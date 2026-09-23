@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
-# 목표 시스템
+# 목표 시스템(Final)
 
 ## 나만의 로보 어드바이저 개발 및 성과 검증 프로젝트	
 - AI 기반의 자동화 로보 어드바이저 모델 개발 
