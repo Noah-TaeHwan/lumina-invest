@@ -19,6 +19,10 @@ async def run_ml_pipeline(
     symbol: str = Query(..., description="종목 코드 (예: 005930.KS)"),
     period: str = Query("2y", description="데이터 기간"),
     model:  str = Query("lgb", description="모델 선택: lgb | mlp | rule"),
+    commission_bps: float = Query(0.0, ge=0.0, le=500.0),
+    slippage_bps: float = Query(0.0, ge=0.0, le=500.0),
+    stop_loss_pct: float | None = Query(None, ge=0.1, le=90.0),
+    take_profit_pct: float | None = Query(None, ge=0.1, le=500.0),
     _user=Depends(get_current_user),
 ):
     """
@@ -33,7 +37,8 @@ async def run_ml_pipeline(
     if not candles:
         raise HTTPException(404, f"종목 데이터 없음: {symbol}")
 
-    result = await run_pipeline(symbol, candles, model_type=model)
+    result = await run_pipeline(symbol, candles, model_type=model, commission_bps=commission_bps,
+                                slippage_bps=slippage_bps, stop_loss_pct=stop_loss_pct, take_profit_pct=take_profit_pct)
     if "error" in result:
         raise HTTPException(422, result["error"])
     return result

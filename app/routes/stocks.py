@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.postgres import get_pg_session
-from app.models import Portfolio, Order, BrokerSettings, CustomIndicator
+from app.models import Portfolio, Order, BrokerSettings, CustomIndicator, QuantVirtualAccount
 from app.lib.session import get_current_user
 from app.services.stock import (
     get_quote, get_candles, get_market_summary,
@@ -15,6 +15,7 @@ from app.services.stock import (
 )
 from app.services.krx_companies import search_companies
 from app.services import auto_trade
+from app.services import risk_guard
 from app.services.quant_pipeline import backtest_custom_indicator
 from app.services.investment_research import backtest_strategy, screen_pattern
 from app.services.brokers.factory import get_broker_client
@@ -170,6 +171,12 @@ async def stock_signals(
             "price": quote.get("price") or result["price"],
             "change_pct": quote.get("change_pct"),
         }
+        # XAI: 최근 3시간 내 계산된 LightGBM 설명이 캐시에 있으면 요약만 첨부 (없으면 /api/ml/explain으로 온디맨드 계산)
+        cached_ai = await cache_get(f"ai_predict:v2:{stock['symbol']}", max_age_hours=3)
+        if cached_ai and cached_ai.get("explanation"):
+            ex = cached_ai["explanation"]
+            row["xai"] = {"signal_label": ex["signal_label"], "probability_pct": ex["probability_pct"],
+                          "summary": ex["summary"], "top_positive": ex["top_positive"][:2], "top_negative": ex["top_negative"][:2]}
         rows.append(row)
 
     signal_filter = (signal or "all").lower()
@@ -358,6 +365,11 @@ class QuantSettingsBody(BaseModel):
     per_trade_budget: float = Field(default=1_000_000, ge=10_000, le=10_000_000)
     buy_ratio: float = Field(default=1.0, ge=0.1, le=1.0)
     sell_ratio: float = Field(default=0.5, ge=0.1, le=1.0)
+    # 위험관리
+    risk_daily_loss_limit_pct: float = Field(default=3.0, ge=0, le=50, description="0이면 비활성")
+    risk_max_position_pct: float = Field(default=30.0, ge=0, le=100, description="0이면 비활성")
+    risk_max_orders_per_day: int = Field(default=20, ge=0, le=500, description="0이면 비활성")
+    risk_cooldown_min: int = Field(default=30, ge=0, le=1440, description="0이면 비활성")
 
 
 async def _get_broker_settings_row(db: AsyncSession, user_id: uuid.UUID) -> BrokerSettings | None:
@@ -439,6 +451,7 @@ async def get_quant_settings(
             "mode": "paper", "broker": DEFAULT_BROKER, "connected": False, "app_key": "",
             "account_no": "", "paper": True, "symbol_source": "ai", "selected_symbols": [],
             "ai_top_n": 3, "per_trade_budget": 1_000_000.0, "buy_ratio": 1.0, "sell_ratio": 0.5,
+            "risk": risk_guard.RiskLimits().to_dict(), "risk_halt_reason": "",
             "brokers": catalog, "stocks": stocks,
         }
 
@@ -459,6 +472,8 @@ async def get_quant_settings(
         "per_trade_budget": row.quant_per_trade_budget,
         "buy_ratio": row.quant_buy_ratio,
         "sell_ratio": row.quant_sell_ratio,
+        "risk": risk_guard.RiskLimits.from_row(row).to_dict(),
+        "risk_halt_reason": row.risk_halt_reason,
         "brokers": catalog,
         "stocks": stocks,
     }
@@ -498,6 +513,10 @@ async def save_quant_settings(
     row.quant_per_trade_budget = body.per_trade_budget
     row.quant_buy_ratio = body.buy_ratio
     row.quant_sell_ratio = body.sell_ratio
+    row.risk_daily_loss_limit_pct = body.risk_daily_loss_limit_pct
+    row.risk_max_position_pct = body.risk_max_position_pct
+    row.risk_max_orders_per_day = body.risk_max_orders_per_day
+    row.risk_cooldown_min = body.risk_cooldown_min
     await db.commit()
     await audit(user["id"], "", "quant.settings.save", {
         "broker": broker, "mode": mode, "symbol_source": symbol_source,
@@ -670,10 +689,35 @@ async def broker_test(
         raise HTTPException(502, f"증권사 API 연결 테스트 오류: {e}")
 
 
+# ── 차트 패턴 · 지지/저항 · 멀티타임프레임 ─────────────────────────────
+
+@router.get("/stocks/patterns")
+async def stock_patterns(symbol: str = Query("005930.KS"), period: str = Query("1y"), _user=Depends(get_current_user)):
+    """캔들 패턴·지지/저항선·돌파 신호 (일봉)."""
+    from app.services.patterns import pattern_summary
+    candles = (await get_candles(symbol, period=period, interval="1d")).get("candles", [])
+    if not candles:
+        raise HTTPException(404, f"종목 데이터 없음: {symbol}")
+    result = pattern_summary(candles)
+    if "error" in result:
+        raise HTTPException(422, result["error"])
+    return {"symbol": symbol, **result}
+
+
+@router.get("/stocks/mtf-signal")
+async def stock_mtf_signal(symbol: str = Query("005930.KS"), _user=Depends(get_current_user)):
+    """분봉(60m)·일봉·주봉 지표를 종합한 매수·매도·관망 신호와 신뢰도."""
+    from app.services.patterns import multi_timeframe_signal
+    return await multi_timeframe_signal(symbol)
+
+
 # ── 자동매매 제어 ─────────────────────────────────────────────────────
 
 @router.post("/auto-trade/start")
-async def start_auto_trade(user=Depends(get_current_user)):
+async def start_auto_trade(user=Depends(get_current_user), db: AsyncSession = Depends(get_pg_session)):
+    row = await _get_broker_settings_row(db, _uid(user["id"]))
+    if row and row.risk_kill_switch:
+        raise HTTPException(409, f"비상 정지 상태입니다. 해제 후 시작하세요. (사유: {row.risk_halt_reason or '수동 정지'})")
     started = auto_trade.start_auto_trade(user.get("id", "quant_system"))
     return {"ok": True, "started": started}
 
@@ -687,6 +731,54 @@ async def stop_auto_trade(user=Depends(get_current_user)):
 @router.get("/auto-trade/status")
 async def auto_trade_status(user=Depends(get_current_user)):
     return auto_trade.get_status()
+
+
+# ── 자동매매 위험관리 ─────────────────────────────────────────────────
+
+class KillSwitchBody(BaseModel):
+    enabled: bool
+    reason: str = ""
+
+
+@router.get("/quant/risk/status")
+async def quant_risk_status(user=Depends(get_current_user), db: AsyncSession = Depends(get_pg_session)):
+    """위험관리 한도·당일 손익·주문 수·비상정지 상태."""
+    uid = _uid(user["id"])
+    row = await _get_broker_settings_row(db, uid)
+    limits = risk_guard.RiskLimits.from_row(row)
+    user_key = user.get("id", "quant_system")
+    # 자동매매 가상계좌 기준 현재 자산 (현재가 캐시 우선, 없으면 평균단가)
+    acc = (await db.execute(select(QuantVirtualAccount).where(QuantVirtualAccount.user_id == uid))).scalar_one_or_none()
+    equity = None
+    if acc:
+        equity = float(acc.cash_balance)
+        for p in (await db.execute(select(Portfolio).where(Portfolio.user_id == uid))).scalars().all():
+            if p.quantity > 0:
+                px = None
+                try:
+                    px = (await get_quote(p.symbol)).get("price")
+                except Exception:
+                    pass
+                equity += p.quantity * float(px or p.avg_price)
+    status = await risk_guard.risk_status(user_key, limits, equity, row.risk_halt_reason if row else "")
+    status["auto_trade_running"] = auto_trade.is_running()
+    status["last_cycle_risk"] = auto_trade.get_status().get("risk", {})
+    return status
+
+
+@router.post("/quant/risk/kill-switch")
+async def quant_kill_switch(body: KillSwitchBody, user=Depends(get_current_user), db: AsyncSession = Depends(get_pg_session)):
+    """비상 정지 스위치 ON/OFF. ON이면 자동매매 루프를 즉시 중지한다."""
+    row = await _get_or_create_broker_settings_row(db, _uid(user["id"]))
+    row.risk_kill_switch = body.enabled
+    row.risk_halt_reason = (body.reason or ("사용자 수동 비상 정지" if body.enabled else ""))[:300]
+    await db.commit()
+    stopped = False
+    if body.enabled:
+        stopped = auto_trade.stop_auto_trade()
+        await notification.notify_risk_halt(row.risk_halt_reason, user_id=user.get("id"))
+    await audit(user["id"], "", "quant.kill_switch", {"enabled": body.enabled, "reason": row.risk_halt_reason})
+    return {"ok": True, "kill_switch": row.risk_kill_switch, "auto_trade_stopped": stopped}
 
 
 @router.post("/quant/auto/start")
@@ -740,10 +832,13 @@ async def quant_pipeline_indicator_backtest(
     rsi: int = Query(14, ge=5, le=40),
     buy_th: float = Query(35.0, ge=5.0, le=50.0),
     strategy: str = Query("custom", description="custom | rsi | ma | bollinger | composite"),
-    cost_bps: float = Query(10.0, ge=0.0, le=500.0),
+    cost_bps: float = Query(10.0, ge=0.0, le=500.0, description="수수료(bp, 포지션 변동 시)"),
+    slippage_bps: float = Query(0.0, ge=0.0, le=500.0, description="슬리피지(bp, 포지션 변동 시)"),
+    stop_loss_pct: float | None = Query(None, ge=0.1, le=90.0, description="손절 % (진입가 대비)"),
+    take_profit_pct: float | None = Query(None, ge=0.1, le=500.0, description="익절 % (진입가 대비)"),
     _user=Depends(get_current_user),
 ):
-    """커스텀 인디케이터 실백테스트."""
+    """커스텀 인디케이터 실백테스트 (수수료·슬리피지·손절·익절 반영)."""
     candle_data = await get_candles(symbol, period=period, interval="1d")
     candles = candle_data.get("candles", [])
     if not candles:
@@ -751,16 +846,21 @@ async def quant_pipeline_indicator_backtest(
     if strategy != "custom":
         if strategy not in ("rsi", "ma", "bollinger", "composite"):
             raise HTTPException(422, "strategy는 custom, rsi, ma, bollinger, composite 중 하나여야 합니다.")
-        result = backtest_strategy(candles, strategy=strategy, cost_bps=cost_bps)
+        result = backtest_strategy(candles, strategy=strategy, cost_bps=cost_bps, slippage_bps=slippage_bps,
+                                   stop_loss_pct=stop_loss_pct, take_profit_pct=take_profit_pct)
     else:
         result = backtest_custom_indicator(
             candles=candles, base=base, short_window=short, mid_window=mid,
-            rsi_period=rsi, buy_threshold=buy_th,
+            rsi_period=rsi, buy_threshold=buy_th, commission_bps=cost_bps, slippage_bps=slippage_bps,
+            stop_loss_pct=stop_loss_pct, take_profit_pct=take_profit_pct,
         )
     if "error" in result:
         raise HTTPException(422, result["error"])
     result["symbol"] = symbol
     result["period"] = period
+    # XAI: 같은 종목의 LightGBM 판단 근거(SHAP)가 캐시에 있으면 함께 내려준다 (없으면 /api/ml/explain으로 생성)
+    cached_ai = await cache_get(f"ai_predict:v2:{symbol}", max_age_hours=3)
+    result["explanation"] = cached_ai.get("explanation") if cached_ai else None
     return result
 
 

@@ -515,3 +515,19 @@ async def notify_auto_trade_executed(
         subject=f"[매매 알림] {label} 체결 – {name}",
         user_id=user_id,
     )
+
+
+async def notify_risk_halt(reason: str, day_pnl_pct: float | None = None, user_id: str | None = None) -> None:
+    """위험관리 비상 정지 알림 (일손실 한도 초과 등)."""
+    pnl_txt = f"\n당일 손익: {day_pnl_pct:+.2f}%" if day_pnl_pct is not None else ""
+    html  = f"🛑 <b>[위험관리] 자동매매 비상 정지</b>\n\n사유: {reason}{pnl_txt}\n\n설정 화면에서 비상 정지를 해제해야 재시작됩니다."
+    plain = f"[위험관리] 자동매매 비상 정지\n사유: {reason}{pnl_txt}\n설정 화면에서 비상 정지를 해제해야 재시작됩니다."
+    await dispatch(plain, html_message=html, subject="[위험관리] 자동매매 비상 정지", user_id=user_id)
+
+
+async def notify_risk_skip(symbol: str, name: str, side: str, reason: str, user_id: str | None = None) -> None:
+    """위험관리 규칙으로 주문을 생략했음을 알린다 (중복 주문·한도 초과)."""
+    label = "매수" if side == "buy" else "매도"
+    html  = f"⚠️ <b>[위험관리] {label} 주문 생략</b>\n\n종목: {name} (<code>{symbol}</code>)\n사유: {reason}"
+    plain = f"[위험관리] {label} 주문 생략 – {name} ({symbol})\n사유: {reason}"
+    await dispatch(plain, html_message=html, subject=f"[위험관리] {label} 주문 생략 – {name}", user_id=user_id)

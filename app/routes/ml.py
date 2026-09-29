@@ -135,7 +135,7 @@ async def robo_allocation(
 
         # TimeSeriesSplit 앙상블 + LightGBM 분류는 종목당 꽤 무거워서(유니버스 전체면
         # 응답이 수십 초까지 걸릴 수 있음) 매 요청마다 재계산하지 않고 캐시한다.
-        cache_key = f"ai_predict:{s['symbol']}"
+        cache_key = f"ai_predict:v2:{s['symbol']}"  # v2: XAI explanation 포함
         ai = await cache_get(cache_key, max_age_hours=3)
         if ai is None:
             # CPU 바운드(sklearn/lightgbm 학습)라 to_thread로 돌려 이벤트 루프를
@@ -294,6 +294,69 @@ async def robo_allocation(
         "projections": projections,
         "optimization": optimized,
     }
+
+
+# ── 투자성향 진단 · 목표 달성 확률 시뮬레이션 ─────────────────────────────
+
+class RiskProfileBody(BaseModel):
+    answers: dict[str, int]   # {question_id: 선택 인덱스 0~4}
+
+
+class GoalSimBody(BaseModel):
+    amount_manwon: float = 5000
+    monthly_contribution_manwon: float = 0
+    horizon_years: int = 3
+    target_return_pct: float = 8.0
+    expected_return_pct: float = 7.0
+    expected_volatility_pct: float = 12.0
+    n_paths: int = 3000
+
+
+@router.get("/robo/questions")
+async def robo_questions(_user=Depends(get_current_user)):
+    from app.services.robo_profile import QUESTIONS, PROFILE_LEVELS
+    return {"questions": QUESTIONS, "levels": [{"min": lv[0], "level": lv[1], "risk_profile": lv[2], "description": lv[3]} for lv in PROFILE_LEVELS]}
+
+
+@router.post("/robo/risk-profile")
+async def robo_risk_profile(body: RiskProfileBody, user=Depends(get_current_user)):
+    from app.services.robo_profile import score_answers
+    try:
+        result = score_answers(body.answers)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc))
+    return result
+
+
+@router.post("/robo/goal-simulation")
+async def robo_goal_simulation(body: GoalSimBody, _user=Depends(get_current_user)):
+    from app.services.robo_profile import goal_simulation
+    n = max(500, min(20000, int(body.n_paths)))
+    return await asyncio.to_thread(goal_simulation, body.amount_manwon, body.horizon_years, body.target_return_pct,
+                                   body.expected_return_pct, body.expected_volatility_pct, body.monthly_contribution_manwon, n)
+
+
+@router.get("/explain")
+async def ml_explain(
+    symbol: str = Query(..., description="예: 005930.KS / AAPL"),
+    refresh: int = Query(0, description="1이면 캐시 무시하고 재학습"),
+    _user=Depends(get_current_user),
+):
+    """XAI: 종목의 LightGBM 매수/관망/매도 판단 근거(SHAP 기여도 + 자연어 설명)."""
+    cache_key = f"ai_predict:v2:{symbol}"
+    ai = None if refresh else await cache_get(cache_key, max_age_hours=3)
+    if ai is None:
+        data = await get_candles(symbol, period="2y", interval="1d")
+        candles = data.get("candles", [])
+        if len(candles) < 80:
+            raise HTTPException(422, "설명을 만들 데이터가 부족합니다 (최소 80거래일).")
+        ai = await asyncio.to_thread(ai_predict_return, candles)
+        if ai is None:
+            raise HTTPException(422, "AI 예측을 계산할 수 없습니다.")
+        await cache_set(cache_key, ai)
+    name = next((q["name"] for q in QUANT_STOCKS if q["symbol"] == symbol), symbol)
+    return {"symbol": symbol, "name": name, "prediction": {k: v for k, v in ai.items() if k != "explanation"},
+            "explanation": ai.get("explanation")}
 
 
 @router.get("/seasonality")

@@ -58,6 +58,14 @@ class BrokerSettings(Base, UUIDPkMixin, UpdatedAtMixin):
     quant_buy_ratio: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
     quant_sell_ratio: Mapped[float] = mapped_column(Float, nullable=False, default=0.5)
 
+    # ── 자동매매 위험관리 ──────────────────────────────────────────────────
+    risk_daily_loss_limit_pct: Mapped[float] = mapped_column(Float, nullable=False, default=3.0)   # 일중 손실 한도(%) 초과 시 비상 정지
+    risk_max_position_pct: Mapped[float] = mapped_column(Float, nullable=False, default=30.0)      # 종목당 최대 비중(%)
+    risk_max_orders_per_day: Mapped[int] = mapped_column(Integer, nullable=False, default=20)      # 하루 최대 자동 주문 수
+    risk_cooldown_min: Mapped[int] = mapped_column(Integer, nullable=False, default=30)            # 같은 종목·방향 재주문 금지 시간(분)
+    risk_kill_switch: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)         # 비상 정지 스위치
+    risk_halt_reason: Mapped[str] = mapped_column(String(300), nullable=False, default="")         # 마지막 정지 사유
+
 
 class QuantVirtualAccount(Base, UUIDPkMixin, CreatedAtMixin, UpdatedAtMixin):
     __tablename__ = "quant_virtual_accounts"

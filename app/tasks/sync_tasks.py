@@ -57,3 +57,25 @@ def sync_stock_candles() -> dict:
     result = asyncio.run(_async())
     logger.info("[beat] sync_stock_candles 완료")
     return result
+
+
+@celery_app.task(name="rebalance.check_triggers", time_limit=600)
+def rebalance_check_triggers() -> dict:
+    """활성 리밸런싱 플랜의 시간·이탈률 트리거를 점검한다 (1시간 주기)."""
+
+    async def _async() -> dict:
+        from app.database.postgres import connect_postgres, close_postgres, get_session_factory
+        from app.lib.redis_cache import connect_redis, close_redis
+        from app.services.rebalance import check_all_due
+
+        await connect_redis()
+        await connect_postgres()
+        try:
+            return await check_all_due(get_session_factory())
+        finally:
+            await close_redis()
+            await close_postgres()
+
+    result = asyncio.run(_async())
+    logger.info("[beat] rebalance_check_triggers 완료: %s", result)
+    return result

@@ -1204,7 +1204,18 @@
           <button id="auto-refresh" class="btn-secondary text-xs">로그 새로고침</button>
         </div>
         <div class="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-3 mb-4 text-xs text-indigo-300">
-          전략: RSI 과매도/과매수 · 골든/데드크로스 · 볼린저밴드 → AI 종합 시그널 → 자동 가상 주문
+          전략: RSI 과매도/과매수 · 골든/데드크로스 · 볼린저밴드 → AI 종합 시그널 → 위험관리 게이트(중복 주문·비중·일 주문 수·일손실) → 자동 가상 주문
+        </div>
+        <div class="rounded-xl p-3 mb-4" style="background:var(--surf2);border:1px solid var(--border);">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <h3 class="text-sm font-semibold">🛡️ 위험관리 상태</h3>
+            <div class="flex gap-2">
+              <button id="risk-kill-on" class="btn-red text-xs">🛑 비상 정지</button>
+              <button id="risk-kill-off" class="btn-secondary text-xs">비상 정지 해제</button>
+            </div>
+          </div>
+          <div id="risk-kpis" class="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs"></div>
+          <div id="risk-note" class="text-xs mt-2" style="color:var(--text-mute);"></div>
         </div>
         <div id="auto-trade-log" class="space-y-2 text-xs max-h-[400px] overflow-y-auto"></div>
       </div>
@@ -1352,6 +1363,31 @@
               <label class="text-xs text-slate-400 block mb-1">매도 비중 (%)</label>
               <input id="quant-sell-ratio" type="number" min="10" max="100" step="5" class="input" value="50" />
             </div>
+          </div>
+          <div class="rounded-xl p-3" style="background:var(--surf2);border:1px solid var(--border);">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="text-sm font-semibold">🛡️ 위험관리 (자동매매 공통)</h4>
+              <span id="risk-kill-badge" class="text-xs"></span>
+            </div>
+            <div class="grid md:grid-cols-4 gap-3">
+              <div>
+                <label class="text-xs text-slate-400 block mb-1">일손실 한도 (%) · 초과 시 비상 정지</label>
+                <input id="risk-daily-loss" type="number" min="0" max="50" step="0.5" class="input" value="3" />
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 block mb-1">종목당 최대 비중 (%)</label>
+                <input id="risk-max-position" type="number" min="0" max="100" step="5" class="input" value="30" />
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 block mb-1">하루 최대 주문 수</label>
+                <input id="risk-max-orders" type="number" min="0" max="500" class="input" value="20" />
+              </div>
+              <div>
+                <label class="text-xs text-slate-400 block mb-1">중복 주문 방지 쿨다운 (분)</label>
+                <input id="risk-cooldown" type="number" min="0" max="1440" step="5" class="input" value="30" />
+              </div>
+            </div>
+            <p class="text-xs mt-2" style="color:var(--text-mute);">0을 입력하면 해당 규칙을 사용하지 않습니다. 쿨다운은 Redis 키(SET NX EX)로 같은 종목·방향 재주문을 막습니다.</p>
           </div>
           <div class="flex gap-2">
             <button id="broker-save" class="btn-primary">저장 / 연결</button>
@@ -1672,6 +1708,68 @@
     </div>
 
     <!-- 7-3. 섹터 인디케이터 -->
+    <!-- TradingView 연동: Webhook 신호 · Strategy Tester↔LEAN 교차 검증 -->
+    <div class="view" data-view="indicator-tradingview">
+      <div class="space-y-4">
+        <div class="card">
+          <h2 class="text-lg font-semibold mb-1">📡 TradingView 연동 (Webhook · 교차 검증)</h2>
+          <p class="text-xs mb-3" style="color:var(--text-mute);">Pine Script 전략의 알림을 Webhook으로 받아 모의계좌에 체결·알림 전달하고, Strategy Tester 성과를 QuantConnect LEAN 백테스트와 나란히 검증합니다.</p>
+          <div class="grid lg:grid-cols-2 gap-4">
+            <div>
+              <h3 class="font-semibold text-sm mb-2">① Webhook URL</h3>
+              <div class="flex gap-2 items-center mb-2"><code id="tv-webhook-url" class="text-xs px-2 py-1 rounded" style="background:var(--surf2);border:1px solid var(--border);"></code><button id="tv-copy-url" class="btn-secondary text-xs">복사</button></div>
+              <h3 class="font-semibold text-sm mb-2">② 알림 메시지 템플릿 (TradingView 알림 › 메시지 칸에 붙이기)</h3>
+              <div class="flex gap-2 items-start"><pre id="tv-alert-template" class="text-xs rounded-lg p-3 flex-1 overflow-x-auto" style="background:var(--surf2);border:1px solid var(--border);"></pre><button id="tv-copy-template" class="btn-secondary text-xs">복사</button></div>
+              <ul id="tv-notes" class="text-xs list-disc ml-5 mt-2 space-y-1" style="color:var(--text-dim);"></ul>
+            </div>
+            <div>
+              <h3 class="font-semibold text-sm mb-2">③ 테스트 신호 보내기 (TradingView 없이 흐름 확인)</h3>
+              <div class="grid grid-cols-2 gap-2 text-sm">
+                <div class="col-span-2"><label class="text-xs font-semibold" style="color:var(--text-dim);">API 키 (token) — 모의투자 › Open API에서 발급</label><input id="tv-test-token" class="input mt-1" placeholder="lumina_..." /></div>
+                <div><label class="text-xs font-semibold" style="color:var(--text-dim);">티커</label><input id="tv-test-ticker" class="input mt-1" value="KRX:005930" /></div>
+                <div><label class="text-xs font-semibold" style="color:var(--text-dim);">action</label><select id="tv-test-action" class="input mt-1"><option value="buy">buy</option><option value="sell">sell</option><option value="alert">alert (주문 없음)</option></select></div>
+                <div><label class="text-xs font-semibold" style="color:var(--text-dim);">contracts</label><input id="tv-test-qty" type="number" min="1" class="input mt-1" value="1" /></div>
+                <div class="flex items-end"><button id="tv-test-send" class="btn-primary text-xs w-full">Webhook으로 전송</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="flex items-center justify-between mb-3"><h3 class="font-semibold text-sm">📥 수신 신호 이력</h3><button id="tv-refresh" class="btn-secondary text-xs">새로고침</button></div>
+          <div id="tv-signals" class="overflow-x-auto text-sm"></div>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold text-sm mb-1">⚖️ Strategy Tester ↔ LEAN 교차 검증</h3>
+          <p class="text-xs mb-3" style="color:var(--text-mute);">TradingView Strategy Tester의 성과 요약을 직접 입력하거나 '거래 목록' CSV를 붙여 넣으면, 같은 종목·기간·전략으로 LEAN 백테스트를 실행해 신호·체결·성과 차이를 검증합니다.</p>
+          <div class="grid md:grid-cols-4 gap-2 mb-2 text-sm">
+            <div><label class="text-xs" style="color:var(--text-mute);">종목</label><input id="tvc-ticker" class="input" value="005930.KS" /></div>
+            <div><label class="text-xs" style="color:var(--text-mute);">LEAN 전략</label><select id="tvc-strategy" class="input"><option value="ma_cross">이동평균 교차 (골든/데드)</option><option value="momentum">모멘텀 돌파</option><option value="dca">정액 분할 매수</option><option value="buy_hold">매수 후 보유</option></select></div>
+            <div><label class="text-xs" style="color:var(--text-mute);">시작일</label><input id="tvc-start" type="date" class="input" /></div>
+            <div><label class="text-xs" style="color:var(--text-mute);">종료일</label><input id="tvc-end" type="date" class="input" /></div>
+            <div><label class="text-xs" style="color:var(--text-mute);">초기 자금</label><input id="tvc-cash" type="number" class="input" value="10000" /></div>
+            <div><label class="text-xs" style="color:var(--text-mute);">단기 MA</label><input id="tvc-short" type="number" class="input" value="20" /></div>
+            <div><label class="text-xs" style="color:var(--text-mute);">장기 MA</label><input id="tvc-long" type="number" class="input" value="60" /></div>
+          </div>
+          <h4 class="text-xs font-semibold mb-1" style="color:var(--text-dim);">TradingView 성과 (Strategy Tester › Overview 값 입력)</h4>
+          <div class="grid md:grid-cols-5 gap-2 mb-2 text-sm">
+            <div><label class="text-xs" style="color:var(--text-mute);">Net Profit %</label><input id="tvc-net" type="number" step="0.01" class="input" placeholder="12.5" /></div>
+            <div><label class="text-xs" style="color:var(--text-mute);">Max Drawdown %</label><input id="tvc-mdd" type="number" step="0.01" class="input" placeholder="-8.3" /></div>
+            <div><label class="text-xs" style="color:var(--text-mute);">Total Trades</label><input id="tvc-trades" type="number" class="input" placeholder="14" /></div>
+            <div><label class="text-xs" style="color:var(--text-mute);">Percent Profitable %</label><input id="tvc-win" type="number" step="0.01" class="input" placeholder="57" /></div>
+            <div><label class="text-xs" style="color:var(--text-mute);">Sharpe</label><input id="tvc-sharpe" type="number" step="0.01" class="input" placeholder="0.9" /></div>
+          </div>
+          <label class="text-xs" style="color:var(--text-mute);">또는 거래 목록 CSV 붙여넣기 (Strategy Tester › List of Trades › Export)</label>
+          <textarea id="tvc-csv" class="input mt-1" rows="3" placeholder="Trade #,Type,Signal,Date/Time,Price,Contracts,Profit,Profit %,..."></textarea>
+          <div class="mt-2"><button id="tvc-run" class="btn-primary">LEAN과 비교 실행</button></div>
+          <div id="tvc-result" class="mt-3 text-sm"></div>
+        </div>
+
+        <div class="card"><h3 class="font-semibold text-sm mb-3">🗂️ 교차 검증 이력</h3><div id="tvc-history" class="overflow-x-auto text-sm"></div></div>
+      </div>
+    </div>
+
     <div class="view" data-view="company-sector">
       <div class="card">
         <h2 class="text-lg font-semibold mb-1">🗂️ 섹터별 투자 인디케이터</h2>
@@ -1685,6 +1783,15 @@
     <!-- 자산배분·포트폴리오 최적화 -->
     <div class="view" data-view="robo-portfolio">
       <div class="space-y-4">
+        <div class="card">
+          <div class="flex items-center justify-between mb-1">
+            <h2 class="text-lg font-semibold">🧭 투자성향 진단</h2>
+            <button id="rp-toggle" class="btn-secondary text-xs">설문 펼치기</button>
+          </div>
+          <p class="text-xs mb-2" style="color:var(--text-mute);">7문항 설문으로 안정형~공격투자형 5단계 성향을 진단하고, 결과를 아래 자산배분 모델의 투자 성향에 자동 반영합니다.</p>
+          <div id="rp-result" class="text-sm"></div>
+          <div id="rp-form" class="hidden mt-3 space-y-3"></div>
+        </div>
         <div class="card">
           <h2 class="text-lg font-semibold mb-1">📊 자산배분 모델 & 포트폴리오 최적화</h2>
           <p class="text-xs mb-4" style="color:var(--text-mute);">투자 성향과 기간에 따라 AI가 최적 자산배분 비율을 계산합니다</p>
@@ -1734,6 +1841,107 @@
             <h3 class="font-semibold mb-3 text-sm">📈 예상 성과 시뮬레이션</h3>
             <div id="robo-perf-table" class="overflow-x-auto"></div>
           </div>
+          <!-- 목표 수익률 달성 확률 -->
+          <div class="card">
+            <h3 class="font-semibold mb-1 text-sm">🎯 목표 수익률 달성 확률 (몬테카를로 3,000경로)</h3>
+            <p class="text-xs mb-3" style="color:var(--text-mute);">위 최적화 포트폴리오의 기대수익률·변동성을 그대로 사용해, 목표 연수익률을 달성할 확률과 자산 분포를 시뮬레이션합니다.</p>
+            <div class="flex flex-wrap gap-2 items-end mb-3 text-sm">
+              <div><label class="text-xs" style="color:var(--text-mute);">목표 연수익률 (%)</label><input id="gs-target" type="number" step="0.5" class="input" style="width:110px" value="8" /></div>
+              <div><label class="text-xs" style="color:var(--text-mute);">월 적립 (만원)</label><input id="gs-monthly" type="number" step="10" min="0" class="input" style="width:110px" value="0" /></div>
+              <div><label class="text-xs" style="color:var(--text-mute);">기대 연수익률 (%)</label><input id="gs-mu" type="number" step="0.1" class="input" style="width:110px" /></div>
+              <div><label class="text-xs" style="color:var(--text-mute);">연변동성 (%)</label><input id="gs-sigma" type="number" step="0.1" min="0" class="input" style="width:110px" /></div>
+              <button id="gs-run" class="btn-primary text-xs">확률 계산</button>
+            </div>
+            <div id="gs-result"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 리밸런싱 엔진 -->
+    <div class="view" data-view="robo-rebalance">
+      <div class="space-y-4">
+        <div class="card">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+            <h2 class="text-lg font-semibold">🔄 리밸런싱 엔진</h2>
+            <div class="flex gap-2">
+              <button id="rb-check" class="btn-secondary text-xs">트리거 지금 점검</button>
+              <button id="rb-refresh" class="btn-secondary text-xs">새로고침</button>
+            </div>
+          </div>
+          <p class="text-xs mb-3" style="color:var(--text-mute);">모의투자 계좌(현금+주식)를 목표 비중으로 되돌립니다. <b>시간 기반</b>(월·분기·연) · <b>이탈률 기반</b>(허용 이탈 %p 초과) · <b>입출금·배당 기반</b> 3가지 트리거를 지원하며, 스케줄러가 1시간마다 시간·이탈률 조건을 점검합니다.</p>
+          <div id="rb-kpis" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3"></div>
+          <div id="rb-trigger-badges" class="flex flex-wrap gap-2 text-xs"></div>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-4">
+          <!-- 플랜 편집 -->
+          <div class="card">
+            <h3 class="font-semibold mb-3 text-sm">🎯 목표 비중 플랜</h3>
+            <div class="grid grid-cols-2 gap-3 mb-3">
+              <div class="col-span-2"><label class="text-xs font-semibold" style="color:var(--text-dim);">플랜 이름</label><input id="rb-name" class="input mt-1" placeholder="예) 60/40 코어 포트폴리오" /></div>
+            </div>
+            <div class="flex flex-wrap gap-2 items-end mb-2">
+              <div class="flex-1 min-w-[140px]"><label class="text-xs font-semibold" style="color:var(--text-dim);">종목코드</label><input id="rb-add-symbol" class="input mt-1" placeholder="005930 / AAPL" /></div>
+              <div style="width:110px"><label class="text-xs font-semibold" style="color:var(--text-dim);">비중(%)</label><input id="rb-add-weight" type="number" min="0" max="100" step="0.5" class="input mt-1" placeholder="30" /></div>
+              <button id="rb-add" class="btn-primary text-xs">추가</button>
+              <button id="rb-import-positions" class="btn-secondary text-xs" title="현재 보유 비중을 목표로 복사">보유 비중 불러오기</button>
+            </div>
+            <div class="overflow-x-auto mb-2"><table><thead><tr><th>종목</th><th>이름</th><th style="text-align:right">목표 비중(%)</th><th></th></tr></thead><tbody id="rb-targets-body"></tbody></table></div>
+            <div id="rb-target-sum" class="text-xs mb-4" style="color:var(--text-dim);"></div>
+
+            <h4 class="font-semibold text-xs mb-2" style="color:var(--text-dim);">트리거 설정</h4>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+              <div><label class="text-xs font-semibold" style="color:var(--text-dim);">① 시간 기반 주기</label>
+                <select id="rb-period" class="input mt-1"><option value="none">사용 안 함</option><option value="monthly">매월 1일</option><option value="quarterly">매분기 첫날</option><option value="yearly">매년 1월 1일</option></select></div>
+              <div><label class="text-xs font-semibold" style="color:var(--text-dim);">② 허용 이탈률 (%p)</label>
+                <div class="flex items-center gap-2 mt-1"><input id="rb-drift-enabled" type="checkbox" class="h-4 w-4" /><input id="rb-drift" type="number" min="0.5" max="50" step="0.5" class="input" style="width:100px" /></div></div>
+              <div><label class="text-xs font-semibold" style="color:var(--text-dim);">③ 입출금·배당 최소금액</label>
+                <div class="flex items-center gap-2 mt-1"><input id="rb-cf-enabled" type="checkbox" class="h-4 w-4" /><input id="rb-cf-min" type="number" min="0" step="10000" class="input" /></div></div>
+              <div><label class="text-xs font-semibold" style="color:var(--text-dim);">최소 주문금액 (원)</label><input id="rb-min-order" type="number" min="0" step="10000" class="input mt-1" /></div>
+              <label class="flex items-center gap-2 text-xs"><input id="rb-auto" type="checkbox" class="h-4 w-4" /> 트리거 충족 시 자동 체결 (해제 시 제안만 생성)</label>
+              <label class="flex items-center gap-2 text-xs"><input id="rb-active" type="checkbox" class="h-4 w-4" /> 플랜 활성화</label>
+            </div>
+            <div class="mt-3"><button id="rb-save" class="btn-primary">플랜 저장</button></div>
+          </div>
+
+          <!-- 현재 vs 목표 -->
+          <div class="card">
+            <h3 class="font-semibold mb-3 text-sm">📊 현재 비중 vs 목표 비중</h3>
+            <div id="rb-weight-chart" class="mb-3"></div>
+            <div id="rb-weight-table" class="overflow-x-auto text-sm"></div>
+          </div>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-4">
+          <!-- 주문 제안/실행 -->
+          <div class="card">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-semibold text-sm">🧮 리밸런싱 주문 제안 · 수동 실행</h3>
+              <div class="flex gap-2"><button id="rb-preview" class="btn-secondary text-xs">주문 산출</button><button id="rb-execute" class="btn-green text-xs" disabled>제안 체결</button></div>
+            </div>
+            <div id="rb-proposal-summary" class="text-xs mb-2" style="color:var(--text-dim);"></div>
+            <div id="rb-proposal" class="overflow-x-auto text-sm"><span style="color:var(--text-mute);">'주문 산출'을 누르면 현재 시세 기준 매도→매수 주문을 계산합니다.</span></div>
+          </div>
+
+          <!-- 현금흐름 이벤트 -->
+          <div class="card">
+            <h3 class="font-semibold mb-3 text-sm">💸 입금 · 출금 · 배당 이벤트</h3>
+            <div class="grid grid-cols-2 gap-3 text-sm">
+              <div><label class="text-xs font-semibold" style="color:var(--text-dim);">구분</label>
+                <select id="rb-cf-kind" class="input mt-1"><option value="DEPOSIT">입금</option><option value="WITHDRAW">출금</option><option value="DIVIDEND">배당금 수령</option></select></div>
+              <div><label class="text-xs font-semibold" style="color:var(--text-dim);">금액 (원)</label><input id="rb-cf-amount" type="number" min="1" step="10000" class="input mt-1" placeholder="1000000" /></div>
+              <div id="rb-cf-symbol-wrap" class="hidden"><label class="text-xs font-semibold" style="color:var(--text-dim);">배당 종목</label><input id="rb-cf-symbol" class="input mt-1" placeholder="005930" /></div>
+              <div class="col-span-2"><label class="text-xs font-semibold" style="color:var(--text-dim);">메모</label><input id="rb-cf-memo" class="input mt-1" placeholder="예) 월급 적립 / 삼성전자 2분기 배당" /></div>
+            </div>
+            <div class="mt-3"><button id="rb-cf-submit" class="btn-primary text-xs">이벤트 반영</button> <span class="text-xs" style="color:var(--text-mute);">플랜의 ③ 조건을 충족하면 새 현금흐름으로 즉시 리밸런싱합니다.</span></div>
+            <div id="rb-cashflows" class="overflow-x-auto text-sm mt-3"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="font-semibold mb-3 text-sm">🗂️ 리밸런싱 실행 이력</h3>
+          <div id="rb-runs"></div>
         </div>
       </div>
     </div>
@@ -1816,6 +2024,26 @@
     </div>
 
     <!-- 모의 투자 의사결정 -->
+    <!-- 패턴 탐지 · 지지/저항 · 멀티타임프레임 (robo-screening 하단) -->
+    <div class="view" data-view="robo-patterns">
+      <div class="space-y-4">
+        <div class="card">
+          <h2 class="text-lg font-semibold mb-1">🕯️ 차트 패턴 · 지지/저항 · 멀티타임프레임 신호</h2>
+          <p class="text-xs mb-3" style="color:var(--text-mute);">캔들 패턴(해머·장악형·샛별형 등)과 피벗 기반 지지·저항선, 돌파·골든크로스 이벤트를 탐지하고, 분봉(60분)·일봉·주봉 지표를 종합해 매수·매도·관망 신호와 신뢰도를 산출합니다.</p>
+          <div class="flex flex-wrap gap-2 items-end">
+            <div><label class="text-xs" style="color:var(--text-mute);">종목</label><input id="pt-symbol" class="input" value="005930.KS" style="width:160px" /></div>
+            <button id="pt-run" class="btn-primary">분석 실행</button>
+          </div>
+        </div>
+        <div id="pt-mtf" class="card hidden"></div>
+        <div class="grid lg:grid-cols-2 gap-4">
+          <div id="pt-patterns" class="card hidden"></div>
+          <div id="pt-sr" class="card hidden"></div>
+        </div>
+        <div id="pt-breakouts" class="card hidden"></div>
+      </div>
+    </div>
+
     <div class="view" data-view="robo-decision">
       <div class="space-y-4">
         <div class="card">
@@ -1964,6 +2192,18 @@
               <label class="text-xs font-semibold" style="color:var(--text-dim);">매수 임계값 (RSI 하한)</label>
               <input id="ci-buy-th" type="number" class="input mt-1" value="35" min="10" max="50" />
             </div>
+            <div>
+              <label class="text-xs font-semibold" style="color:var(--text-dim);">수수료+슬리피지 (bp)</label>
+              <input id="ci-cost" type="number" class="input mt-1" value="15" min="0" max="500" />
+            </div>
+            <div>
+              <label class="text-xs font-semibold" style="color:var(--text-dim);">손절 % (비우면 미적용)</label>
+              <input id="ci-sl" type="number" class="input mt-1" min="0" step="0.5" placeholder="5" />
+            </div>
+            <div>
+              <label class="text-xs font-semibold" style="color:var(--text-dim);">익절 % (비우면 미적용)</label>
+              <input id="ci-tp" type="number" class="input mt-1" min="0" step="0.5" placeholder="15" />
+            </div>
           </div>
           <div class="flex gap-2">
             <button id="ci-generate-btn" class="btn-primary">코드 생성</button>
@@ -2025,6 +2265,13 @@
               <option value="composite">복합 인디케이터 전략</option>
             </select>
             <button id="ibt-run-btn" class="btn-primary">성과 검증 실행</button>
+          </div>
+          <div class="flex flex-wrap gap-2 mb-3 items-end text-xs">
+            <div><label style="color:var(--text-mute);">수수료 (bp)</label><input id="ibt-cost" type="number" min="0" step="1" class="input" style="width:90px" value="10" /></div>
+            <div><label style="color:var(--text-mute);">슬리피지 (bp)</label><input id="ibt-slip" type="number" min="0" step="1" class="input" style="width:90px" value="5" /></div>
+            <div><label style="color:var(--text-mute);">손절 (%)</label><input id="ibt-sl" type="number" min="0" step="0.5" class="input" style="width:90px" placeholder="예) 5" /></div>
+            <div><label style="color:var(--text-mute);">익절 (%)</label><input id="ibt-tp" type="number" min="0" step="0.5" class="input" style="width:90px" placeholder="예) 15" /></div>
+            <span style="color:var(--text-mute);">비용은 포지션 변동 시 회전금액에 비례해 차감 · 손절/익절은 진입가 대비 종가 기준 (비우면 미적용)</span>
           </div>
           <div class="rounded-lg p-3 text-xs mb-2" style="background:rgba(8,153,129,0.08);color:var(--green);border:1px solid rgba(8,153,129,0.2);">
             Python: pandas · pandas-ta · scikit-learn · LightGBM 기반 백테스트 엔진
@@ -2651,6 +2898,8 @@ RC_i = wi × (Σw)_i / √(w'Σw)
 <script type="module">
 import { api, getMe, setToast, escHtml, fmt, fmtPct, colorPct } from "/js/common.js";
 import { initPaperViews, onPaperViewActivated } from "/js/paper.js";
+import { initRebalanceView, onRebalanceViewActivated } from "/js/rebalance.js";
+import { initTradingViewView, onTradingViewViewActivated } from "/js/tradingview.js";
 
 // ── Navigation ────────────────────────────────────────────────────
 const GNB_MENUS = {
@@ -2659,7 +2908,9 @@ const GNB_MENUS = {
     items: [
       { key: "agent-chat",      icon: "fa-solid fa-comments",              label: "AI 투자 상담" },
       { key: "robo-portfolio",  icon: "fa-solid fa-chart-pie",             label: "자산배분·최적화" },
+      { key: "robo-rebalance",  icon: "fa-solid fa-rotate",                label: "리밸런싱 엔진" },
       { key: "robo-screening",  icon: "fa-solid fa-magnifying-glass-chart",label: "패턴 인식·종목 스크리닝" },
+      { key: "robo-patterns",   icon: "fa-solid fa-chart-column",          label: "차트 패턴·지지/저항·멀티타임프레임" },
       { key: "robo-decision",   icon: "fa-solid fa-brain",                 label: "모의 투자 의사결정" },
       { key: "agent-cb",        icon: "fa-solid fa-chart-bar",             label: "신용 리스크 분석" },
       { key: "agent-products",  icon: "fa-solid fa-coins",                 label: "맞춤 상품 추천" },
@@ -2719,6 +2970,7 @@ const GNB_MENUS = {
       { key: "indicator-custom",    icon: "fa-solid fa-code",           label: "커스텀 인디케이터 개발" },
       { key: "indicator-backtest",  icon: "fa-solid fa-flask",          label: "성과 검증 (Python)" },
       { key: "indicator-api",       icon: "fa-solid fa-plug",           label: "증권사 API 자동화" },
+      { key: "indicator-tradingview", icon: "fa-solid fa-satellite-dish", label: "TradingView 연동 (Webhook·교차검증)" },
       { key: "company-dashboard",   icon: "fa-solid fa-gauge",          label: "지표 대시보드" },
       { key: "company-compare",     icon: "fa-solid fa-table-columns",  label: "지표 비교 분석" },
       { key: "company-sector",      icon: "fa-solid fa-layer-group",    label: "섹터 인디케이터" },
@@ -2762,6 +3014,10 @@ const GNB_MENUS = {
 
 // ── 용어 글로서리 (용어 설명 모달에서 사용) ──────────────────────────
 const TERMS = {
+  shap:             { title: "SHAP 기여도 (XAI)", body: "각 입력 지표(RSI, MACD, 이동평균 비율 등)가 모델의 최종 판단을 얼마나 밀어 올렸는지(+) 또는 끌어내렸는지(−)를 게임이론의 Shapley 값으로 공정하게 배분한 설명 기법입니다. 이 앱은 LightGBM의 TreeSHAP(pred_contrib)을 사용해 매수·관망·매도 판단의 근거를 사람이 읽을 수 있는 문장으로 풀어 보여줍니다." },
+  confidence:       { title: "신호 신뢰도", body: "여러 타임프레임(분봉·일봉·주봉)이 같은 방향을 가리키는 정도(일치도)와 종합 점수의 크기를 절반씩 섞어 0~100으로 표시합니다. 확률이 아니라 신호의 강도·일관성을 나타내는 상대 지표입니다." },
+  rebalancing:      { title: "리밸런싱", body: "시간이 지나며 가격 변동으로 흐트러진 자산 비중을 처음 정한 목표 비중으로 되돌리는 작업입니다. 오른 자산을 일부 팔고 내린 자산을 사게 되어 자연스럽게 '고점 매도·저점 매수'가 이뤄집니다. 주기(시간), 허용 이탈률, 입출금·배당 발생을 기준으로 실행합니다." },
+  drift:            { title: "이탈률 (Drift)", body: "현재 비중과 목표 비중의 차이(%p)입니다. 예: 목표 30%인 종목이 36%가 되면 이탈 +6%p. 허용 이탈률(예: 5%p)을 넘으면 리밸런싱을 실행합니다." },
   rsi:              { title: "RSI (상대강도지수)", body: "일정 기간의 상승폭·하락폭 평균을 비교해 0~100 사이 값으로 나타내는 모멘텀 지표입니다. 통상 70 이상이면 과매수, 30 이하면 과매도로 해석합니다." },
   ma:               { title: "이동평균선 (MA)", body: "최근 N일 종가의 평균을 이어 그린 선입니다. 단기선(MA5)이 장기선(MA20) 위로 뚫고 올라가면 골든크로스(매수 신호), 아래로 내려가면 데드크로스(매도 신호)로 봅니다." },
   macd:             { title: "MACD", body: "단기(12일)·장기(26일) 지수이동평균의 차이(MACD선)와 그 신호선(9일 EMA)의 교차로 추세 전환을 포착하는 지표입니다. MACD가 신호선을 상향 돌파하면 매수 신호로 해석합니다." },
@@ -2845,6 +3101,9 @@ const VIEW_GUIDES = {
   "us-order":        { summary: "미국 주식 모의 주문을 내고 체결 내역을 확인합니다.", steps: ["매수/매도, 수량, 가격을 입력해 주문하세요.", "Alpaca API 키를 등록하면 실제 페이퍼트레이딩 계좌와 연동할 수 있습니다."], relatedTerms: ["alpaca", "paper_trading"] },
   "us-portfolio":    { summary: "미국 주식 모의 계좌의 잔고와 평가손익을 확인합니다.", steps: ["계좌 요약과 보유 종목별 평가손익을 확인하세요."], relatedTerms: ["virtual_account"] },
   "indicator-strategy": { summary: "MA·RSI 등 기본 인디케이터로 매매 전략을 직접 설계하고 신호를 확인합니다.", steps: ["종목·기간을 선택하고 사용할 인디케이터를 체크하세요.", "'분석 실행'으로 지표값과 매수/매도 판단 근거를 확인하세요."], relatedTerms: ["rsi", "ma", "macd", "bollinger", "golden_cross", "dead_cross"] },
+  "robo-rebalance": { summary: "모의투자 계좌를 목표 비중으로 되돌리는 리밸런싱 엔진입니다. 시간·이탈률·입출금/배당 3가지 트리거를 설정할 수 있습니다.", steps: ["종목코드와 목표 비중(%)을 추가하고 '플랜 저장'을 누르세요. 합계가 100% 미만이면 나머지는 현금 비중입니다.", "① 시간 기반: 월·분기·연 주기 도래 시, ② 이탈률 기반: 현재 비중이 목표에서 허용 %p 이상 벗어나면, ③ 현금흐름 기반: 입금·출금·배당이 최소금액 이상 발생하면 리밸런싱합니다.", "'자동 체결'을 끄면 트리거 충족 시 제안만 생성되고, 실행 이력에서 '승인·체결'로 직접 확정합니다.", "'주문 산출' → '제안 체결'로 언제든 수동 리밸런싱할 수 있습니다."], related: ["rebalancing", "drift", "mdd"] },
+  "indicator-tradingview": { summary: "TradingView 알림을 Webhook으로 받아 모의계좌 체결·알림 전달하고, Strategy Tester 성과를 LEAN 백테스트와 교차 검증합니다.", steps: ["모의투자 › Open API에서 API 키를 발급받아 알림 메시지의 token에 넣습니다.", "TradingView 알림 생성 시 Webhook URL과 메시지 템플릿을 붙여 넣으면 buy/sell 알림이 모의계좌에 체결됩니다.", "Strategy Tester 성과를 입력(또는 거래 목록 CSV)하고 LEAN과 비교해 수익률·MDD·거래 횟수 차이와 원인을 확인합니다."], related: ["pine_script", "sharpe", "mdd"] },
+  "robo-patterns": { summary: "캔들 패턴·지지/저항선·돌파 이벤트를 탐지하고 분봉·일봉·주봉을 종합한 매수·매도·관망 신호와 신뢰도를 보여줍니다.", steps: ["종목코드를 입력하고 분석을 실행하세요 (60분봉 1개월 · 일봉 1년 · 주봉 5년).", "종합 점수는 타임프레임별 지표 점수를 20/50/30% 가중 평균한 값이고, 신뢰도는 방향 일치도와 점수 크기를 반반 섞은 값입니다.", "지지·저항선은 피벗 고점/저점을 1% 허용 범위로 군집화해 터치 횟수로 강도를 매깁니다."], related: ["rsi", "ma", "bollinger", "macd"] },
   "indicator-custom": { summary: "나만의 파라미터로 커스텀 인디케이터를 만들고 PineScript/Python 코드를 생성합니다.", steps: ["기준 조합(RSI+MA, MACD+BB 등)과 기간·임계값을 조정하세요.", "생성된 PineScript는 트레이딩뷰에, Python 코드는 직접 백테스트에 활용할 수 있습니다.", "'백테스트 실행'으로 이 앱에서 바로 성과를 검증할 수 있습니다.", "마음에 드는 조합은 '저장'해두면 다음에 목록에서 바로 불러올 수 있습니다."], relatedTerms: ["custom_indicator", "pine_script", "backtest"] },
   "indicator-backtest": { summary: "설계한 전략(기본/커스텀)의 파이썬 기반 성과를 검증합니다.", steps: ["종목과 전략을 선택하면 자동으로 백테스트가 실행됩니다.", "수익률·샤프지수·MDD·승률로 전략의 위험 대비 성과를 판단하세요.", "'비교에 추가'로 여러 전략의 성과를 나란히 비교할 수 있습니다."], relatedTerms: ["backtest", "sharpe", "mdd", "win_rate", "cost_bps"] },
   "indicator-api":   { summary: "완성한 인디케이터 전략을 증권사 API와 연결해 자동화하는 방법을 안내합니다.", steps: ["3단계 아키텍처(신호 계산→주문 생성→증권사 API 전송)를 확인하세요.", "하단에서 증권사 키를 등록하고 연결을 테스트하세요."], relatedTerms: ["broker_api", "custom_indicator"] },
@@ -3110,6 +3369,34 @@ const ROBO_PICKS = {
   ],
 };
 
+// ── XAI: SHAP 기여도 블록 렌더 (로보 추천 · 스크리닝 · 파이프라인 공용) ──
+function renderXaiBlock(ex, { compact = false } = {}) {
+  if (!ex) return "";
+  const rows = (compact ? [...(ex.top_positive || []), ...(ex.top_negative || [])] : (ex.contributions || [])).slice(0, compact ? 4 : 12);
+  const maxAbs = Math.max(0.0001, ...rows.map(r => Math.abs(r.contribution)));
+  const bars = rows.map(r => {
+    const pos = r.contribution >= 0;
+    const w = Math.round(Math.abs(r.contribution) / maxAbs * 100);
+    return `<div class="flex items-center gap-2 text-xs" style="line-height:1.2;">
+      <span style="width:${compact ? 110 : 150}px;flex:none;color:var(--text-dim);" title="${escHtml(r.interpretation || "")}">${escHtml(r.label || r.feature)} <span style="color:var(--text-mute);">${escHtml(r.value_text || "")}</span></span>
+      <div style="flex:1;height:8px;background:var(--surf3);border-radius:4px;overflow:hidden;position:relative;">
+        <div style="width:${w}%;height:100%;background:${pos ? "var(--green)" : "var(--red)"};"></div>
+      </div>
+      <span style="width:52px;flex:none;text-align:right;color:${pos ? "var(--green)" : "var(--red)"};">${r.contribution >= 0 ? "+" : ""}${Number(r.contribution).toFixed(2)}</span>
+    </div>`;
+  }).join("");
+  const sigCls = ex.signal === 1 ? "badge-buy" : ex.signal === -1 ? "badge-sell" : "badge-hold";
+  return `<div class="mt-2 rounded-lg p-2" style="background:var(--surf2);border:1px solid var(--border);">
+    <div class="flex items-center justify-between mb-1">
+      <span class="text-xs font-semibold">🧠 ${tt("AI 판단 근거 (XAI)", "SHAP 기여도: 각 지표가 모델의 매수/관망/매도 판단을 얼마나 밀어 올렸는지(+)/끌어내렸는지(−)", "shap")}</span>
+      <span class="${sigCls}" style="font-size:11px;">${escHtml(ex.signal_label)} ${ex.probability_pct}%</span>
+    </div>
+    <p class="text-xs mb-2" style="color:var(--text-dim);">${escHtml(ex.summary || "")}</p>
+    <div class="space-y-1">${bars}</div>
+    ${compact ? "" : `<p class="text-xs mt-2" style="color:var(--text-mute);">${escHtml(ex.method || "")} · ${escHtml(ex.disclaimer || "")}</p>`}
+  </div>`;
+}
+
 document.getElementById("robo-optimize-btn").addEventListener("click", async () => {
   const profile = document.getElementById("robo-risk").value;
   const horizon = parseInt(document.getElementById("robo-horizon").value);
@@ -3148,6 +3435,7 @@ document.getElementById("robo-optimize-btn").addEventListener("click", async () 
         </div>
         <div class="text-xs" style="color:var(--text-mute);">${escHtml(p.reason)}</div>
         <div class="text-xs mt-1" style="color:var(--text-dim);">${Math.round(amount * p.weight / 100).toLocaleString()}만원</div>
+        ${renderXaiBlock(p.ai_prediction?.explanation, { compact: true })}
       </div>
     `).join("");
 
@@ -3160,6 +3448,14 @@ document.getElementById("robo-optimize-btn").addEventListener("click", async () 
       <p class="text-xs mt-2" style="color:var(--text-mute);">※ 시장 데이터 기반 추정치이며 실제 수익을 보장하지 않습니다.</p>
     `;
     document.getElementById("robo-alloc-result").classList.remove("hidden");
+    // 목표 달성 시뮬레이션 기본값: 최적화 포트폴리오의 기대수익·변동성 (주식 바스켓 비중 반영)
+    const opt = data.optimization || {};
+    const stockBucket = ((data.allocations?.["국내주식"] || 0) + (data.allocations?.["해외주식"] || 0)) / 100;
+    const mu = (opt.expected_return_pct || 0) * stockBucket + 2.5 * (1 - stockBucket);
+    const sigma = (opt.expected_volatility_pct || 0) * stockBucket;
+    document.getElementById("gs-mu").value = mu.toFixed(1);
+    document.getElementById("gs-sigma").value = sigma.toFixed(1);
+    lastGoalSim = null; document.getElementById("gs-result").innerHTML = "";
   } catch (e) {
     setToast("포트폴리오 최적화 오류: " + e.message, "error");
   } finally {
@@ -3168,6 +3464,87 @@ document.getElementById("robo-optimize-btn").addEventListener("click", async () 
   }
 });
 
+
+// ── 로보 어드바이저: 투자성향 진단 설문 ─────────────────────────────
+let rpQuestions = null;
+async function loadRiskQuestions() {
+  if (rpQuestions) return rpQuestions;
+  const r = await api("/api/ml/robo/questions");
+  rpQuestions = r.questions;
+  document.getElementById("rp-form").innerHTML = rpQuestions.map((q, qi) => `
+    <div class="rounded-lg p-3" style="background:var(--surf2);border:1px solid var(--border);">
+      <div class="text-sm font-semibold mb-2">Q${qi + 1}. ${escHtml(q.text)}</div>
+      <div class="flex flex-wrap gap-2">${q.options.map((o, oi) => `<label class="text-xs flex items-center gap-1 px-2 py-1 rounded cursor-pointer" style="border:1px solid var(--border);"><input type="radio" name="rp-${q.id}" value="${oi}" /> ${escHtml(o.label)}</label>`).join("")}</div>
+    </div>`).join("") + `<div class="flex gap-2"><button id="rp-submit" class="btn-primary text-xs">진단하기</button><span class="text-xs self-center" style="color:var(--text-mute);">모든 문항에 답해야 진단됩니다.</span></div>`;
+  document.getElementById("rp-submit").addEventListener("click", submitRiskProfile);
+  return rpQuestions;
+}
+async function submitRiskProfile() {
+  const answers = {};
+  for (const q of rpQuestions) { const v = document.querySelector(`input[name="rp-${q.id}"]:checked`); if (v) answers[q.id] = Number(v.value); }
+  try {
+    const r = await api("/api/ml/robo/risk-profile", { method: "POST", body: { answers } });
+    const cls = r.risk_profile === "aggressive" ? "badge-sell" : r.risk_profile === "moderate" ? "badge-hold" : "badge-buy";
+    document.getElementById("rp-result").innerHTML = `
+      <div class="flex flex-wrap items-center gap-2 mb-1"><span class="${cls}" style="font-size:14px;">${escHtml(r.level)}</span><span class="text-xs" style="color:var(--text-mute);">점수 ${r.score} / ${r.max_score} · 시스템 프로파일 <b>${escHtml(r.risk_profile)}</b> (자산배분 성향에 반영됨)</span></div>
+      <p class="text-xs" style="color:var(--text-dim);">${escHtml(r.description)}</p>
+      <div class="flex gap-1 mt-2">${r.scale.map(sc => `<span class="text-xs px-2 py-0.5 rounded" style="background:${sc.level===r.level?"var(--accent)":"var(--surf3)"};color:${sc.level===r.level?"#fff":"var(--text-mute)"};">${escHtml(sc.level)} ${sc.min}+</span>`).join("")}</div>`;
+    document.getElementById("robo-risk").value = r.risk_profile;
+    document.getElementById("rp-form").classList.add("hidden"); document.getElementById("rp-toggle").textContent = "설문 다시 하기";
+    try { localStorage.setItem("robo_risk_profile", JSON.stringify({ level: r.level, risk_profile: r.risk_profile, score: r.score })); } catch (_) {}
+    setToast(`투자성향: ${r.level} → 자산배분 성향을 ${r.risk_profile}로 설정했습니다.`, "ok");
+  } catch (e) { setToast(e.message, "error"); }
+}
+document.getElementById("rp-toggle")?.addEventListener("click", async () => {
+  await loadRiskQuestions();
+  const f = document.getElementById("rp-form"); f.classList.toggle("hidden");
+  document.getElementById("rp-toggle").textContent = f.classList.contains("hidden") ? "설문 펼치기" : "설문 접기";
+});
+(() => { try { const saved = JSON.parse(localStorage.getItem("robo_risk_profile") || "null"); if (saved) { document.getElementById("rp-result").innerHTML = `<span class="text-xs" style="color:var(--text-mute);">최근 진단: <b>${escHtml(saved.level)}</b> (${saved.score}점) — 자산배분 성향 ${escHtml(saved.risk_profile)}</span>`; document.getElementById("robo-risk").value = saved.risk_profile; } } catch (_) {} })();
+
+// ── 로보 어드바이저: 목표 수익률 달성 확률 시뮬레이션 ────────────────
+let lastGoalSim = null, goalChart = null;
+async function runGoalSimulation() {
+  const body = {
+    amount_manwon: parseInt(document.getElementById("robo-amount").value) || 5000,
+    horizon_years: parseInt(document.getElementById("robo-horizon").value) || 3,
+    target_return_pct: Number(document.getElementById("gs-target").value || 8),
+    monthly_contribution_manwon: Number(document.getElementById("gs-monthly").value || 0),
+    expected_return_pct: Number(document.getElementById("gs-mu").value || 7),
+    expected_volatility_pct: Number(document.getElementById("gs-sigma").value || 12),
+  };
+  const el = document.getElementById("gs-result");
+  el.innerHTML = `<div class="text-xs" style="color:var(--text-mute);">3,000개 경로 시뮬레이션 중…</div>`;
+  try {
+    const r = await api("/api/ml/robo/goal-simulation", { method: "POST", body });
+    lastGoalSim = r;
+    const pc = r.probability_pct, color = pc >= 80 ? "var(--green)" : pc >= 50 ? "var(--accent)" : "var(--red)";
+    el.innerHTML = `
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3">
+        ${[["목표 달성 확률", `<span style="color:${color}">${pc}%</span>`], ["목표 금액", `${fmt(r.target_value_manwon)}만원`], ["총 투입 원금", `${fmt(r.invested_manwon)}만원`], ["중앙값(50%) 최종자산", `${fmt(r.percentiles_manwon.p50)}만원 (${r.median_return_pct >= 0 ? "+" : ""}${r.median_return_pct}%)`], ["원금 손실 확률", `${r.loss_probability_pct}%`]]
+          .map(([l, v]) => `<div class="card" style="padding:12px;text-align:center;"><div class="text-xs mb-1" style="color:var(--text-mute);">${l}</div><div style="font-size:17px;font-weight:700;">${v}</div></div>`).join("")}
+      </div>
+      <div class="text-sm mb-2"><b>${escHtml(r.verdict)}</b> · 목표 달성에 필요한 연수익률 ${r.required_annual_return_pct}% vs 포트폴리오 기대 ${r.inputs.expected_return_pct}% (변동성 ${r.inputs.expected_volatility_pct}%)</div>
+      <div id="gs-chart"></div>
+      <table class="mt-2"><thead><tr><th>백분위</th><th style="text-align:right">5% (비관)</th><th style="text-align:right">25%</th><th style="text-align:right">50% (중앙)</th><th style="text-align:right">75%</th><th style="text-align:right">95% (낙관)</th></tr></thead>
+      <tbody><tr><td>${r.inputs.horizon_years}년 후 자산 (만원)</td>${["p5","p25","p50","p75","p95"].map(k => `<td style="text-align:right;${r.percentiles_manwon[k] >= r.target_value_manwon ? "color:var(--green);font-weight:600" : ""}">${fmt(r.percentiles_manwon[k])}</td>`).join("")}</tr></tbody></table>
+      <p class="text-xs mt-2" style="color:var(--text-mute);">${escHtml(r.disclaimer)} 초록색은 목표 금액 이상인 구간입니다.</p>`;
+    if (window.ApexCharts) {
+      const opts = { chart: { type: "line", height: 240, toolbar: { show: false }, background: "transparent" },
+        theme: { mode: document.documentElement.dataset.theme === "light" ? "light" : "dark" },
+        series: [
+          { name: "낙관 (95%)", data: r.curves.p95 }, { name: "중앙 (50%)", data: r.curves.p50 }, { name: "비관 (5%)", data: r.curves.p5 },
+          { name: "목표 금액", data: r.curve_years.map((y, i) => i === r.curve_years.length - 1 ? r.target_value_manwon : null) },
+        ],
+        xaxis: { categories: r.curve_years.map(y => `${y}년`), tickAmount: 8 }, yaxis: { labels: { formatter: v => `${fmt(v)}만` } },
+        stroke: { width: [2, 3, 2, 0], dashArray: [4, 0, 4, 0] }, markers: { size: [0, 0, 0, 6] }, colors: ["#089981", "#2962ff", "#f23645", "#f59e0b"],
+        dataLabels: { enabled: false }, legend: { position: "top" }, tooltip: { y: { formatter: v => v == null ? "" : `${fmt(v)}만원` } } };
+      if (goalChart) goalChart.destroy();
+      goalChart = new ApexCharts(document.getElementById("gs-chart"), opts); goalChart.render();
+    }
+  } catch (e) { el.innerHTML = `<span class="text-red-500 text-sm">${escHtml(e.message)}</span>`; }
+}
+document.getElementById("gs-run")?.addEventListener("click", runGoalSimulation);
 // ── 로보 어드바이저: 종목 스크리닝 ──────────────────────────────────
 async function loadRoboScreening() {
   const signal = document.getElementById("screen-signal")?.value || "all";
@@ -3200,7 +3577,7 @@ function renderScreenTable(signals) {
   if (!el) return;
   if (!signals?.length) { el.innerHTML = `<p class="text-slate-400 text-sm">조회된 종목이 없습니다.</p>`; return; }
   el.innerHTML = `<table>
-    <thead><tr><th>종목명</th><th style="text-align:right;">현재가</th><th style="text-align:right;">등락률</th><th style="text-align:right;">RSI</th><th>AI 신호</th><th>패턴 근거</th></tr></thead>
+    <thead><tr><th>종목명</th><th style="text-align:right;">현재가</th><th style="text-align:right;">등락률</th><th style="text-align:right;">RSI</th><th>AI 신호</th><th>패턴 근거</th><th>XAI</th></tr></thead>
     <tbody>${signals.map(s => {
       const pct = s.change_pct ?? 0;
       const sigClass = s.signal === "BUY" ? "badge-buy" : s.signal === "SELL" ? "badge-sell" : "badge-hold";
@@ -3210,14 +3587,71 @@ function renderScreenTable(signals) {
         <td style="text-align:right;color:${pct>=0?"var(--green)":"var(--red)"};">${pct>=0?"+":""}${pct.toFixed(2)}%</td>
         <td style="text-align:right;">${s.rsi?.toFixed(1) ?? "--"}</td>
         <td><span class="${sigClass}">${s.signal}</span></td>
-        <td style="font-size:11px;color:var(--text-mute);">${escHtml(s.reason || "계산된 패턴 신호")}</td>
+        <td style="font-size:11px;color:var(--text-mute);">${escHtml(s.reason || "계산된 패턴 신호")}${s.xai ? `<div style="color:var(--text-dim);margin-top:2px;">🧠 ${escHtml(s.xai.signal_label)} ${s.xai.probability_pct}% — ${escHtml((s.xai.top_positive?.[0]?.label) || "")}</div>` : ""}</td>
+        <td><button class="btn-secondary text-xs" onclick="showScreenXai('${escHtml(s.symbol)}')" title="LightGBM SHAP 기여도로 판단 근거 설명">🧠 설명</button></td>
       </tr>`;
     }).join("")}</tbody>
-  </table>`;
+  </table>
+  <div id="screen-xai-panel" class="mt-3"></div>`;
 }
+
+async function showScreenXai(symbol) {
+  const panel = document.getElementById("screen-xai-panel");
+  if (!panel) return;
+  panel.innerHTML = `<div class="text-xs" style="color:var(--text-mute);">🧠 ${escHtml(symbol)} LightGBM 학습 + SHAP 계산 중… (최초 1회 수 초 소요, 3시간 캐시)</div>`;
+  try {
+    const r = await api(`/api/ml/explain?symbol=${encodeURIComponent(symbol)}`);
+    const pr = r.prediction || {};
+    panel.innerHTML = `<div class="card" style="padding:14px;">
+      <div class="flex items-center justify-between mb-1">
+        <h3 class="font-semibold text-sm">🧠 ${escHtml(r.name)} <span class="text-xs font-mono" style="color:var(--text-mute);">${escHtml(r.symbol)}</span> — AI 판단 근거</h3>
+        <span class="text-xs" style="color:var(--text-mute);">5일 예측 ${pr.pred_5d_return_pct ?? "-"}% · 모델 ${escHtml(pr.model || "")} · 신뢰도 ${pr.confidence ?? "-"}</span>
+      </div>
+      ${r.explanation ? renderXaiBlock(r.explanation) : `<p class="text-xs" style="color:var(--text-mute);">이 종목은 LightGBM 분류를 학습할 수 없어 설명을 제공하지 못했습니다.</p>`}
+    </div>`;
+  } catch (e) { panel.innerHTML = `<span class="text-xs text-red-500">${escHtml(e.message)}</span>`; }
+}
+window.showScreenXai = showScreenXai;
 
 document.getElementById("screen-run-btn").addEventListener("click", loadRoboScreening);
 
+
+// ── 로보 어드바이저: 차트 패턴 · 지지/저항 · 멀티타임프레임 ─────────────
+async function loadPatternAnalysis() {
+  const symbol = document.getElementById("pt-symbol").value.trim() || "005930.KS";
+  const box = (id, html) => { const el = document.getElementById(id); el.innerHTML = html; el.classList.remove("hidden"); };
+  box("pt-mtf", `<div class="text-sm" style="color:var(--text-mute);">분봉·일봉·주봉 데이터 수집 및 계산 중…</div>`);
+  try {
+    const [mtf, pat] = await Promise.all([
+      api(`/api/stocks/mtf-signal?symbol=${encodeURIComponent(symbol)}`),
+      api(`/api/stocks/patterns?symbol=${encodeURIComponent(symbol)}`),
+    ]);
+    const actCls = mtf.action.includes("매수") ? "badge-buy" : mtf.action.includes("매도") ? "badge-sell" : "badge-hold";
+    box("pt-mtf", `
+      <div class="flex flex-wrap items-center gap-3 mb-3">
+        <h3 class="font-semibold text-sm">📐 멀티타임프레임 종합 신호 — ${escHtml(symbol)}</h3>
+        <span class="${actCls}" style="font-size:14px;">${escHtml(mtf.action)}</span>
+        <span class="text-xs" style="color:var(--text-dim);">종합 점수 ${mtf.composite} · ${tt("신뢰도","타임프레임 방향 일치도(50%) + 점수 크기(50%)","confidence")} <b>${mtf.confidence}%</b> · 방향 일치 ${mtf.agreement}%</span>
+      </div>
+      <table><thead><tr><th>타임프레임</th><th style="text-align:right">가중치</th><th style="text-align:right">점수</th><th style="text-align:right">RSI</th><th style="text-align:right">MA5 / MA20</th><th>근거</th><th>기준 시점</th></tr></thead><tbody>${
+        mtf.timeframes.map(t => t.error ? `<tr><td>${escHtml(t.label)}</td><td colspan="6" class="text-xs" style="color:var(--text-mute)">${escHtml(t.error)}</td></tr>` :
+          `<tr><td>${escHtml(t.label)}</td><td style="text-align:right">${Math.round(t.weight*100)}%</td><td style="text-align:right;font-weight:700;color:${t.score>0?"var(--green)":t.score<0?"var(--red)":"var(--text-mute)"}">${t.score>0?"+":""}${t.score}</td><td style="text-align:right">${t.rsi}</td><td style="text-align:right">${fmt(t.ma5)} / ${fmt(t.ma20)}</td><td class="text-xs" style="color:var(--text-dim)">${t.reasons.map(escHtml).join(" · ")}</td><td class="text-xs" style="color:var(--text-mute)">${escHtml(t.as_of)}</td></tr>`).join("")}</tbody></table>
+      <p class="text-xs mt-2" style="color:var(--text-mute);">${escHtml(mtf.disclaimer)}</p>`);
+    const dirBadge = (d) => d === "bullish" ? `<span class="badge-buy">상승</span>` : d === "bearish" ? `<span class="badge-sell">하락</span>` : `<span class="badge-hold">중립</span>`;
+    box("pt-patterns", `<h3 class="font-semibold text-sm mb-2">🕯️ 캔들 패턴 (최근 5봉) · 패턴 점수 ${pat.pattern_score} (${escHtml(pat.pattern_bias)})</h3>${
+      pat.patterns.length ? `<table><thead><tr><th>일자</th><th>패턴</th><th>방향</th><th>해설</th></tr></thead><tbody>${pat.patterns.map(p => `<tr><td class="text-xs">${p.date}${p.bars_ago===0?" <b>(최신)</b>":""}</td><td style="font-weight:600">${escHtml(p.name)}</td><td>${dirBadge(p.direction)}</td><td class="text-xs" style="color:var(--text-dim)">${escHtml(p.description)}</td></tr>`).join("")}</tbody></table>`
+      : `<p class="text-sm" style="color:var(--text-mute)">최근 5봉에서 뚜렷한 캔들 패턴이 없습니다.</p>`}`);
+    const sr = pat.support_resistance;
+    box("pt-sr", `<h3 class="font-semibold text-sm mb-2">📏 지지·저항선 (최근 ${sr.lookback_bars}봉 피벗 군집) · 현재가 ${fmt(sr.last_price)}</h3>
+      <div class="flex gap-3 text-xs mb-2">${sr.nearest_resistance ? `<span class="badge-sell">가장 가까운 저항 ${fmt(sr.nearest_resistance.price)} (${sr.nearest_resistance.distance_pct>0?"+":""}${sr.nearest_resistance.distance_pct}%)</span>` : ""}${sr.nearest_support ? `<span class="badge-buy">가장 가까운 지지 ${fmt(sr.nearest_support.price)} (${sr.nearest_support.distance_pct}%)</span>` : ""}</div>
+      ${sr.levels.length ? `<table><thead><tr><th>가격대</th><th>구분</th><th style="text-align:right">터치</th><th>강도</th><th style="text-align:right">현재가 대비</th></tr></thead><tbody>${sr.levels.map(l => `<tr><td style="font-weight:600">${fmt(l.price)}</td><td>${l.type==="support"?'<span class="badge-buy">지지</span>':'<span class="badge-sell">저항</span>'}</td><td style="text-align:right">${l.touches}회</td><td>${l.strength}</td><td style="text-align:right;color:${l.distance_pct>=0?"var(--green)":"var(--red)"}">${l.distance_pct>0?"+":""}${l.distance_pct}%</td></tr>`).join("")}</tbody></table>` : `<p class="text-sm" style="color:var(--text-mute)">레벨을 찾지 못했습니다.</p>`}`);
+    box("pt-breakouts", `<h3 class="font-semibold text-sm mb-2">🚀 돌파·크로스 이벤트 (${pat.as_of} 기준)</h3>${
+      pat.breakouts.length ? `<div class="flex flex-wrap gap-2">${pat.breakouts.map(e => `<div class="rounded-lg p-2 text-xs" style="background:var(--surf2);border:1px solid var(--border);min-width:220px;">${dirBadge(e.direction)} <b>${escHtml(e.name)}</b>${e.confirmed ? ' <span style="color:var(--green)">✔ 확인</span>' : ''}<div style="color:var(--text-dim);margin-top:2px;">${escHtml(e.detail || "")}</div></div>`).join("")}</div>`
+      : `<p class="text-sm" style="color:var(--text-mute)">현재 봉에서 돌파·크로스 이벤트가 없습니다.</p>`}`);
+  } catch (e) { box("pt-mtf", `<span class="text-red-500 text-sm">${escHtml(e.message)}</span>`); }
+}
+document.getElementById("pt-run")?.addEventListener("click", loadPatternAnalysis);
+document.getElementById("pt-symbol")?.addEventListener("keydown", e => { if (e.key === "Enter") loadPatternAnalysis(); });
 // ── 로보 어드바이저: 모의 투자 의사결정 ─────────────────────────────
 async function loadRoboDecision() {
   try {
@@ -3408,12 +3842,18 @@ document.getElementById("ci-test-btn").addEventListener("click", async () => {
   const buyTh = parseFloat(document.getElementById("ci-buy-th").value || "35");
   const symbol = document.getElementById("ibt-symbol")?.value || "005930.KS";
   try {
-    const r = await api(`/api/quant/pipeline?symbol=${encodeURIComponent(symbol)}&period=10y&base=${encodeURIComponent(base)}&short=${short}&mid=${mid}&rsi=${rsi}&buy_th=${buyTh}`);
+    const q = new URLSearchParams({ symbol, period: "10y", base, short, mid, rsi, buy_th: buyTh, cost_bps: document.getElementById("ci-cost")?.value || "0", slippage_bps: "0" });
+    const sl = document.getElementById("ci-sl")?.value, tp = document.getElementById("ci-tp")?.value;
+    if (sl) q.set("stop_loss_pct", sl); if (tp) q.set("take_profit_pct", tp);
+    const r = await api(`/api/quant/pipeline?${q}`);
+    const c = r.costs || {};
     const data = [
       { label:"누적 수익률", value: `${(r.return_total*100 >= 0 ? "+" : "")}${(r.return_total*100).toFixed(1)}%`, color:"var(--green)" },
       { label:tt("샤프 비율","위험 대비 수익 지표. 높을수록 좋음","sharpe"),   value: Number(r.sharpe || 0).toFixed(2), color:"var(--accent)" },
       { label:tt("최대 낙폭","전략 보유 기간 중 최악의 손실 구간(MDD)","mdd"),   value: `${(r.mdd*100).toFixed(1)}%`, color:"var(--red)" },
       { label:tt("승률","수익이 난 거래의 비율","win_rate"),        value: `${Number(r.win_rate_pct || 0).toFixed(1)}%`, color:"var(--text)" },
+      { label:tt("비용 차감","수수료+슬리피지 누적 차감(%p)","cost_bps"), value: `-${Number(c.cost_pct || 0).toFixed(2)}%p`, color:"var(--text-mute)" },
+      { label:"손절/익절 발동", value: `${c.stop_loss_exits ?? 0}회 / ${c.take_profit_exits ?? 0}회`, color:"var(--text-mute)" },
     ];
     document.getElementById("ci-bt-cards").innerHTML = data.map(d=>`
       <div class="card" style="padding:14px;text-align:center;">
@@ -3507,7 +3947,10 @@ async function loadIndicatorBacktest() {
   const strategy = document.getElementById("ibt-strategy")?.value;
   if (!sym) return;
   try {
-    const data = await api(`/api/quant/pipeline?symbol=${encodeURIComponent(sym)}&period=10y&strategy=${encodeURIComponent(strategy)}&cost_bps=10`);
+    const q = new URLSearchParams({ symbol: sym, period: "10y", strategy, cost_bps: document.getElementById("ibt-cost")?.value || "10", slippage_bps: document.getElementById("ibt-slip")?.value || "0" });
+    const sl = document.getElementById("ibt-sl")?.value, tp = document.getElementById("ibt-tp")?.value;
+    if (sl) q.set("stop_loss_pct", sl); if (tp) q.set("take_profit_pct", tp);
+    const data = await api(`/api/quant/pipeline?${q}`);
     renderIndicatorBacktest(data);
   } catch {}
 }
@@ -3530,7 +3973,8 @@ function renderIndicatorBacktest(data) {
       <h3 class="font-semibold mb-2 text-sm">📊 Python 백테스트 상세</h3>
       <table><thead><tr><th>비교 대상</th><th style="text-align:right;">누적 수익률</th><th style="text-align:right;">거래 횟수</th><th style="text-align:right;">${tt("승률","수익이 난 거래의 비율","win_rate")}</th></tr></thead>
       <tbody><tr><td>${strategyLabel}</td><td style="text-align:right;color:${Number(data.total_return_pct)>=0?"var(--green)":"var(--red)"};">${Number(data.total_return_pct)>=0?"+":""}${Number(data.total_return_pct).toFixed(2)}%</td><td style="text-align:right;">${data.trade_count}회</td><td style="text-align:right;">${Number(data.win_rate_pct).toFixed(1)}%</td></tr><tr><td>매수 후 보유</td><td style="text-align:right;">${Number(data.buy_hold_return_pct).toFixed(2)}%</td><td style="text-align:right;">-</td><td style="text-align:right;">-</td></tr></tbody></table>
-      <p class="text-xs mt-2" style="color:var(--text-mute);">매매비용 왕복 기준 10bp를 반영했으며, 신호는 다음 거래일 수익률에 적용됩니다.</p>
+      <p class="text-xs mt-2" style="color:var(--text-mute);">비용 차감 전 수익률 ${Number(data.gross_return_pct ?? data.total_return_pct).toFixed(1)}% → 수수료 ${data.cost_bps ?? 0}bp + 슬리피지 ${data.slippage_bps ?? 0}bp 로 누적 ${Number(data.cost_pct || 0).toFixed(2)}%p 차감 · 손절 ${data.stop_loss_pct ? data.stop_loss_pct + "% (" + data.stop_loss_exits + "회 발동)" : "미적용"} · 익절 ${data.take_profit_pct ? data.take_profit_pct + "% (" + data.take_profit_exits + "회 발동)" : "미적용"} · 신호는 다음 거래일 수익률에 적용됩니다.</p>
+      ${data.explanation ? renderXaiBlock(data.explanation) : ""}
       <button type="button" class="btn-secondary text-xs mt-2" onclick='compareTrayAdd(${JSON.stringify({
         source: "성과 검증 (Python)", label: `${strategyLabel}`,
         summary: `수익률 ${Number(data.total_return_pct)>=0?"+":""}${Number(data.total_return_pct).toFixed(1)}% · 샤프 ${Number(data.sharpe_ratio||0).toFixed(2)} · MDD ${Number(data.mdd_pct||0).toFixed(1)}% · 승률 ${Number(data.win_rate_pct||0).toFixed(1)}%`,
@@ -3586,6 +4030,8 @@ async function boot() {
     loadSyncStatus();
     setInterval(loadSyncStatus, 60_000);   // refresh sync badge every minute
     initPaperViews();                      // 모의투자 · LEAN 백테스트 버튼 바인딩 (js/paper.js)
+    initRebalanceView();                   // 리밸런싱 엔진 버튼 바인딩 (js/rebalance.js)
+    initTradingViewView();                 // TradingView 연동 (js/tradingview.js)
     const hash = location.hash.replace("#", "");
     navigate(hash && document.querySelector(`[data-view="${hash}"]`) ? hash : "agent-chat");
   } catch {
@@ -3892,6 +4338,8 @@ function loadCompanySector() {
 // ── View Activation ───────────────────────────────────────────────
 function onViewActivated(view) {
   onPaperViewActivated(view); // 모의투자 · LEAN 백테스트 (js/paper.js)
+  onRebalanceViewActivated(view); // 리밸런싱 엔진 (js/rebalance.js)
+  onTradingViewViewActivated(view); // TradingView 연동 (js/tradingview.js)
   if (view === "trading-chart") loadStockChart();
   if (view === "trading-portfolio") loadPortfolio();
   if (view === "trading-order") { loadOrderHistory(); loadBrokerStatus(); }
@@ -3912,6 +4360,7 @@ function onViewActivated(view) {
   // 로보 어드바이저 신규 뷰
   if (view === "robo-screening") loadRoboScreening();
   if (view === "robo-decision")  loadRoboDecision();
+  if (view === "robo-patterns")  { if (!document.getElementById("pt-mtf").innerHTML) loadPatternAnalysis(); }
   // 투자 인디케이터 신규 뷰
   if (view === "indicator-custom") loadSavedIndicators();
   if (view === "indicator-backtest") loadIndicatorBacktest();
@@ -4420,6 +4869,7 @@ document.getElementById("refresh-market").addEventListener("click", loadQuantDas
 
 // ── 자동매매 ─────────────────────────────────────────────────────
 async function loadAutoTradeStatus() {
+  loadRiskStatus(); // 로그가 없어 아래에서 조기 return 되더라도 위험관리 상태는 항상 표시
   try {
     const s = await api("/api/auto-trade/status");
     document.getElementById("auto-trade-status").textContent =
@@ -4428,18 +4878,54 @@ async function loadAutoTradeStatus() {
     if (!s.log?.length) { el.innerHTML = "<div class='text-slate-400'>자동매매 로그가 없습니다.</div>"; return; }
     el.innerHTML = [...s.log].reverse().map(cycle => {
       const trades = (cycle.trades || []).map(t =>
-        `<div class="ml-3 text-slate-300">${t.action === "buy" ? "🟢매수" : "🔴매도"} ${escHtml(t.name)} ${fmt(t.quantity)}주 @${fmt(t.price)}</div>`
+        t.type === "risk" || t.status === "skipped"
+          ? `<div class="ml-3 text-amber-400">⚠️ ${t.action === "buy" ? "매수" : "매도"} 생략 ${escHtml(t.name)} — ${escHtml(t.reason || "")}</div>`
+          : `<div class="ml-3 text-slate-300">${t.action === "buy" ? "🟢매수" : "🔴매도"} ${escHtml(t.name)} ${fmt(t.quantity)}주 @${fmt(t.price)}</div>`
       ).join("");
+      const risk = cycle.risk ? `<div class="ml-3 text-slate-500">위험관리: 당일 ${cycle.risk.day_pnl_pct ?? "-"}% · 주문 ${cycle.risk.orders_today ?? "-"}건${cycle.risk.halted ? ` · <span class="text-red-400">🛑 ${escHtml(cycle.risk.reason || "비상 정지")}</span>` : ""}</div>` : "";
       const sigs = (cycle.signals || []).map(sig =>
         `<div class="ml-3 text-slate-500">${escHtml(sig.name||sig.symbol)}: ${escHtml(sig.action||"-")} (점수:${sig.score??"-"})</div>`
       ).join("");
       return `<div class="rounded-xl border border-white/10 bg-black/20 p-2 mb-1">
-        <div class="font-semibold text-indigo-300">${escHtml(cycle.time)}</div>
-        ${sigs}${trades ? '<div class="mt-1 font-medium text-xs">체결:</div>' + trades : ""}
+        <div class="font-semibold text-indigo-300">${escHtml(cycle.time)}${cycle.note ? ` <span class="text-red-400 font-normal">· ${escHtml(cycle.note)}</span>` : ""}</div>
+        ${risk}${sigs}${trades ? '<div class="mt-1 font-medium text-xs">체결/생략:</div>' + trades : ""}
       </div>`;
     }).join("");
   } catch {}
 }
+
+async function loadRiskStatus() {
+  try {
+    const r = await api("/api/quant/risk/status");
+    const L = r.limits || {};
+    const pnlCls = r.day_pnl_pct == null ? "" : (r.day_pnl_pct >= 0 ? "text-emerald-400" : "text-red-400");
+    const tile = (label, value, cls = "") => `<div class="rounded-lg p-2" style="background:var(--surf3);"><div style="color:var(--text-mute);">${label}</div><div class="font-bold ${cls}">${value}</div></div>`;
+    document.getElementById("risk-kpis").innerHTML = [
+      tile("비상 정지", r.kill_switch ? `<span class="text-red-400">🛑 ON</span>` : `<span class="text-emerald-400">OFF</span>`),
+      tile("당일 손익", r.day_pnl_pct == null ? "-" : `${r.day_pnl_pct > 0 ? "+" : ""}${r.day_pnl_pct}% <span class="font-normal" style="color:var(--text-mute)">/ 한도 -${L.daily_loss_limit_pct}%</span>`, r.daily_loss_breached ? "text-red-400" : pnlCls),
+      tile("당일 자동 주문", `${r.orders_today ?? 0}건 <span class="font-normal" style="color:var(--text-mute)">/ 최대 ${L.max_orders_per_day || "∞"}</span>`),
+      tile("종목 비중 한도", `${L.max_position_pct || "∞"}%`),
+      tile("중복 주문 쿨다운", `${L.cooldown_min || 0}분`),
+    ].join("");
+    document.getElementById("risk-note").textContent = r.kill_switch
+      ? `정지 사유: ${r.halt_reason || "수동 비상 정지"} — 해제 후 자동매매를 다시 시작할 수 있습니다.`
+      : `시작 자산 ${r.day_start_equity != null ? fmt(r.day_start_equity) + "원" : "-"} · 현재 자산 ${r.current_equity != null ? fmt(r.current_equity) + "원" : "-"} (${r.date})`;
+  } catch (e) { document.getElementById("risk-kpis").innerHTML = `<span class="text-red-400">${escHtml(e.message)}</span>`; }
+}
+
+document.getElementById("risk-kill-on").addEventListener("click", async () => {
+  if (!confirm("자동매매를 즉시 중지하고 비상 정지 상태로 전환합니다. 계속할까요?")) return;
+  try {
+    await api("/api/quant/risk/kill-switch", { method: "POST", body: { enabled: true, reason: "사용자 수동 비상 정지" } });
+    setToast("비상 정지 ON — 자동매매가 중지되었습니다.", "ok"); loadAutoTradeStatus();
+  } catch (e) { setToast(e.message, "error"); }
+});
+document.getElementById("risk-kill-off").addEventListener("click", async () => {
+  try {
+    await api("/api/quant/risk/kill-switch", { method: "POST", body: { enabled: false } });
+    setToast("비상 정지를 해제했습니다.", "ok"); loadAutoTradeStatus();
+  } catch (e) { setToast(e.message, "error"); }
+});
 
 document.getElementById("auto-start").addEventListener("click", async () => {
   try {
@@ -4500,6 +4986,14 @@ async function loadSettings() {
     document.getElementById("quant-per-trade-budget").value = cfg.per_trade_budget || 1000000;
     document.getElementById("quant-buy-ratio").value = Math.round((cfg.buy_ratio ?? 1) * 100);
     document.getElementById("quant-sell-ratio").value = Math.round((cfg.sell_ratio ?? 0.5) * 100);
+    const rk = cfg.risk || {};
+    document.getElementById("risk-daily-loss").value   = rk.daily_loss_limit_pct ?? 3;
+    document.getElementById("risk-max-position").value = rk.max_position_pct ?? 30;
+    document.getElementById("risk-max-orders").value   = rk.max_orders_per_day ?? 20;
+    document.getElementById("risk-cooldown").value     = rk.cooldown_min ?? 30;
+    document.getElementById("risk-kill-badge").innerHTML = rk.kill_switch
+      ? `<span class="badge-sell">🛑 비상 정지 ON${cfg.risk_halt_reason ? " · " + escHtml(cfg.risk_halt_reason) : ""}</span>`
+      : `<span class="badge-buy">정상</span>`;
     const selected = new Set(cfg.selected_symbols || []);
     document.querySelectorAll(".quant-symbol").forEach((el) => {
       el.checked = selected.has(el.value);
@@ -4539,6 +5033,10 @@ document.getElementById("broker-save")?.addEventListener("click", async () => {
         app_secret: document.getElementById("broker-app-secret").value,
         account_no: document.getElementById("broker-account").value,
         paper:      document.getElementById("broker-paper").checked,
+        risk_daily_loss_limit_pct: Number(document.getElementById("risk-daily-loss").value || 0),
+        risk_max_position_pct:     Number(document.getElementById("risk-max-position").value || 0),
+        risk_max_orders_per_day:   Number(document.getElementById("risk-max-orders").value || 0),
+        risk_cooldown_min:         Number(document.getElementById("risk-cooldown").value || 0),
       },
     });
     setToast("증권사 API 설정이 저장되었습니다.", "ok");

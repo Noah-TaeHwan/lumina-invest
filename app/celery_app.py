@@ -7,7 +7,13 @@ Beat  실행: celery -A app.celery_app beat  --loglevel=info
 from celery import Celery
 from app.config import settings
 
-celery_app = Celery("lumina-invest")
+celery_app = Celery(
+    "lumina-invest",
+    # autodiscover_tasks(["app.tasks"])는 app.tasks.tasks 모듈을 찾기 때문에 실제로는 아무 태스크도
+    # 등록되지 않았다(워커 [tasks] 목록이 비어 Beat 스케줄·/async 엔드포인트가 모두 대기 상태).
+    # 태스크 모듈을 명시적으로 include 한다.
+    include=["app.tasks.sync_tasks", "app.tasks.ingest_tasks", "app.tasks.agent_tasks"],
+)
 
 celery_app.conf.update(
     # ── 브로커 / 백엔드 ─────────────────────────────────────────────────────────
@@ -32,14 +38,19 @@ celery_app.conf.update(
     # ── Celery Beat 주기 스케줄 ────────────────────────────────────────────────
     beat_schedule={
         "sync-market-data-hourly": {
-            "task": "app.tasks.sync_tasks.sync_market_data",
+            "task": "sync.market_data",
             "schedule": 3600.0,           # 1시간
             "options": {"expires": 3500},
         },
         "sync-candles-daily": {
-            "task": "app.tasks.sync_tasks.sync_stock_candles",
+            "task": "sync.stock_candles",
             "schedule": 86400.0,          # 24시간
             "options": {"expires": 82800},
+        },
+        "rebalance-check-hourly": {
+            "task": "rebalance.check_triggers",
+            "schedule": 3600.0,           # 1시간 — 시간·이탈률 리밸런싱 트리거 점검
+            "options": {"expires": 3500},
         },
     },
 )

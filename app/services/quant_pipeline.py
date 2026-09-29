@@ -228,17 +228,66 @@ def rule_based_signals(df: pd.DataFrame) -> pd.Series:
 
 # ── 6. 백테스트 ───────────────────────────────────────────────────────
 
-def backtest(df: pd.DataFrame, signals: pd.Series) -> dict:
+def apply_stops(close: pd.Series, held: pd.Series, stop_loss_pct: float | None = None,
+                take_profit_pct: float | None = None) -> tuple[pd.Series, int, int]:
+    """보유 상태(held, 이미 shift(1) 적용된 0/1)에 손절·익절 규칙을 덧씌운다.
+
+    - 진입가 = 보유가 시작되는 날의 전일 종가(held[t]=1이면 t일 수익률을 먹으므로 close[t-1]에 진입)
+    - 종가가 진입가 × (1 − 손절%) 이하 → 그날 수익률까지 반영하고 다음 날부터 현금
+    - 종가가 진입가 × (1 + 익절%) 이상 → 동일하게 청산
+    - 청산 후에는 원 신호가 0→1로 새로 바뀌는 시점(재진입)까지 현금 유지 (룩어헤드 없음: 모두 과거 종가만 사용)
+    Returns (조정된 held, 손절 횟수, 익절 횟수)
+    """
+    sl = float(stop_loss_pct) / 100 if stop_loss_pct else None
+    tp = float(take_profit_pct) / 100 if take_profit_pct else None
+    if not sl and not tp:
+        return held, 0, 0
+    c = close.values.astype(float)
+    h = held.values.astype(float).copy()
+    out = np.zeros_like(h)
+    entry = None
+    blocked = False   # 청산 후 재진입 신호 대기 중
+    n_sl = n_tp = 0
+    for t in range(len(h)):
+        want = h[t] == 1
+        fresh_entry = want and (t == 0 or h[t - 1] == 0)
+        if fresh_entry:
+            blocked = False
+        if not want or blocked:
+            out[t] = 0
+            entry = None
+            continue
+        if entry is None:
+            entry = c[t - 1] if t > 0 else c[t]
+        out[t] = 1
+        if sl and c[t] <= entry * (1 - sl):
+            n_sl += 1; blocked = True; entry = None
+        elif tp and c[t] >= entry * (1 + tp):
+            n_tp += 1; blocked = True; entry = None
+    return pd.Series(out, index=held.index), n_sl, n_tp
+
+
+def backtest(df: pd.DataFrame, signals: pd.Series, commission_bps: float = 0.0, slippage_bps: float = 0.0,
+             stop_loss_pct: float | None = None, take_profit_pct: float | None = None) -> dict:
     """
     벡터화 백테스트: 롱 전략 (signal=+1 보유, 그 외 현금).
+
+    - commission_bps / slippage_bps : 포지션이 바뀔 때(진입·청산) 회전금액에 비례해 차감 (1bp = 0.01%)
+    - stop_loss_pct / take_profit_pct : 진입가 대비 손절·익절 규칙 (apply_stops)
 
     Returns: 수익률, 샤프지수, MDD, 승률, 누적수익 시계열
     """
     ret = df["close"].pct_change().fillna(0)
     # 전날 시그널로 오늘 포지션 (룩어헤드 방지)
     pos = signals.shift(1).fillna(0).reindex(ret.index, fill_value=0)
+    pos = (pos == 1).astype(float)
+    pos, n_sl, n_tp = apply_stops(df["close"].astype(float), pos, stop_loss_pct, take_profit_pct)
 
-    strat_ret = ret * (pos == 1).astype(float)
+    gross_ret = ret * pos
+    turnover  = pos.diff().abs().fillna(pos.abs())
+    cost_rate = (max(0.0, float(commission_bps)) + max(0.0, float(slippage_bps))) / 10_000
+    cost      = turnover * cost_rate
+    strat_ret = gross_ret - cost
     bh_ret    = ret
 
     cum_strat = (1 + strat_ret).cumprod()
@@ -253,6 +302,7 @@ def backtest(df: pd.DataFrame, signals: pd.Series) -> dict:
     # 승률 (보유 구간만)
     held_rets = strat_ret[pos == 1]
     win_rate  = float((held_rets > 0).sum() / max(len(held_rets), 1)) * 100
+    gross_total = float((1 + gross_ret).cumprod().iloc[-1] - 1) * 100
 
     # 매매 횟수 (포지션 변화)
     trade_count = int((pos.diff().abs() > 0).sum())
@@ -265,6 +315,14 @@ def backtest(df: pd.DataFrame, signals: pd.Series) -> dict:
 
     return {
         "total_return_pct":     round(total_strat, 2),
+        "gross_return_pct":     round(gross_total, 2),          # 비용 차감 전
+        "cost_pct":             round(float(cost.sum()) * 100, 3),  # 누적 비용(수수료+슬리피지)
+        "commission_bps":       float(commission_bps),
+        "slippage_bps":         float(slippage_bps),
+        "stop_loss_pct":        stop_loss_pct,
+        "take_profit_pct":      take_profit_pct,
+        "stop_loss_exits":      n_sl,
+        "take_profit_exits":    n_tp,
         "buy_hold_return_pct":  round(total_bh, 2),
         "sharpe_ratio":         round(sharpe, 3),
         "mdd_pct":              round(mdd, 2),
@@ -339,6 +397,10 @@ async def run_pipeline(
     symbol: str,
     candles: list[dict],
     model_type: str = "lgb",
+    commission_bps: float = 0.0,
+    slippage_bps: float = 0.0,
+    stop_loss_pct: float | None = None,
+    take_profit_pct: float | None = None,
 ) -> dict:
     """
     OHLCV → 전처리 → 피처 → ML/DL 학습 → 시그널 → 백테스트 순서로 실행.
@@ -359,10 +421,18 @@ async def run_pipeline(
 
     # 3) 모델 학습 + 예측
     metrics: dict = {}
+    explanation: dict | None = None
     if model_type == "lgb" and HAS_LGB:
         model, metrics = train_lgb(df)
         signals = predict_lgb(model, df)
         used_model = "LightGBM"
+        try:
+            from app.services.xai import explain_signal
+            x_last = df[FEATURE_COLS].iloc[-1]
+            probs = model.predict(x_last.values.reshape(1, -1))[0]
+            explanation = explain_signal(model, x_last.values, FEATURE_COLS, x_last.to_dict(), probs)
+        except Exception:
+            explanation = None
     elif model_type == "mlp" and HAS_SKLEARN:
         model, scaler, metrics = train_mlp(df)
         signals = predict_mlp(model, scaler, df)
@@ -372,8 +442,8 @@ async def run_pipeline(
         used_model = "Rule-Based (RSI+MACD+BB)"
         metrics = {"note": "ML 라이브러리 미설치 — 규칙 기반 대체"}
 
-    # 4) 백테스트
-    bt = backtest(df, signals)
+    # 4) 백테스트 (수수료·슬리피지·손절·익절 반영)
+    bt = backtest(df, signals, commission_bps, slippage_bps, stop_loss_pct, take_profit_pct)
 
     # 5) 최신 시그널 + Alpaca 주문 (mockup)
     latest_signal  = int(signals.iloc[-1])
@@ -397,6 +467,7 @@ async def run_pipeline(
         "backtest":       bt,
         "alpaca":         alpaca_result,
         "data_rows":      len(df),
+        "explanation":    explanation,   # XAI (LightGBM일 때 SHAP 기여도)
     }
 
 
@@ -407,8 +478,12 @@ def backtest_custom_indicator(
     mid_window: int = 20,
     rsi_period: int = 14,
     buy_threshold: float = 35.0,
+    commission_bps: float = 0.0,
+    slippage_bps: float = 0.0,
+    stop_loss_pct: float | None = None,
+    take_profit_pct: float | None = None,
 ) -> dict:
-    """사용자 지정 인디케이터 전략 백테스트.
+    """사용자 지정 인디케이터 전략 백테스트 (수수료·슬리피지·손절·익절 반영 가능).
 
     base: rsi_ma | macd_bb | volume_rsi | triple_ma
     """
@@ -453,8 +528,10 @@ def backtest_custom_indicator(
     regime.loc[sell_cond] = 0.0
     position = regime.ffill().fillna(0.0).rename("ml_signal")
 
-    bt = backtest(df, position)
+    bt = backtest(df, position, commission_bps, slippage_bps, stop_loss_pct, take_profit_pct)
     return {
+        "costs": {k: bt[k] for k in ("gross_return_pct", "cost_pct", "commission_bps", "slippage_bps",
+                                     "stop_loss_pct", "take_profit_pct", "stop_loss_exits", "take_profit_exits")},
         "strategy": {
             "name": f"custom_{base}",
             "base": base,

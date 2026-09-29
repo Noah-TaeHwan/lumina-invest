@@ -47,8 +47,12 @@ def _position(df: pd.DataFrame, strategy: str) -> pd.Series:
     return state.ffill().fillna(0.0)
 
 
-def backtest_strategy(candles: list[dict], strategy: str = "composite", cost_bps: float = 10.0) -> dict:
-    """롱온리 일봉 백테스트. 매매비용은 포지션 변동 시 차감한다."""
+def backtest_strategy(candles: list[dict], strategy: str = "composite", cost_bps: float = 10.0,
+                      slippage_bps: float = 0.0, stop_loss_pct: float | None = None,
+                      take_profit_pct: float | None = None) -> dict:
+    """롱온리 일봉 백테스트. 수수료(cost_bps)·슬리피지(slippage_bps)는 포지션 변동 시 차감하고,
+    손절·익절(%)은 진입가 대비 종가 기준으로 적용한다."""
+    from app.services.quant_pipeline import apply_stops
     df = indicators(candles).dropna()
     if len(df) < 60:
         return {"error": f"데이터 부족: {len(df)}행 (최소 60 필요)"}
@@ -56,8 +60,11 @@ def backtest_strategy(candles: list[dict], strategy: str = "composite", cost_bps
     returns = df["close"].pct_change().fillna(0.0)
     # t일 장 마감 신호는 t+1일 수익률에만 적용
     held = position.shift(1).fillna(0.0)
+    held, n_sl, n_tp = apply_stops(df["close"].astype(float), held, stop_loss_pct, take_profit_pct)
     turnover = held.diff().abs().fillna(held.abs())
-    net = returns * held - turnover * (max(0.0, float(cost_bps)) / 10_000)
+    cost_rate = (max(0.0, float(cost_bps)) + max(0.0, float(slippage_bps))) / 10_000
+    cost_series = turnover * cost_rate
+    net = returns * held - cost_series
     equity = (1 + net).cumprod()
     benchmark = (1 + returns).cumprod()
     drawdown = equity / equity.cummax() - 1
@@ -68,6 +75,13 @@ def backtest_strategy(candles: list[dict], strategy: str = "composite", cost_bps
     return {
         "strategy": strategy,
         "cost_bps": float(cost_bps),
+        "slippage_bps": float(slippage_bps),
+        "stop_loss_pct": stop_loss_pct,
+        "take_profit_pct": take_profit_pct,
+        "stop_loss_exits": n_sl,
+        "take_profit_exits": n_tp,
+        "gross_return_pct": round(((1 + returns * held).cumprod().iloc[-1] - 1) * 100, 2),
+        "cost_pct": round(float(cost_series.sum()) * 100, 3),
         "total_return_pct": round((equity.iloc[-1] - 1) * 100, 2),
         "buy_hold_return_pct": round((benchmark.iloc[-1] - 1) * 100, 2),
         "sharpe_ratio": round(ta.sharpe_ratio(net), 3),
@@ -196,8 +210,15 @@ def ai_predict_return(candles: list[dict]) -> dict | None:
         probs = lgb_model.predict(X[-1:])[0]
         signal = int(np.argmax(probs)) - 1
         signal_confidence = float(np.max(probs))
+        try:
+            from app.services.xai import explain_signal
+            latest_vals = {f: float(v) for f, v in zip(FEATURE_COLS, latest_features[0])}
+            explanation = explain_signal(lgb_model, latest_features[0], FEATURE_COLS, latest_vals, probs)
+        except Exception:
+            explanation = None
     except Exception:
         signal = 1 if pred_5d > 0 else (-1 if pred_5d < 0 else 0)
+        explanation = None
 
     # 5일 예측을 그대로 연환산(252/5 제곱)하면 예측이 조금만 튀어도 지수적으로
     # 폭발해 비현실적인 값이 나온다 (R^2가 음수인 종목에서 특히). 표시용으로 clip.
@@ -216,6 +237,7 @@ def ai_predict_return(candles: list[dict]) -> dict | None:
         "signal": signal,
         "signal_confidence": round(signal_confidence, 4),
         "confidence": confidence,
+        "explanation": explanation,  # XAI: SHAP 기여도 + 자연어 설명 (LightGBM 실패 시 None)
     }
 
 

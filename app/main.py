@@ -88,6 +88,12 @@ app.include_router(paper.router)
 app.include_router(openapi.router)
 # QuantConnect LEAN 백테스트 — domain-rag-lab 이식
 app.include_router(lean.router)
+# 리밸런싱 엔진 (시간·이탈률·현금흐름 트리거)
+from app.routes import rebalance as rebalance_routes  # noqa: E402
+app.include_router(rebalance_routes.router)
+# TradingView Webhook 수신 + Strategy Tester↔LEAN 교차 검증
+from app.routes import tradingview as tradingview_routes  # noqa: E402
+app.include_router(tradingview_routes.router)
 
 # 정적 파일 (프론트엔드)
 _public = os.path.join(os.path.dirname(__file__), "..", "public")

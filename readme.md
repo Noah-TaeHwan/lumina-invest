@@ -88,7 +88,13 @@
 | **크롤링** | GitHub docs (python-quant) 크롤링 → Qdrant RAG. URL 직접 크롤링 지원 |
 | **직접매매** | 가상 포트폴리오 관리, 매수/매도 주문, 키움증권·토스증권 API Mockup |
 | **모의투자** | (stock-coin-trade 이식) 공유 현금 1억원 모의계좌 — 국내주식 실시간 시세 모의주문·미리보기·계좌 리셋, Upbit KRW 마켓 코인 모의매매(국내 거래소 가격 비교·거래대금 랭킹), 대체자산(선물·옵션·파생 ETN·금·은·부동산 지분) 모의주문, 외부 시스템용 Open API 키 발급(`/openapi/v1`), Alpaca Paper 읽기 전용 연결 테스트 |
-| **퀀트자동매매** | RSI·SMA·볼린저밴드 시그널, 10분 주기 Agentic AI 자동매매 Mockup, 10년 백테스트, **QuantConnect LEAN 백테스트**(domain-rag-lab 이식: Yahoo 일봉 → LEAN Docker 실행, 매수후보유·MA교차·DCA·모멘텀 전략) |
+| **퀀트자동매매** | RSI·SMA·볼린저밴드 시그널, 10분 주기 Agentic AI 자동매매 Mockup, 10년 백테스트, **QuantConnect LEAN 백테스트**(domain-rag-lab 이식: Yahoo 일봉 → LEAN Docker 실행, 매수후보유·MA교차·DCA·모멘텀 전략), **위험관리**(중복 주문 방지 쿨다운·일손실 한도·종목 비중 한도·일 주문 수·비상 정지 스위치) |
+| **리밸런싱 엔진** | 목표 비중 플랜 + 3가지 트리거(시간: 월/분기/연 · 이탈률: 허용 %p 초과 · 현금흐름: 입금/출금/배당) → 매도→매수 주문 산출·모의 체결(`source=REBALANCE`), 자동 체결/제안 승인 모드, Celery Beat 1시간 점검 (`/api/rebalance/*`) |
+| **XAI (설명 가능한 AI)** | LightGBM TreeSHAP(`pred_contrib`) 기여도로 매수/관망/매도 판단 근거를 자연어로 설명 (`/api/ml/explain`, 로보 추천 종목·스크리닝·성과 검증 화면) |
+| **차트 패턴·멀티타임프레임** | 캔들 패턴(해머·장악형·샛별형 등)·피벗 지지/저항선·돌파/골든크로스 탐지, 60분봉·일봉·주봉 종합 신호 + 신뢰도 (`/api/stocks/patterns`, `/api/stocks/mtf-signal`) |
+| **TradingView 연동** | 알림 Webhook 수신(`POST /api/webhooks/tradingview`, API 키 인증, 모의 체결·중복 방지·알림 전달) + Strategy Tester 성과/거래 목록 CSV ↔ LEAN 백테스트 교차 검증 |
+| **투자성향·목표 시뮬레이션** | 7문항 투자성향 진단(5단계) → 자산배분 성향 반영, 목표 연수익률 달성 확률 몬테카를로(월 적립·백분위 경로) |
+| **백테스트 비용 모델** | 수수료·슬리피지(bp)·손절·익절(%) 반영 (`/api/quant/pipeline`, `/api/quant/ml/run`) |
 
 ---
 
@@ -226,6 +232,23 @@ FastAPI (Uvicorn)
 ```
 
 ---
+
+## 단위 테스트
+
+```bash
+pip install -r requirements.txt -r requirements-dev.txt
+python -m pytest -q            # tests/: 지표 룩어헤드 방지 · 리밸런싱 · 위험관리 · XAI · TradingView 파서 · 패턴 · 성향/시뮬레이션
+```
+
+컨테이너 이미지로 실행할 때:
+
+```bash
+docker run --rm -v "$PWD/tests:/app/tests:ro" -v "$PWD/pytest.ini:/app/pytest.ini:ro" \
+  -e DATABASE_URL=postgresql+asyncpg://x:x@localhost/x -e REDIS_URL=redis://localhost:6379/0 \
+  --entrypoint sh lumina-invest-app -c "pip install -q pytest && python -m pytest -q"
+```
+
+GitHub Actions `Unit Tests` 워크플로가 push/PR마다 실행되며, `Deploy to fund-web EC2`는 테스트 통과 후에만 배포합니다.
 
 ## 로컬 실행 가이드
 

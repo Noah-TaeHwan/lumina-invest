@@ -177,6 +177,23 @@ def train_symbol(symbol: str) -> dict | None:
         latest_probs = model.predict(X[-1:])[0]
         signal = int(np.argmax(latest_probs)) - 1
         signal_confidence = float(np.max(latest_probs))
+        # ── XAI: 예측 클래스에 대한 TreeSHAP 기여도 (app/services/xai.py와 동일 로직) ──
+        try:
+            contrib = np.asarray(model.predict(X[-1:], pred_contrib=True))[0]
+            n_feat = len(FEATURE_COLS)
+            block = n_feat + 1
+            cls = int(np.argmax(latest_probs))
+            seg = contrib[cls * block:(cls + 1) * block] if contrib.size != block else contrib
+            rows = [{"feature": f, "value": round(float(X[-1][i]), 4), "contribution": round(float(seg[i]), 4)}
+                    for i, f in enumerate(FEATURE_COLS)]
+            rows.sort(key=lambda r: abs(r["contribution"]), reverse=True)
+            result["shap"] = {"method": "LightGBM TreeSHAP (pred_contrib)", "base_value": round(float(seg[-1]), 4),
+                              "signal_label": {1: "매수", 0: "관망", -1: "매도"}[signal],
+                              "probability_pct": round(float(np.max(latest_probs)) * 100, 1),
+                              "contributions": rows, "top_positive": [r for r in rows if r["contribution"] > 0][:3],
+                              "top_negative": [r for r in rows if r["contribution"] < 0][:3]}
+        except Exception as exc:  # 설명 실패는 점수 산출을 막지 않는다
+            result["shap_error"] = str(exc)[:200]
 
     # ── 수익률 회귀: TimeSeriesSplit으로 Ridge/GradientBoosting 중 더 나은 쪽 선택 ──
     n_splits = 4 if len(X) >= 150 else 3

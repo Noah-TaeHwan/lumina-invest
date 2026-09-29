@@ -17,6 +17,8 @@ from app.models.paper import (
     LeanBacktestRun,
     PAPER_INITIAL_CASH,
 )
+from app.models.rebalance import RebalancePlan, CashflowEvent, RebalanceRun
+from app.models.tradingview import WebhookSignal, StrategyComparison
 from app.models.chat import Conversation, Chat
 from app.models.misc import (
     AuditEvent,
@@ -50,6 +52,11 @@ __all__ = [
     "ApiKey",
     "LeanBacktestRun",
     "PAPER_INITIAL_CASH",
+    "RebalancePlan",
+    "CashflowEvent",
+    "RebalanceRun",
+    "WebhookSignal",
+    "StrategyComparison",
     "Conversation",
     "Chat",
     "AuditEvent",

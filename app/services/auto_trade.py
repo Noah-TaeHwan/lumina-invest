@@ -12,6 +12,7 @@ from app.database.postgres import get_session_factory
 from app.models import BrokerSettings, Order, Portfolio, QuantVirtualAccount
 from app.models.base import SYSTEM_USER_ID
 from app.services import notification
+from app.services import risk_guard
 from app.services.audit import audit
 from app.services.brokers.factory import get_broker_client
 
@@ -23,6 +24,7 @@ _is_running = False
 _auto_trade_user_id = "quant_system"
 _INTERVAL_SEC = 600
 _INITIAL_CAPITAL = 10_000_000
+_last_risk: dict = {}          # 마지막 사이클의 위험관리 상태 (status 응답용)
 
 
 def _resolve_user_id(raw: str) -> uuid.UUID:
@@ -36,6 +38,7 @@ def get_status() -> dict:
         "running":      _is_running,
         "user_id":      _auto_trade_user_id,
         "interval_sec": _INTERVAL_SEC,
+        "risk":         _last_risk,
         "log":          _trade_log[-50:],
     }
 
@@ -176,8 +179,32 @@ async def _place_live_order(
         return {"status": "error", "broker": broker, "error": str(e)}
 
 
+async def _equity_snapshot(db: AsyncSession, uid: uuid.UUID, price_map: dict[str, float]) -> tuple[float, float, dict[str, float]]:
+    """(현금, 총자산, 종목별 평가액)."""
+    acc = (await db.execute(select(QuantVirtualAccount).where(QuantVirtualAccount.user_id == uid))).scalar_one_or_none()
+    cash = float(acc.cash_balance) if acc else float(_INITIAL_CAPITAL)
+    values: dict[str, float] = {}
+    for p in (await db.execute(select(Portfolio).where(Portfolio.user_id == uid))).scalars().all():
+        if p.quantity > 0:
+            values[p.symbol] = p.quantity * float(price_map.get(p.symbol, p.avg_price))
+    return cash, cash + sum(values.values()), values
+
+
+async def emergency_halt(db: AsyncSession, broker_row: BrokerSettings | None, user_id: str, reason: str,
+                         day_pnl_pct: float | None = None) -> None:
+    """비상 정지: kill switch를 DB에 켜고 루프를 멈추고 알림을 보낸다."""
+    if broker_row is not None:
+        broker_row.risk_kill_switch = True
+        broker_row.risk_halt_reason = reason[:300]
+        await db.commit()
+    stop_auto_trade()
+    await notification.notify_risk_halt(reason, day_pnl_pct, user_id=user_id)
+    await audit(user_id, "", "auto_trade.emergency_halt", {"reason": reason, "day_pnl_pct": day_pnl_pct})
+    logger.warning("자동매매 비상 정지 user=%s: %s", user_id, reason)
+
+
 async def _run_quant_cycle(user_id: str = "quant_system") -> None:
-    global _trade_log
+    global _trade_log, _last_risk
     now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     cycle_log: dict = {"time": now_str, "trades": [], "signals": []}
 
@@ -212,6 +239,15 @@ async def _run_quant_cycle(user_id: str = "quant_system") -> None:
         buy_ratio = max(0.1, min(buy_ratio, 1.0))
         sell_ratio = float(broker_row.quant_sell_ratio if broker_row else 0.5)
         sell_ratio = max(0.1, min(sell_ratio, 1.0))
+
+        limits = risk_guard.RiskLimits.from_row(broker_row)
+        if limits.kill_switch:
+            cycle_log["risk"] = {"halted": True, "reason": (broker_row.risk_halt_reason if broker_row else "") or "비상 정지 스위치 ON"}
+            cycle_log["note"] = "비상 정지 상태 — 주문을 내지 않습니다."
+            _last_risk = {**cycle_log["risk"], "limits": limits.to_dict()}
+            _trade_log.append(cycle_log)
+            stop_auto_trade()
+            return
 
         price_map: dict[str, float] = {}
         indicator_map: dict[str, dict] = {}
@@ -254,6 +290,45 @@ async def _run_quant_cycle(user_id: str = "quant_system") -> None:
             "sell_ratio": sell_ratio,
         }
 
+        # ── 위험관리 사전 점검: 일손실 한도 ───────────────────────────────
+        cash_now, equity_now, position_values = await _equity_snapshot(db, uid, price_map)
+        start_equity = await risk_guard.day_start_equity(user_id, equity_now)
+        day_pnl = risk_guard.daily_pnl_pct(start_equity, equity_now)
+        cycle_log["risk"] = {
+            "day_start_equity": round(start_equity, 2), "equity": round(equity_now, 2), "day_pnl_pct": day_pnl,
+            "orders_today": await risk_guard.orders_today(user_id), "limits": limits.to_dict(), "skipped": [],
+        }
+        if risk_guard.daily_loss_breached(start_equity, equity_now, limits.daily_loss_limit_pct):
+            reason = f"일손실 한도 초과: 당일 {day_pnl:+.2f}% ≤ -{limits.daily_loss_limit_pct}%"
+            cycle_log["risk"]["halted"] = True
+            cycle_log["risk"]["reason"] = reason
+            _last_risk = cycle_log["risk"]
+            _trade_log.append(cycle_log)
+            await emergency_halt(db, broker_row, user_id, reason, day_pnl)
+            return
+
+        async def _risk_gate(symbol: str, name: str, side: str, qty: int, price: float) -> tuple[int, str | None]:
+            """주문 직전 위험관리 게이트. (허용 수량, 생략/조정 사유)"""
+            if limits.max_orders_per_day > 0 and await risk_guard.orders_today(user_id) >= limits.max_orders_per_day:
+                return 0, f"일 주문 수 한도 {limits.max_orders_per_day}건 도달"
+            if side == "buy":
+                qty, note = risk_guard.cap_buy_quantity(qty, price, position_values.get(symbol, 0.0), equity_now, limits.max_position_pct)
+                if qty <= 0:
+                    return 0, note
+            else:
+                note = None
+            if not await risk_guard.acquire_order_slot(user_id, symbol, side, limits.cooldown_min):
+                return 0, f"중복 주문 방지: {limits.cooldown_min}분 내 동일 종목·방향 주문 존재"
+            return qty, note
+
+        async def _risk_skip(symbol: str, name: str, side: str, price: float, reason: str) -> None:
+            cycle_log["risk"]["skipped"].append({"symbol": symbol, "name": name, "side": side, "reason": reason})
+            cycle_log["trades"].append({
+                "time": datetime.now(timezone.utc).isoformat(), "symbol": symbol, "name": name, "action": side,
+                "quantity": 0, "price": price, "reason": f"[위험관리] {reason}", "status": "skipped", "type": "risk",
+            })
+            await notification.notify_risk_skip(symbol, name, side, reason, user_id=user_id)
+
         for symbol in target_symbols:
             stock = stock_map.get(symbol)
             if not stock:
@@ -275,12 +350,22 @@ async def _run_quant_cycle(user_id: str = "quant_system") -> None:
             if action in ("강력 매수", "매수"):
                 budget = per_trade_budget * buy_ratio
                 qty = max(1, int(budget / price))
+                qty, risk_note = await _risk_gate(stock["symbol"], stock["name"], "buy", qty, price)
+                if qty <= 0:
+                    await _risk_skip(stock["symbol"], stock["name"], "buy", price, risk_note or "위험관리 규칙")
+                    continue
+                if risk_note:
+                    reasons = [*reasons, f"위험관리: {risk_note}"]
                 trade = await _execute_virtual_trade(
                     db, uid, stock["symbol"], stock["name"],
                     "buy", price, qty, f"[{mode}] " + " | ".join(reasons),
                 )
                 cycle_log["trades"].append({**trade, "type": "auto"})
+                if trade.get("status") != "filled":
+                    await risk_guard.release_order_slot(user_id, stock["symbol"], "buy")
                 if trade.get("status") == "filled":
+                    cycle_log["risk"]["orders_today"] = await risk_guard.increment_orders_today(user_id)
+                    position_values[stock["symbol"]] = position_values.get(stock["symbol"], 0.0) + price * trade.get("quantity", qty)
                     await notification.notify_auto_trade_executed(
                         symbol   = stock["symbol"],
                         name     = stock["name"],
@@ -304,12 +389,20 @@ async def _run_quant_cycle(user_id: str = "quant_system") -> None:
                 existing = port_result.scalar_one_or_none()
                 if existing and existing.quantity > 0:
                     qty = max(1, int(existing.quantity * sell_ratio))
+                    qty, risk_note = await _risk_gate(stock["symbol"], stock["name"], "sell", qty, price)
+                    if qty <= 0:
+                        await _risk_skip(stock["symbol"], stock["name"], "sell", price, risk_note or "위험관리 규칙")
+                        continue
                     trade = await _execute_virtual_trade(
                         db, uid, stock["symbol"], stock["name"],
                         "sell", price, qty, f"[{mode}] " + " | ".join(reasons),
                     )
                     cycle_log["trades"].append({**trade, "type": "auto"})
+                    if trade.get("status") != "filled":
+                        await risk_guard.release_order_slot(user_id, stock["symbol"], "sell")
                     if trade.get("status") == "filled":
+                        cycle_log["risk"]["orders_today"] = await risk_guard.increment_orders_today(user_id)
+                        position_values[stock["symbol"]] = max(0.0, position_values.get(stock["symbol"], 0.0) - price * trade.get("quantity", qty))
                         await notification.notify_auto_trade_executed(
                             symbol   = stock["symbol"],
                             name     = stock["name"],
@@ -351,9 +444,18 @@ async def _run_quant_cycle(user_id: str = "quant_system") -> None:
         "pnl_pct": pnl_pct,
     }
 
+    # ── 위험관리 사후 점검: 체결 후 일손실 한도 재확인 ────────────────────
+    day_pnl_after = risk_guard.daily_pnl_pct(start_equity, total_equity)
+    cycle_log["risk"].update({"equity": round(total_equity, 2), "day_pnl_pct": day_pnl_after})
+    _last_risk = cycle_log["risk"]
     _trade_log.append(cycle_log)
     if len(_trade_log) > 100:
         _trade_log = _trade_log[-100:]
+    if risk_guard.daily_loss_breached(start_equity, total_equity, limits.daily_loss_limit_pct):
+        async with session_factory() as db2:
+            row2 = (await db2.execute(select(BrokerSettings).where(BrokerSettings.user_id == uid))).scalar_one_or_none()
+            await emergency_halt(db2, row2, user_id,
+                                 f"일손실 한도 초과(체결 후): 당일 {day_pnl_after:+.2f}% ≤ -{limits.daily_loss_limit_pct}%", day_pnl_after)
 
 
 async def _auto_trade_loop(user_id: str) -> None:
