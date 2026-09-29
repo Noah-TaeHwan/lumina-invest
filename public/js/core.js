@@ -429,6 +429,7 @@ function navigate(viewKey) {
   renderCompareTrayAll();
 
   location.hash = viewKey;
+  document.dispatchEvent(new CustomEvent("lumina:view-changed", { detail: { view: viewKey } }));
   _viewActivated(viewKey);
 }
 

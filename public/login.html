@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
   </noscript>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="/css/completion.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -132,7 +133,7 @@
     .form-footer a:hover { text-decoration: underline; }
   </style>
 </head>
-<body>
+<body data-view="login">
   <div class="login-wrap">
     <div class="brand">
       <div class="brand-icon"><i class="fa-solid fa-chart-mixed"></i></div>
@@ -163,6 +164,8 @@
 
   <script type="module">
     import { api, setToast } from "/js/common.js";
+    import { initCompletionIndicator } from "/js/completion.js";
+    initCompletionIndicator();
     document.getElementById("f").addEventListener("submit", async (e) => {
       e.preventDefault();
       const fd = new FormData(e.target);
