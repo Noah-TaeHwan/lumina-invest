@@ -54,3 +54,14 @@ def test_backtest_strategy_accepts_costs_and_stops():
     for k in ("gross_return_pct", "cost_pct", "stop_loss_exits", "take_profit_exits"):
         assert k in r
     assert r["total_return_pct"] <= r["gross_return_pct"] + 1e-9
+
+
+def test_optimize_portfolio_expected_return_is_shrunk():
+    """기대수익률은 실현수익(±30% 클립)과 장기 7%의 절반씩 → 종목별 -11.5%~18.5% 범위를 벗어날 수 없다."""
+    from app.services.investment_research import optimize_portfolio
+    data = [{"symbol": "A", "candles": make_candles(400, seed=1, start=100)},
+            {"symbol": "B", "candles": make_candles(400, seed=2, start=200)},
+            {"symbol": "C", "candles": make_candles(400, seed=3, start=50)}]
+    r = optimize_portfolio(data, "aggressive")
+    assert -11.5 - 1e-6 <= r["expected_return_pct"] <= 18.5 + 1e-6
+    assert "expected_return_raw_pct" in r and abs(sum(r["weights"].values()) - 100) < 0.5

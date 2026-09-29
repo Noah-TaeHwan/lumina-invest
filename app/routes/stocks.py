@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.postgres import get_pg_session
-from app.models import Portfolio, Order, BrokerSettings, CustomIndicator, QuantVirtualAccount
+from app.models import Portfolio, Order, BrokerSettings, CustomIndicator, QuantVirtualAccount, PORTFOLIO_BOOK_PAPER, PORTFOLIO_BOOK_QUANT
 from app.lib.session import get_current_user
 from app.services.stock import (
     get_quote, get_candles, get_market_summary,
@@ -172,7 +172,7 @@ async def stock_signals(
             "change_pct": quote.get("change_pct"),
         }
         # XAI: 최근 3시간 내 계산된 LightGBM 설명이 캐시에 있으면 요약만 첨부 (없으면 /api/ml/explain으로 온디맨드 계산)
-        cached_ai = await cache_get(f"ai_predict:v2:{stock['symbol']}", max_age_hours=3)
+        cached_ai = await cache_get(f"ai_predict:v3:{stock['symbol']}", max_age_hours=3)
         if cached_ai and cached_ai.get("explanation"):
             ex = cached_ai["explanation"]
             row["xai"] = {"signal_label": ex["signal_label"], "probability_pct": ex["probability_pct"],
@@ -209,7 +209,7 @@ async def get_portfolio(
     db: AsyncSession = Depends(get_pg_session),
 ):
     result = await db.execute(
-        select(Portfolio).where(Portfolio.user_id == _uid(user["id"])).order_by(Portfolio.updated_at.desc())
+        select(Portfolio).where(Portfolio.user_id == _uid(user["id"]), Portfolio.book == PORTFOLIO_BOOK_PAPER).order_by(Portfolio.updated_at.desc())
     )
     holdings = [_portfolio_to_dict(h) for h in result.scalars().all()]
     return {"holdings": holdings}
@@ -223,10 +223,10 @@ async def upsert_holding(
 ):
     stmt = pg_insert(Portfolio).values(
         user_id=_uid(user["id"]), symbol=body.symbol, name=body.name,
-        quantity=body.quantity, avg_price=body.avg_price,
+        quantity=body.quantity, avg_price=body.avg_price, book=PORTFOLIO_BOOK_PAPER,
     )
     stmt = stmt.on_conflict_do_update(
-        index_elements=[Portfolio.user_id, Portfolio.symbol],
+        index_elements=[Portfolio.user_id, Portfolio.symbol, Portfolio.book],
         set_={"name": body.name, "quantity": body.quantity, "avg_price": body.avg_price},
     )
     await db.execute(stmt)
@@ -241,7 +241,7 @@ async def delete_holding(
     db: AsyncSession = Depends(get_pg_session),
 ):
     result = await db.execute(
-        select(Portfolio).where(Portfolio.user_id == _uid(user["id"]), Portfolio.symbol == symbol)
+        select(Portfolio).where(Portfolio.user_id == _uid(user["id"]), Portfolio.symbol == symbol, Portfolio.book == PORTFOLIO_BOOK_PAPER)
     )
     holding = result.scalar_one_or_none()
     if holding:
@@ -265,7 +265,7 @@ async def _apply_portfolio(db: AsyncSession, user_id: uuid.UUID, symbol: str, na
                            order_type: str, quantity: int, price: float) -> None:
     """주문 체결분을 포트폴리오에 반영한다. 커밋은 호출자가 담당(주문 삽입과 한 트랜잭션)."""
     result = await db.execute(
-        select(Portfolio).where(Portfolio.user_id == user_id, Portfolio.symbol == symbol)
+        select(Portfolio).where(Portfolio.user_id == user_id, Portfolio.symbol == symbol, Portfolio.book == PORTFOLIO_BOOK_PAPER)
     )
     existing = result.scalar_one_or_none()
 
@@ -275,7 +275,7 @@ async def _apply_portfolio(db: AsyncSession, user_id: uuid.UUID, symbol: str, na
             existing.avg_price = (existing.avg_price * existing.quantity + price * quantity) / new_qty
             existing.quantity = new_qty
         else:
-            db.add(Portfolio(user_id=user_id, symbol=symbol, name=name, quantity=quantity, avg_price=price))
+            db.add(Portfolio(user_id=user_id, symbol=symbol, name=name, quantity=quantity, avg_price=price, book=PORTFOLIO_BOOK_PAPER))
     elif order_type == "sell" and existing:
         new_qty = existing.quantity - quantity
         if new_qty <= 0:
@@ -718,19 +718,19 @@ async def start_auto_trade(user=Depends(get_current_user), db: AsyncSession = De
     row = await _get_broker_settings_row(db, _uid(user["id"]))
     if row and row.risk_kill_switch:
         raise HTTPException(409, f"비상 정지 상태입니다. 해제 후 시작하세요. (사유: {row.risk_halt_reason or '수동 정지'})")
-    started = auto_trade.start_auto_trade(user.get("id", "quant_system"))
-    return {"ok": True, "started": started}
+    started = await auto_trade.start_auto_trade(db, user["id"])
+    return {"ok": True, "started": started, "scheduler": "celery-beat (10분)"}
 
 
 @router.post("/auto-trade/stop")
-async def stop_auto_trade(user=Depends(get_current_user)):
-    stopped = auto_trade.stop_auto_trade()
+async def stop_auto_trade(user=Depends(get_current_user), db: AsyncSession = Depends(get_pg_session)):
+    stopped = await auto_trade.stop_auto_trade_for(db, user["id"])
     return {"ok": True, "stopped": stopped}
 
 
 @router.get("/auto-trade/status")
-async def auto_trade_status(user=Depends(get_current_user)):
-    return auto_trade.get_status()
+async def auto_trade_status(user=Depends(get_current_user), db: AsyncSession = Depends(get_pg_session)):
+    return await auto_trade.get_status(db, _uid(user["id"]))
 
 
 # ── 자동매매 위험관리 ─────────────────────────────────────────────────
@@ -752,7 +752,7 @@ async def quant_risk_status(user=Depends(get_current_user), db: AsyncSession = D
     equity = None
     if acc:
         equity = float(acc.cash_balance)
-        for p in (await db.execute(select(Portfolio).where(Portfolio.user_id == uid))).scalars().all():
+        for p in (await db.execute(select(Portfolio).where(Portfolio.user_id == uid, Portfolio.book == PORTFOLIO_BOOK_QUANT))).scalars().all():
             if p.quantity > 0:
                 px = None
                 try:
@@ -761,8 +761,8 @@ async def quant_risk_status(user=Depends(get_current_user), db: AsyncSession = D
                     pass
                 equity += p.quantity * float(px or p.avg_price)
     status = await risk_guard.risk_status(user_key, limits, equity, row.risk_halt_reason if row else "")
-    status["auto_trade_running"] = auto_trade.is_running()
-    status["last_cycle_risk"] = auto_trade.get_status().get("risk", {})
+    status["auto_trade_running"] = bool(row and row.quant_auto_enabled)
+    status["last_cycle_risk"] = (await auto_trade.get_status(db, uid)).get("risk", {})
     return status
 
 
@@ -775,30 +775,33 @@ async def quant_kill_switch(body: KillSwitchBody, user=Depends(get_current_user)
     await db.commit()
     stopped = False
     if body.enabled:
-        stopped = auto_trade.stop_auto_trade()
+        stopped = await auto_trade.stop_auto_trade_for(db, user["id"])
         await notification.notify_risk_halt(row.risk_halt_reason, user_id=user.get("id"))
     await audit(user["id"], "", "quant.kill_switch", {"enabled": body.enabled, "reason": row.risk_halt_reason})
     return {"ok": True, "kill_switch": row.risk_kill_switch, "auto_trade_stopped": stopped}
 
 
 @router.post("/quant/auto/start")
-async def quant_auto_start(user=Depends(get_current_user)):
+async def quant_auto_start(user=Depends(get_current_user), db: AsyncSession = Depends(get_pg_session)):
     """기존 프론트 호환 경로."""
-    started = auto_trade.start_auto_trade(user.get("id", "quant_system"))
+    row = await _get_broker_settings_row(db, _uid(user["id"]))
+    if row and row.risk_kill_switch:
+        raise HTTPException(409, f"비상 정지 상태입니다. 해제 후 시작하세요. (사유: {row.risk_halt_reason or '수동 정지'})")
+    started = await auto_trade.start_auto_trade(db, user["id"])
     return {"ok": True, "started": started}
 
 
 @router.post("/quant/auto/stop")
-async def quant_auto_stop(user=Depends(get_current_user)):
+async def quant_auto_stop(user=Depends(get_current_user), db: AsyncSession = Depends(get_pg_session)):
     """기존 프론트 호환 경로."""
-    stopped = auto_trade.stop_auto_trade()
+    stopped = await auto_trade.stop_auto_trade_for(db, user["id"])
     return {"ok": True, "stopped": stopped}
 
 
 @router.get("/quant/auto/status")
-async def quant_auto_status(user=Depends(get_current_user)):
+async def quant_auto_status(user=Depends(get_current_user), db: AsyncSession = Depends(get_pg_session)):
     """모의 투자 의사결정 UI용 최근 사이클 결과."""
-    status = auto_trade.get_status()
+    status = await auto_trade.get_status(db, _uid(user["id"]))
     logs, signals = [], []
     for cycle in status.get("log", [])[-10:]:
         for sig in cycle.get("signals", []):
@@ -859,7 +862,7 @@ async def quant_pipeline_indicator_backtest(
     result["symbol"] = symbol
     result["period"] = period
     # XAI: 같은 종목의 LightGBM 판단 근거(SHAP)가 캐시에 있으면 함께 내려준다 (없으면 /api/ml/explain으로 생성)
-    cached_ai = await cache_get(f"ai_predict:v2:{symbol}", max_age_hours=3)
+    cached_ai = await cache_get(f"ai_predict:v3:{symbol}", max_age_hours=3)
     result["explanation"] = cached_ai.get("explanation") if cached_ai else None
     return result
 

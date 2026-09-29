@@ -94,6 +94,7 @@
 | **차트 패턴·멀티타임프레임** | 캔들 패턴(해머·장악형·샛별형 등)·피벗 지지/저항선·돌파/골든크로스 탐지, 60분봉·일봉·주봉 종합 신호 + 신뢰도 (`/api/stocks/patterns`, `/api/stocks/mtf-signal`) |
 | **TradingView 연동** | 알림 Webhook 수신(`POST /api/webhooks/tradingview`, API 키 인증, 모의 체결·중복 방지·알림 전달) + Strategy Tester 성과/거래 목록 CSV ↔ LEAN 백테스트 교차 검증 |
 | **투자성향·목표 시뮬레이션** | 7문항 투자성향 진단(5단계) → 자산배분 성향 반영, 목표 연수익률 달성 확률 몬테카를로(월 적립·백분위 경로) |
+| **자유 산식 커스텀 지표** | 안전한 수식 DSL(`app/services/formula.py`: 화이트리스트 AST, 37개 causal 함수, `shift`≥1로 룩어헤드 차단)로 지표·매수·매도 산식과 params 정의 → 산식 변경 시 자동 버전 증가·복원, (버전·종목·기간)별 계산 결과 저장·재사용, Pine/Python 내보내기 (`/api/formula-indicators/*`) |
 | **백테스트 비용 모델** | 수수료·슬리피지(bp)·손절·익절(%) 반영 (`/api/quant/pipeline`, `/api/quant/ml/run`) |
 
 ---
@@ -321,6 +322,20 @@ docker compose run --rm ingest
 | `OPENAPI_RATE_LIMIT_MAX` | `60` | Open API 키당 분당 호출 제한 |
 
 ---
+
+### 운영·보안 관련 추가 변수 (2026-09 보강)
+
+| 변수 | 기본값 | 설명 |
+|---|---|---|
+| `RUN_MIGRATIONS_ON_STARTUP` | `true` | 앱 기동 시 `alembic upgrade head` 실행. 복제 인스턴스가 여럿인 운영에서는 `false`로 두고 배포 단계에서 `scripts/migrate.sh`(또는 `docker compose run --rm app alembic upgrade head`)를 1회 실행 |
+| `TRADINGVIEW_ENFORCE_IP` | `false` | TradingView Webhook 발신 IP 허용 목록 검사. 운영에서 `true` |
+| `TRADINGVIEW_ALLOWED_IPS` | TradingView 공식 4개 IP | 쉼표 구분 허용 IP |
+| `TRADINGVIEW_RATE_LIMIT_MAX` | `30` | API 키당 분당 Webhook 알림 수 |
+| `PUBLIC_BASE_URL` | (빈 값) | Webhook URL 안내에 쓰는 외부 공개 주소 |
+
+자동매매는 인프로세스 루프가 아니라 **DB 플래그(`broker_settings.quant_auto_enabled`) + Celery Beat 10분 태스크(`quant.auto_trade_cycle`)**로 실행되므로 `celery-beat`, `celery-worker` 컨테이너가 반드시 떠 있어야 합니다. 사이클 로그는 `data_cache`에 공유 저장됩니다.
+
+Ansible 실제 시크릿(`aws-work/ansible/inventories/*/group_vars/secrets.yml`)은 더 이상 커밋되지 않습니다(`secrets.sample.yml` 참고). 이전에 커밋된 값은 모두 교체하세요.
 
 ## 모의투자 · Open API (stock-coin-trade 이식)
 

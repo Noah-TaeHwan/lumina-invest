@@ -1,6 +1,8 @@
 from app.models.base import Base, SYSTEM_USER_ID
 from app.models.user import User
 from app.models.trading import (
+    PORTFOLIO_BOOK_PAPER,
+    PORTFOLIO_BOOK_QUANT,
     Portfolio,
     Order,
     BrokerSettings,
@@ -19,6 +21,7 @@ from app.models.paper import (
 )
 from app.models.rebalance import RebalancePlan, CashflowEvent, RebalanceRun
 from app.models.tradingview import WebhookSignal, StrategyComparison
+from app.models.formula import FormulaIndicator, FormulaIndicatorVersion, FormulaIndicatorResult
 from app.models.chat import Conversation, Chat
 from app.models.misc import (
     AuditEvent,
@@ -40,6 +43,8 @@ __all__ = [
     "SYSTEM_USER_ID",
     "User",
     "Portfolio",
+    "PORTFOLIO_BOOK_PAPER",
+    "PORTFOLIO_BOOK_QUANT",
     "Order",
     "BrokerSettings",
     "QuantVirtualAccount",
@@ -57,6 +62,9 @@ __all__ = [
     "RebalanceRun",
     "WebhookSignal",
     "StrategyComparison",
+    "FormulaIndicator",
+    "FormulaIndicatorVersion",
+    "FormulaIndicatorResult",
     "Conversation",
     "Chat",
     "AuditEvent",

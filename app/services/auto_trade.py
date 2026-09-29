@@ -1,4 +1,11 @@
-"""10분 주기 자동매매 Agentic AI - PostgreSQL 기반."""
+"""10분 주기 자동매매 Agentic AI - PostgreSQL 기반.
+
+실행 모델
+  - 활성 여부는 BrokerSettings.quant_auto_enabled(DB)에 저장한다. 앱 재시작·다중 인스턴스에서도 상태가 유지된다.
+  - 주기 실행은 Celery Beat(`quant.auto_trade_cycle`, 10분)이 활성 사용자 전원에 대해 run_cycle_for_enabled_users()를 돌린다.
+  - 시작 시에는 즉시 1회 사이클을 백그라운드로 실행해 화면 반응을 준다(인프로세스 루프는 더 이상 쓰지 않는다).
+  - 사이클 로그는 data_cache(`quant:cycle_log:{uid}`)에 최근 50개를 남겨 API 프로세스와 워커가 공유한다.
+"""
 import asyncio
 import logging
 import uuid
@@ -9,12 +16,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.stock import get_quant_indicators, QUANT_STOCKS
 from app.database.postgres import get_session_factory
-from app.models import BrokerSettings, Order, Portfolio, QuantVirtualAccount
+from app.models import BrokerSettings, Order, Portfolio, QuantVirtualAccount, PORTFOLIO_BOOK_QUANT
 from app.models.base import SYSTEM_USER_ID
 from app.services import notification
 from app.services import risk_guard
 from app.services.audit import audit
 from app.services.brokers.factory import get_broker_client
+from app.services.data_cache import cache_get, cache_set
 
 logger = logging.getLogger(__name__)
 
@@ -33,18 +41,58 @@ def _resolve_user_id(raw: str) -> uuid.UUID:
     return uuid.UUID(raw)
 
 
-def get_status() -> dict:
+def _log_key(uid: uuid.UUID) -> str:
+    return f"quant:cycle_log:{uid}"
+
+
+async def _persist_cycle(uid: uuid.UUID, cycle_log: dict) -> None:
+    """사이클 로그를 프로세스 메모리와 data_cache 양쪽에 남긴다 (워커↔API 공유)."""
+    global _trade_log, _last_risk
+    _trade_log.append(cycle_log)
+    if len(_trade_log) > 100:
+        _trade_log = _trade_log[-100:]
+    _last_risk = cycle_log.get("risk") or _last_risk
+    try:
+        cached = await cache_get(_log_key(uid), max_age_hours=24 * 30) or {}
+        cycles = (cached.get("cycles") or [])[-49:] + [cycle_log]
+        await cache_set(_log_key(uid), {"cycles": cycles})
+    except Exception:
+        logger.exception("사이클 로그 저장 실패 user=%s", uid)
+
+
+async def is_enabled(db: AsyncSession, uid: uuid.UUID) -> bool:
+    row = (await db.execute(select(BrokerSettings.quant_auto_enabled).where(BrokerSettings.user_id == uid))).scalar_one_or_none()
+    return bool(row)
+
+
+async def set_enabled(db: AsyncSession, uid: uuid.UUID, enabled: bool) -> None:
+    row = (await db.execute(select(BrokerSettings).where(BrokerSettings.user_id == uid))).scalar_one_or_none()
+    if row is None:
+        row = BrokerSettings(user_id=uid)
+        db.add(row)
+    row.quant_auto_enabled = enabled
+    await db.commit()
+
+
+async def get_status(db: AsyncSession, uid: uuid.UUID) -> dict:
+    """DB 플래그 + 공유 캐시 로그 기반 상태 (프로세스에 무관)."""
+    enabled = await is_enabled(db, uid)
+    cached = await cache_get(_log_key(uid), max_age_hours=24 * 30) or {}
+    cycles = cached.get("cycles") or list(_trade_log[-50:])
+    last_risk = next((c.get("risk") for c in reversed(cycles) if c.get("risk")), {})
     return {
-        "running":      _is_running,
-        "user_id":      _auto_trade_user_id,
+        "running":      enabled,
+        "scheduler":    "celery-beat (10분)",
+        "user_id":      str(uid),
         "interval_sec": _INTERVAL_SEC,
-        "risk":         _last_risk,
-        "log":          _trade_log[-50:],
+        "risk":         last_risk,
+        "log":          cycles[-50:],
+        "last_cycle_at": cycles[-1]["time"] if cycles else None,
     }
 
 
 def is_running() -> bool:
-    """자동매매 루프 실행 상태만 반환."""
+    """(하위 호환) 인프로세스 즉시 실행 태스크가 돌고 있는지."""
     return _is_running
 
 
@@ -92,7 +140,7 @@ async def _execute_virtual_trade(
                 }
             executed_quantity = max_qty
 
-    port_result = await db.execute(select(Portfolio).where(Portfolio.user_id == user_id, Portfolio.symbol == symbol))
+    port_result = await db.execute(select(Portfolio).where(Portfolio.user_id == user_id, Portfolio.symbol == symbol, Portfolio.book == PORTFOLIO_BOOK_QUANT))
     existing = port_result.scalar_one_or_none()
 
     if action == "sell":
@@ -118,7 +166,7 @@ async def _execute_virtual_trade(
             existing.avg_price = (existing.avg_price * existing.quantity + price * executed_quantity) / new_qty
             existing.quantity = new_qty
         else:
-            db.add(Portfolio(user_id=user_id, symbol=symbol, name=name, quantity=executed_quantity, avg_price=price))
+            db.add(Portfolio(user_id=user_id, symbol=symbol, name=name, quantity=executed_quantity, avg_price=price, book=PORTFOLIO_BOOK_QUANT))
         cash_balance -= price * executed_quantity
     elif action == "sell":
         new_qty = max(0, existing.quantity - executed_quantity)
@@ -184,7 +232,7 @@ async def _equity_snapshot(db: AsyncSession, uid: uuid.UUID, price_map: dict[str
     acc = (await db.execute(select(QuantVirtualAccount).where(QuantVirtualAccount.user_id == uid))).scalar_one_or_none()
     cash = float(acc.cash_balance) if acc else float(_INITIAL_CAPITAL)
     values: dict[str, float] = {}
-    for p in (await db.execute(select(Portfolio).where(Portfolio.user_id == uid))).scalars().all():
+    for p in (await db.execute(select(Portfolio).where(Portfolio.user_id == uid, Portfolio.book == PORTFOLIO_BOOK_QUANT))).scalars().all():
         if p.quantity > 0:
             values[p.symbol] = p.quantity * float(price_map.get(p.symbol, p.avg_price))
     return cash, cash + sum(values.values()), values
@@ -196,6 +244,7 @@ async def emergency_halt(db: AsyncSession, broker_row: BrokerSettings | None, us
     if broker_row is not None:
         broker_row.risk_kill_switch = True
         broker_row.risk_halt_reason = reason[:300]
+        broker_row.quant_auto_enabled = False
         await db.commit()
     stop_auto_trade()
     await notification.notify_risk_halt(reason, day_pnl_pct, user_id=user_id)
@@ -244,9 +293,8 @@ async def _run_quant_cycle(user_id: str = "quant_system") -> None:
         if limits.kill_switch:
             cycle_log["risk"] = {"halted": True, "reason": (broker_row.risk_halt_reason if broker_row else "") or "비상 정지 스위치 ON"}
             cycle_log["note"] = "비상 정지 상태 — 주문을 내지 않습니다."
-            _last_risk = {**cycle_log["risk"], "limits": limits.to_dict()}
-            _trade_log.append(cycle_log)
-            stop_auto_trade()
+            await _persist_cycle(uid, cycle_log)
+            await set_enabled(db, uid, False)   # 비상 정지 상태면 자동매매 플래그도 내린다
             return
 
         price_map: dict[str, float] = {}
@@ -302,8 +350,7 @@ async def _run_quant_cycle(user_id: str = "quant_system") -> None:
             reason = f"일손실 한도 초과: 당일 {day_pnl:+.2f}% ≤ -{limits.daily_loss_limit_pct}%"
             cycle_log["risk"]["halted"] = True
             cycle_log["risk"]["reason"] = reason
-            _last_risk = cycle_log["risk"]
-            _trade_log.append(cycle_log)
+            await _persist_cycle(uid, cycle_log)
             await emergency_halt(db, broker_row, user_id, reason, day_pnl)
             return
 
@@ -384,7 +431,7 @@ async def _run_quant_cycle(user_id: str = "quant_system") -> None:
 
             elif action in ("강력 매도", "매도"):
                 port_result = await db.execute(
-                    select(Portfolio).where(Portfolio.user_id == uid, Portfolio.symbol == stock["symbol"])
+                    select(Portfolio).where(Portfolio.user_id == uid, Portfolio.symbol == stock["symbol"], Portfolio.book == PORTFOLIO_BOOK_QUANT)
                 )
                 existing = port_result.scalar_one_or_none()
                 if existing and existing.quantity > 0:
@@ -424,7 +471,7 @@ async def _run_quant_cycle(user_id: str = "quant_system") -> None:
         cash_balance = float(account.cash_balance) if account else float(_INITIAL_CAPITAL)
 
         holdings_value = 0.0
-        pf_result = await db.execute(select(Portfolio).where(Portfolio.user_id == uid))
+        pf_result = await db.execute(select(Portfolio).where(Portfolio.user_id == uid, Portfolio.book == PORTFOLIO_BOOK_QUANT))
         for p in pf_result.scalars().all():
             if p.quantity <= 0:
                 continue
@@ -447,10 +494,7 @@ async def _run_quant_cycle(user_id: str = "quant_system") -> None:
     # ── 위험관리 사후 점검: 체결 후 일손실 한도 재확인 ────────────────────
     day_pnl_after = risk_guard.daily_pnl_pct(start_equity, total_equity)
     cycle_log["risk"].update({"equity": round(total_equity, 2), "day_pnl_pct": day_pnl_after})
-    _last_risk = cycle_log["risk"]
-    _trade_log.append(cycle_log)
-    if len(_trade_log) > 100:
-        _trade_log = _trade_log[-100:]
+    await _persist_cycle(uid, cycle_log)
     if risk_guard.daily_loss_breached(start_equity, total_equity, limits.daily_loss_limit_pct):
         async with session_factory() as db2:
             row2 = (await db2.execute(select(BrokerSettings).where(BrokerSettings.user_id == uid))).scalar_one_or_none()
@@ -471,22 +515,63 @@ async def _auto_trade_loop(user_id: str) -> None:
         _is_running = False
 
 
-def start_auto_trade(user_id: str = "quant_system") -> bool:
-    global _auto_trade_task, _is_running, _auto_trade_user_id
-    if _auto_trade_task and not _auto_trade_task.done():
+async def _run_once(user_id: str) -> None:
+    global _is_running
+    _is_running = True
+    try:
+        await _run_quant_cycle(user_id)
+    except Exception:
+        logger.exception("자동매매 즉시 실행 실패 user=%s", user_id)
+    finally:
+        _is_running = False
+
+
+async def start_auto_trade(db: AsyncSession, user_id: str) -> bool:
+    """자동매매 활성화: DB 플래그 ON + 즉시 1회 사이클(백그라운드). 이후 주기 실행은 Celery Beat."""
+    global _auto_trade_task, _auto_trade_user_id
+    uid = _resolve_user_id(user_id)
+    if await is_enabled(db, uid):
         return False
+    await set_enabled(db, uid, True)
     _auto_trade_user_id = user_id or "quant_system"
-    _auto_trade_task = asyncio.create_task(_auto_trade_loop(_auto_trade_user_id))
+    if not (_auto_trade_task and not _auto_trade_task.done()):
+        _auto_trade_task = asyncio.create_task(_run_once(_auto_trade_user_id))
     asyncio.create_task(notification.notify_auto_trade_started(user_id=_auto_trade_user_id))
-    asyncio.create_task(audit(_auto_trade_user_id, "", "auto_trade.start", {}))
+    asyncio.create_task(audit(_auto_trade_user_id, "", "auto_trade.start", {"scheduler": "celery-beat"}))
     return True
 
 
+async def stop_auto_trade_for(db: AsyncSession, user_id: str) -> bool:
+    uid = _resolve_user_id(user_id)
+    was = await is_enabled(db, uid)
+    await set_enabled(db, uid, False)
+    stop_auto_trade()
+    if was:
+        asyncio.create_task(notification.notify_auto_trade_stopped(user_id=user_id))
+        asyncio.create_task(audit(user_id, "", "auto_trade.stop", {}))
+    return was
+
+
 def stop_auto_trade() -> bool:
+    """(하위 호환) 인프로세스 즉시 실행 태스크 취소. 플래그는 호출자가 내린다."""
     global _auto_trade_task
     if _auto_trade_task and not _auto_trade_task.done():
         _auto_trade_task.cancel()
-        asyncio.create_task(notification.notify_auto_trade_stopped(user_id=_auto_trade_user_id))
-        asyncio.create_task(audit(_auto_trade_user_id, "", "auto_trade.stop", {}))
         return True
     return False
+
+
+async def run_cycle_for_enabled_users() -> dict:
+    """Celery Beat 진입점: quant_auto_enabled=true 인 사용자 전원의 사이클을 순차 실행."""
+    session_factory = get_session_factory()
+    async with session_factory() as db:
+        uids = (await db.execute(select(BrokerSettings.user_id).where(BrokerSettings.quant_auto_enabled.is_(True)))).scalars().all()
+    ran, failed = 0, 0
+    for uid in uids:
+        try:
+            await _run_quant_cycle(str(uid))
+            ran += 1
+        except Exception:
+            failed += 1
+            logger.exception("자동매매 사이클 실패 user=%s", uid)
+    return {"enabled_users": len(uids), "ran": ran, "failed": failed}

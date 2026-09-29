@@ -81,6 +81,18 @@ class Settings(BaseSettings):
     OPENAPI_RATE_LIMIT_MAX: int = 60       # 키당 분당 호출 수
     OPENAPI_RATE_LIMIT_WINDOW: int = 60    # 초
 
+    # ── TradingView Webhook 보호 ─────────────────────────────────────────────
+    # TradingView 공식 알림 발신 IP (docs: Webhooks). 운영에서 TRADINGVIEW_ENFORCE_IP=true 로 켠다.
+    TRADINGVIEW_ALLOWED_IPS: str = "52.89.214.238,34.212.75.30,54.218.53.128,52.32.178.7"
+    TRADINGVIEW_ENFORCE_IP: bool = False
+    TRADINGVIEW_RATE_LIMIT_MAX: int = 30    # 키당 분당 알림 수
+
+    # ── 운영 ────────────────────────────────────────────────────────────────
+    # 앱 기동 시 alembic upgrade head 실행 여부. 복제 인스턴스가 여러 개인 운영 환경에서는 false 로 두고
+    # 배포 단계에서 scripts/migrate.sh 로 1회 실행한다.
+    RUN_MIGRATIONS_ON_STARTUP: bool = True
+    PUBLIC_BASE_URL: str = ""               # Webhook URL 안내 등에 쓰는 외부 공개 주소 (예: https://fund.example.com)
+
     ADMIN_EMAILS: str = ""
     TRUST_PROXY: bool = False
     COOKIE_SECURE: bool = False

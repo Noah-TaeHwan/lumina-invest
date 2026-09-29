@@ -25,9 +25,11 @@ from app.models import (
     Order,
     PaperAccount,
     Portfolio,
+    PORTFOLIO_BOOK_PAPER,
     PAPER_INITIAL_CASH,
 )
 from app.services.krx_companies import get_krx_companies
+from app.services.fx import to_krw
 from app.services.stock import HEADERS, _yahoo_chart, get_candles, get_quote
 
 BUY = "BUY"
@@ -66,8 +68,10 @@ async def apply_cash(db: AsyncSession, user_id: uuid.UUID, delta: float) -> Pape
 async def reset_account(db: AsyncSession, user_id: uuid.UUID) -> PaperAccount:
     """주식·코인·대체자산 포지션과 주문 이력을 모두 지우고 초기 현금으로 되돌린다."""
     account = await get_account(db, user_id, lock=True)
-    for model in (Portfolio, Order, CryptoHolding, CryptoOrder, AlternativePosition, AlternativeOrder):
+    for model in (Order, CryptoHolding, CryptoOrder, AlternativePosition, AlternativeOrder):
         await db.execute(delete(model).where(model.user_id == user_id))
+    # 자동매매 가상계좌(QUANT 장부) 포지션은 모의계좌 리셋 대상이 아니다
+    await db.execute(delete(Portfolio).where(Portfolio.user_id == user_id, Portfolio.book == PORTFOLIO_BOOK_PAPER))
     account.cash = float(PAPER_INITIAL_CASH)
     account.initial_cash = float(PAPER_INITIAL_CASH)
     return account
@@ -122,7 +126,13 @@ async def resolve_stock(symbol: str) -> dict:
     price = quote.get("price")
     if not price:
         raise PaperTradeError("실시간 시세를 확인할 수 없어 주문할 수 없습니다. 잠시 후 다시 시도해주세요.")
-    data = {**meta, "price": float(price), "prev_close": quote.get("prev_close"), "currency": quote.get("currency", "KRW")}
+    currency = (quote.get("currency") or "KRW").upper()
+    # 모의계좌는 원화 단일 통화 — 해외 종목은 환율을 곱해 KRW 로 환산해 체결·평가한다
+    price_krw, fx_rate = await to_krw(float(price), currency)
+    prev_close = quote.get("prev_close")
+    data = {**meta, "price": price_krw, "price_local": float(price), "currency": currency, "fx_rate": fx_rate,
+            "prev_close": (float(prev_close) * fx_rate) if prev_close else None, "prev_close_local": prev_close,
+            "settlement_currency": "KRW"}
     _STOCK_CACHE[symbol] = {"ts": now, "data": data}
     _STOCK_CACHE[meta["symbol"]] = {"ts": now, "data": data}
     return data
@@ -135,12 +145,12 @@ def _price_unit(price: float) -> float:
 
 async def _stock_position(db: AsyncSession, user_id: uuid.UUID, symbol: str) -> Portfolio | None:
     return (await db.execute(
-        select(Portfolio).where(Portfolio.user_id == user_id, Portfolio.symbol == symbol)
+        select(Portfolio).where(Portfolio.user_id == user_id, Portfolio.symbol == symbol, Portfolio.book == PORTFOLIO_BOOK_PAPER)
     )).scalar_one_or_none()
 
 
 async def stock_positions(db: AsyncSession, user_id: uuid.UUID, include_volatility: bool = False) -> list[dict]:
-    rows = (await db.execute(select(Portfolio).where(Portfolio.user_id == user_id))).scalars().all()
+    rows = (await db.execute(select(Portfolio).where(Portfolio.user_id == user_id, Portfolio.book == PORTFOLIO_BOOK_PAPER))).scalars().all()
     result = []
     for pos in rows:
         price = pos.avg_price
@@ -224,7 +234,8 @@ async def stock_order(db: AsyncSession, user_id: uuid.UUID, symbol: str, side: s
             raise PaperTradeError("보유 현금이 부족합니다.")
         account.cash = float(account.cash - amount)
         if position is None:
-            db.add(Portfolio(user_id=user_id, symbol=info["symbol"], name=info["name"], quantity=quantity, avg_price=price))
+            db.add(Portfolio(user_id=user_id, symbol=info["symbol"], name=info["name"], quantity=quantity, avg_price=price,
+                             book=PORTFOLIO_BOOK_PAPER))
         else:
             total_qty = position.quantity + quantity
             position.avg_price = (position.avg_price * position.quantity + amount) / total_qty

@@ -10,6 +10,7 @@ from alembic import command as alembic_command
 from alembic.config import Config as AlembicConfig
 
 from app.database.postgres import connect_postgres, close_postgres
+from app.config import settings
 from app.database.neo4j import connect_neo4j, close_neo4j, ensure_graph_schema
 from app.lib.redis_cache import connect_redis, close_redis
 from app.routes import auth, health, chat, stocks, library, admin, system, quant, ml, macro, documents, notification, graph, conversations, tasks, ingest, paper, openapi, lean
@@ -36,7 +37,10 @@ async def lifespan(app: FastAPI):
         # alembic의 command.upgrade()는 내부적으로 asyncio.run()을 새로 여는데,
         # 이미 실행 중인 uvicorn 이벤트 루프 안에서 그대로 부르면 충돌한다.
         # 별도 스레드에서 돌려 독립된 루프를 갖게 한다.
-        await asyncio.get_event_loop().run_in_executor(None, _run_migrations)
+        if settings.RUN_MIGRATIONS_ON_STARTUP:
+            await asyncio.get_event_loop().run_in_executor(None, _run_migrations)
+        else:
+            print("[fin-agent] RUN_MIGRATIONS_ON_STARTUP=false — 마이그레이션은 scripts/migrate.sh 로 별도 실행")
         await connect_postgres()
     except Exception as e:
         print(f"[WARN] PostgreSQL 연결 실패 (인증 비활성): {e}")
@@ -94,11 +98,15 @@ app.include_router(rebalance_routes.router)
 # TradingView Webhook 수신 + Strategy Tester↔LEAN 교차 검증
 from app.routes import tradingview as tradingview_routes  # noqa: E402
 app.include_router(tradingview_routes.router)
+# 자유 산식 커스텀 지표 (DSL · 버전 · 결과 저장)
+from app.routes import formula as formula_routes  # noqa: E402
+app.include_router(formula_routes.router)
 
 # 정적 파일 (프론트엔드)
 _public = os.path.join(os.path.dirname(__file__), "..", "public")
 if os.path.isdir(_public):
     app.mount("/js", StaticFiles(directory=os.path.join(_public, "js")), name="js")
+    app.mount("/css", StaticFiles(directory=os.path.join(_public, "css")), name="css")
 
     @app.get("/", include_in_schema=False)
     async def index():

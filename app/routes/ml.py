@@ -135,7 +135,7 @@ async def robo_allocation(
 
         # TimeSeriesSplit 앙상블 + LightGBM 분류는 종목당 꽤 무거워서(유니버스 전체면
         # 응답이 수십 초까지 걸릴 수 있음) 매 요청마다 재계산하지 않고 캐시한다.
-        cache_key = f"ai_predict:v2:{s['symbol']}"  # v2: XAI explanation 포함
+        cache_key = f"ai_predict:v3:{s['symbol']}"  # v2: XAI explanation 포함
         ai = await cache_get(cache_key, max_age_hours=3)
         if ai is None:
             # CPU 바운드(sklearn/lightgbm 학습)라 to_thread로 돌려 이벤트 루프를
@@ -343,7 +343,7 @@ async def ml_explain(
     _user=Depends(get_current_user),
 ):
     """XAI: 종목의 LightGBM 매수/관망/매도 판단 근거(SHAP 기여도 + 자연어 설명)."""
-    cache_key = f"ai_predict:v2:{symbol}"
+    cache_key = f"ai_predict:v3:{symbol}"
     ai = None if refresh else await cache_get(cache_key, max_age_hours=3)
     if ai is None:
         data = await get_candles(symbol, period="2y", interval="1d")

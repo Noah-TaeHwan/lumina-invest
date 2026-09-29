@@ -47,6 +47,11 @@ celery_app.conf.update(
             "schedule": 86400.0,          # 24시간
             "options": {"expires": 82800},
         },
+        "quant-auto-trade-10min": {
+            "task": "quant.auto_trade_cycle",
+            "schedule": 600.0,            # 10분 — 자동매매 활성 사용자 사이클
+            "options": {"expires": 540},
+        },
         "rebalance-check-hourly": {
             "task": "rebalance.check_triggers",
             "schedule": 3600.0,           # 1시간 — 시간·이탈률 리밸런싱 트리거 점검

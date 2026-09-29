@@ -188,7 +188,7 @@ def ai_predict_return(candles: list[dict]) -> dict | None:
     pred_5d = float(final_model.predict(scaler_full.transform(latest_features))[0])
 
     # 방향성 분류 (LightGBM) — 회귀와 별도로 매수/관망/매도 신호 + 신뢰도 산출
-    signal, signal_confidence, cls_acc = 0, 0.5, None
+    signal, signal_confidence, cls_acc, baseline = 0, 0.5, None, None
     try:
         import lightgbm as lgb
         y_cls = (labeled["target"].values + 1).astype(int)
@@ -202,6 +202,7 @@ def ai_predict_return(candles: list[dict]) -> dict | None:
                                    callbacks=[lgb.early_stopping(10, verbose=False), lgb.log_evaluation(-1)])
             va_pred = np.argmax(lgb_model.predict(X[split:]), axis=1)
             cls_acc = float((va_pred == y_cls[split:]).mean())
+            baseline = float(np.bincount(y_cls[split:], minlength=3).max() / len(y_cls[split:]))  # 다수 클래스 정확도
         else:
             lgb_model = lgb.train(
                 {"objective": "multiclass", "num_class": 3, "verbosity": -1},
@@ -216,6 +217,14 @@ def ai_predict_return(candles: list[dict]) -> dict | None:
             explanation = explain_signal(lgb_model, latest_features[0], FEATURE_COLS, latest_vals, probs)
         except Exception:
             explanation = None
+        # 품질 게이트: 검증 정확도가 '다수 클래스만 찍는' 기준선을 2%p 이상 못 넘으면 신호를 관망으로 낮춘다
+        reliable = cls_acc is None or baseline is None or cls_acc >= baseline + 0.02
+        if not reliable:
+            signal, signal_confidence = 0, min(signal_confidence, 0.34)
+            if explanation:
+                explanation["quality_warning"] = (f"검증 정확도 {cls_acc:.2f}가 기준선(다수 클래스 {baseline:.2f}) 대비 유의하게 높지 않아 "
+                                                  f"모델 신호를 '관망'으로 낮췼습니다. 아래 기여도는 참고용입니다.")
+                explanation["summary"] = "⚠ " + explanation["quality_warning"] + " " + explanation["summary"]
     except Exception:
         signal = 1 if pred_5d > 0 else (-1 if pred_5d < 0 else 0)
         explanation = None
@@ -237,6 +246,9 @@ def ai_predict_return(candles: list[dict]) -> dict | None:
         "signal": signal,
         "signal_confidence": round(signal_confidence, 4),
         "confidence": confidence,
+        "quality": {"cls_val_accuracy": None if cls_acc is None else round(cls_acc, 4),
+                    "baseline_accuracy": None if baseline is None else round(baseline, 4),
+                    "reliable": bool(cls_acc is None or baseline is None or cls_acc >= baseline + 0.02)},
         "explanation": explanation,  # XAI: SHAP 기여도 + 자연어 설명 (LightGBM 실패 시 None)
     }
 
@@ -252,8 +264,12 @@ def optimize_portfolio(stock_data: list[dict], risk_profile: str) -> dict:
             labels.append(item["symbol"])
     if len(series) < 2:
         return {"error": "최적화에는 유효 종목 2개 이상이 필요합니다."}
-    ret = pd.concat(series, axis=1).dropna().tail(252)
-    mu = ret.mean().values * 252
+    ret = pd.concat(series, axis=1).dropna().tail(756)   # 최대 3년으로 표본을 넓혀 최근 1년 모멘텀 편향 완화
+    mu_raw = ret.mean().values * 252
+    # 최근 실현 수익률은 미래 기대수익의 나쁜 추정치(66% 같은 값이 나온다). ±30%로 잘라 장기 주식 기대수익(7%)과
+    # 반반 섞는(James-Stein식 축소) 값을 기대수익으로 쓴다.
+    LONG_RUN_EQUITY_RETURN = 0.07
+    mu = 0.5 * np.clip(mu_raw, -0.30, 0.30) + 0.5 * LONG_RUN_EQUITY_RETURN
     cov = ret.cov().values * 252 + np.eye(len(labels)) * 1e-6
     inv_cov = np.linalg.pinv(cov)
     min_var = inv_cov @ np.ones(len(labels)); min_var /= min_var.sum()
@@ -264,4 +280,7 @@ def optimize_portfolio(stock_data: list[dict], risk_profile: str) -> dict:
     weights = np.clip(weights, 0.05, 0.60); weights /= weights.sum()
     port_ret = float(weights @ mu)
     port_vol = float(np.sqrt(weights @ cov @ weights))
-    return {"weights": {label: round(float(w) * 100, 1) for label, w in zip(labels, weights)}, "expected_return_pct": round(port_ret * 100, 2), "expected_volatility_pct": round(port_vol * 100, 2), "method": "최근 252거래일 공분산 기반 long-only 최적화 (비용·세금 미반영)"}
+    return {"weights": {label: round(float(w) * 100, 1) for label, w in zip(labels, weights)},
+            "expected_return_pct": round(port_ret * 100, 2), "expected_volatility_pct": round(port_vol * 100, 2),
+            "expected_return_raw_pct": round(float(weights @ mu_raw) * 100, 2),
+            "method": f"최근 {len(ret)}거래일 공분산 기반 long-only 최적화 · 기대수익은 실현수익(±30% 클립)과 장기 기대수익 7%를 반반 축소 (비용·세금 미반영)"}

@@ -35,7 +35,7 @@ class KISClient(BrokerClient):
         return h
 
     async def get_token(self) -> TokenInfo:
-        async with httpx.AsyncClient(verify=False, timeout=10) as cli:
+        async with httpx.AsyncClient(timeout=10) as cli:
             r = await cli.post(
                 f"{self.base_url}/oauth2/tokenP",
                 json={
@@ -57,7 +57,7 @@ class KISClient(BrokerClient):
         await self._ensure_token()
         # 6자리 코드 (005930) → KIS는 종목코드만
         code = symbol.replace(".KS", "").replace(".KQ", "")
-        async with httpx.AsyncClient(verify=False, timeout=10) as cli:
+        async with httpx.AsyncClient(timeout=10) as cli:
             r = await cli.get(
                 f"{self.base_url}/uapi/domestic-stock/v1/quotations/inquire-price",
                 headers=self._headers("FHKST01010100"),
@@ -81,7 +81,7 @@ class KISClient(BrokerClient):
         await self._ensure_token()
         cano, acnt_prdt = account_no[:8], account_no[8:]
         tr_id = "VTTC8434R" if self.paper else "TTTC8434R"
-        async with httpx.AsyncClient(verify=False, timeout=10) as cli:
+        async with httpx.AsyncClient(timeout=10) as cli:
             r = await cli.get(
                 f"{self.base_url}/uapi/domestic-stock/v1/trading/inquire-balance",
                 headers=self._headers(tr_id),
@@ -143,7 +143,7 @@ class KISClient(BrokerClient):
         else:
             tr_id = "VTTC0801U" if self.paper else "TTTC0801U"
 
-        async with httpx.AsyncClient(verify=False, timeout=10) as cli:
+        async with httpx.AsyncClient(timeout=10) as cli:
             r = await cli.post(
                 f"{self.base_url}/uapi/domestic-stock/v1/trading/order-cash",
                 headers=self._headers(tr_id),
@@ -163,7 +163,7 @@ class KISClient(BrokerClient):
         """일봉 OHLCV. start/end: YYYYMMDD"""
         await self._ensure_token()
         code = symbol.replace(".KS", "").replace(".KQ", "")
-        async with httpx.AsyncClient(verify=False, timeout=10) as cli:
+        async with httpx.AsyncClient(timeout=10) as cli:
             r = await cli.get(
                 f"{self.base_url}/uapi/domestic-stock/v1/quotations/inquire-daily-price",
                 headers=self._headers("FHKST01010400"),

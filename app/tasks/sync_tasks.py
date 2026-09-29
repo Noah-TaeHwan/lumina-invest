@@ -79,3 +79,25 @@ def rebalance_check_triggers() -> dict:
     result = asyncio.run(_async())
     logger.info("[beat] rebalance_check_triggers 완료: %s", result)
     return result
+
+
+@celery_app.task(name="quant.auto_trade_cycle", time_limit=540)
+def quant_auto_trade_cycle() -> dict:
+    """자동매매 활성 사용자 전원의 10분 사이클 (Celery Beat)."""
+
+    async def _async() -> dict:
+        from app.database.postgres import connect_postgres, close_postgres
+        from app.lib.redis_cache import connect_redis, close_redis
+        from app.services.auto_trade import run_cycle_for_enabled_users
+
+        await connect_redis()
+        await connect_postgres()
+        try:
+            return await run_cycle_for_enabled_users()
+        finally:
+            await close_redis()
+            await close_postgres()
+
+    result = asyncio.run(_async())
+    logger.info("[beat] quant_auto_trade_cycle 완료: %s", result)
+    return result

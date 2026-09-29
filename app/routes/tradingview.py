@@ -24,6 +24,7 @@ from app.services import notification
 from app.services import tradingview as tv
 from app.services.audit import audit
 from app.services.lean_backtest import STRATEGY_LABELS, LeanBacktestError, service as lean_service
+from app.routes.openapi import _check_rate_limit
 
 router = APIRouter(tags=["tradingview"])
 
@@ -49,7 +50,17 @@ async def tradingview_webhook(request: Request, db: AsyncSession = Depends(get_p
                 payload[k.strip()] = v.strip()
         if not payload:
             raise HTTPException(400, {"error": "BAD_REQUEST", "message": "JSON 본문을 해석할 수 없습니다."})
+    # 발신 IP 허용 목록 (운영: TRADINGVIEW_ENFORCE_IP=true)
+    if settings.TRADINGVIEW_ENFORCE_IP:
+        fwd = request.headers.get("x-forwarded-for", "")
+        client_ip = (fwd.split(",")[0].strip() if fwd else (request.client.host if request.client else ""))
+        allowed = {ip.strip() for ip in settings.TRADINGVIEW_ALLOWED_IPS.split(",") if ip.strip()}
+        if client_ip not in allowed:
+            raise HTTPException(403, {"error": "FORBIDDEN", "message": f"허용되지 않은 발신 IP: {client_ip}"})
     try:
+        key = await tv.resolve_user_by_token(db, str(payload.get("token") or payload.get("api_key") or ""))
+        if not await _check_rate_limit(f"tv:{key.id}", settings.TRADINGVIEW_RATE_LIMIT_MAX):
+            raise HTTPException(429, {"error": "RATE_LIMITED", "message": f"분당 {settings.TRADINGVIEW_RATE_LIMIT_MAX}회 알림 제한을 초과했습니다."})
         result = await tv.handle_alert(db, payload)
     except tv.WebhookError as exc:
         await db.rollback()

@@ -37,8 +37,8 @@ class OpenApiError(HTTPException):
         super().__init__(status_code=status_code, detail={"error": code, "message": message})
 
 
-async def _check_rate_limit(key_id: str) -> bool:
-    window, limit = settings.OPENAPI_RATE_LIMIT_WINDOW, settings.OPENAPI_RATE_LIMIT_MAX
+async def _check_rate_limit(key_id: str, limit: int | None = None) -> bool:
+    window, limit = settings.OPENAPI_RATE_LIMIT_WINDOW, (limit or settings.OPENAPI_RATE_LIMIT_MAX)
     bucket = f"{key_id}:{int(time.time() // window)}"
     try:
         count = await _rate_cache.incr(bucket, ttl=window)
