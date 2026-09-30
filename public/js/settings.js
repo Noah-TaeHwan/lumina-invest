@@ -1,0 +1,217 @@
+/* 증권사 Open API 설정, 알림 설정
+ * app.html 인라인 스크립트에서 분리됨. 엔트리는 main.js */
+import { api, getMe, setToast, escHtml, fmt, fmtPct, colorPct } from "/js/common.js";
+
+// ── 설정 (증권사 Open API) ────────────────────────────────────────
+async function loadSettings() {
+  try {
+    const cfg = await api("/api/quant/settings");
+    document.getElementById("quant-mode").value = cfg.mode || "paper";
+    document.getElementById("quant-symbol-source").value = cfg.symbol_source || "ai";
+    document.getElementById("broker-type").value   = cfg.broker || "mock";
+    document.getElementById("broker-app-key").value = cfg.app_key || "";
+    document.getElementById("broker-account").value = cfg.account_no || "";
+    document.getElementById("broker-paper").checked = cfg.paper !== false;
+    document.getElementById("quant-ai-top-n").value = cfg.ai_top_n || 3;
+    document.getElementById("quant-per-trade-budget").value = cfg.per_trade_budget || 1000000;
+    document.getElementById("quant-buy-ratio").value = Math.round((cfg.buy_ratio ?? 1) * 100);
+    document.getElementById("quant-sell-ratio").value = Math.round((cfg.sell_ratio ?? 0.5) * 100);
+    const rk = cfg.risk || {};
+    document.getElementById("risk-daily-loss").value   = rk.daily_loss_limit_pct ?? 3;
+    document.getElementById("risk-max-position").value = rk.max_position_pct ?? 30;
+    document.getElementById("risk-max-orders").value   = rk.max_orders_per_day ?? 20;
+    document.getElementById("risk-cooldown").value     = rk.cooldown_min ?? 30;
+    document.getElementById("risk-kill-badge").innerHTML = rk.kill_switch
+      ? `<span class="badge-sell">🛑 비상 정지 ON${cfg.risk_halt_reason ? " · " + escHtml(cfg.risk_halt_reason) : ""}</span>`
+      : `<span class="badge-buy">정상</span>`;
+    const selected = new Set(cfg.selected_symbols || []);
+    document.querySelectorAll(".quant-symbol").forEach((el) => {
+      el.checked = selected.has(el.value);
+    });
+    toggleManualSymbols();
+    document.getElementById("broker-status").textContent =
+      cfg.connected ? `✅ 연결됨 (${cfg.broker})` : "⚠️ API 키 미설정 – Mockup 모드";
+  } catch {}
+}
+
+function toggleManualSymbols() {
+  const source = document.getElementById("quant-symbol-source")?.value || "ai";
+  const wrap = document.getElementById("quant-manual-symbols-wrap");
+  if (!wrap) return;
+  if (source === "manual") wrap.classList.remove("hidden");
+  else wrap.classList.add("hidden");
+}
+document.getElementById("quant-symbol-source")?.addEventListener("change", toggleManualSymbols);
+
+document.getElementById("broker-save")?.addEventListener("click", async () => {
+  try {
+    const selectedSymbols = [...document.querySelectorAll(".quant-symbol:checked")].map((el) => el.value);
+    const buyRatio = Math.max(10, Math.min(100, Number(document.getElementById("quant-buy-ratio").value || 100))) / 100;
+    const sellRatio = Math.max(10, Math.min(100, Number(document.getElementById("quant-sell-ratio").value || 50))) / 100;
+    await api("/api/quant/settings", {
+      method: "POST",
+      body: {
+        mode:       document.getElementById("quant-mode").value,
+        symbol_source: document.getElementById("quant-symbol-source").value,
+        selected_symbols: selectedSymbols,
+        ai_top_n: Number(document.getElementById("quant-ai-top-n").value || 3),
+        per_trade_budget: Number(document.getElementById("quant-per-trade-budget").value || 1000000),
+        buy_ratio:  buyRatio,
+        sell_ratio: sellRatio,
+        broker:     document.getElementById("broker-type").value,
+        app_key:    document.getElementById("broker-app-key").value,
+        app_secret: document.getElementById("broker-app-secret").value,
+        account_no: document.getElementById("broker-account").value,
+        paper:      document.getElementById("broker-paper").checked,
+        risk_daily_loss_limit_pct: Number(document.getElementById("risk-daily-loss").value || 0),
+        risk_max_position_pct:     Number(document.getElementById("risk-max-position").value || 0),
+        risk_max_orders_per_day:   Number(document.getElementById("risk-max-orders").value || 0),
+        risk_cooldown_min:         Number(document.getElementById("risk-cooldown").value || 0),
+      },
+    });
+    setToast("증권사 API 설정이 저장되었습니다.", "ok");
+    loadSettings();
+  } catch (e) { setToast(e.message, "error"); }
+});
+
+document.getElementById("broker-test")?.addEventListener("click", async () => {
+  const el = document.getElementById("broker-status");
+  el.textContent = "연결 테스트 중...";
+  try {
+    const data = await api("/api/broker/price?symbol=005930.KS");
+    el.textContent = `✅ 연결 성공 – 삼성전자 현재가: ${fmt(data.current)}원`;
+    setToast("연결 성공", "ok");
+  } catch (e) {
+    el.textContent = `❌ 연결 실패: ${e.message}`;
+    setToast(e.message, "error");
+  }
+});
+
+document.getElementById("broker-test")?.addEventListener("click", async () => {
+  const el = document.getElementById("broker-status");
+  el.textContent = "연결 테스트 중...";
+  try {
+    const data = await api("/api/broker/price?symbol=005930.KS");
+    el.textContent = `✅ 연결 성공 – 삼성전자 현재가: ${fmt(data.current)}원`;
+    setToast("연결 성공", "ok");
+  } catch (e) {
+    el.textContent = `❌ 연결 실패: ${e.message}`;
+    setToast(e.message, "error");
+  }
+});
+
+// ── 알림 설정 ──────────────────────────────────────────────────────
+function toggleNotiSections() {
+  const chMap = { telegram: "noti-section-telegram", slack: "noti-section-slack",
+                  email: "noti-section-email", kakao: "noti-section-kakao", sms: "noti-section-sms" };
+  document.querySelectorAll(".noti-channel").forEach(cb => {
+    const sec = document.getElementById(chMap[cb.value]);
+    if (sec) sec.classList.toggle("hidden", !cb.checked);
+  });
+}
+document.querySelectorAll(".noti-channel").forEach(cb => cb.addEventListener("change", toggleNotiSections));
+
+async function loadNotificationSettings() {
+  try {
+    const cfg = await api("/api/notification/settings");
+    const channels = cfg.channels || [];
+    document.querySelectorAll(".noti-channel").forEach(cb => { cb.checked = channels.includes(cb.value); });
+    toggleNotiSections();
+    // Telegram
+    document.getElementById("noti-telegram-token").value    = cfg.telegram_token    || "";
+    document.getElementById("noti-telegram-chat-id").value  = cfg.telegram_chat_id  || "";
+    // Slack
+    document.getElementById("noti-slack-webhook").value     = cfg.slack_webhook_url || "";
+    // Email
+    document.getElementById("noti-email-host").value        = cfg.email_host        || "";
+    document.getElementById("noti-email-port").value        = cfg.email_port        || 587;
+    document.getElementById("noti-email-user").value        = cfg.email_user        || "";
+    document.getElementById("noti-email-password").value    = cfg.email_password    || "";
+    document.getElementById("noti-email-from").value        = cfg.email_from        || "";
+    document.getElementById("noti-email-to").value          = cfg.email_to          || "";
+    // Kakao
+    document.getElementById("noti-kakao-api-key").value     = cfg.kakao_api_key     || "";
+    document.getElementById("noti-kakao-api-secret").value  = cfg.kakao_api_secret  || "";
+    document.getElementById("noti-kakao-sender-key").value  = cfg.kakao_sender_key  || "";
+    document.getElementById("noti-kakao-phone").value       = cfg.kakao_phone       || "";
+    // SMS
+    document.getElementById("noti-sms-api-key").value       = cfg.sms_api_key       || "";
+    document.getElementById("noti-sms-api-secret").value    = cfg.sms_api_secret    || "";
+    document.getElementById("noti-sms-from").value          = cfg.sms_from          || "";
+    document.getElementById("noti-sms-to").value            = cfg.sms_to            || "";
+  } catch {}
+  loadNotificationHistory();
+}
+
+async function loadNotificationHistory() {
+  const el = document.getElementById("noti-history");
+  if (!el) return;
+  try {
+    const data = await api("/api/notification/history?limit=30");
+    if (!data.events?.length) {
+      el.innerHTML = "발송 이력이 없습니다.";
+      return;
+    }
+    el.innerHTML = data.events.map(ev => {
+      const chBadges = (ev.channels || []).map(c =>
+        `<span class="badge-${c.ok ? "buy" : "sell"}" style="margin-right:4px;">${escHtml(c.channel)}</span>`
+      ).join("") || "<span style='color:var(--text-mute);'>발송 채널 없음</span>";
+      return `<div class="py-1.5" style="border-bottom:1px solid var(--border);">
+        <div style="color:var(--text-mute);">${escHtml(ev.created_at || "")}</div>
+        <div style="color:var(--text-dim);">${escHtml(ev.subject || ev.message || "")}</div>
+        <div class="mt-0.5">${chBadges}</div>
+      </div>`;
+    }).join("");
+  } catch (e) {
+    el.innerHTML = `<span style="color:var(--red);">${escHtml(e.message)}</span>`;
+  }
+}
+
+document.getElementById("noti-save")?.addEventListener("click", async () => {
+  try {
+    const channels = [...document.querySelectorAll(".noti-channel:checked")].map(cb => cb.value);
+    await api("/api/notification/settings", {
+      method: "POST",
+      body: {
+        channels,
+        telegram_token:    document.getElementById("noti-telegram-token").value,
+        telegram_chat_id:  document.getElementById("noti-telegram-chat-id").value,
+        slack_webhook_url: document.getElementById("noti-slack-webhook").value,
+        email_to:          document.getElementById("noti-email-to").value,
+        email_host:        document.getElementById("noti-email-host").value,
+        email_port:        Number(document.getElementById("noti-email-port").value || 587),
+        email_user:        document.getElementById("noti-email-user").value,
+        email_password:    document.getElementById("noti-email-password").value,
+        email_from:        document.getElementById("noti-email-from").value,
+        kakao_api_key:     document.getElementById("noti-kakao-api-key").value,
+        kakao_api_secret:  document.getElementById("noti-kakao-api-secret").value,
+        kakao_sender_key:  document.getElementById("noti-kakao-sender-key").value,
+        kakao_phone:       document.getElementById("noti-kakao-phone").value,
+        sms_api_key:       document.getElementById("noti-sms-api-key").value,
+        sms_api_secret:    document.getElementById("noti-sms-api-secret").value,
+        sms_from:          document.getElementById("noti-sms-from").value,
+        sms_to:            document.getElementById("noti-sms-to").value,
+      },
+    });
+    setToast("알림 설정이 저장되었습니다.", "ok");
+    document.getElementById("noti-status").textContent = "✅ 저장 완료";
+    loadNotificationSettings();
+  } catch (e) { setToast(e.message, "error"); }
+});
+
+document.getElementById("noti-test")?.addEventListener("click", async () => {
+  const el = document.getElementById("noti-status");
+  el.textContent = "테스트 알림 전송 중...";
+  try {
+    await api("/api/notification/test", { method: "POST" });
+    el.textContent = "✅ 테스트 알림을 전송했습니다. 수신 여부를 확인하세요.";
+    setToast("테스트 알림 전송 완료", "ok");
+    loadNotificationHistory();
+  } catch (e) {
+    el.textContent = `❌ 전송 실패: ${e.message}`;
+    setToast(e.message, "error");
+  }
+});
+
+
+export { loadNotificationSettings, loadSettings };

@@ -1,0 +1,31 @@
+# 단위 테스트: 지표 룩어헤드 방지 · 리밸런싱 · 위험관리 · XAI · TradingView 파서
+# push / PR 마다 실행. 배포 워크플로(deploy.yml)는 이 테스트가 통과한 뒤에만 진행한다.
+name: Unit Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call: {}
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: 의존성 설치
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq libgomp1
+          pip install -r requirements.txt -r requirements-dev.txt
+      - name: pytest
+        run: python -m pytest -q --junitxml=pytest-report.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytest-report
+          path: pytest-report.xml
