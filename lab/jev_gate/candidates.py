@@ -18,16 +18,17 @@ def build_table(k: pd.DataFrame, pre: dict) -> pd.DataFrame:
     f = features.compute_features(k)
     c = rule.find_candidates(f, pre["rule"]["n_grid"][0])
     opens, closes = f["open"].to_numpy(float), f["close"].to_numpy(float)
+    open_t, close_t = f["open_time"].to_numpy(), f["t_close"].to_numpy()
     fee, slip = pre["costs"]["taker_fee_rate"], pre["costs"]["slippage_bps"]
     rows = []
     for i in range(len(c)):
         r = c.iloc[i]
         entry_bar = int(r["bar"]) + 1
-        if entry_bar >= len(f):
-            continue
+        if entry_bar >= len(f) or open_t[entry_bar] != close_t[entry_bar - 1]:
+            continue  # 다음 봉이 없거나 시간상 이어지지 않음
         entry = opens[entry_bar]
         exit_bar, reason = rule.find_exit(closes, entry_bar, entry, float(r["atr14"]))
-        if reason == "end" or exit_bar + 1 >= len(f):
+        if reason == "end" or exit_bar + 1 >= len(f) or open_t[exit_bar + 1] != close_t[exit_bar]:
             continue
         net = rule.net_return(entry, opens[exit_bar + 1], fee, slip)
         state = features.build_state(r)

@@ -130,6 +130,7 @@ def test_model_mismatch_is_blocked_and_not_cached(tmp_path):
     rec = Recorder(other_model)
     g = _gate(tmp_path / "calls.jsonl", rec)
     r = g.ask(STATE)
-    assert (r.ok, r.error) == (False, "model_mismatch")
+    assert (r.ok, r.error, r.model, r.input_tokens) == (False, "model_mismatch", "jev-1.14.0", 500)
+    assert g.spent_usd > 0
     g.ask(STATE)
     assert len(rec.requests) == 2

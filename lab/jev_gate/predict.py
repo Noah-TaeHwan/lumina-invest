@@ -82,11 +82,14 @@ def render_report(s: dict) -> str:
              "## 구간별", "", "| 구간 | 후보 | JEV 응답 커버리지 | 실패 비율 | JEV AUC | 로지스틱 AUC | JEV Brier |",
              "|---|---:|---:|---:|---:|---:|---:|"]
     for name, p in s["periods"].items():
+        lg = _fmt(p["auc_logistic"]) + (" (학습 구간)" if name == "dev" and p["auc_logistic"] is not None else "")
         lines.append(f"| {name} | {p['n']} | {_fmt(p['coverage'], True)} | {_fmt(p['fail_rate'], True)} | "
-                     f"{_fmt(p['auc_jev'])} | {_fmt(p['auc_logistic'])} | {_fmt(p['brier_jev'])} |")
+                     f"{_fmt(p['auc_jev'])} | {lg} | {_fmt(p['brier_jev'])} |")
     h = s.get("holdout")
     lines += ["", "## 홀드아웃 비교 (일 단위 블록 부트스트랩 95% 구간)", ""]
     if h:
+        state = "" if h["coverage"] >= 1 else " — PARTIAL(응답 없는 후보 제외, 최종 결과 아님)"
+        lines.append(f"- 홀드아웃 후보 {h['n']}건, JEV 응답 커버리지 {_fmt(h['coverage'], True)}{state}")
         for label, d in (("JEV − 0.5", h["vs_half"]), ("JEV − 로지스틱", h["vs_logistic"])):
             lines.append(f"- {label}: {_fmt(d['diff'])} (95% {_fmt(d['lo'])} ~ {_fmt(d['hi'])}, "
                          f"유효 반복 {d['n_boot_used']})")
@@ -96,6 +99,6 @@ def render_report(s: dict) -> str:
                 lines.append(f"| {r['bin_lo']:.1f}~{r['bin_hi']:.1f} | {r['n']} | {_fmt(r['mean_p'])} | "
                              f"{_fmt(r['fail_rate'], True)} |")
     else:
-        lines.append("- 아직 홀드아웃 응답이 없다.")
+        lines.append("- 아직 동결 전이거나 홀드아웃 응답이 없다. 동결 전에는 홀드아웃·공개 이후 구간의 결과를 계산하지 않는다.")
     lines += ["", "## 판단 규칙(사전등록)", "", s["claim"], ""]
     return "\n".join(lines)

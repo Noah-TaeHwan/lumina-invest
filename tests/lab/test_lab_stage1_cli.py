@@ -87,3 +87,35 @@ def test_report_shows_coverage(tmp_path):
     assert s["periods"]["holdout"]["auc_jev"] == 1.0          # 가짜 JEV가 라벨과 완전히 일치
     text = paths.report.read_text(encoding="utf-8")
     assert "커버리지" in text and "95%" in text and s["claim"] in text
+
+
+def test_report_before_freeze_hides_holdout_outcomes(tmp_path):
+    paths, pre = _paths(tmp_path)
+    t, fake = _table(), Fake()
+    cli.cmd_stage1_call(paths, pre, "dev", gate_factory=fake, table=t)
+    s = cli.cmd_stage1_report(paths, pre, table=t)
+    for period in ("holdout", "post_release"):
+        p = s["periods"][period]
+        assert p["fail_rate"] is None and p["auc_jev"] is None and p["auc_logistic"] is None
+    assert s["periods"]["dev"]["fail_rate"] is not None
+
+
+def test_report_rejects_stale_freeze(tmp_path):
+    paths, pre = _paths(tmp_path)
+    t = _table()
+    cli.cmd_stage1_freeze(paths, pre, table=t)
+    frozen = json.loads(paths.freeze.read_text())
+    frozen["question_sha256"] = "0" * 64
+    paths.freeze.write_text(json.dumps(frozen))
+    with pytest.raises(SystemExit, match="동결"):
+        cli.cmd_stage1_report(paths, pre, table=t)
+
+
+def test_freeze_refused_after_holdout_calls(tmp_path):
+    paths, pre = _paths(tmp_path)
+    t, fake = _table(), Fake()
+    cli.cmd_stage1_freeze(paths, pre, table=t)
+    cli.cmd_stage1_call(paths, pre, "holdout", gate_factory=fake, table=t)
+    paths.freeze.unlink()
+    with pytest.raises(SystemExit, match="홀드아웃"):
+        cli.cmd_stage1_freeze(paths, pre, table=t)

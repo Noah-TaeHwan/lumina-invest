@@ -172,3 +172,14 @@ def test_missing_api_key_stops_before_any_record(tmp_path, monkeypatch):
     with pytest.raises(SystemExit, match="API 키"):
         cli.cmd_stage0_call(paths, pre, 1, now=T0)
     assert not paths.calls.exists()
+
+
+def test_stage0_report_ignores_stage1_records(tmp_path):
+    paths, pre, fake = _setup(tmp_path), cli.load_prereg(), FakeFactory()
+    _call(paths, pre, fake, 1, T0)
+    before = cli.cmd_stage0_report(paths, pre, now=T0)["calls"]["calls"]
+    with paths.calls.open("a") as f:
+        f.write(json.dumps({"key": "x", "ok": False, "p_fail": None, "latency_ms": 9999.0, "model": None,
+                            "input_tokens": 0, "status": None, "error": "timeout", "called_at": T0.isoformat(),
+                            "cached": False, "state": {}, "tag": "stage1-dev"}) + "\n")
+    assert cli.cmd_stage0_report(paths, pre, now=T0)["calls"]["calls"] == before

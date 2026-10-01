@@ -196,7 +196,9 @@ def cmd_stage0_repeat(paths: Paths, pre: dict, gate_factory=None) -> int:
 def cmd_stage0_report(paths: Paths, pre: dict, now: datetime | None = None) -> dict:
     """호출 기록을 요약해 통과 여부를 판정하고 리포트·summary·시도 원장을 쓴다."""
     s0, th = pre["stage0"], pre["stage0"]["thresholds"]
-    rs, sample, records = _read_json(paths.rule, None), _require_sample(paths), _read_jsonl(paths.calls)
+    rs, sample = _read_json(paths.rule, None), _require_sample(paths)
+    records = [r for r in _read_jsonl(paths.calls)  # 공유 기록에서 Stage 0 호출만(Stage 1 줄 제외)
+               if str(r.get("tag") or "").startswith("session-") or r.get("tag") == "repeat"]
     if rs is None:
         raise SystemExit("규칙 통계가 없습니다. stage0-rule을 먼저 실행하세요")
     if not records:
@@ -293,6 +295,8 @@ def cmd_stage1_freeze(paths, pre: dict, table=None) -> int:
     """개발 구간으로 로지스틱 기준선을 학습하고, 사전등록·질문 해시와 함께 동결한다(덮어쓰지 않음)."""
     if paths.freeze.exists():
         raise SystemExit("이미 동결했습니다. 동결 파일은 덮어쓰지 않습니다")
+    if any(str(r.get("tag")) in ("stage1-holdout", "stage1-post_release") for r in _read_jsonl(paths.calls)):
+        raise SystemExit("홀드아웃을 이미 호출했습니다. 다시 동결할 수 없습니다")
     t = load_table(paths, pre) if table is None else table
     dev = t[t["period"] == "dev"]
     model = predict.fit_logistic(dev[list(features.STATE_FEATURES)].to_numpy(float), dev["label"].to_numpy())
@@ -311,11 +315,17 @@ def cmd_stage1_report(paths, pre: dict, table=None) -> dict:
     for r in _read_jsonl(paths.calls):
         if r["ok"] and r["key"] not in p_by_key:
             p_by_key[r["key"]] = r["p_fail"]
-    frozen = _read_json(paths.freeze, None)
+    frozen = check_freeze(paths, pre) if paths.freeze.exists() else None
     cols = list(features.STATE_FEATURES)
-    out = {"periods": {}}
+    out = {"periods": {}, "frozen": frozen is not None}
     for period in pre["periods"]:
         sub = t[t["period"] == period]
+        if frozen is None and period in ("holdout", "post_release"):
+            # 동결 전에는 홀드아웃 가격에서 나온 값(실패 비율·AUC)을 계산하지 않는다
+            out["periods"][period] = {"n": int(len(sub)), "coverage": float(sub["key"].isin(p_by_key).mean())
+                                      if len(sub) else 0.0, "fail_rate": None, "auc_jev": None,
+                                      "auc_logistic": None, "brier_jev": None}
+            continue
         have = sub[sub["key"].isin(p_by_key)]
         y = have["label"].to_numpy()
         p = have["key"].map(p_by_key).to_numpy(float)
@@ -332,7 +342,8 @@ def cmd_stage1_report(paths, pre: dict, table=None) -> dict:
         y, p = hold["label"].to_numpy(), hold["key"].map(p_by_key).to_numpy(float)
         lg = predict.logistic_proba(frozen["logistic"], hold[cols].to_numpy(float))
         days = hold["day"].to_numpy()
-        out["holdout"] = {"vs_half": predict.block_bootstrap_auc_diff(y, p, None, days, b["n"], b["seed"]),
+        out["holdout"] = {"n": int(len(hold)), "coverage": float(len(hold) / max(1, (t["period"] == "holdout").sum())),
+                          "vs_half": predict.block_bootstrap_auc_diff(y, p, None, days, b["n"], b["seed"]),
                           "vs_logistic": predict.block_bootstrap_auc_diff(y, p, lg, days, b["n"], b["seed"]),
                           "calibration": predict.calibration_table(y, p, s1["calibration_bins"])}
     out["claim"] = s1["claim_rule"]

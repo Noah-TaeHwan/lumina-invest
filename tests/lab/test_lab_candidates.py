@@ -44,3 +44,9 @@ def test_period_and_day_columns():
     closes = [100.0] * 300 + [101.0] + [100.0] * 60
     row = candidates.build_table(_bars(closes), PRE).iloc[0]
     assert row["day"] == "2025-10-02" and row["period"] == "holdout"   # 300번 봉 마감 = 10-02 01:05 UTC
+
+
+def test_candidate_dropped_when_next_bar_is_missing():
+    closes = [100.0] * 300 + [101.0] + [100.0] * 60
+    b = _bars(closes).drop(index=301).reset_index(drop=True)   # 신호 다음 5분봉이 빠짐
+    assert len(candidates.build_table(b, PRE)) == 0
