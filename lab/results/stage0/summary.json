@@ -1,0 +1,119 @@
+{
+  "generated_at": "2026-10-01T11:11:45.828300+00:00",
+  "n_selected": 120,
+  "rule": {
+    "30": {
+      "candidates": 10154,
+      "trades": 5437,
+      "net_compound": -0.9999948560902452,
+      "net_mean": -0.0022341664855928364,
+      "gross_mean": -3.5664655223394865e-05,
+      "win_rate": 0.1675556372999816,
+      "reasons": {
+        "stop": 3259,
+        "take": 2155,
+        "time": 23
+      }
+    },
+    "60": {
+      "candidates": 6590,
+      "trades": 3642,
+      "net_compound": -0.9997047386162669,
+      "net_mean": -0.002225777237469044,
+      "gross_mean": -2.725692202351206e-05,
+      "win_rate": 0.17984623833058758,
+      "reasons": {
+        "stop": 2207,
+        "take": 1421,
+        "time": 14
+      }
+    },
+    "120": {
+      "candidates": 4109,
+      "trades": 2346,
+      "net_compound": -0.9950780966011328,
+      "net_mean": -0.002258939134176587,
+      "gross_mean": -6.049188847163189e-05,
+      "win_rate": 0.19352088661551578,
+      "reasons": {
+        "stop": 1445,
+        "take": 888,
+        "time": 13
+      }
+    }
+  },
+  "candidate_counts": {
+    "dev": 4109,
+    "validation": 1160,
+    "holdout": 1531,
+    "post_release": 427
+  },
+  "dev_candidates": 4109,
+  "calls": {
+    "calls": 300,
+    "p50_ms": 205.52049999241717,
+    "p95_ms": 290.9390503395116,
+    "p99_ms": 374.24644759244984,
+    "failure_rate": 0.0,
+    "schema_valid_rate": 1.0,
+    "mean_input_tokens": 806.5466666666666,
+    "models": [
+      "jev-1.13.0"
+    ],
+    "errors": {}
+  },
+  "repeat": {
+    "items": 50,
+    "agreement": 0.9359999999999999,
+    "mean_std": 0.009710872902213157
+  },
+  "projection": {
+    "calls": 7227,
+    "cost_usd": 0.24481433592000001,
+    "hours_sequential": 0.41258240373477745
+  },
+  "sessions": [
+    {
+      "session": 1,
+      "started_at": "2026-10-01T11:10:29.875314+00:00"
+    }
+  ],
+  "by_session": {
+    "repeat": {
+      "calls": 200,
+      "p50_ms": 201.45408350799698,
+      "p95_ms": 285.41963066527387,
+      "p99_ms": 319.61813007626887,
+      "failure_rate": 0.0,
+      "schema_valid_rate": 1.0,
+      "mean_input_tokens": 806.52,
+      "models": [
+        "jev-1.13.0"
+      ],
+      "errors": {}
+    },
+    "session-1": {
+      "calls": 100,
+      "p50_ms": 207.48814550461248,
+      "p95_ms": 319.1561330560944,
+      "p99_ms": 375.1999744965,
+      "failure_rate": 0.0,
+      "schema_valid_rate": 1.0,
+      "mean_input_tokens": 806.6,
+      "models": [
+        "jev-1.13.0"
+      ],
+      "errors": {}
+    }
+  },
+  "complete": false,
+  "go": {
+    "latency_p99": true,
+    "failure_rate": true,
+    "schema_valid": true,
+    "repeat_agreement": true,
+    "dev_candidates": true,
+    "projected_cost": true
+  },
+  "verdict": "PARTIAL"
+}
