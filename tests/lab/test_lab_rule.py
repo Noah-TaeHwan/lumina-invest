@@ -5,7 +5,7 @@ import pytest
 
 from lab.jev_gate import features as ft
 from lab.jev_gate import rule
-from tests.lab.bars import MINUTE_US, T0_US
+from tests.lab.bars import MINUTE_US, T0_US, make_minute_bars
 
 
 def _bars(closes) -> pd.DataFrame:
@@ -59,3 +59,18 @@ def test_rule_only_holds_one_position():
     assert trades["bar"].tolist() == [300, 430]          # 305는 보유 중이라 건너뜀
     assert trades["reason"].tolist() == ["time", "time"]
     assert (trades["net_ret"] < trades["gross_ret"]).all()
+
+
+def test_candidates_are_causal():
+    """뒤 봉을 잘라내거나 바꿔도 그 이전 후보(bar·특징 11개)는 같아야 한다."""
+    bars, cut = make_minute_bars(900, seed=11), 700
+    cols = ["bar", *ft.STATE_FEATURES]
+    full = rule.find_candidates(ft.compute_features(bars), n=30)
+    early = full[full["bar"] < cut][cols].reset_index(drop=True)
+    part = rule.find_candidates(ft.compute_features(bars.iloc[:cut]), n=30)[cols]
+    changed = bars.copy()
+    changed.loc[cut:, ["high", "close", "volume"]] *= 1.05
+    alt = rule.find_candidates(ft.compute_features(changed), n=30)
+    assert len(early) > 0
+    pd.testing.assert_frame_equal(early, part)
+    pd.testing.assert_frame_equal(early, alt[alt["bar"] < cut][cols].reset_index(drop=True))

@@ -98,6 +98,16 @@ def evaluate_go(summary: dict, th: dict) -> dict[str, bool]:
     }
 
 
+def stage0_notes(selected_rule: dict) -> list[str]:
+    """리포트에 남길 해석 메모. 선택 N의 규칙 단독 성과가 비용 전에도 0 이하이면 spec 7절 대응을 명시한다."""
+    notes = ["표본 300건은 시간순으로 정렬돼 세션마다 개발 구간의 다른 시기(약 3분의 1씩)를 맡고, "
+             "반복 측정 50건은 가장 이른 시기에서 뽑혔다. 세션 간 지연 차이를 해석할 때 이 배정을 함께 본다."]
+    if selected_rule["gross_mean"] <= 0:
+        notes.append("선택 N의 규칙 단독 성과가 비용 전에도 거래당 0 이하다. spec 7절에 따라 Stage 1 전에 규칙을 다시 "
+                     "고르거나, 게이트 효과를 '손실 전략 차단'으로만 해석한다고 명시한다.")
+    return notes
+
+
 def render_report(summary: dict, go: dict[str, bool], th: dict) -> str:
     """Stage 0 결과 Markdown. 세션·반복 측정이 끝나기 전에는 PARTIAL로 표시한다."""
     verdict = "PARTIAL" if not summary["complete"] else ("GO" if all(go.values()) else "NO-GO")
@@ -150,4 +160,6 @@ def render_report(summary: dict, go: dict[str, bool], th: dict) -> str:
         lines.append(f"| {n} | {s['candidates']} | {s['trades']} | {s['net_compound']:.2%} | "
                      f"{s['net_mean']:.4%} | {s['gross_mean']:.4%} | {s['win_rate']:.1%} |")
     lines += ["", f"구간별 후보 수(선택 N): {summary['candidate_counts']}", ""]
+    if summary.get("notes"):
+        lines += ["## 해석 메모", "", *[f"- {note}" for note in summary["notes"]], ""]
     return "\n".join(lines)

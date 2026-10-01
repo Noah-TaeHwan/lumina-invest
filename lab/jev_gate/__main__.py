@@ -24,17 +24,17 @@ from lab.jev_gate import data, features, gate, rule, stage0
 
 PREREG_PATH = Path(__file__).with_name("prereg.json")
 REPO_ROOT = Path(__file__).resolve().parents[2]
+MAX_CONSECUTIVE_FAILURES = 3  # 연속 실패가 이만큼이면 세션을 멈춘다(로컬 장애가 실패율을 오염시키지 않게)
 
 
 class Paths:
-    """Stage 0 입출력 경로 모음."""
+    """Stage 0 입출력 경로 모음. 세션 시작·종료 시각은 파일로 두지 않고 호출 기록에서 계산한다."""
 
     def __init__(self, root: Path):
         self.raw = root / "lab/data/raw"
         self.results = root / "lab/results/stage0"
         self.rule = self.results / "rule_stats.json"
         self.sample = self.results / "sample.json"
-        self.sessions = self.results / "sessions.json"
         self.calls = self.results / "jev_calls.jsonl"
         self.summary = self.results / "summary.json"
         self.report = root / "docs/lab/stage0-report.md"
@@ -61,6 +61,47 @@ def _read_jsonl(path: Path) -> list[dict]:
 
 def _default_gate(paths: Paths, pre: dict) -> gate.JevGate:
     return gate.JevGate(paths.calls, budget_usd=pre["jev"]["budget_usd"])
+
+
+def _session_calls(records: list[dict]) -> dict[int, list[dict]]:
+    """session-K 태그가 붙은 호출 기록을 세션 번호별로 묶는다."""
+    out: dict[int, list[dict]] = defaultdict(list)
+    for r in records:
+        tag = str(r.get("tag") or "")
+        if tag.startswith("session-"):
+            out[int(tag.split("-", 1)[1])].append(r)
+    return out
+
+
+def _ok_keys(records: list[dict]) -> set[str]:
+    return {r["key"] for r in records if r["ok"]}
+
+
+def _batch(sample: list[dict], s0: dict, session: int) -> list[dict]:
+    """표본을 세션 수로 나눈 session번째 묶음(마지막 세션이 나머지를 가진다)."""
+    size = len(sample) // s0["sessions"]
+    end = None if session == s0["sessions"] else session * size
+    return sample[(session - 1) * size: end]
+
+
+def _require_sample(paths: Paths) -> list[dict]:
+    sample = _read_json(paths.sample, None)
+    if sample is None:
+        raise SystemExit("표본이 없습니다. stage0-rule을 먼저 실행하세요")
+    return sample
+
+
+def _ask_each(g: gate.JevGate, states: list[dict], tag: str, use_cache: bool = True) -> None:
+    """순차 호출한다. 연속 실패가 한도에 닿으면 남은 호출을 하지 않고 멈춘다(재실행하면 이어서 채운다)."""
+    streak = 0
+    for i, state in enumerate(states, 1):
+        r = g.ask(state, use_cache=use_cache, tag=tag)
+        print(f"[{tag}] {i}/{len(states)} ok={r.ok} p_fail={r.p_fail} {r.latency_ms:.0f}ms "
+              f"cached={r.cached} error={r.error}", flush=True)
+        streak = 0 if r.ok else streak + 1
+        if streak >= MAX_CONSECUTIVE_FAILURES:
+            raise SystemExit(f"연속 실패 {streak}회로 중단했습니다. 원인을 확인한 뒤 같은 명령을 다시 실행하세요")
+    print(f"누적 비용 ${g.spent_usd:.6f}")
 
 
 def cmd_stage0_rule(paths: Paths, pre: dict) -> int:
@@ -100,64 +141,66 @@ def cmd_stage0_rule(paths: Paths, pre: dict) -> int:
 
 
 def cmd_stage0_call(paths: Paths, pre: dict, session: int, gate_factory=None, now: datetime | None = None) -> int:
-    """표본의 session번째 묶음을 순차 호출한다. 이전 세션 시작 후 최소 간격이 지나야 한다."""
+    """표본의 session번째 묶음을 순차 호출한다.
+
+    이전 세션의 묶음이 모두 성공 응답을 받았고, 그 세션의 마지막 호출 후 최소 간격이 지나야 한다.
+    시각은 실제 호출 기록(called_at)으로만 판단하므로, 호출 전에 죽은 실행은 세션 시작으로 남지 않는다.
+    """
     s0 = pre["stage0"]
     if not 1 <= session <= s0["sessions"]:
         raise SystemExit(f"session은 1~{s0['sessions']} 사이여야 합니다")
     now = now or datetime.now(timezone.utc)
-    sessions = _read_json(paths.sessions, [])
+    sample = _require_sample(paths)
     if session > 1:
-        prev = next((s for s in sessions if s["session"] == session - 1), None)
-        if prev is None:
-            raise SystemExit(f"세션 {session - 1}을 먼저 실행하세요")
-        gap = now - datetime.fromisoformat(prev["started_at"])
+        prev_calls = _session_calls(_read_jsonl(paths.calls)).get(session - 1, [])
+        prev_ok = _ok_keys(prev_calls)
+        if not prev_calls or not all(gate.cache_key(it["state"]) in prev_ok
+                                     for it in _batch(sample, s0, session - 1)):
+            raise SystemExit(f"세션 {session - 1}을 먼저 끝까지 실행하세요")
+        gap = now - max(datetime.fromisoformat(r["called_at"]) for r in prev_calls)
         if gap < timedelta(hours=s0["session_min_gap_hours"]):
-            raise SystemExit(f"세션 간격이 {s0['session_min_gap_hours']}시간 미만입니다(경과 {gap})")
-    if not any(s["session"] == session for s in sessions):
-        sessions.append({"session": session, "started_at": now.isoformat()})
-        _write_json(paths.sessions, sessions)
-    sample = _read_json(paths.sample, None)
-    size = len(sample) // s0["sessions"]
-    end = None if session == s0["sessions"] else session * size
-    batch = sample[(session - 1) * size: end]
+            raise SystemExit(f"세션 {session - 1} 마지막 호출 후 {s0['session_min_gap_hours']}시간이 지나지 않았습니다"
+                             f"(경과 {gap})")
     g = (gate_factory or _default_gate)(paths, pre)
-    for i, item in enumerate(batch, 1):
-        r = g.ask(item["state"], tag=f"session-{session}")
-        print(f"[session {session}] {i}/{len(batch)} ok={r.ok} p_fail={r.p_fail} "
-              f"{r.latency_ms:.0f}ms cached={r.cached}", flush=True)
-    print(f"누적 비용 ${g.spent_usd:.6f}")
+    _ask_each(g, [it["state"] for it in _batch(sample, s0, session)], tag=f"session-{session}")
     return 0
 
 
 def cmd_stage0_repeat(paths: Paths, pre: dict, gate_factory=None) -> int:
-    """표본 앞 repeat_items건을 입력당 총 repeat_calls회가 되도록 더 호출한다(중단 후 재실행 시 이어서)."""
+    """표본 앞 repeat_items건이 입력당 성공 응답 repeat_calls개가 되도록 더 호출한다.
+
+    실패한 시도는 기록·실패율에 그대로 남고, 재실행하면 모자란 성공 응답만 채운다.
+    대상 입력이 모두 세션 1에서 성공 응답을 받은 뒤에만 실행한다.
+    """
     s0 = pre["stage0"]
-    if not any(s["session"] == 1 for s in _read_json(paths.sessions, [])):
-        raise SystemExit("세션 1을 먼저 실행하세요")
-    done = Counter(r["key"] for r in _read_jsonl(paths.calls) if r.get("tag") == "repeat")
+    sample, records = _require_sample(paths), _read_jsonl(paths.calls)
+    targets = sample[: s0["repeat_items"]]
+    s1_ok = _ok_keys(_session_calls(records).get(1, []))
+    if not all(gate.cache_key(it["state"]) in s1_ok for it in targets):
+        raise SystemExit("반복 대상이 세션 1에서 모두 성공한 뒤에 실행하세요")
+    done = Counter(r["key"] for r in records if r.get("tag") == "repeat" and r["ok"])
+    states = [it["state"] for it in targets
+              for _ in range(max(0, s0["repeat_calls"] - 1 - done[gate.cache_key(it["state"])]))]
     g = (gate_factory or _default_gate)(paths, pre)
-    for item in _read_json(paths.sample, None)[: s0["repeat_items"]]:
-        for _ in range(max(0, s0["repeat_calls"] - 1 - done[gate.cache_key(item["state"])])):
-            r = g.ask(item["state"], use_cache=False, tag="repeat")
-            print(f"[repeat] ok={r.ok} p_fail={r.p_fail} {r.latency_ms:.0f}ms", flush=True)
-    print(f"누적 비용 ${g.spent_usd:.6f}")
+    _ask_each(g, states, tag="repeat", use_cache=False)
     return 0
 
 
 def cmd_stage0_report(paths: Paths, pre: dict, now: datetime | None = None) -> dict:
     """호출 기록을 요약해 통과 여부를 판정하고 리포트·summary·시도 원장을 쓴다."""
     s0, th = pre["stage0"], pre["stage0"]["thresholds"]
-    rs, sample = _read_json(paths.rule, None), _read_json(paths.sample, None)
-    records, sessions = _read_jsonl(paths.calls), _read_json(paths.sessions, [])
+    rs, sample, records = _read_json(paths.rule, None), _require_sample(paths), _read_jsonl(paths.calls)
     if not records:
         raise SystemExit("호출 기록이 없습니다")
+    sessions = [{"session": k, "started_at": min(r["called_at"] for r in v), "ended_at": max(r["called_at"] for r in v)}
+                for k, v in sorted(_session_calls(records).items())]
     repeat_keys = [gate.cache_key(it["state"]) for it in sample[: s0["repeat_items"]]]
     by_key = defaultdict(list)
     for r in records:
         if r["ok"]:
             by_key[r["key"]].append(r["p_fail"])
     groups = {k: by_key[k][: s0["repeat_calls"]] for k in repeat_keys if len(by_key[k]) >= s0["repeat_calls"]}
-    called = {r["key"] for r in records if str(r.get("tag", "")).startswith("session-")}
+    called = _ok_keys([r for v in _session_calls(records).values() for r in v])
     calls = stage0.call_summary(records)
     summary = {
         "generated_at": (now or datetime.now(timezone.utc)).isoformat(),
@@ -167,6 +210,7 @@ def cmd_stage0_report(paths: Paths, pre: dict, now: datetime | None = None) -> d
         "projection": stage0.project_full_run(sum(rs["candidate_counts"].values()), calls["mean_input_tokens"],
                                               calls["p50_ms"]),
         "sessions": sessions,
+        "notes": stage0.stage0_notes(rs["stats"][str(rs["n_selected"])]),
         "by_session": {tag: stage0.call_summary([r for r in records if r.get("tag") == tag])
                        for tag in sorted({r.get("tag") for r in records if r.get("tag")})},
         "complete": (len(sessions) >= s0["sessions"]

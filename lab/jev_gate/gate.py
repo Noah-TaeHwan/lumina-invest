@@ -92,11 +92,12 @@ class JevGate:
     """캐시·예산 상한이 있는 순차 JEV 호출기."""
 
     def __init__(self, cache_path: Path, budget_usd: float = 5.0, client: httpx.Client | None = None,
-                 api_key: str | None = None):
+                 api_key: str | None = None, clock=None):
         self.cache_path = cache_path
         self.budget_usd = budget_usd
         self._client = client if client is not None else httpx.Client(timeout=TIMEOUT_S)
         self._api_key = api_key
+        self._clock = clock or (lambda: datetime.now(timezone.utc))  # 호출 시각 기록용(테스트에서 주입)
         self._cache: dict[str, GateResult] = {}
         self.spent_usd = 0.0
         if cache_path.exists():
@@ -129,7 +130,7 @@ class JevGate:
         if self._api_key is None:
             self._api_key = load_api_key()
         body = {"model": MODEL, "state": state, "questions": {QUESTION_ID: QUESTION}}
-        called_at = datetime.now(timezone.utc).isoformat()
+        called_at = self._clock().isoformat()
         t0 = time.perf_counter()
 
         def fail(error: str, status: int | None = None) -> GateResult:

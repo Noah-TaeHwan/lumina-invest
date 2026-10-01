@@ -1,5 +1,6 @@
 """JEV 게이트 클라이언트 검증 — 실제 API를 호출하지 않는다."""
 import json
+from datetime import datetime, timezone
 
 import httpx
 import pytest
@@ -114,3 +115,9 @@ def test_load_api_key_rejects_open_permissions(tmp_path, monkeypatch):
         gate.load_api_key()
     key.chmod(0o600)
     assert gate.load_api_key() == "secret-value"
+
+
+def test_called_at_uses_injected_clock(tmp_path):
+    at = datetime(2026, 10, 1, 12, 0, tzinfo=timezone.utc)
+    r = _gate(tmp_path / "calls.jsonl", Recorder(ok_response), clock=lambda: at).ask(STATE)
+    assert r.called_at == at.isoformat()

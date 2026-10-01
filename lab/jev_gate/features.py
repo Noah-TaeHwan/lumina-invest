@@ -11,6 +11,7 @@ import pandas as pd
 
 from app.services import ta_utils as ta
 
+ROUND_DECIMALS = 3  # state 값은 소수 셋째 자리까지 남긴다(넷째 자리에서 반올림)
 STATE_FEATURES = ("ret_1", "ret_5", "ret_15", "ret_60", "breakout_margin_atr", "atr_regime",
                   "volume_z", "taker_buy_ratio", "range_pos_240", "trend_slope_atr", "bars_since_prev_signal")
 
@@ -49,6 +50,6 @@ def compute_features(k: pd.DataFrame) -> pd.DataFrame:
 
 
 def build_state(row) -> dict:
-    """후보 한 행을 JEV state(익명 특징 + 정의)로 바꾼다. 값은 소수 셋째 자리로 반올림한다."""
-    return {"features": {name: round(float(row[name]), 3) for name in STATE_FEATURES},
+    """후보 한 행을 JEV state(익명 특징 + 정의)로 바꾼다. 값은 ROUND_DECIMALS 자리까지 남긴다."""
+    return {"features": {name: round(float(row[name]), ROUND_DECIMALS) for name in STATE_FEATURES},
             "feature_definitions": FEATURE_DEFINITIONS}

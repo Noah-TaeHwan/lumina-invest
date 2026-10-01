@@ -92,3 +92,18 @@ def test_render_report_verdicts():
     assert "판정: GO" in stage0.render_report(base, go, TH)
     assert "판정: PARTIAL" in stage0.render_report({**base, "complete": False}, go, TH)
     assert "판정: NO-GO" in stage0.render_report(base, {**go, "dev_candidates": False}, TH)
+
+
+def test_stage0_notes_flag_pre_cost_loss():
+    assert any("손실 전략 차단" in n for n in stage0.stage0_notes({"gross_mean": -0.0001}))
+    assert not any("손실 전략 차단" in n for n in stage0.stage0_notes({"gross_mean": 0.001}))
+
+
+def test_render_report_shows_notes():
+    summary = {"n_selected": 60, "rule": {}, "candidate_counts": {}, "sessions": [], "by_session": {},
+               "calls": {"calls": 1, "p50_ms": 1, "p95_ms": 1, "p99_ms": 1, "failure_rate": 0.0,
+                         "schema_valid_rate": 1.0, "mean_input_tokens": 1, "models": [], "errors": {}},
+               "repeat": {"items": 0, "agreement": 0.0, "mean_std": 0.0}, "dev_candidates": 0,
+               "projection": {"calls": 0, "cost_usd": 0.0, "hours_sequential": 0.0}, "complete": False,
+               "notes": ["메모 A"]}
+    assert "- 메모 A" in stage0.render_report(summary, stage0.evaluate_go(summary, TH), TH)
