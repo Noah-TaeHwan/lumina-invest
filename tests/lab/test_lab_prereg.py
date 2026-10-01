@@ -45,9 +45,16 @@ def test_prereg_pins_cost_operations_and_arms():
 
 
 def test_prereg_v3_five_minute_bars_and_separate_results():
-    assert PREREG["version"] == 3
+    assert PREREG["version"] >= 3
     assert PREREG["bar_minutes"] == 5
     assert PREREG["rule"]["n_grid"] == [48]
     paths = cli.Paths(Path("/repo"), PREREG)
     assert str(paths.results).endswith("lab/results/stage0-v3")
     assert str(paths.report).endswith("docs/lab/stage0-v3-report.md")
+
+
+def test_prereg_v4_stage1_block():
+    assert PREREG["version"] == 4
+    s1 = PREREG["stage1"]
+    assert s1["calls_file"] == PREREG["stage0"]["results_dir"] + "/jev_calls.jsonl"
+    assert set(s1) >= {"results_dir", "report", "freeze_file", "bootstrap", "claim_rule"}

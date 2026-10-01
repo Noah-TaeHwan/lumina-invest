@@ -20,7 +20,7 @@ from pathlib import Path
 import httpx
 import numpy as np
 
-from lab.jev_gate import data, features, gate, rule, stage0
+from lab.jev_gate import candidates, data, features, gate, predict, rule, stage0
 
 PREREG_PATH = Path(__file__).with_name("prereg.json")
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -240,6 +240,69 @@ def cmd_stage0_report(paths: Paths, pre: dict, now: datetime | None = None) -> d
     return summary
 
 
+class Stage1Paths:
+    """Stage 1 입출력 경로. JEV 호출 기록은 Stage 0 v3와 공유한다(같은 입력 재과금 방지)."""
+
+    def __init__(self, root: Path, pre: dict):
+        s1 = pre["stage1"]
+        self.raw = root / "lab/data/raw"
+        self.results = root / s1["results_dir"]
+        self.report = root / s1["report"]
+        self.freeze = root / s1["freeze_file"]
+        self.calls = root / s1["calls_file"]
+        self.summary = self.results / "summary.json"
+
+
+def load_table(paths, pre: dict):
+    """전 구간 1분봉을 받아 봉 주기로 묶고 후보 표를 만든다."""
+    periods = pre["periods"]
+    months = data.month_range(periods["dev"][0][:7], periods["post_release"][1][:7])
+    with httpx.Client(timeout=120, follow_redirects=True) as client:
+        k = data.load_klines_range(pre["symbol"], months, paths.raw, client)
+    return candidates.build_table(data.resample_klines(k, pre.get("bar_minutes", 1)), pre)
+
+
+def _prereg_sha() -> str:
+    return hashlib.sha256(PREREG_PATH.read_bytes()).hexdigest()
+
+
+def check_freeze(paths, pre: dict) -> dict:
+    """동결 파일이 있고 현재 사전등록·질문과 일치해야 한다."""
+    frozen = _read_json(paths.freeze, None)
+    if frozen is None:
+        raise SystemExit("홀드아웃 동결 파일이 없습니다. stage1-freeze를 먼저 실행하세요")
+    if frozen["prereg_sha256"] != _prereg_sha() or frozen["question_sha256"] != gate.question_hash():
+        raise SystemExit("동결 이후 사전등록이나 질문이 바뀌었습니다. 홀드아웃을 열 수 없습니다")
+    return frozen
+
+
+def cmd_stage1_call(paths, pre: dict, period: str, gate_factory=None, table=None) -> int:
+    """한 구간의 모든 후보에 JEV를 순차 호출한다. 홀드아웃·공개 이후 구간은 동결 확인 후에만."""
+    if period not in pre["periods"]:
+        raise SystemExit(f"period는 {list(pre['periods'])} 중 하나여야 합니다")
+    if period in ("holdout", "post_release"):
+        check_freeze(paths, pre)
+    t = load_table(paths, pre) if table is None else table
+    states = list(t.loc[t["period"] == period, "state"])
+    g = (gate_factory or _default_gate)(paths, pre)
+    _ask_each(g, states, tag=f"stage1-{period}")
+    return 0
+
+
+def cmd_stage1_freeze(paths, pre: dict, table=None) -> int:
+    """개발 구간으로 로지스틱 기준선을 학습하고, 사전등록·질문 해시와 함께 동결한다(덮어쓰지 않음)."""
+    if paths.freeze.exists():
+        raise SystemExit("이미 동결했습니다. 동결 파일은 덮어쓰지 않습니다")
+    t = load_table(paths, pre) if table is None else table
+    dev = t[t["period"] == "dev"]
+    model = predict.fit_logistic(dev[list(features.STATE_FEATURES)].to_numpy(float), dev["label"].to_numpy())
+    _write_json(paths.freeze, {"frozen_at": datetime.now(timezone.utc).isoformat(), "prereg_sha256": _prereg_sha(),
+                               "question_sha256": gate.question_hash(), "dev_candidates": int(len(dev)),
+                               "features": list(features.STATE_FEATURES), "logistic": model})
+    print(f"동결: {paths.freeze} (dev {len(dev)}건)")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     """명령줄 진입점."""
     p = argparse.ArgumentParser(prog="python -m lab.jev_gate")
@@ -250,8 +313,20 @@ def main(argv: list[str] | None = None) -> int:
     call.add_argument("--session", type=int, required=True)
     sub.add_parser("stage0-repeat")
     sub.add_parser("stage0-report")
+    s1call = sub.add_parser("stage1-call")
+    s1call.add_argument("--period", required=True)
+    sub.add_parser("stage1-freeze")
+    sub.add_parser("stage1-report")
     args = p.parse_args(argv)
     pre = load_prereg()
+    if args.cmd.startswith("stage1-"):
+        s1 = Stage1Paths(args.root, pre)
+        if args.cmd == "stage1-call":
+            return cmd_stage1_call(s1, pre, args.period)
+        if args.cmd == "stage1-freeze":
+            return cmd_stage1_freeze(s1, pre)
+        cmd_stage1_report(s1, pre)
+        return 0
     paths = Paths(args.root, pre)
     if args.cmd == "stage0-rule":
         return cmd_stage0_rule(paths, pre)

@@ -1,7 +1,7 @@
 {
-  "version": 3,
+  "version": 4,
   "created": "2026-10-01",
-  "amended": "2026-10-01 v2 — 세션 1·반복 측정 이후, 코드에 이미 있던 값(특징 이름·정의 해시·반올림 자릿수·신호 간격 상한·갈래 맞춤 규칙·토큰 가격·연속 실패 한도)을 명시로 추가했다. JEV 호출 입력(state·질문)과 v1의 모든 값은 바뀌지 않았다. / 2026-10-02 v3 — spec 15절: 5분봉(bar_minutes 5), N=48 고정, 시간청산 24봉(2시간), 질문 문구 5분봉·2시간으로 변경(새 질문 해시), 주결과 H-predict. 검증·홀드아웃 가격은 이 결정에 쓰지 않았다. v2 결과는 lab/results/stage0에 보존.",
+  "amended": "2026-10-01 v2 — 세션 1·반복 측정 이후, 코드에 이미 있던 값(특징 이름·정의 해시·반올림 자릿수·신호 간격 상한·갈래 맞춤 규칙·토큰 가격·연속 실패 한도)을 명시로 추가했다. JEV 호출 입력(state·질문)과 v1의 모든 값은 바뀌지 않았다. / 2026-10-02 v3 — spec 15절: 5분봉(bar_minutes 5), N=48 고정, 시간청산 24봉(2시간), 질문 문구 5분봉·2시간으로 변경(새 질문 해시), 주결과 H-predict. 검증·홀드아웃 가격은 이 결정에 쓰지 않았다. v2 결과는 lab/results/stage0에 보존. / 2026-10-02 v4 — Stage 1 Plan 1(판정력) 설정 추가. 홀드아웃을 열기 전, 개발·검증 구간 JEV 결과를 보기 전에 기록했다.",
   "spec": "docs/superpowers/specs/2026-10-01-jev-gate-lab-design.md",
   "symbol": "BTCUSDT",
   "bar_minutes": 5,
@@ -102,5 +102,17 @@
     "results_dir": "lab/results/stage0-v3",
     "report": "docs/lab/stage0-v3-report.md"
   },
-  "primary_outcome": "H-predict: 홀드아웃 후보의 지연 0 가상 거래 손실 여부에 대한 JEV p_fail AUC를 무작위(0.5)·같은 특징 로지스틱 회귀 AUC와 비교, 일 단위 블록 부트스트랩 95% 신뢰구간"
+  "primary_outcome": "H-predict: 홀드아웃 후보의 지연 0 가상 거래 손실 여부에 대한 JEV p_fail AUC를 무작위(0.5)·같은 특징 로지스틱 회귀 AUC와 비교, 일 단위 블록 부트스트랩 95% 신뢰구간",
+  "stage1": {
+    "results_dir": "lab/results/stage1",
+    "report": "docs/lab/stage1-predict-report.md",
+    "freeze_file": "lab/jev_gate/prereg_holdout.json",
+    "calls_file": "lab/results/stage0-v3/jev_calls.jsonl",
+    "bootstrap": {
+      "n": 2000,
+      "seed": 20261002
+    },
+    "calibration_bins": 10,
+    "claim_rule": "홀드아웃 JEV AUC − 0.5의 95% 구간 하한 > 0 이고 JEV − 로지스틱 AUC 차의 점추정 ≥ 0 일 때만 판정력이 있다고 쓴다"
+  }
 }
