@@ -91,6 +91,8 @@ class Settings(BaseSettings):
     # 앱 기동 시 alembic upgrade head 실행 여부. 복제 인스턴스가 여러 개인 운영 환경에서는 false 로 두고
     # 배포 단계에서 scripts/migrate.sh 로 1회 실행한다.
     RUN_MIGRATIONS_ON_STARTUP: bool = True
+    # 로컬 기능 확인 시 대량 시세 수집을 끈다. 기존 실행의 기본 동작은 유지한다.
+    STARTUP_DATA_SYNC_ENABLED: bool = True
     PUBLIC_BASE_URL: str = ""               # Webhook URL 안내 등에 쓰는 외부 공개 주소 (예: https://fund.example.com)
 
     ADMIN_EMAILS: str = ""

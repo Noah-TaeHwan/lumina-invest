@@ -1,904 +1,132 @@
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+# Lumina Invest
 
-# 목표 시스템(Final)
+기업 지표 조회와 AI 채팅을 출발점으로 발전시키는 **투자 리서치 포트폴리오**입니다.
 
-## 나만의 로보 어드바이저 개발 및 성과 검증 프로젝트	
-- AI 기반의 자동화 로보 어드바이저 모델 개발 
-- 패턴 인식 기법을 활용한 주식 시장 예측 프로젝트 
-- 자산배분모델을 활용한 포트폴리오 최적화, 주식 스크리닝을 통한 종목 선정 등 직접 수행 
-- 구축한 퀀트 모델의 결과를 해석해보고 자체적으로 모의 투자 의사결정 진행	
+**현재 단계: 초기 개발 · 로컬 기본 동작 확인**
 
-## 나만의 투자 인디케이터 개발 및 성과 검증 프로젝트	
-- 기본적인 인디케이터(MA, RSI등)로 전략 설계 
-- 커스텀 인디케이터 개발 
-- 트레이딩뷰 플랫폼으로 성과 확인 및 코딩 실습(PineScript) 
-- 파이썬 프로그래밍을 통한 성과 검증 
-- 증권사 연동(API 활용)을 통한 자동화 모델 구현
-  
-## 목차
+[edumgt/lumina-invest](https://github.com/edumgt/lumina-invest)의 교육용 코드에서 출발했습니다. 원본 기반을 유지하면서 자료 확인, AI의 설명, 사용자의 판단 기록을 연결하는 경험을 개발합니다.
 
-1. [프로젝트 시작 전 개인별 준비사항](#프로젝트-시작-전-개인별-준비사항)
-2. [기능 개요](#기능-개요)
-3. [기술 스택](#기술-스택)
-4. [아키텍처](#아키텍처)
-5. [로컬 실행 가이드](#로컬-실행-가이드)
-6. [환경변수](#환경변수)
-7. [AWS 이관 가이드](#aws-이관-가이드)
-8. [Qdrant 구성 제안](#qdrant-구성-제안)
-9. [Qdrant 데이터 공유 방법](#qdrant-데이터-공유-방법)
-10. [주요 화면](#주요-화면)
+## 프로젝트가 다루는 일
 
----
+상장기업을 조사할 때 기업 지표와 관련 자료를 확인하고, AI의 설명을 검토하며, 자신의 판단을 기록할 수 있는 흐름을 목표로 합니다.
 
-## 프로젝트 시작 전 개인별 준비사항
+현재 확인한 두 경로는 다음과 같습니다.
 
-### 1) 개인별 습득 기술 스택 (권장 우선순위)
+- **기업 조회:** 종목 검색 → 기업 선택 → 지표 확인
+- **AI 채팅:** 질문 입력 → 답변 표시 → 대화 이력 저장
 
-| 우선순위 | 영역 | 학습 포인트 |
+선택한 기업 자료와 AI의 출처 링크, 판단 노트를 연결하는 기능은 다음 개발 범위입니다.
+
+## 원본 기반과 개인 작업
+
+| 구분 | 범위 | 상태 |
 |---|---|---|
-| 1 | Python / FastAPI | 비동기 API(`async`/`await`), 라우팅, 의존성 주입, Pydantic 모델 |
-| 1 | Docker / Docker Compose | 컨테이너 기동, 볼륨, 서비스 간 네트워크, 로그 확인 |
-| 1 | 데이터 기초 | SQLite 쿼리, MongoDB 기본 CRUD, Redis 세션 개념 |
-| 2 | LLM / RAG | Ollama 모델 관리, 임베딩, Qdrant 컬렉션/업서트/검색 |
-| 2 | 금융 데이터 처리 | pandas/numpy 기반 지표 계산(RSI, SMA, Bollinger) |
-| 3 | 운영/배포 | 환경변수 관리, AWS(ECS/Fargate) 배포 흐름, 모니터링 기초 |
+| 원본 제공 기반 | 인증, 기업 조회, AI 에이전트·RAG 경로, 그래프, 모의투자·퀀트 기능 및 관련 자료 | edumgt의 기존 코드. 전체 기능의 실행 검증은 미수행 |
+| 개인 작업 — 저장소 | 독립 개인 저장소에서 개발하며 원작 출처와 기존 이력 유지 | 개인 개발 저장소 |
+| 개인 작업 — 실행 환경 | 독립 Compose 환경, 전용 포트·볼륨, 시작 시장 동기화 가드와 최소 검사 | 이 변경에 포함 |
+| 개인 작업 — 소개 | 제품 중심 README, 원본 교육 자료 보존, 재현 가능한 로컬 가이드 | 이 변경에 포함 |
+| 개인 작업 — 확인 | 회원가입·로그인, 종목 조회·지표 표시, 시드 그래프, 채팅 응답·저장 | 2026-10-01 로컬 확인 |
+| 다음 개발 | 영속 관심종목, 자료 출처·시점, AI 근거 링크, 기업별 판단 노트 | 계획 |
 
-### 2) 본인 PC 사양 가이드
+기능을 추가할 때 이 표에 개인 변경과 확인 근거를 함께 갱신합니다.
 
-| 구분 | 최소 사양(학습/실습) | 권장 사양(원활한 개발) |
-|---|---|---|
-| OS | Windows 11 / macOS / Ubuntu 최신 | 동일 |
-| CPU | 4코어 이상 | 8코어 이상 |
-| RAM | 16GB | 32GB 이상 |
-| 저장공간 | 여유 30GB 이상(도커 이미지+모델+데이터) | 여유 80GB 이상 |
-| Docker | Desktop/Engine + Compose v2 필수 | 필수 |
-| Python | 3.12 | 3.12 |
-| 네트워크 | 모델/이미지 다운로드 가능한 안정적 회선 | 동일 |
+## 화면
 
-> 참고: 로컬에서 Ollama(`llama3.1`, `nomic-embed-text`)까지 구동하므로 메모리와 디스크 여유가 작업 체감 성능에 큰 영향을 줍니다.
+아래는 원본 프로젝트에 포함된 기업 화면 예시입니다. **API Mock 기반 캡처**이며, 현재 로컬 실데이터·AI 정확성·공개 배포를 검증한 이미지로 사용하지 않습니다.
 
-### 3) 가입/계정 준비가 필요한 플랫폼
+![원본 프로젝트 제공 · API Mock 기반 기업 지표 화면](screenshots/final05_company.png)
 
-| 구분 | 필수 여부 | 용도 |
-|---|---|---|
-| GitHub | 필수 | 코드 접근, 토큰 발급(`GITHUB_TOKEN`) 시 크롤링 rate limit 완화 |
-| Docker Hub 계정 | 권장 | 도커 이미지 pull rate limit 관리 |
-| AWS 계정 | 선택 | 문서의 AWS 이관 가이드(ECS/Fargate, ElastiCache, DocumentDB 등) 적용 시 |
-| Qdrant Cloud 계정 | 선택 | 로컬 대신 관리형 벡터DB 사용 시 |
-| 증권 API 계정(Alpaca/키움/토스 등) | 선택 | 현재는 Mock 기반, 실거래/외부 연동 확장 시 필요 |
+실제 대표 화면은 해외 종목의 통화 표시 문제를 해결한 뒤 새로 준비합니다.
 
-### 4) 예상 비용(카드 청구 예상금액)
+## 현재 구성
 
-| 시나리오 | 월 예상비용(1인) | 비고 |
-|---|---|---|
-| 로컬 개발만 사용 | **0원 ~ 2만원** | 기본은 무료, 필요 시 유료 IDE/클라우드 스토리지 구독 정도 |
-| 로컬 + Qdrant Cloud(PoC) | **2만원 ~ 8만원** | 사용량/플랜에 따라 변동 |
-| AWS 소규모 운영 병행 | **30만원 ~ 150만원+** | ECS, Redis, DocumentDB, GPU(OLLAMA용 EC2) 포함 시 급증 가능 |
-
-> 비용은 2026년 기준 일반적인 사용 패턴 기준의 보수적 범위입니다.  
-> 실제 청구액은 사용 시간, 저장 용량, 트래픽, GPU 사양에 따라 달라집니다.
-
----
-
-## 기능 개요
-
-| GNB | 기능 |
+| 역할 | 사용 기술 |
 |---|---|
-| **금융정보 Agent** | ReAct 루프 기반 AI 챗봇. 개인CB / 기업CB / 금융상품 CSV를 SQLite로 집계 후 자연어 질의 |
-| **크롤링** | GitHub docs (python-quant) 크롤링 → Qdrant RAG. URL 직접 크롤링 지원 |
-| **직접매매** | 가상 포트폴리오 관리, 매수/매도 주문, 키움증권·토스증권 API Mockup |
-| **모의투자** | (stock-coin-trade 이식) 공유 현금 1억원 모의계좌 — 국내주식 실시간 시세 모의주문·미리보기·계좌 리셋, Upbit KRW 마켓 코인 모의매매(국내 거래소 가격 비교·거래대금 랭킹), 대체자산(선물·옵션·파생 ETN·금·은·부동산 지분) 모의주문, 외부 시스템용 Open API 키 발급(`/openapi/v1`), Alpaca Paper 읽기 전용 연결 테스트 |
-| **퀀트자동매매** | RSI·SMA·볼린저밴드 시그널, 10분 주기 Agentic AI 자동매매 Mockup, 10년 백테스트, **QuantConnect LEAN 백테스트**(domain-rag-lab 이식: Yahoo 일봉 → LEAN Docker 실행, 매수후보유·MA교차·DCA·모멘텀 전략), **위험관리**(중복 주문 방지 쿨다운·일손실 한도·종목 비중 한도·일 주문 수·비상 정지 스위치) |
-| **리밸런싱 엔진** | 목표 비중 플랜 + 3가지 트리거(시간: 월/분기/연 · 이탈률: 허용 %p 초과 · 현금흐름: 입금/출금/배당) → 매도→매수 주문 산출·모의 체결(`source=REBALANCE`), 자동 체결/제안 승인 모드, Celery Beat 1시간 점검 (`/api/rebalance/*`) |
-| **XAI (설명 가능한 AI)** | LightGBM TreeSHAP(`pred_contrib`) 기여도로 매수/관망/매도 판단 근거를 자연어로 설명 (`/api/ml/explain`, 로보 추천 종목·스크리닝·성과 검증 화면) |
-| **차트 패턴·멀티타임프레임** | 캔들 패턴(해머·장악형·샛별형 등)·피벗 지지/저항선·돌파/골든크로스 탐지, 60분봉·일봉·주봉 종합 신호 + 신뢰도 (`/api/stocks/patterns`, `/api/stocks/mtf-signal`) |
-| **TradingView 연동** | 알림 Webhook 수신(`POST /api/webhooks/tradingview`, API 키 인증, 모의 체결·중복 방지·알림 전달) + Strategy Tester 성과/거래 목록 CSV ↔ LEAN 백테스트 교차 검증 |
-| **투자성향·목표 시뮬레이션** | 7문항 투자성향 진단(5단계) → 자산배분 성향 반영, 목표 연수익률 달성 확률 몬테카를로(월 적립·백분위 경로) |
-| **자유 산식 커스텀 지표** | 안전한 수식 DSL(`app/services/formula.py`: 화이트리스트 AST, 37개 causal 함수, `shift`≥1로 룩어헤드 차단)로 지표·매수·매도 산식과 params 정의 → 산식 변경 시 자동 버전 증가·복원, (버전·종목·기간)별 계산 결과 저장·재사용, Pine/Python 내보내기 (`/api/formula-indicators/*`) |
-| **백테스트 비용 모델** | 수수료·슬리피지(bp)·손절·익절(%) 반영 (`/api/quant/pipeline`, `/api/quant/ml/run`) |
-
----
-
-## 기술 스택
-
-### Backend
-| 항목 | 기술 |
-|---|---|
-| 언어 / 프레임워크 | Python 3.12 / FastAPI (async) |
-| LLM / 임베딩 | Ollama (`llama3.1` / `nomic-embed-text`) |
-| 벡터 DB | Qdrant |
-| 사용자 인증 DB | MongoDB (motor async driver) |
-| 세션 | Redis (`redis.asyncio`) + HTTP-only 쿠키 |
-| 관계형 / 시계열 | aiosqlite (CB 통계, 금융상품, 포트폴리오, 주문) |
-| 외부 HTTP | httpx (async) – Yahoo Finance, Ollama API |
-| HTML 파싱 | BeautifulSoup4 |
-| 환경변수 | pydantic-settings |
-
-### Frontend
-| 항목 | 기술 |
-|---|---|
-| 빌드 | Vanilla JS (ES Modules, CDN-only, 빌드 툴 없음) |
-| 스타일 | Tailwind CSS v3 (CDN) |
-| 차트 | TradingView Lightweight Charts v4 (CDN) |
-
-### Infra (로컬 Docker)
-```
-MongoDB 8  ·  Redis 8  ·  Ollama  ·  Qdrant latest
-```
-
----
-
-## 퀀트 매매 ML 파이프라인
+| API | Python 3.12 · FastAPI |
+| AI 워크플로 | LangGraph · Ollama 기반 로컬 모델 |
+| 사용자·대화 데이터 | PostgreSQL · SQLAlchemy |
+| 세션·상태 | Redis |
+| 기업 관계 그래프 | Neo4j |
+| 문서 검색 경로 | Qdrant · Ollama 임베딩 |
+| 웹 화면 | Vanilla JavaScript ES Modules |
+| 로컬 실행 | Docker Compose |
 
 ```mermaid
-flowchart TD
-    A([원시 시장 데이터\nOHLCV · Yahoo Finance]) --> B
-
-    subgraph PRE["① 전처리 (Preprocessing)"]
-        B[결측치 처리\nffill / bfill] --> C[이상치 제거\n종가 0 이하 필터] --> D[DatetimeIndex 정렬]
-    end
-
-    D --> E
-
-    subgraph FE["② 피처 엔지니어링 (Feature Engineering)"]
-        E[수익률\nret_1 / ret_5 / ret_20] --> F[이동평균 비율\nMA5 / MA20 ratio]
-        F --> G[RSI 14]
-        G --> H[MACD 12/26/9]
-        H --> I[볼린저밴드\nbb_width · bb_pos]
-        I --> J[거래량 비율 · ATR]
-    end
-
-    J --> K{모델 선택}
-
-    subgraph ML["③-A ML 모델"]
-        K -->|lgb| L[LightGBM\n방향성 3-class 분류\n매수 / 관망 / 매도]
-    end
-
-    subgraph DL["③-B DL 모델"]
-        K -->|mlp| M[MLP Neural Net\n64→32 ReLU\nsklearn MLPClassifier]
-        K -->|lstm| N[LSTM · Transformer\nPyTorch 확장 옵션]
-    end
-
-    subgraph RULE["③-C Fallback"]
-        K -->|rule| O[규칙 기반\nRSI+MACD+BB 점수합산]
-    end
-
-    L --> P([시그널 생성\n+1 매수 / 0 관망 / -1 매도])
-    M --> P
-    N --> P
-    O --> P
-
-    P --> Q
-
-    subgraph BT["④ 백테스트 (Backtest)"]
-        Q[누적 수익률] --> R[샤프지수\n연간화 √252]
-        R --> S[MDD 최대낙폭]
-        S --> T[승률 · 매매 횟수]
-    end
-
-    T --> U{시그널 검증}
-    U -->|통과| V
-    U -->|기각| FE
-
-    subgraph EXEC["⑤ 실시간 실행 (Alpaca API)"]
-        V[POST /v2/orders\nPaper Trading] --> W[포트폴리오 업데이트\nMongoDB orders · portfolio]
-    end
-
-    W --> X([10분 Agentic Loop\nauto_trade.py]) --> A
-
-    style PRE fill:#e8f4fd,stroke:#2962ff
-    style FE  fill:#e8f5e9,stroke:#089981
-    style ML  fill:#fff3e0,stroke:#f57c00
-    style DL  fill:#fce4ec,stroke:#e91e63
-    style RULE fill:#f3e5f5,stroke:#7b1fa2
-    style BT  fill:#e0f2f1,stroke:#00695c
-    style EXEC fill:#e8eaf6,stroke:#3949ab
+flowchart LR
+  Web[웹 화면] --> API[FastAPI]
+  API --> PG[PostgreSQL: 사용자와 대화]
+  API --> Redis[Redis: 세션과 상태]
+  API --> Market[기업 자료 조회]
+  API --> Graph[Neo4j: 관계 그래프]
+  API --> Agent[LangGraph]
+  Agent --> LLM[Ollama]
+  API -. 문서 검색 경로 .-> Vector[Qdrant]
 ```
 
----
+위 구성은 현재 코드와 로컬 실행 경로를 설명합니다. Qdrant 검색을 통한 출처 연결 답변은 아직 확인하지 않았습니다.
 
-## 아키텍처
+코드 진입점은 [FastAPI 앱](app/main.py)이며, [채팅 API](app/routes/chat.py)가 [LangGraph 에이전트](app/services/langgraph_agent.py)와 PostgreSQL 대화 저장을 연결합니다.
 
-배포 환경별 상세 목표 설계서는 다음 문서를 기준으로 합니다.
+## 로컬에서 실행하기
 
-- [온프레미스 아키텍처 설계서](onprem.md): Docker Compose, Kubernetes, 로컬 Ollama, NVIDIA GPU, 데이터·보안·백업·관측성
-- [AWS 아키텍처 설계서](aws.md): CloudFront/S3, API Gateway/Lambda, ECS, Bedrock/SageMaker, GPU 자체 호스팅, RDS/ElastiCache, 보안·DR·비용
-- [데이터 파이프라인 설계서](pipeline.md): 주식 백데이터 원천 인벤토리, 수집 스케줄, 캐시·적재 스키마, OHLCV/텍스트 전처리 규칙, 히스토리 테이블 목표안
+Docker Compose v2와 이미지·모델 다운로드가 가능한 네트워크가 필요합니다. 별도의 유료 AI API 키는 사용하지 않습니다.
 
-> 아래 구성도와 이 README의 일부 로컬 설명에는 과거 MongoDB/SQLite 기준 내용이 남아 있습니다. 신규 인프라 설계는 현재 코드의 PostgreSQL/Redis/Neo4j/Celery 및 선택형 LLM provider를 반영한 위 두 설계서를 우선합니다.
+- 실행 설정: [compose.portfolio.yml](compose.portfolio.yml)
+- 앱 주소: `http://127.0.0.1:8967`
+- 로컬 채팅 모델: `llama3.2:1b` · 임베딩 모델: `nomic-embed-text`
+- 비공개 설정: `.env.portfolio` — 별도 생성, Git과 이미지 빌드에서 제외
+- 시작 시장 동기화 비활성화, 실주문 키·Celery/ingest 서비스·Docker socket 제외
 
-```
-Browser
-  │
-  ▼
-FastAPI (Uvicorn)
-  ├── /api/auth/*         → MongoDB (motor)
-  ├── /api/chat           → ReAct Agent → SQLite + Qdrant RAG
-  ├── /api/stocks/*       → Yahoo Finance API (httpx)
-  ├── /api/portfolio/*    → SQLite (aiosqlite)
-  ├── /api/orders/*       → SQLite + 포트폴리오 동기화
-  ├── /api/crawl/*        → GitHub API + Qdrant upsert
-  ├── /api/quant/*        → Yahoo Finance + 기술지표 계산
-  └── /api/admin/*        → 관리자 전용 초기화
-  │
-  ├── Redis ──── 세션 (fin_session:{uuid})
-  ├── MongoDB ── users collection
-  ├── SQLite ─── 10개 테이블
-  │               personal_cb_stats, corporate_cb_stats,
-  │               bank_products, fund_products, chats,
-  │               portfolio, orders, broker_settings,
-  │               crawled_docs, audit_events
-  ├── Qdrant ─── fin_chunks collection (크롤링 문서)
-  └── Ollama ─── llama3.1 (chat) + nomic-embed-text (embed)
-```
+[로컬 실행 가이드](PORTFOLIO_LOCAL.md)에서 checkout, 비밀값 생성, 모델 준비, 기동과 기능 확인 순서를 안내합니다.
+현재 변경 브랜치와 main 통합 후 clone 방법도 구분합니다.
 
----
+기본 [docker-compose.yml](docker-compose.yml)은 8966 포트와 백그라운드 ingest/Celery 구성이 포함된 원본 실행 경로입니다.
+이 포트폴리오용 profile과 서비스·주소를 혼용하지 않습니다.
 
-## 단위 테스트
+## 확인한 동작과 한계
 
-```bash
-pip install -r requirements.txt -r requirements-dev.txt
-python -m pytest -q            # tests/: 지표 룩어헤드 방지 · 리밸런싱 · 위험관리 · XAI · TradingView 파서 · 패턴 · 성향/시뮬레이션
-```
+2026-10-01 별도 로컬 브랜치에서 확인했습니다.
 
-컨테이너 이미지로 실행할 때:
+| 항목 | 결과 |
+|---|---|
+| 회원가입·로그인 | 확인 |
+| 종목 검색·기업 지표 표시 | 확인. 일부 재무 필드는 누락 |
+| 삼성전자 시드 관계 그래프 | 확인 |
+| AI 채팅·화면 표시·대화 저장 | 확인. 한 화면 요청은 약 419.9초 소요 |
+| 시작 시장 동기화 비활성 설정 | 최소 검사 및 실제 서버 상태 확인 |
+| 해외 기업 통화·금액 표시 | 오류 발견, 수정 예정 |
+| RAG 출처 연결·citations 표시 | 현재 확인한 답변에서 근거 링크를 제공하지 못함 |
+| AI 근거 링크·판단 노트 | 개발 예정 |
+| 공개 데모·배포·개인 CI 성공 | 미확인 |
 
-```bash
-docker run --rm -v "$PWD/tests:/app/tests:ro" -v "$PWD/pytest.ini:/app/pytest.ini:ro" \
-  -e DATABASE_URL=postgresql+asyncpg://x:x@localhost/x -e REDIS_URL=redis://localhost:6379/0 \
-  --entrypoint sh lumina-invest-app -c "pip install -q pytest && python -m pytest -q"
-```
+419.9초는 단일 로컬 요청의 관측값이며 평균 응답 시간·서비스 성능 지표가 아닙니다. 채팅 연결 확인은 금융 답변 정확성이나 투자 성과 검증을 의미하지 않습니다.
 
-GitHub Actions `Unit Tests` 워크플로가 push/PR마다 실행되며, `Deploy to fund-web EC2`는 테스트 통과 후에만 배포합니다.
+원본 테스트 파일과 GitHub workflow가 있습니다. 2026-10-01 조사에서 개인 저장소 Actions는 `enabled=false`, 실행 기록은 0건이었습니다. 전체 CI와 공개 배포는 확인하지 않았습니다.
+이 변경에는 시작 동기화 가드의 [최소 검사](tests/test_startup_data_sync.py)가 포함되어 있습니다. 실행 절차는 로컬 가이드에 설명합니다.
 
-## 로컬 실행 가이드
+## 다음 개발
 
-### 사전 요구사항
-- Docker Desktop + Docker Compose v2
-- Python 3.12 (로컬 개발 시)
+- [ ] 해외 기업 통화·단위 표시 개선
+- [ ] AI 응답 지연 원인 개선 및 실제 사용자 요청으로 확인
+- [ ] 기업 자료의 출처·조회 시각 표시
+- [ ] 관심종목과 기업별 판단 노트 저장
+- [ ] AI 답변에 근거 링크 전달·표시
+- [ ] 위 기능을 연결한 대표 리서치 흐름과 검증 근거 준비
 
-### 1. 인프라 기동
+## 상세 자료
 
-```bash
-# Ollama 모델 포함 전체 기동
-docker compose up -d
+- [로컬 실행 가이드](PORTFOLIO_LOCAL.md)
+- [원본 교육 자료·Mock 화면·개념 설명 보존본](docs/upstream/readme.md)
+- [AWS 목표 설계](aws.md) · [온프레미스 목표 설계](onprem.md) · [데이터 파이프라인 목표 설계](pipeline.md)
 
-# 모델 준비 대기 (약 1~5분)
-docker compose logs -f model-pull
-```
+목표 설계와 교육 자료는 원본 프로젝트에서 제공한 문서이며 개인 운영·배포 완료를 증명하지 않습니다.
+기존 904줄 README의 내용은 출처와 기준 commit을 붙여 보존했습니다. 상대 링크·코드 블록 경계·줄 끝 공백 표현을 교정했으며, 의도된 줄바꿈은 유지했습니다.
 
-### 2. Python 앱 로컬 실행
+## 원작 출처와 이용 조건
 
-```bash
-# 가상환경
-python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
+- 원본 코드·기초 자료: [edumgt/lumina-invest](https://github.com/edumgt/lumina-invest)
+- 개인 개발 저장소: [Noah-TaeHwan/lumina-invest](https://github.com/Noah-TaeHwan/lumina-invest)
+- 개인 포트폴리오 공개는 강사님의 허용 범위에서 진행합니다.
+- 개인 포트폴리오 공개 허용이 프로젝트 전체의 일반 재배포 라이선스나 MIT 재선언을 뜻하지는 않습니다. 명시적인 프로젝트 라이선스는 확인하지 않았습니다.
 
-pip install -r requirements.txt
-
-# 환경변수
-cp .env.example .env.dev
-
-# DB 초기화 + CSV 인제스트
-python -m app.services.financial_ingest
-
-# 앱 실행
-uvicorn app.main:app --reload --port 8000
-```
-
-### 3. Docker 전체 실행
-
-```bash
-docker compose up -d --build
-
-# CSV 인제스트 (최초 1회)
-docker compose run --rm ingest
-```
-
-브라우저: `http://localhost:8000`
-
----
-
-## 환경변수
-
-`.env.example` 참고. 핵심 변수:
-
-| 변수 | 기본값 | 설명 |
-|---|---|---|
-| `OLLAMA_BASE_URL` | `http://127.0.0.1:11434` | Ollama 서버 주소 |
-| `LLM_MODEL` | `llama3.1` | 채팅 모델 |
-| `EMBED_MODEL` | `nomic-embed-text` | 임베딩 모델 |
-| `MONGO_URI` | — | MongoDB 연결 문자열 |
-| `REDIS_URL` | `redis://localhost:6379` | Redis 연결 문자열 |
-| `SQLITE_PATH` | `./data/app.db` | SQLite 파일 경로 |
-| `DATA_DIR` | `./data` | CSV 파일 루트 디렉토리 |
-| `QDRANT_URL` | `http://localhost:6333` | Qdrant 서버 주소 |
-| `QDRANT_COLLECTION` | `fin_chunks` | Qdrant 컬렉션명 |
-| `GITHUB_TOKEN` | — | GitHub API rate limit 완화 |
-| `LEAN_MODE` | `auto` | LEAN 백테스트 실행 방식 `auto\|ssh\|docker\|local` (아래 참고) |
-| `LEAN_DOCKER_IMAGE` | `quantconnect/lean:latest` | LEAN 엔진 이미지 |
-| `LEAN_SSH_HOST` / `LEAN_SSH_KEY_PATH` | — | ssh 모드: 원격 LEAN 실행 서버 |
-| `ALPACA_API_KEY` / `ALPACA_SECRET_KEY` | — | Alpaca Paper 연결 테스트·퀀트 파이프라인 주문 |
-| `OPENAPI_RATE_LIMIT_MAX` | `60` | Open API 키당 분당 호출 제한 |
-
----
-
-### 운영·보안 관련 추가 변수 (2026-09 보강)
-
-| 변수 | 기본값 | 설명 |
-|---|---|---|
-| `RUN_MIGRATIONS_ON_STARTUP` | `true` | 앱 기동 시 `alembic upgrade head` 실행. 복제 인스턴스가 여럿인 운영에서는 `false`로 두고 배포 단계에서 `scripts/migrate.sh`(또는 `docker compose run --rm app alembic upgrade head`)를 1회 실행 |
-| `TRADINGVIEW_ENFORCE_IP` | `false` | TradingView Webhook 발신 IP 허용 목록 검사. 운영에서 `true` |
-| `TRADINGVIEW_ALLOWED_IPS` | TradingView 공식 4개 IP | 쉼표 구분 허용 IP |
-| `TRADINGVIEW_RATE_LIMIT_MAX` | `30` | API 키당 분당 Webhook 알림 수 |
-| `PUBLIC_BASE_URL` | (빈 값) | Webhook URL 안내에 쓰는 외부 공개 주소 |
-
-자동매매는 인프로세스 루프가 아니라 **DB 플래그(`broker_settings.quant_auto_enabled`) + Celery Beat 10분 태스크(`quant.auto_trade_cycle`)**로 실행되므로 `celery-beat`, `celery-worker` 컨테이너가 반드시 떠 있어야 합니다. 사이클 로그는 `data_cache`에 공유 저장됩니다.
-
-Ansible 실제 시크릿(`aws-work/ansible/inventories/*/group_vars/secrets.yml`)은 더 이상 커밋되지 않습니다(`secrets.sample.yml` 참고). 이전에 커밋된 값은 모두 교체하세요.
-
-## 모의투자 · Open API (stock-coin-trade 이식)
-
-`/home/ubuntu/stock-coin-trade`(Flask + MariaDB)의 모의투자 기능을 FastAPI + PostgreSQL 구조로 옮긴 것이다.
-주식·코인·대체자산이 `paper_accounts.cash`(유저당 1행, 초기 1억원) 하나를 공유하며, 주식 포지션/주문은
-기존 직접매매 화면의 `portfolio` / `orders` 테이블을 그대로 재사용한다(직접매매의 가상 주문도 이 현금과 연동).
-
-| 화면 (GNB 모의투자) | API | 원본 |
-|---|---|---|
-| 모의계좌 현황 | `GET /api/paper/account`, `POST /api/paper/account/reset` | `stocks.py` account/reset |
-| 국내주식 모의주문 | `GET /api/paper/stocks/quote`, `POST /api/paper/stocks/orders[/preview\|/buy\|/sell\|/pine]`, `GET /api/paper/stocks/positions\|orders/history` | `stock_trading.py`, `stocks.py` |
-| 코인 모의매매 | `GET /api/paper/crypto/market-list\|rankings\|ticker\|{code}/candles\|{code}/domestic-prices`, `GET /api/paper/trade/hold`, `POST /api/paper/trade/order/buy\|sell\|preview` | `crypto.py` |
-| 대체자산 | `GET /api/paper/alternatives/markets[/{symbol}/chart]\|positions\|orders/history`, `POST /api/paper/alternatives/orders[/preview]` | `alternatives.py` |
-| Open API 키 | `GET/POST /api/paper/api-keys`, `DELETE /api/paper/api-keys/{id}` | `api_keys.py` |
-| Alpaca 연결 테스트 | `POST /api/paper/alpaca/account\|positions` (읽기 전용) | `alpaca_test.py` |
-
-외부 시스템은 발급받은 키로 `/openapi/v1/*`를 호출한다 (`Authorization: Bearer <key>`, 키당 분당 60회):
-
-```bash
-curl -H "Authorization: Bearer $KEY" http://localhost:8966/openapi/v1/quote/005930
-curl -X POST -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
-     -d '{"symbol":"005930","side":"BUY","quantity":10}' http://localhost:8966/openapi/v1/orders
-```
-
-엔드포인트: `GET /stocks`, `GET /quote/{symbol}`, `GET /account`, `GET /positions`, `POST /orders`, `GET /orders`,
-`GET /crypto/hold`, `GET /alternatives/positions`. 오류 응답은 원본과 같은 `{"error": CODE, "message": ...}` 형식이다.
-
-> 원본 중 이식하지 않은 것: 봇 계정 자동 매매(`market_bots.py`), API 사용 이력·오류 분석 화면, 4일 커리큘럼 문서, KIS MCP 서버.
-> 증권사 읽기 전용 테스트(KIS/KB)는 이미 있는 `/api/broker/*`(brokers/ 어댑터)가 같은 역할을 한다.
-
-## QuantConnect LEAN 백테스트 (domain-rag-lab 이식)
-
-`/home/ubuntu/domain-rag-lab`의 `lean_backtest_service.py` + `/backtests/run`을 `app/services/lean_backtest.py`,
-`POST /api/backtests/lean/run`으로 옮겼다. 화면은 GNB **퀀트자동매매 > LEAN 백테스트**.
-
-흐름: Yahoo Finance 일봉(httpx, yfinance 불필요) → `prices.csv` + 전략별 LEAN 알고리즘(`main.py`) 생성 →
-`quantconnect/lean` 컨테이너 실행(`--environment backtesting --algorithm-language Python ...`) →
-`*-summary.json` 통계 + 로그 회수 → pandas로 계산한 수익률·MDD·샤프·시장 노출 일수와 함께 반환.
-LEAN이 Initialize() 전에 요구하는 `market-hours` / `symbol-properties` 참조 데이터는
-`app/services/lean_reference_data/`에 벤더링되어 있다.
-
-| `LEAN_MODE` | 동작 | 출처 |
-|---|---|---|
-| `docker` | 같은 호스트 Docker 데몬에서 실행. 컨테이너 안에서는 `/var/run/docker.sock` 마운트 + named volume `lean-workflows`를 `/workspace`로 공유(docker-compose.yml에 설정됨). docker CLI가 없으면 Engine API(소켓)로 실행 | stock-coin-trade `ai_sheet.py` |
-| `ssh` | `LEAN_SSH_HOST`로 scp 후 원격에서 `docker run` | domain-rag-lab |
-| `local` | LEAN 미실행, pandas 지표만 | — |
-| `auto` (기본) | ssh 설정 → docker 가용 → local 순서로 자동 선택 | — |
-
-```bash
-docker pull quantconnect/lean:latest   # docker 모드 사전 준비 (약 14GB)
-```
-
-실행 이력은 `lean_backtest_runs` 테이블에 남고 `GET /api/backtests/lean/history`로 조회한다.
-
----
-
-## AWS 이관 가이드
-
-### 권장 아키텍처
-
-```
-Internet
-    │
-    ▼
-Route 53 → CloudFront (정적 자산 캐싱)
-    │
-    ▼
-ALB (HTTPS, ACM 인증서)
-    │
-    ▼
-ECS Fargate (fin-ai-app)
-  ├── Task: FastAPI + Uvicorn
-  ├── ECR: Docker 이미지
-  └── EFS: data/ 볼륨 (SQLite, CSV)
-    │
-    ├── DocumentDB (MongoDB 호환) or Atlas
-    ├── ElastiCache for Redis (Serverless 또는 r7g.large)
-    ├── Ollama on EC2 (G4dn / G5 GPU 인스턴스)
-    │     └── EFS 마운트: /root/.ollama
-    └── Qdrant (아래 섹션 참고)
-```
-
-### ECS Fargate 태스크 정의 요점
-
-```json
-{
-  "cpu": "1024",
-  "memory": "2048",
-  "portMappings": [{"containerPort": 8000}],
-  "environment": [
-    {"name": "OLLAMA_BASE_URL", "value": "http://<ollama-ec2-private-ip>:11434"},
-    {"name": "QDRANT_URL",      "value": "http://<qdrant-ec2-private-ip>:6333"}
-  ],
-  "secrets": [
-    {"name": "MONGO_URI",   "valueFrom": "arn:aws:secretsmanager:..."},
-    {"name": "REDIS_URL",   "valueFrom": "arn:aws:secretsmanager:..."}
-  ]
-}
-```
-
-### CI/CD (GitHub Actions 예시)
-
-```yaml
-- name: Build & push to ECR
-  run: |
-    docker build -t $ECR_REPO:$GITHUB_SHA .
-    docker push $ECR_REPO:$GITHUB_SHA
-- name: Deploy to ECS
-  run: aws ecs update-service --cluster fin-ai --service app --force-new-deployment
-```
-
----
-
-## Qdrant 구성 제안
-
-### 옵션 비교
-
-| 방식 | 비용 | 관리 | 권장 케이스 |
-|---|---|---|---|
-| **EC2 자가 호스팅** | EC2 비용만 | 직접 | 데이터 외부 전송 불가 / 비용 최적화 |
-| **Qdrant Cloud** | 무료 1GB ~ 유료 | 관리형 | 빠른 PoC / 소규모 |
-| **EKS on EC2** | 중간 | K8s 관리 | 대규모 고가용성 |
-
-### EC2 자가 호스팅 (권장 시작점)
-
-```bash
-# r7g.large (ARM, 16GB RAM) 또는 m7i.large
-docker run -d \
-  -p 6333:6333 -p 6334:6334 \
-  -v /data/qdrant:/qdrant/storage \
-  qdrant/qdrant:latest
-```
-
-### 컬렉션 설계
-
-```python
-# fin_chunks – 크롤링 문서 RAG
-VectorParams(size=768, distance=Distance.COSINE)
-# payload 필드: source_url, chunk_index, doc_type, crawled_at
-
-# 권장 인덱스
-create_payload_index("fin_chunks", "doc_type", PayloadSchemaType.KEYWORD)
-create_payload_index("fin_chunks", "crawled_at", PayloadSchemaType.DATETIME)
-```
-
-### 스케일링 시 고려사항
-
-- **Qdrant Cluster 모드**: shard 수 = (총 벡터 수 / 200만) × replication factor
-- **메모리**: 768차원 float32 × 벡터 수 × 1.5 (HNSW 오버헤드)
-- **스냅샷 백업**: S3에 주기적 스냅샷 (`POST /collections/{name}/snapshots`)
-
----
-
-## Qdrant 데이터 공유 방법
-
-### Docker 이미지만으로는 데이터가 공유되지 않는 이유
-
-이 프로젝트의 Qdrant 컨테이너는 **named volume**을 사용합니다 (`docker-compose.yml`):
-
-```yaml
-qdrant:
-  volumes:
-    - qdrant_data:/qdrant/storage   # named volume
-```
-
-Named volume은 Docker 이미지 레이어 **외부**에 존재합니다.  
-따라서 `docker push` / `docker pull`로 이미지만 공유하면 크롤링·인제스트로 적재한 벡터 데이터는 전달되지 않습니다.  
-데이터를 함께 전달하려면 아래 세 가지 방법 중 하나를 선택하세요.
-
----
-
-### 방법 1 — Volume tarball 추출 (권장)
-
-가장 간단한 방법으로, volume 전체를 압축 파일 하나로 내보냅니다.
-
-**① 내보내기 (공유하는 쪽)**
-
-```bash
-# Qdrant 컨테이너를 먼저 중지해 파일 정합성 보장
-docker compose stop qdrant
-
-docker run --rm \
-  -v qdrant_data:/qdrant/storage \
-  -v $(pwd):/backup \
-  busybox tar czf /backup/qdrant_data.tar.gz -C /qdrant/storage .
-
-# 완료 후 재기동
-docker compose start qdrant
-```
-
-생성된 `qdrant_data.tar.gz` 파일을 상대방에게 전달합니다.
-
-**② 불러오기 (받는 쪽)**
-
-```bash
-# 1. Named volume 생성
-docker volume create qdrant_data
-
-# 2. tarball 압축 해제 후 volume에 적재
-docker run --rm \
-  -v qdrant_data:/qdrant/storage \
-  -v $(pwd):/backup \
-  busybox tar xzf /backup/qdrant_data.tar.gz -C /qdrant/storage
-
-# 3. 전체 스택 기동
-docker compose up -d
-```
-
-> **주의**: `docker compose up -d` 실행 전에 volume을 복원해야 Qdrant가 기동 시 데이터를 올바르게 인식합니다.
-
----
-
-### 방법 2 — Qdrant Snapshot API (공식 방식)
-
-Qdrant가 내장한 스냅샷 기능으로, **컬렉션 단위**로 선택적 공유가 가능합니다.
-
-**① 스냅샷 생성 및 다운로드 (공유하는 쪽)**
-
-```bash
-# 스냅샷 생성 (컬렉션명: fin_chunks)
-curl -X POST http://localhost:6333/collections/fin_chunks/snapshots
-
-# 생성된 스냅샷 목록 확인
-curl http://localhost:6333/collections/fin_chunks/snapshots
-# 응답 예시: {"result":[{"name":"fin_chunks-123456789.snapshot", ...}]}
-
-# 스냅샷 파일 다운로드
-curl -O http://localhost:6333/collections/fin_chunks/snapshots/fin_chunks-123456789.snapshot
-```
-
-**② 복원 (받는 쪽)**
-
-```bash
-# Qdrant 기동 후, 스냅샷을 업로드하여 컬렉션 복원
-curl -X POST 'http://localhost:6333/collections/fin_chunks/snapshots/upload?priority=snapshot' \
-  -H 'Content-Type: multipart/form-data' \
-  -F 'snapshot=@fin_chunks-123456789.snapshot'
-```
-
-컬렉션이 없으면 자동 생성되고, 이미 있으면 스냅샷 내용으로 덮어씁니다.
-
-> **여러 컬렉션이 있는 경우** 각 컬렉션마다 위 명령을 반복하거나,  
-> 전체 스토리지 수준 백업은 방법 1(tarball)을 사용하세요.
-
----
-
-### 방법 3 — 이미지에 데이터 굽기 (비권장)
-
-```dockerfile
-FROM qdrant/qdrant:latest
-COPY ./qdrant_storage /qdrant/storage
-```
-
-배포는 단순해지나, 데이터가 클수록 이미지가 비대해지고  
-데이터 업데이트 시마다 이미지를 다시 빌드·푸시해야 하므로 권장하지 않습니다.
-
----
-
-### 방법 비교
-
-| 방법 | 공유 단위 | 장점 | 단점 |
-|---|---|---|---|
-| **Volume tarball** | 전체 storage | 명령 2개로 완전 복원, 추가 도구 불필요 | 컨테이너 중지 필요, 파일이 클 수 있음 |
-| **Snapshot API** | 컬렉션 단위 | Qdrant 공식, 선택적·점진적 공유 가능 | 컬렉션이 여러 개면 반복 작업 필요 |
-| **이미지에 굽기** | 이미지 전체 | 이미지 하나로 배포 완결 | 이미지 비대화, 데이터 갱신 불편 |
-
----
-
-## 주요 화면
-
-> Playwright로 캡처한 주요 화면입니다 (한글 폰트 적용, API Mock 기반).
-
-### 1. Agent 홈 화면 (캡처 세트 01)
-![Agent 홈](screenshots/cap01_agent_home.png)
-
-### 2. 로그인 화면 (캡처 세트 01)
-![로그인](screenshots/cap01_login.png)
-
-### 3. 회원가입 화면 (캡처 세트 02)
-![회원가입](screenshots/cap02_register.png)
-
-### 4. 퀀트 화면 (캡처 세트 02)
-![퀀트 초기](screenshots/cap02_quant.png)
-
-### 5. 앱 메인 화면 (캡처 세트 03)
-![앱 메인](screenshots/cap03_app_main.png)
-
-### 6. 미국 주식 화면 (캡처 세트 03)
-![미국 주식](screenshots/cap03_us_stocks.png)
-
-### 7. 기업 분석 화면 (캡처 세트 04)
-![기업 분석 초기](screenshots/cap04_company.png)
-
-### 8. 퀀트 화면 (캡처 세트 04)
-![퀀트 추가](screenshots/cap04_quant.png)
-
-### 9. 기업 분석 화면 (캡처 세트 05)
-![기업 분석 추가](screenshots/cap05_company.png)
-
-### 10. 트레이딩 화면 (캡처 세트 05)
-![트레이딩](screenshots/cap05_trading.png)
-
-### 11. Agent 최종 화면
-![Agent 최종](screenshots/final01_agent.png)
-
-### 12. 주식 APEX 최종 화면
-![주식 APEX](screenshots/final02_stock_apex.png)
-
-### 13. 퀀트 APEX 최종 화면
-![퀀트 APEX](screenshots/final03_quant_apex.png)
-
-### 14. 미국 주식 APEX 최종 화면
-![미국 주식 APEX](screenshots/final04_us_apex.png)
-
-### 15. 기업 분석 최종 화면
-![기업 분석 최종](screenshots/final05_company.png)
-
----
-
-### 투자분석 기초 방법론	
-- 매크로 분석: 경제지표 분석(금리, 물가, 유가 등 주요 지표 보는 법 ), 거시경제상황 분석 실습 
-- 산업 분석: 산업 경쟁력 분석(산업경쟁력 개념/분석모형, 산업별 분석방법), 산업 분석 실습 
-- 기본적 분석: 재무제표분석 (손익계산서/대차대조표/현금흐름표), 기업가치분석(상대가치평가 밸류에이션(멀티플), 절대가치평가 밸류에이션 (DCF, EVA, FCF 등)), 분석기업선정 및 밸류에이션 실습 
-- 기술적 분석: 추세 분석(지지선과 저항선, 이동평균선, 갭 반전, 되돌림 분석 등), 패턴 분석, 캔들 차트 분석, 지표 분석, 앨리어트파동이론, 분석기업선정 및 기술적 분석
-
-### 퀀트를 위한 금융 필수 지식	
-- 금융상품 이해: 주식/ETF 상품(주식/ETF 개요 및 운용 전략), 채권 상품(채권 개요 및 운용 전략), 파생상품(파생상품 개요 및 운용 전략) 
-- 자산배분방법론: 포트폴리오 이론(개요 및 성과분석, 리스크 지표), 자산배분 모델(평균분산, 블랙리터만, Risk-Parity 모델 설명), 사례 분석
-
-### 퀀트를 위한 머신러닝과 딥러닝	
-- 머신러닝(회귀, SVM, Random Forest, Ensemble 등)과 딥러닝(RNN, CNN, LSTM, Transformer) 주요 모델 학습하기 
-- 하이퍼 파라미터 튜닝, 교차 검증, 성능 확인 등 모델링의 주요 개념 이해하기 
-- 클러스터링을 통한 군집화 및 의미 해석하기 
-- 시계열에서 주로 활용되는 모델에 대한 학습(Transformer를 접목한 최신 시계열 분석 모델 학습)	
-
-### 주가 지수 데이터 활용 머신러닝-딥러닝 프로젝트	
-- 국내 증시 데이터를 활용한 시계열 머신러닝-딥러닝 프로젝트 
-- 네이버 주식 웹 페이지 크롤링을 통한 주가 정보 수집 
-- 주가 데이터 클러스터링을 통한 주식 항목 군집화 및 해석 
-- 다양한 지표를 투입한 머신러닝-딥러닝 모델링을 통해 주가 변동 방향성을 직접 예측해보고 검증
-
-### 데이터 활용 퀀트 모델링	
-- 백테스트로 나오는 성과 지표 분석(MDD, Sharp ratio 등) 및 개선방향 논의 
-- 주식 시장의 계절성 분석(연말 랠리, 월별 효과, 요일 효과) 
-- 알고리즘 트레이딩 &amp; 자동매매 기초(트레이딩뷰 PineScript)
-
-### 나만의 로보 어드바이저 개발 및 성과 검증 프로젝트	
-- AI 기반의 자동화 로보 어드바이저 모델 개발 
-- 패턴 인식 기법을 활용한 주식 시장 예측 프로젝트 
-- 자산배분모델을 활용한 포트폴리오 최적화, 주식 스크리닝을 통한 종목 선정 등 직접 수행 
-- 구축한 퀀트 모델의 결과를 해석해보고 자체적으로 모의 투자 의사결정 진행
-
-### 나만의 투자 인디케이터 개발 및 성과 검증 프로젝트	
-- 기본적인 인디케이터(MA, RSI등)로 전략 설계 
-- 커스텀 인디케이터 개발 
-- 트레이딩뷰 플랫폼으로 성과 확인 및 코딩 실습(PineScript) 
-- 파이썬 프로그래밍을 통한 성과 검증 
-- 증권사 연동(API 활용)을 통한 자동화 모델 구현
-
-
----
-
-# <i class="fa-solid fa-book"></i> Neo4j 정리
-
-## 1. 개요
-
-**Neo4j**는 그래프 기반 데이터베이스(Graph Database)로,  
-데이터 간의 **관계(Relationship)**를 중심으로 저장하고 조회하는 DB이다.
-
-기존의 RDB(MySQL, Oracle 등)가 테이블 기반이라면,  
-Neo4j는 **노드(Node)와 관계(Relationship)** 기반으로 데이터를 표현한다.
-
----
-
-## 2. 핵심 개념
-
-### 2.1 Node (노드)
-
-- 데이터를 표현하는 기본 단위
-- 사람, 상품, 장소 등 객체를 의미
-
-```cypher
-(:Person {name: "Kim", age: 30})
-
----
-
-# AI Agent 개발을 위한 Celery 개념 정리
-
-AI 에이전트를 만들 때 **Celery(셀러리)**는 에이전트에게 **"백그라운드에서 지치지 않고 일하는 비서"**를 고용해 주는 것과 같습니다.
-
-LLM(대형 언어 모델)을 사용하는 AI 에이전트는 필연적으로 비싸고 무거운 작업(API 호출, 장시간의 데이터 검색, 코드 실행 등)을 수행합니다. 이때 웹 서버가 이 작업을 직접 처리하면 서버가 멈추거나 사용자가 무한 대기를 겪게 됩니다. Celery는 이 문제를 해결하는 핵심 도구입니다.
-
----
-
-## 1. AI 에이전트에서 Celery가 필요한 이유
-
-기존 웹 서비스와 달리, AI 에이전트는 한 번 요청을 받으면 뒤에서 엄청나게 바쁩니다.
-
-* **동기식 처리 (Celery 없음):** 사용자가 "이번 달 뉴스 요약해 줘"라고 요청함 → 웹 서버가 직접 뉴스 50개 긁고, LLM API 보내고, 요약함 (이동안 웹 서버 마비, 사용자 브라우저 타임아웃 오류 발생).
-* **비동기식 처리 (Celery 사용):** 사용자가 요청함 → 웹 서버가 **"접수 완료! 영수증(Task ID) 줄 테니 이따가 결과 확인해"** 하고 바로 응답 → 실제 무거운 요약 작업은 **Celery**가 백그라운드에서 조용히 처리.
-
----
-
-## 2. Celery의 4가지 핵심 구성 요소
-
-셀러리를 이해할 때 레스토랑 주방을 떠올리면 아주 쉽습니다.
-
-```
-[ 사용자/웹 서버 ] ──(요청/주문서)──> [ 브로커 (Redis/RabbitMQ) ]
-                                              │
-                                       (주문서 전달)
-                                              ▼
-[ 결과 저장소 (Result Backend) ] <──(완성)── [ 워커 (Celery Worker) ]
-```
-
-* **Task (작업):** 에이전트가 해야 할 일입니다. (예: "웹 스크래핑 하기", "LLM으로 이메일 초안 쓰기")
-* **Broker (브로커/중간 관리자):** 웹 서버가 던진 작업(Task)을 순서대로 쌓아두는 큐(Queue, 대기열)입니다. 주로 **Redis**나 **RabbitMQ**라는 도구를 브로커로 사용합니다.
-* **Worker (워커/일꾼):** 실제로 CPU와 메모리를 써서 AI 에이전트의 로직을 실행하는 주체입니다. 웹 서버와 완전히 분리된 별도의 프로세스(혹은 별도의 서버)에서 작동합니다.
-* **Result Backend (결과 저장소):** 일꾼(Worker)이 AI 작업을 끝내고 나온 결과물(예: 요약된 텍스트)을 저장하는 곳입니다. (Redis나 데이터베이스를 주로 사용)
-
----
-
-## 3. AI 에이전트 개발 시 Celery 활용 시나리오
-
-* **롱 러닝 태스크 (Long-running Tasks):** 에이전트가 웹 서칭을 하고, 파일들을 분석하고, 여러 단계의 추론(Reasoning)을 거치는 대형 작업들을 백그라운드에서 안정적으로 처리합니다.
-* **분산 처리 (Scaling):** 사용자가 몰려 대량의 AI 요청이 들어와도, Celery 워커 서버만 늘려서 작업을 쪼개어 병렬 처리할 수 있습니다.
-* **예약 및 주기적 작업 (Celery Beat):** "매일 아침 9시에 뉴스 모니터링 분석 리포트 작성" 같은 스케줄링 기능을 에이전트에 쉽게 부여합니다.
-
----
-
-## 4. Celery GitHub 오픈소스 프로젝트적 특징
-
-Celery는 **GitHub에서 오픈소스로 관리되고 있는 전형적인 파이썬(Python) 프로젝트**입니다. `celery/celery` 저장소에서 전 세계 개발자들에 의해 관리됩니다.
-
-* **100% 파이썬 기반:** 핵심 로직이 파이썬 코드로 작성되어 있어 `pip install celery`로 쉽게 설치 및 연동이 가능합니다.
-* **자유로운 BSD-3-Clause 라이선스:** 상업적 목적의 수정 및 배포가 자유로워 수많은 글로벌 AI 및 IT 기업들이 안심하고 도입하고 있습니다.
-* **파이썬 고급 기술의 집약체:** 데코레이터(`@app.task`)의 우아한 활용, 멀티프로세싱 및 비동기(`asyncio`) 동시성 프로그래밍 기술이 투명하게 공개되어 있습니다.
-
-
----
-
-# Infrastructure as Code (IaC) 및 클라우드 배포 도구 비교 분석 보고서
-
-본 보고서는 현대 데브옵스(DevOps) 생태계에서 핵심적인 역할을 하는 인프라 프로비저닝, 구성 관리, 배포 자동화 도구인 **Terraform, Ansible, AWS CloudFormation, AWS Elastic Beanstalk**의 특징과 차이점을 상세히 비교 분석합니다.
-
----
-
-## 1. IaC 핵심 도구 비교: Terraform vs Ansible
-
-테라폼(Terraform)과 앤서블(Ansible)은 종종 비교 대상이 되지만, 실제로는 서로 보완적인 관계에 가깝습니다.
-
-* **Terraform (인프라 프로비저닝 특화)**
-    * **핵심 역할:** AWS, Azure, GCP 같은 클라우드 환경에서 VPC를 만들고, 서브넷을 쪼개고, EC2 인스턴스를 생성하는 등의 **인프라 자체를 구축(Provisioning)**하는 데 최적화되어 있습니다.
-    * **작동 방식 (선언적 - Declarative):** "내가 원하는 최종 상태"를 코드로 기술합니다. (예: *"나는 AWS에 EC2 인스턴스 3개가 필요해."*) 현재 상태가 2개라면 테라폼이 알아서 계산해서 1개만 추가로 생성합니다.
-    * **상태 관리:** 자체적으로 State 파일(`*.tfstate`)을 유지하여 현재 인프라의 상태를 추적합니다.
-
-* **Ansible (구성 관리 & 애플리케이션 배포 특화)**
-    * **핵심 역할:** 이미 만들어진 서버(인프라)에 접속하여 사용자를 추가하고, Nginx나 Docker를 설치하고, 보안 설정을 적용하는 등의 **구성 관리(Configuration Management)**에 최적화되어 있습니다.
-    * **작동 방식 (절차적/명령형에 가까운 하이브리드):** "순서대로 실행할 작업(Task)"을 순차적으로 기술하는 플레이북(Playbook) 방식을 사용합니다. 단, 개별 모듈들은 **멱등성(Idempotency)**을 보장하므로 이미 세팅된 작업은 안전하게 건너뜁니다.
-    * **상태 관리:** 별도의 State 파일이 없으며, 실행할 때마다 대상 서버의 상태를 실시간으로 확인합니다.
-
-### 아키텍처 및 통신 방식 비교
-
-| 비교 항목 | Terraform | Ansible |
-| :--- | :--- | :--- |
-| **관리 대상과의 연결** | 각 클라우드 공급자의 **API**를 호출하여 제어 | 대상 서버에 **SSH** 또는 WinRM으로 직접 원격 접속 |
-| **에이전트 유무** | **Agentless** (대상 서버에 아무것도 설치 안 함) | **Agentless** (대상 서버에 Python만 있으면 됨) |
-| **주요 언어** | HCL (HashiCorp Configuration Language) | YAML |
-
----
-
-## 2. AWS 진영의 도구 비교: CloudFormation vs Elastic Beanstalk
-
-AWS 환경 내에서 인프라와 배포를 다루는 대표적인 두 서비스입니다. 목적지와 타겟층이 명확하게 구분됩니다.
-
-* **AWS CloudFormation (AWS 공식 표준 IaC 도구)**
-    * **인프라 중심:** VPC, 서브넷, IAM 역할, EC2, RDS 등 AWS의 거의 모든 리소스를 코드로 관리하는 테라폼의 AWS 전용 대항마입니다. JSON이나 YAML 템플릿 파일을 이용해 선언적으로 정의합니다.
-    * **완전 관리형 상태 관리:** 테라폼과 달리 상태 파일(`tfstate`)을 사용자가 직접 관리할 필요 없이 AWS 백엔드에서 알아서 안전하게 관리해 줍니다.
-    * **제한 사항:** AWS 전용 서비스이므로 타사 클라우드(GCP, Azure 등)에는 사용할 수 없습니다.
-
-* **AWS Elastic Beanstalk (개발자를 위한 PaaS형 배포 도구)**
-    * **애플리케이션 중심:** 인프라 제어보다 서비스 배포에 집중하는 **PaaS(Platform as a Service)**에 가깝습니다. Java, Node.js, Python, Docker 등으로 작성된 소스 코드만 업로드하면 인프라가 자동으로 구성됩니다.
-    * **자동화 범위:** 로드 밸런서(ALB) 설정, 오토 스케일링 그룹(서버 자동 증설), 모니터링, OS 패치 등을 Beanstalk이 완전히 알아서 처리합니다.
-    * **비밀 연결고리:** Elastic Beanstalk은 내부적으로 **CloudFormation을 기반으로 작동**합니다. 개발자가 코드를 올리면 Beanstalk이 뒤에서 자동으로 CloudFormation 템플릿을 생성해 리소스를 프로비저닝합니다.
-
----
-
-## 3. 한눈에 보는 4대 도구 종합 비교 Matrix
-
-| 도구 | 주요 역할 | 제어 범위 | 멀티 클라우드 | 난이도 및 특징 |
-| :--- | :--- | :--- | :--- | :--- |
-| **Terraform** | 인프라 프로비저닝 | 인프라 겉껍데기 | **지원 (강점)** | 표준적인 IaC, 대규모 인프라 및 전사적 아키텍처에 적합. |
-| **CloudFormation** | 인프라 프로비저닝 | 인프라 겉껍데기 | **AWS 전용** | AWS 리소스 관리에 최적화, 인프라의 안정적인 선언적 관리. |
-| **Ansible** | 구성 관리 (OS 내부 세팅) | OS 내부 및 소프트웨어 | **지원 (SSH 기반)** | 서버 내 환경 설정, 미들웨어 설치 및 앱 배포 자동화에 탁월. |
-| **Elastic Beanstalk** | 앱 배포 및 관리 (PaaS) | 인프라 + 앱 전체 | **AWS 전용** | 인프라 구조를 몰라도 빠르게 코드를 배포하려는 개발자 친화형. |
-
----
-
-## 💡 실무 적용 및 조합 가이드 (Best Practice)
-
-현업에서는 단일 도구만 사용하기보다 각 도구의 장점을 결합하여 파이프라인을 구축하는 것이 일반적입니다.
-
-1.  **Terraform + Ansible 조합 (멀티 클라우드/하이브리드 표준)**
-    * `Terraform`으로 클라우드 상에 VPC, 보안 그룹, EC2 인스턴스를 깨끗하게 생성합니다.
-    * 인스턴스 생성이 완료되면 해당 서버들의 IP 정보를 `Ansible` 인벤토리에 넘겨줍니다.
-    * `Ansible`이 생성된 서버들에 SSH로 접속하여 보안 패치를 적용하고 필요한 소프트웨어 패키지를 배포합니다.
-2.  **CloudFormation vs Elastic Beanstalk 선택 기준**
-    * **"우리 회사는 오직 AWS만 쓰고, 인프라 아키텍처를 완벽하게 통제하고 싶다"** ➔ **CloudFormation** (또는 시장 주도권이 높은 **Terraform**)
-    * **"인프라 구축이나 복잡한 설정은 최소화하고, 웹 서비스 코드를 AWS에 빠르게 배포하여 서비스하는 것이 최우선이다"** ➔ **Elastic Beanstalk**
-
----
-
-# Vector DB 차원(Dimension) 이해하기
-
-우리가 3차원 공간만 보고 살다 보니, AI가 다루는 **수백~수천 차원의 '고차원 벡터 공간(Vector Space)'**은 상상하기조차 어렵습니다. 머릿속으로 100개의 축이 직교하는 공간을 그리려고 하면 당연히 과부하가 걸립니다.
-
-하지만 너무 어렵게 생각할 필요 없습니다. AI의 고차원을 이해하는 가장 좋은 방법은 차원을 공간이 아니라 **'특징(Feature)의 개수'**로 바라보는 것입니다.
-
----
-
-## 1. 차원 = 공간의 축 (X) → 특징의 개수 (O)
-
-수학이나 AI에서 1차원은 축 1개가 아니라 **'정보 1개'**를 의미합니다.
-
-과일을 분류하는 AI 모델이 있다고 가정해 봅시다.
-
-* **1차원 데이터**: 과일의 **[당도]**만 측정 (예: `[9.5]`)
-* **2차원 데이터**: 과일의 **[당도, 신맛]**을 측정 (예: `[9.5, 2.1]`)
-* **3차원 데이터**: 과일의 **[당도, 신맛, 단단함]**을 측정 (예: `[9.5, 2.1, 8.4]`)
-
-여기까지는 우리가 사는 3차원 공간에 점으로 찍을 수 있습니다. 그렇다면 여기에 **[무게, 색상, 향기, 수분량, 가격...]**을 계속 추가하면 어떻게 될까요?
-
-특징이 100개가 되면 100차원 벡터 `[9.5, 2.1, 8.4, 150, 0.8, ...]`가 됩니다. 기하학적으로는 그릴 수 없지만, 데이터 표(Table)의 열(Column)이 100개인 것과 다를 바 없습니다. 즉, 고차원 벡터는 대상을 엄청나게 구체적으로 묘사한 '특징 리스트'입니다.
-
----
-
-## 2. 고차원 공간에서 '의미'를 찾는 방법
-
-AI의 Vector DB는 이 수많은 특징들을 가지고 무엇을 할까요? 핵심은 **"비슷한 것끼리는 고차원 공간에서도 가까이 모인다"**는 점입니다.
-
-우리가 3차원 공간에서 두 점 사이의 거리를 구할 때 피타고라스 정리를 쓰는 것처럼, AI도 고차원 공간에서 두 벡터 사이의 거리를 계산합니다. (주로 코사인 유사도 같은 방식을 씁니다.)
-
-예를 들어 단어를 벡터로 변환하는 LLM(대형 언어 모델)의 경우:
-
-* **'왕(King)'**과 **'여왕(Queen)'**은 [권력, 왕실, 인간, 역사...] 등 수천 개의 특징(차원)에서 매우 유사한 값을 가집니다. 따라서 수천 차원의 공간 속에서도 두 데이터는 아주 가까운 거리에 위치하게 됩니다.
-* 반면 **'컴퓨터'**는 이들과 특징이 전혀 다르므로 고차원 공간에서 아주 멀리 떨어진 곳에 위치합니다.
-
-결국 Vector DB는 인간처럼 공간을 시각적으로 '보는' 게 아니라, 수천 개의 숫자를 계산해서 "아, 이 두 데이터는 거리가 가까우니 의미가 비슷하구나!" 하고 수학적으로 인지하는 것입니다.
-
----
-
-## 3. 인간이 고차원을 시각적으로 이해하는 꼼수: 차원 축소
-
-그럼에도 인간은 눈으로 봐야 직성이 풀리는 동물입니다. 그래서 과학자들은 1000차원짜리 벡터 데이터를 인간에게 보여주기 위해 **차원 축소(Dimension Reduction)**라는 기술을 씁니다.
-
-가장 대표적인 것이 t-SNE나 UMAP 같은 알고리즘입니다. 이 기술들은 고차원 공간에서 데이터들이 가졌던 '가깝고 먼 관계'를 최대한 유지하면서, 억지로 2차원 평면이나 3차원 공간으로 꾹꾹 눌러서 압축해 줍니다.
-
-이렇게 축소된 화면을 보면, 수천 차원 속에 있던 데이터들이 끼리끼리 모여 군집(Cluster)을 이루고 있는 모습을 우리 눈으로도 확인할 수 있게 됩니다.
-
----
-
-## 💡 요약
-
-인간은 공간의 축(X, Y, Z)으로 차원을 이해하지만, AI의 Vector DB는 **데이터가 가진 '특징의 개수'**로 차원을 이해합니다. 우리가 수천 개의 단어로 어떤 개념을 세밀하게 설명하듯, AI는 수천 개의 숫자로 이루어진 벡터로 개념을 정교하게 인지하는 것이죠.
-
-> 참고: 이 프로젝트의 Qdrant 컬렉션(`fin_chunks`)은 `nomic-embed-text` 임베딩 모델을 사용해 `VectorParams(size=768, distance=Distance.COSINE)`로 768차원 벡터를 저장합니다. 즉 각 금융 문서 청크가 768개의 특징 값으로 표현되며, 코사인 유사도로 의미가 가까운 문서를 검색하는 것입니다.
+이 프로젝트는 학습·정보 제공을 위한 포트폴리오입니다. 투자 자문이나 수익 보장을 제공하지 않습니다.

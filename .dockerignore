@@ -7,3 +7,4 @@ data/app.db-wal
 data/collected
 *.log
 .git
+.env.*
