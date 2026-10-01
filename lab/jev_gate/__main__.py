@@ -303,6 +303,46 @@ def cmd_stage1_freeze(paths, pre: dict, table=None) -> int:
     return 0
 
 
+def cmd_stage1_report(paths, pre: dict, table=None) -> dict:
+    """구간별 판정력과 홀드아웃 부트스트랩을 계산해 리포트를 쓴다."""
+    s1 = pre["stage1"]
+    t = load_table(paths, pre) if table is None else table
+    p_by_key = {}
+    for r in _read_jsonl(paths.calls):
+        if r["ok"] and r["key"] not in p_by_key:
+            p_by_key[r["key"]] = r["p_fail"]
+    frozen = _read_json(paths.freeze, None)
+    cols = list(features.STATE_FEATURES)
+    out = {"periods": {}}
+    for period in pre["periods"]:
+        sub = t[t["period"] == period]
+        have = sub[sub["key"].isin(p_by_key)]
+        y = have["label"].to_numpy()
+        p = have["key"].map(p_by_key).to_numpy(float)
+        lg = predict.logistic_proba(frozen["logistic"], sub[cols].to_numpy(float)) if frozen and len(sub) else None
+        out["periods"][period] = {
+            "n": int(len(sub)), "coverage": float(len(have) / len(sub)) if len(sub) else 0.0,
+            "fail_rate": float(sub["label"].mean()) if len(sub) else None,
+            "auc_jev": predict.auc(y, p) if len(have) else None,
+            "auc_logistic": predict.auc(sub["label"].to_numpy(), lg) if lg is not None else None,
+            "brier_jev": predict.brier(y, p) if len(have) else None}
+    hold = t[(t["period"] == "holdout") & t["key"].isin(p_by_key)]
+    b = s1["bootstrap"]
+    if len(hold) and frozen:
+        y, p = hold["label"].to_numpy(), hold["key"].map(p_by_key).to_numpy(float)
+        lg = predict.logistic_proba(frozen["logistic"], hold[cols].to_numpy(float))
+        days = hold["day"].to_numpy()
+        out["holdout"] = {"vs_half": predict.block_bootstrap_auc_diff(y, p, None, days, b["n"], b["seed"]),
+                          "vs_logistic": predict.block_bootstrap_auc_diff(y, p, lg, days, b["n"], b["seed"]),
+                          "calibration": predict.calibration_table(y, p, s1["calibration_bins"])}
+    out["claim"] = s1["claim_rule"]
+    _write_json(paths.summary, out)
+    paths.report.parent.mkdir(parents=True, exist_ok=True)
+    paths.report.write_text(predict.render_report(out), encoding="utf-8")
+    print(json.dumps(out["periods"], ensure_ascii=False))
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     """명령줄 진입점."""
     p = argparse.ArgumentParser(prog="python -m lab.jev_gate")

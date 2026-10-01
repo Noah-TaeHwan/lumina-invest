@@ -73,3 +73,17 @@ def test_freeze_refuses_to_overwrite(tmp_path):
     cli.cmd_stage1_freeze(paths, pre, table=t)
     with pytest.raises(SystemExit, match="이미"):
         cli.cmd_stage1_freeze(paths, pre, table=t)
+
+
+def test_report_shows_coverage(tmp_path):
+    paths, pre = _paths(tmp_path)
+    t, fake = _table(), Fake()
+    cli.cmd_stage1_call(paths, pre, "dev", gate_factory=fake, table=t)
+    cli.cmd_stage1_freeze(paths, pre, table=t)
+    cli.cmd_stage1_call(paths, pre, "holdout", gate_factory=fake, table=t)
+    s = cli.cmd_stage1_report(paths, pre, table=t)
+    assert s["periods"]["dev"]["coverage"] == 1.0
+    assert s["periods"]["validation"]["coverage"] == 0.0 and s["periods"]["validation"]["auc_jev"] is None
+    assert s["periods"]["holdout"]["auc_jev"] == 1.0          # 가짜 JEV가 라벨과 완전히 일치
+    text = paths.report.read_text(encoding="utf-8")
+    assert "커버리지" in text and "95%" in text and s["claim"] in text

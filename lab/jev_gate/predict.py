@@ -66,3 +66,36 @@ def block_bootstrap_auc_diff(y, s1, s2, days, n_boot: int, seed: int) -> dict:
     lo, hi = np.percentile(samples, [2.5, 97.5]) if samples else (None, None)
     return {"diff": point, "lo": None if lo is None else float(lo), "hi": None if hi is None else float(hi),
             "n_boot_used": len(samples)}
+
+
+def _fmt(v, pct=False):
+    if v is None:
+        return "-"
+    return f"{v:.1%}" if pct else f"{v:.3f}"
+
+
+def render_report(s: dict) -> str:
+    """판정력 리포트 Markdown. 주장은 홀드아웃 결과와 사전등록 규칙으로만 한다."""
+    lines = ["# JEV Gate Lab — Stage 1 판정력 리포트", "",
+             "라벨은 지연 0 가상 거래(다음 5분봉 시가 진입, 코드 청산)의 비용 차감 손실 여부다. "
+             "JEV p_fail을 무작위(0.5)·개발 구간으로 학습한 로지스틱 회귀와 비교한다.", "",
+             "## 구간별", "", "| 구간 | 후보 | JEV 응답 커버리지 | 실패 비율 | JEV AUC | 로지스틱 AUC | JEV Brier |",
+             "|---|---:|---:|---:|---:|---:|---:|"]
+    for name, p in s["periods"].items():
+        lines.append(f"| {name} | {p['n']} | {_fmt(p['coverage'], True)} | {_fmt(p['fail_rate'], True)} | "
+                     f"{_fmt(p['auc_jev'])} | {_fmt(p['auc_logistic'])} | {_fmt(p['brier_jev'])} |")
+    h = s.get("holdout")
+    lines += ["", "## 홀드아웃 비교 (일 단위 블록 부트스트랩 95% 구간)", ""]
+    if h:
+        for label, d in (("JEV − 0.5", h["vs_half"]), ("JEV − 로지스틱", h["vs_logistic"])):
+            lines.append(f"- {label}: {_fmt(d['diff'])} (95% {_fmt(d['lo'])} ~ {_fmt(d['hi'])}, "
+                         f"유효 반복 {d['n_boot_used']})")
+        lines += ["", "| p_fail 구간 | 후보 | 평균 p_fail | 실제 실패 비율 |", "|---|---:|---:|---:|"]
+        for r in h["calibration"]:
+            if r["n"]:
+                lines.append(f"| {r['bin_lo']:.1f}~{r['bin_hi']:.1f} | {r['n']} | {_fmt(r['mean_p'])} | "
+                             f"{_fmt(r['fail_rate'], True)} |")
+    else:
+        lines.append("- 아직 홀드아웃 응답이 없다.")
+    lines += ["", "## 판단 규칙(사전등록)", "", s["claim"], ""]
+    return "\n".join(lines)
