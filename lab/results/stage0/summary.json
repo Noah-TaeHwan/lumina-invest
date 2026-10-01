@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-01T11:28:31.745311+00:00",
+  "generated_at": "2026-10-01T15:26:43.639557+00:00",
   "n_selected": 120,
   "rule": {
     "30": {
@@ -50,13 +50,13 @@
   },
   "dev_candidates": 4109,
   "calls": {
-    "calls": 300,
-    "p50_ms": 205.52049999241717,
-    "p95_ms": 290.9390503395116,
-    "p99_ms": 374.24644759244984,
+    "calls": 500,
+    "p50_ms": 204.98737499292474,
+    "p95_ms": 285.60976105654845,
+    "p99_ms": 338.89384290523583,
     "failure_rate": 0.0,
     "schema_valid_rate": 1.0,
-    "mean_input_tokens": 806.5466666666666,
+    "mean_input_tokens": 806.53,
     "models": [
       "jev-1.13.0"
     ],
@@ -69,14 +69,24 @@
   },
   "projection": {
     "calls": 7227,
-    "cost_usd": 0.24481433592000001,
-    "hours_sequential": 0.41258240373477745
+    "cost_usd": 0.24480927702000002,
+    "hours_sequential": 0.4115121552982964
   },
   "sessions": [
     {
       "session": 1,
       "started_at": "2026-10-01T11:10:29.944223+00:00",
       "ended_at": "2026-10-01T11:10:52.171682+00:00"
+    },
+    {
+      "session": 2,
+      "started_at": "2026-10-01T13:15:19.463570+00:00",
+      "ended_at": "2026-10-01T13:15:41.622882+00:00"
+    },
+    {
+      "session": 3,
+      "started_at": "2026-10-01T15:26:18.443620+00:00",
+      "ended_at": "2026-10-01T15:26:38.829324+00:00"
     }
   ],
   "notes": [
@@ -109,9 +119,35 @@
         "jev-1.13.0"
       ],
       "errors": {}
+    },
+    "session-2": {
+      "calls": 100,
+      "p50_ms": 211.87249950889964,
+      "p95_ms": 287.7130993991159,
+      "p99_ms": 329.98929623718146,
+      "failure_rate": 0.0,
+      "schema_valid_rate": 1.0,
+      "mean_input_tokens": 806.55,
+      "models": [
+        "jev-1.13.0"
+      ],
+      "errors": {}
+    },
+    "session-3": {
+      "calls": 100,
+      "p50_ms": 200.30095851689111,
+      "p95_ms": 244.5001806030632,
+      "p99_ms": 285.96326542843616,
+      "failure_rate": 0.0,
+      "schema_valid_rate": 1.0,
+      "mean_input_tokens": 806.46,
+      "models": [
+        "jev-1.13.0"
+      ],
+      "errors": {}
     }
   },
-  "complete": false,
+  "complete": true,
   "go": {
     "latency_p99": true,
     "failure_rate": true,
@@ -120,5 +156,5 @@
     "dev_candidates": true,
     "projected_cost": true
   },
-  "verdict": "PARTIAL"
+  "verdict": "GO"
 }
