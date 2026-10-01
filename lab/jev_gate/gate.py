@@ -155,4 +155,6 @@ class JevGate:
                 raise ValueError(p)
         except (ValueError, KeyError, TypeError):
             return fail("schema", 200)
+        if model != MODEL:  # 별칭이 다른 버전을 가리키면 확률이 섞이므로 차단
+            return fail("model_mismatch", 200)
         return GateResult(key, True, p, latency, model, tokens, 200, None, called_at)
