@@ -243,7 +243,7 @@ def cmd_stage0_report(paths: Paths, pre: dict, now: datetime | None = None) -> d
 
 
 class Stage1Paths:
-    """Stage 1 입출력 경로. JEV 호출 기록은 Stage 0 v3와 공유한다(같은 입력 재과금 방지)."""
+    """Stage 1 입출력 경로. JEV 호출 기록은 Stage 1 전용 파일에 쓴다(Stage 0 기록과 덧붙이기 충돌 방지)."""
 
     def __init__(self, root: Path, pre: dict):
         s1 = pre["stage1"]
