@@ -1,0 +1,104 @@
+{
+  "version": 2,
+  "created": "2026-10-01",
+  "amended": "2026-10-01 v2 — 세션 1·반복 측정 이후, 코드에 이미 있던 값(특징 이름·정의 해시·반올림 자릿수·신호 간격 상한·갈래 맞춤 규칙·토큰 가격·연속 실패 한도)을 명시로 추가했다. JEV 호출 입력(state·질문)과 v1의 모든 값은 바뀌지 않았다.",
+  "spec": "docs/superpowers/specs/2026-10-01-jev-gate-lab-design.md",
+  "symbol": "BTCUSDT",
+  "periods": {
+    "dev": [
+      "2025-10-01",
+      "2026-04-30"
+    ],
+    "validation": [
+      "2026-05-01",
+      "2026-06-30"
+    ],
+    "holdout": [
+      "2026-07-01",
+      "2026-09-10"
+    ],
+    "post_release": [
+      "2026-09-11",
+      "2026-09-30"
+    ]
+  },
+  "rule": {
+    "n_grid": [
+      30,
+      60,
+      120
+    ],
+    "n_selection": "개발 구간 후보가 dev_candidates_min 이상인 N 중 1분봉 종가 근사 비용 차감 누적 수익률이 가장 높은 N(동률이면 작은 N)",
+    "stop_atr": 2.0,
+    "take_atr": 3.0,
+    "max_bars": 120
+  },
+  "features": {
+    "names": [
+      "ret_1",
+      "ret_5",
+      "ret_15",
+      "ret_60",
+      "breakout_margin_atr",
+      "atr_regime",
+      "volume_z",
+      "taker_buy_ratio",
+      "range_pos_240",
+      "trend_slope_atr",
+      "bars_since_prev_signal"
+    ],
+    "definitions_sha256": "3fff7da950ce22ef29ea89c11516a1dcbb6dd4073bfe34e3689a73eb9df53333",
+    "round_decimals": 3,
+    "prev_signal_cap": 240
+  },
+  "costs": {
+    "taker_fee_rate": 0.001,
+    "slippage_bps": 1.0,
+    "notional_usdt": 1000
+  },
+  "stale_latency_ms": 5000,
+  "jev": {
+    "model": "jev-1.13.0",
+    "question_sha256": "df13cbf68dce6784b48544c5ba01efa2b8484f4de450428ee3e52be2f5d159f1",
+    "timeout_s": 10,
+    "budget_usd": 5.0,
+    "price_per_million_input_tokens": 0.042
+  },
+  "tau_grid": [
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7
+  ],
+  "tau_max_block_rate": 0.6,
+  "arms": {
+    "matching": {
+      "deterministic_filter": "volume_z < q이면 차단. q는 개발 구간에서 JEV 실측 지연 갈래(⑥)의 차단율에 맞춘다",
+      "random_block": "후보마다 확률 p로 차단, 시드 1,000개. p는 같은 구간 ⑥의 실제 차단율",
+      "logistic": "같은 특징으로 개발 구간 후보 거래의 손실 확률을 학습하고, 임계값은 개발 구간 ⑥ 차단율에 맞춘다"
+    }
+  },
+  "regime": {
+    "lookback_days": 30,
+    "up_threshold": 0.05,
+    "down_threshold": -0.05
+  },
+  "stage0": {
+    "sample_size": 300,
+    "sample_seed": 20261001,
+    "sessions": 3,
+    "session_min_gap_hours": 2,
+    "repeat_items": 50,
+    "repeat_calls": 5,
+    "thresholds": {
+      "latency_p99_ms": 5000,
+      "failure_rate_max": 0.02,
+      "schema_valid_min": 0.99,
+      "repeat_agreement_min": 0.9,
+      "dev_candidates_min": 300,
+      "projected_cost_max_usd": 5.0
+    },
+    "max_consecutive_failures": 3
+  }
+}

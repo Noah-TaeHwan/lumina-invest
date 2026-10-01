@@ -1,0 +1,160 @@
+{
+  "generated_at": "2026-10-01T15:26:43.639557+00:00",
+  "n_selected": 120,
+  "rule": {
+    "30": {
+      "candidates": 10154,
+      "trades": 5437,
+      "net_compound": -0.9999948560902452,
+      "net_mean": -0.0022341664855928364,
+      "gross_mean": -3.5664655223394865e-05,
+      "win_rate": 0.1675556372999816,
+      "reasons": {
+        "stop": 3259,
+        "take": 2155,
+        "time": 23
+      }
+    },
+    "60": {
+      "candidates": 6590,
+      "trades": 3642,
+      "net_compound": -0.9997047386162669,
+      "net_mean": -0.002225777237469044,
+      "gross_mean": -2.725692202351206e-05,
+      "win_rate": 0.17984623833058758,
+      "reasons": {
+        "stop": 2207,
+        "take": 1421,
+        "time": 14
+      }
+    },
+    "120": {
+      "candidates": 4109,
+      "trades": 2346,
+      "net_compound": -0.9950780966011328,
+      "net_mean": -0.002258939134176587,
+      "gross_mean": -6.049188847163189e-05,
+      "win_rate": 0.19352088661551578,
+      "reasons": {
+        "stop": 1445,
+        "take": 888,
+        "time": 13
+      }
+    }
+  },
+  "candidate_counts": {
+    "dev": 4109,
+    "validation": 1160,
+    "holdout": 1531,
+    "post_release": 427
+  },
+  "dev_candidates": 4109,
+  "calls": {
+    "calls": 500,
+    "p50_ms": 204.98737499292474,
+    "p95_ms": 285.60976105654845,
+    "p99_ms": 338.89384290523583,
+    "failure_rate": 0.0,
+    "schema_valid_rate": 1.0,
+    "mean_input_tokens": 806.53,
+    "models": [
+      "jev-1.13.0"
+    ],
+    "errors": {}
+  },
+  "repeat": {
+    "items": 50,
+    "agreement": 0.9359999999999999,
+    "mean_std": 0.009710872902213157
+  },
+  "projection": {
+    "calls": 7227,
+    "cost_usd": 0.24480927702000002,
+    "hours_sequential": 0.4115121552982964
+  },
+  "sessions": [
+    {
+      "session": 1,
+      "started_at": "2026-10-01T11:10:29.944223+00:00",
+      "ended_at": "2026-10-01T11:10:52.171682+00:00"
+    },
+    {
+      "session": 2,
+      "started_at": "2026-10-01T13:15:19.463570+00:00",
+      "ended_at": "2026-10-01T13:15:41.622882+00:00"
+    },
+    {
+      "session": 3,
+      "started_at": "2026-10-01T15:26:18.443620+00:00",
+      "ended_at": "2026-10-01T15:26:38.829324+00:00"
+    }
+  ],
+  "notes": [
+    "표본 300건은 시간순으로 정렬돼 세션마다 개발 구간의 다른 시기(약 3분의 1씩)를 맡고, 반복 측정 50건은 가장 이른 시기에서 뽑혔다. 세션 간 지연 차이를 해석할 때 이 배정을 함께 본다.",
+    "선택 N의 규칙 단독 성과가 비용 전에도 거래당 0 이하다. spec 7절에 따라 Stage 1 전에 규칙을 다시 고르거나, 게이트 효과를 '손실 전략 차단'으로만 해석한다고 명시한다."
+  ],
+  "by_session": {
+    "repeat": {
+      "calls": 200,
+      "p50_ms": 201.45408350799698,
+      "p95_ms": 285.41963066527387,
+      "p99_ms": 319.61813007626887,
+      "failure_rate": 0.0,
+      "schema_valid_rate": 1.0,
+      "mean_input_tokens": 806.52,
+      "models": [
+        "jev-1.13.0"
+      ],
+      "errors": {}
+    },
+    "session-1": {
+      "calls": 100,
+      "p50_ms": 207.48814550461248,
+      "p95_ms": 319.1561330560944,
+      "p99_ms": 375.1999744965,
+      "failure_rate": 0.0,
+      "schema_valid_rate": 1.0,
+      "mean_input_tokens": 806.6,
+      "models": [
+        "jev-1.13.0"
+      ],
+      "errors": {}
+    },
+    "session-2": {
+      "calls": 100,
+      "p50_ms": 211.87249950889964,
+      "p95_ms": 287.7130993991159,
+      "p99_ms": 329.98929623718146,
+      "failure_rate": 0.0,
+      "schema_valid_rate": 1.0,
+      "mean_input_tokens": 806.55,
+      "models": [
+        "jev-1.13.0"
+      ],
+      "errors": {}
+    },
+    "session-3": {
+      "calls": 100,
+      "p50_ms": 200.30095851689111,
+      "p95_ms": 244.5001806030632,
+      "p99_ms": 285.96326542843616,
+      "failure_rate": 0.0,
+      "schema_valid_rate": 1.0,
+      "mean_input_tokens": 806.46,
+      "models": [
+        "jev-1.13.0"
+      ],
+      "errors": {}
+    }
+  },
+  "complete": true,
+  "go": {
+    "latency_p99": true,
+    "failure_rate": true,
+    "schema_valid": true,
+    "repeat_agreement": true,
+    "dev_candidates": true,
+    "projected_cost": true
+  },
+  "verdict": "GO"
+}
