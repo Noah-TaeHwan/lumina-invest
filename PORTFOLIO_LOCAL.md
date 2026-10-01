@@ -8,21 +8,14 @@
 
 ## 1. 실행할 버전 준비
 
-2026-10-01 작성 기준은 `docs/portfolio-readme` 변경 브랜치다. main 통합을 가정하지 않는다.
-이 브랜치가 원격에 게시되어 있으면 다음과 같이 받는다.
-
-```sh
-git clone --branch docs/portfolio-readme https://github.com/Noah-TaeHwan/lumina-invest.git
-cd lumina-invest
-```
-
-원격에 브랜치가 없다면 위 명령은 사용할 수 없으므로, 해당 변경이 포함된 리뷰 checkout에서 진행한다.
-main에 이 변경이 통합된 버전을 받는 경우에는 다음처럼 branch 옵션 없이 clone한다.
+PR #2로 로컬 실행 설정이 main에 통합된 버전을 기준으로 한다. 기본 실행 경로는 main을 clone하는 것이다.
 
 ```sh
 git clone https://github.com/Noah-TaeHwan/lumina-invest.git
 cd lumina-invest
 ```
+
+병합 전 변경을 검토할 때만 해당 PR의 head 브랜치를 `--branch`로 지정해 받는다.
 
 이후 명령은 모두 `compose.portfolio.yml`이 있는 프로젝트 루트에서 실행한다.
 기본 `docker-compose.yml`은 8966 포트와 ingest/Celery 등 원본의 백그라운드 실행 구성이므로 아래 명령과 혼용하지 않는다.
