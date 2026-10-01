@@ -60,7 +60,12 @@ def _read_jsonl(path: Path) -> list[dict]:
 
 
 def _default_gate(paths: Paths, pre: dict) -> gate.JevGate:
-    return gate.JevGate(paths.calls, budget_usd=pre["jev"]["budget_usd"])
+    """키를 먼저 읽어, 키 문제는 호출 기록이 생기기 전에 안내 메시지로 멈춘다."""
+    try:
+        key = gate.load_api_key()
+    except OSError as e:  # 파일 없음·권한 오류
+        raise SystemExit(f"TypeSafe API 키를 읽을 수 없습니다: {e}")
+    return gate.JevGate(paths.calls, budget_usd=pre["jev"]["budget_usd"], api_key=key)
 
 
 def _session_calls(records: list[dict]) -> dict[int, list[dict]]:
@@ -96,8 +101,8 @@ def _ask_each(g: gate.JevGate, states: list[dict], tag: str, use_cache: bool = T
     streak = 0
     for i, state in enumerate(states, 1):
         r = g.ask(state, use_cache=use_cache, tag=tag)
-        print(f"[{tag}] {i}/{len(states)} ok={r.ok} p_fail={r.p_fail} {r.latency_ms:.0f}ms "
-              f"cached={r.cached} error={r.error}", flush=True)
+        latency = "cache" if r.cached else f"{r.latency_ms:.0f}ms"  # 캐시 줄에 예전 지연을 찍지 않는다
+        print(f"[{tag}] {i}/{len(states)} ok={r.ok} p_fail={r.p_fail} {latency} error={r.error}", flush=True)
         streak = 0 if r.ok else streak + 1
         if streak >= MAX_CONSECUTIVE_FAILURES:
             raise SystemExit(f"연속 실패 {streak}회로 중단했습니다. 원인을 확인한 뒤 같은 명령을 다시 실행하세요")
@@ -190,6 +195,8 @@ def cmd_stage0_report(paths: Paths, pre: dict, now: datetime | None = None) -> d
     """호출 기록을 요약해 통과 여부를 판정하고 리포트·summary·시도 원장을 쓴다."""
     s0, th = pre["stage0"], pre["stage0"]["thresholds"]
     rs, sample, records = _read_json(paths.rule, None), _require_sample(paths), _read_jsonl(paths.calls)
+    if rs is None:
+        raise SystemExit("규칙 통계가 없습니다. stage0-rule을 먼저 실행하세요")
     if not records:
         raise SystemExit("호출 기록이 없습니다")
     sessions = [{"session": k, "started_at": min(r["called_at"] for r in v), "ended_at": max(r["called_at"] for r in v)}

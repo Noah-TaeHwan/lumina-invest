@@ -155,3 +155,20 @@ def test_main_dispatches_report(tmp_path):
     paths, pre, fake = _setup(tmp_path), cli.load_prereg(), FakeFactory()
     _call(paths, pre, fake, 1, T0)
     assert cli.main(["--root", str(tmp_path), "stage0-report"]) == 0
+
+
+def test_report_requires_rule_stats(tmp_path):
+    paths, pre, fake = _setup(tmp_path), cli.load_prereg(), FakeFactory()
+    _call(paths, pre, fake, 1, T0)
+    paths.rule.unlink()
+    with pytest.raises(SystemExit, match="stage0-rule"):
+        cli.cmd_stage0_report(paths, pre, now=T0)
+
+
+def test_missing_api_key_stops_before_any_record(tmp_path, monkeypatch):
+    paths, pre = _setup(tmp_path), cli.load_prereg()
+    monkeypatch.delenv("TYPESAFE_API_KEY", raising=False)
+    monkeypatch.setenv("HOME", str(tmp_path / "empty-home"))
+    with pytest.raises(SystemExit, match="API 키"):
+        cli.cmd_stage0_call(paths, pre, 1, now=T0)
+    assert not paths.calls.exists()
