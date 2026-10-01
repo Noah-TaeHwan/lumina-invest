@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "created": "2026-10-01",
+  "spec": "docs/superpowers/specs/2026-10-01-jev-gate-lab-design.md",
+  "symbol": "BTCUSDT",
+  "periods": {
+    "dev": ["2025-10-01", "2026-04-30"],
+    "validation": ["2026-05-01", "2026-06-30"],
+    "holdout": ["2026-07-01", "2026-09-10"],
+    "post_release": ["2026-09-11", "2026-09-30"]
+  },
+  "rule": {
+    "n_grid": [30, 60, 120],
+    "n_selection": "개발 구간 후보가 dev_candidates_min 이상인 N 중 1분봉 종가 근사 비용 차감 누적 수익률이 가장 높은 N(동률이면 작은 N)",
+    "stop_atr": 2.0,
+    "take_atr": 3.0,
+    "max_bars": 120
+  },
+  "costs": {"taker_fee_rate": 0.001, "slippage_bps": 1.0, "notional_usdt": 1000},
+  "stale_latency_ms": 5000,
+  "jev": {
+    "model": "jev-1.13.0",
+    "question_sha256": "df13cbf68dce6784b48544c5ba01efa2b8484f4de450428ee3e52be2f5d159f1",
+    "timeout_s": 10,
+    "budget_usd": 5.0
+  },
+  "tau_grid": [0.3, 0.4, 0.5, 0.6, 0.7],
+  "tau_max_block_rate": 0.6,
+  "regime": {"lookback_days": 30, "up_threshold": 0.05, "down_threshold": -0.05},
+  "stage0": {
+    "sample_size": 300,
+    "sample_seed": 20261001,
+    "sessions": 3,
+    "session_min_gap_hours": 2,
+    "repeat_items": 50,
+    "repeat_calls": 5,
+    "thresholds": {
+      "latency_p99_ms": 5000,
+      "failure_rate_max": 0.02,
+      "schema_valid_min": 0.99,
+      "repeat_agreement_min": 0.9,
+      "dev_candidates_min": 300,
+      "projected_cost_max_usd": 5.0
+    }
+  }
+}
