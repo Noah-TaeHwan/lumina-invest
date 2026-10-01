@@ -1,0 +1,38 @@
+{
+  "periods": {
+    "dev": {
+      "n": 1279,
+      "coverage": 1.0,
+      "fail_rate": 0.7021110242376857,
+      "auc_jev": 0.5165123429727186,
+      "auc_logistic": null,
+      "brier_jev": 0.258186004691165
+    },
+    "validation": {
+      "n": 342,
+      "coverage": 1.0,
+      "fail_rate": 0.7251461988304093,
+      "auc_jev": 0.48189773507206596,
+      "auc_logistic": null,
+      "brier_jev": 0.25982134502923976
+    },
+    "holdout": {
+      "n": 476,
+      "coverage": 0.0,
+      "fail_rate": null,
+      "auc_jev": null,
+      "auc_logistic": null,
+      "brier_jev": null
+    },
+    "post_release": {
+      "n": 137,
+      "coverage": 0.0,
+      "fail_rate": null,
+      "auc_jev": null,
+      "auc_logistic": null,
+      "brier_jev": null
+    }
+  },
+  "frozen": false,
+  "claim": "홀드아웃 JEV AUC − 0.5의 95% 구간 하한 > 0 이고 JEV − 로지스틱 AUC 차의 점추정 ≥ 0 일 때만 판정력이 있다고 쓴다"
+}
