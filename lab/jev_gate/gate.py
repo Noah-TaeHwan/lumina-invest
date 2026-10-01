@@ -27,15 +27,15 @@ QUESTION_ID = "fail"
 QUESTION = {
     "type": "noul",
     "instructions": (
-        "A long breakout entry signal just fired on a 1-minute chart of a liquid market. "
+        "A long breakout entry signal just fired on a 5-minute chart of a liquid market. "
         "Using only the anonymized features in the state, will this trade more likely fail than succeed?"
     ),
     "criteria": {
         "true": (
-            "Price is more likely to close 2 ATR below entry, or reach the 120-minute limit without "
+            "Price is more likely to close 2 ATR below entry, or reach the 2-hour limit without "
             "closing 3 ATR above entry, before it closes 3 ATR above entry."
         ),
-        "false": "Price is more likely to close 3 ATR above entry before closing 2 ATR below entry, within 120 minutes.",
+        "false": "Price is more likely to close 3 ATR above entry before closing 2 ATR below entry, within 2 hours.",
     },
 }
 

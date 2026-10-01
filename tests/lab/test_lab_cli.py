@@ -15,7 +15,7 @@ T0 = datetime(2026, 10, 1, 9, 0, tzinfo=timezone.utc)
 
 
 def _setup(tmp_path):
-    paths = cli.Paths(tmp_path)
+    paths = cli.Paths(tmp_path, cli.load_prereg())
     paths.results.mkdir(parents=True)
     paths.rule.write_text(json.dumps({
         "n_selected": 60,

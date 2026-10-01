@@ -30,14 +30,15 @@ MAX_CONSECUTIVE_FAILURES = 3  # 연속 실패가 이만큼이면 세션을 멈�
 class Paths:
     """Stage 0 입출력 경로 모음. 세션 시작·종료 시각은 파일로 두지 않고 호출 기록에서 계산한다."""
 
-    def __init__(self, root: Path):
+    def __init__(self, root: Path, pre: dict | None = None):
+        s0 = (pre or {}).get("stage0", {})
         self.raw = root / "lab/data/raw"
-        self.results = root / "lab/results/stage0"
+        self.results = root / s0.get("results_dir", "lab/results/stage0")
         self.rule = self.results / "rule_stats.json"
         self.sample = self.results / "sample.json"
         self.calls = self.results / "jev_calls.jsonl"
         self.summary = self.results / "summary.json"
-        self.report = root / "docs/lab/stage0-report.md"
+        self.report = root / s0.get("report", "docs/lab/stage0-report.md")
         self.attempts = root / "lab/attempts.jsonl"
 
 
@@ -115,6 +116,7 @@ def cmd_stage0_rule(paths: Paths, pre: dict) -> int:
     months = data.month_range(periods["dev"][0][:7], periods["post_release"][1][:7])
     with httpx.Client(timeout=120, follow_redirects=True) as client:
         k = data.load_klines_range(pre["symbol"], months, paths.raw, client)
+    k = data.resample_klines(k, pre.get("bar_minutes", 1))
     f = features.compute_features(k)
     dev_rows = np.flatnonzero(stage0.period_mask(f["t_close"], *periods["dev"]).to_numpy())
     f_dev = f.iloc[: dev_rows[-1] + 1]  # 개발 구간 끝에서 잘라 다음 구간 가격을 쓰지 않는다
@@ -249,7 +251,8 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("stage0-repeat")
     sub.add_parser("stage0-report")
     args = p.parse_args(argv)
-    paths, pre = Paths(args.root), load_prereg()
+    pre = load_prereg()
+    paths = Paths(args.root, pre)
     if args.cmd == "stage0-rule":
         return cmd_stage0_rule(paths, pre)
     if args.cmd == "stage0-call":

@@ -39,9 +39,10 @@ def test_find_exit_stop_and_take(path, expected):
 
 
 def test_find_exit_time_and_end():
-    flat = np.full(200, 100.0)
-    assert rule.find_exit(flat, 1, 100.0, 1.0) == (120, "time")
-    assert rule.find_exit(flat[:50], 1, 100.0, 1.0) == (49, "end")
+    flat = np.full(rule.MAX_BARS + 50, 100.0)
+    assert rule.find_exit(flat, 1, 100.0, 1.0) == (rule.MAX_BARS, "time")
+    short = flat[: rule.MAX_BARS // 2]
+    assert rule.find_exit(short, 1, 100.0, 1.0) == (len(short) - 1, "end")
 
 
 def test_net_return_applies_fees_and_slippage():

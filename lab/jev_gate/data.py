@@ -117,3 +117,17 @@ def load_klines_range(symbol: str, months: list[str], raw_dir: Path, client: htt
     frames = [load_klines(p) for m in months for p in download_month(symbol, m, raw_dir, client)]
     df = pd.concat(frames, ignore_index=True)
     return df.drop_duplicates("open_time").sort_values("open_time").reset_index(drop=True)
+
+
+def resample_klines(k: pd.DataFrame, minutes: int) -> pd.DataFrame:
+    """1분봉을 UTC minutes분 경계로 묶는다. 1분봉이 minutes개 다 있는 봉만 남긴다(빠진 분이 있으면 버림)."""
+    if minutes == 1:
+        return k
+    width = minutes * MINUTE_US
+    g = k.assign(_bucket=k["open_time"] // width * width)
+    out = g.groupby("_bucket", sort=True).agg(
+        open=("open", "first"), high=("high", "max"), low=("low", "min"), close=("close", "last"),
+        volume=("volume", "sum"), taker_buy_base=("taker_buy_base", "sum"), n=("open", "size"))
+    out = out[out["n"] == minutes].drop(columns="n").reset_index(names="open_time")
+    out["t_close"] = out["open_time"] + width
+    return out

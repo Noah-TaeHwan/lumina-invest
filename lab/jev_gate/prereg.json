@@ -1,9 +1,10 @@
 {
-  "version": 2,
+  "version": 3,
   "created": "2026-10-01",
-  "amended": "2026-10-01 v2 — 세션 1·반복 측정 이후, 코드에 이미 있던 값(특징 이름·정의 해시·반올림 자릿수·신호 간격 상한·갈래 맞춤 규칙·토큰 가격·연속 실패 한도)을 명시로 추가했다. JEV 호출 입력(state·질문)과 v1의 모든 값은 바뀌지 않았다.",
+  "amended": "2026-10-01 v2 — 세션 1·반복 측정 이후, 코드에 이미 있던 값(특징 이름·정의 해시·반올림 자릿수·신호 간격 상한·갈래 맞춤 규칙·토큰 가격·연속 실패 한도)을 명시로 추가했다. JEV 호출 입력(state·질문)과 v1의 모든 값은 바뀌지 않았다. / 2026-10-02 v3 — spec 15절: 5분봉(bar_minutes 5), N=48 고정, 시간청산 24봉(2시간), 질문 문구 5분봉·2시간으로 변경(새 질문 해시), 주결과 H-predict. 검증·홀드아웃 가격은 이 결정에 쓰지 않았다. v2 결과는 lab/results/stage0에 보존.",
   "spec": "docs/superpowers/specs/2026-10-01-jev-gate-lab-design.md",
   "symbol": "BTCUSDT",
+  "bar_minutes": 5,
   "periods": {
     "dev": [
       "2025-10-01",
@@ -24,14 +25,12 @@
   },
   "rule": {
     "n_grid": [
-      30,
-      60,
-      120
+      48
     ],
-    "n_selection": "개발 구간 후보가 dev_candidates_min 이상인 N 중 1분봉 종가 근사 비용 차감 누적 수익률이 가장 높은 N(동률이면 작은 N)",
+    "n_selection": "v3에서 개발 구간 사전 분석(docs/lab/stage1-rule-options.md)으로 48 고정",
     "stop_atr": 2.0,
     "take_atr": 3.0,
-    "max_bars": 120
+    "max_bars": 24
   },
   "features": {
     "names": [
@@ -59,7 +58,7 @@
   "stale_latency_ms": 5000,
   "jev": {
     "model": "jev-1.13.0",
-    "question_sha256": "df13cbf68dce6784b48544c5ba01efa2b8484f4de450428ee3e52be2f5d159f1",
+    "question_sha256": "62de38bfd3cadffae4116e936cd6b81af57569f383a8b5429a55b3a90f2e3fc0",
     "timeout_s": 10,
     "budget_usd": 5.0,
     "price_per_million_input_tokens": 0.042
@@ -99,6 +98,9 @@
       "dev_candidates_min": 300,
       "projected_cost_max_usd": 5.0
     },
-    "max_consecutive_failures": 3
-  }
+    "max_consecutive_failures": 3,
+    "results_dir": "lab/results/stage0-v3",
+    "report": "docs/lab/stage0-v3-report.md"
+  },
+  "primary_outcome": "H-predict: 홀드아웃 후보의 지연 0 가상 거래 손실 여부에 대한 JEV p_fail AUC를 무작위(0.5)·같은 특징 로지스틱 회귀 AUC와 비교, 일 단위 블록 부트스트랩 95% 신뢰구간"
 }
