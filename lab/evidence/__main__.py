@@ -230,10 +230,13 @@ def model_digest(tags: list[dict], model: str, expected: str) -> str:
     return digest
 
 
+STAGE0_TAGS = {"check", "repeat1", "repeat2", "repeat3"}
+
+
 def latency_rows(calls: list[dict]) -> tuple[list[dict], list[dict]]:
-    """첫 시도 기록을 관문용(묶음·반복)과 단건(single)으로 나눈다."""
+    """첫 시도 기록을 관문용(Stage 0 묶음·반복)과 단건(single)으로 나눈다. tune·holdout 등은 뺀다."""
     first = [r for r in calls if r["attempt"] == 1]
-    return [r for r in first if r["tag"] != "single"], [r for r in first if r["tag"] == "single"]
+    return [r for r in first if r["tag"] in STAGE0_TAGS], [r for r in first if r["tag"] == "single"]
 
 
 def session_stats(rows: list[dict]) -> list[dict]:
