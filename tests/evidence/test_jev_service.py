@@ -81,11 +81,37 @@ def test_default_timeout_is_two_seconds_per_attempt():
 
 
 def test_429_401_403_are_not_retried(fake_redis, jev_payload):
-    for status in (429, 401, 403):
+    for status, code in ((429, "http_429"), (401, "http_4xx"), (403, "http_4xx")):
         seen = []
         r = _ask(_client(fake_redis, [(status, {}), (200, jev_payload(Q))], seen))
         assert not r.ok and r.attempts == 1 and len(seen) == 1
-        assert r.http_status == status and r.error_code == "http_4xx"
+        assert r.http_status == status and r.error_code == code
+
+
+def test_other_4xx_is_retried_as_http_4xx(fake_redis):
+    r = _ask(_client(fake_redis, [(400, {}), (422, {})], []))
+    assert not r.ok and r.attempts == 2 and r.error_code == "http_4xx"
+
+
+def test_cancelled_attempt_still_counts_one_call_with_estimated_tokens(fake_redis, jev_payload):
+    """마감 취소로 wait_for 중 CancelledError를 받아도 요청은 이미 나갔으므로 한도에 센다."""
+    seen = []
+    usage = {}
+
+    async def go():
+        client = _client(fake_redis, [("sleep", 1.0, 200, jev_payload(Q))], seen, timeout=2.0)
+        task = asyncio.create_task(client.ask("state", Q, user_id="u1", usage=usage))
+        await asyncio.sleep(0.05)
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            return "cancelled"
+
+    assert asyncio.run(go()) == "cancelled" and len(seen) == 1
+    assert fake_redis.data["evidence:quota:20261002:user:u1:calls"] == "1"
+    assert fake_redis.data["evidence:quota:20261002:user:u1:tokens"] == str(jev_service.EST_TOKENS_PER_CALL)
+    assert usage == {"calls": 1, "tokens": jev_service.EST_TOKENS_PER_CALL}
 
 
 def test_invalid_response_is_retried_and_tokens_of_both_attempts_counted(fake_redis, jev_payload):

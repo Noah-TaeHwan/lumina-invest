@@ -12,7 +12,7 @@ import json
 import logging
 import time
 from dataclasses import dataclass, field, replace
-from typing import Any, Callable
+from typing import Any
 
 from app.lib import jev
 from app.lib.jev_service import Quota, QuotaUnavailable
@@ -40,10 +40,6 @@ class Policy:
     max_claims: int = 8
     concurrency: int = 3
     deadline_s: float = 8.0
-
-    @property
-    def lex_filter(self) -> bool:
-        return self.theta_low is not None or self.theta_high is not None
 
 
 # 평가(P5) 전 잠정 정책: τ_s 0.70, τ_c 0.35, 1차 필터 끔(spec 6.4절)
@@ -124,15 +120,14 @@ def _finish(claims: list[ClaimResult], fatal: str | None) -> tuple[str, str | No
 class Runner:
     """판정 실행기. 사용자별 진행 중 실행을 1건으로 묶는다(같은 사용자의 다음 실행은 앞 실행이 끝난 뒤 시작)."""
 
-    def __init__(self, client: Any, quota: Quota, *, clock: Callable[[], float] = time.monotonic):
+    def __init__(self, client: Any, quota: Quota):
         self._client = client
         self._quota = quota
-        self._clock = clock
         self._user_locks: dict[str, asyncio.Lock] = {}
 
     async def run(self, *, company: str, answer: str, passages: list[str], user_id: str,
                   policy: Policy = A2_PROVISIONAL, trigger: str = "auto", run_id: str | None = None) -> RunResult:
-        t0 = self._clock()
+        t0 = time.monotonic()
         claims = [ClaimResult(i, sp.text, sp.start, sp.end, "unjudged") for i, sp in enumerate(claim_spans(answer))]
         for c in claims:
             if is_not_claim(c.text):
@@ -162,6 +157,7 @@ class Runner:
             status, code = _finish(claims, None)
             return self._result(status, code, claims, policy, trigger, t0, run_id)
 
+        # ponytail: 단일 프로세스 전제, 워커를 늘리면 Redis 락으로
         lock = self._user_locks.setdefault(user_id, asyncio.Lock())
         async with lock:
             try:
@@ -180,7 +176,10 @@ class Runner:
 
     async def _judge_all(self, company: str, passages: list[str], jev_claims: list[ClaimResult], user_id: str,
                          policy: Policy, run_id: str | None) -> str | None:
-        """동시성·마감 안에서 주장마다 JEV를 부른다. 401·403이면 실행을 실패시킬 오류 코드를 돌려준다."""
+        """동시성·마감 안에서 주장마다 JEV를 부른다. 401·403이면 실행을 실패시킬 오류 코드를 돌려준다.
+
+        마감으로 취소된 주장도 이미 나간 시도 수와 센 토큰(취소 시도는 추정치)을 집계에 남긴다.
+        """
         sem = asyncio.Semaphore(policy.concurrency)
         stop: dict[str, str | None] = {"reason": None, "fatal": None}
         questions = judge.build_questions(len(passages))
@@ -191,9 +190,15 @@ class Runner:
                     c.reason = stop["reason"]
                     return
                 state = judge.build_state(company, c.text, passages)
+                usage: dict = {}
                 try:
                     r = await self._client.ask(state, questions, user_id=user_id,
-                                               log_ctx={"run_id": run_id, "claim_idx": c.idx})
+                                               log_ctx={"run_id": run_id, "claim_idx": c.idx}, usage=usage)
+                except asyncio.CancelledError:
+                    if usage.get("calls"):
+                        c.jev_request_key = jev.request_key(state, questions)
+                        c.attempts, c.input_tokens = usage["calls"], usage["tokens"]
+                    raise
                 except Exception as exc:  # noqa: BLE001 — 조용히 사라지지 않게 문장에 남긴다
                     log.error(json.dumps({"event": "claim_error", "run_id": run_id, "claim_idx": c.idx,
                                           "error": type(exc).__name__}))
@@ -230,7 +235,7 @@ class Runner:
                         calls=sum(c.attempts for c in used if not c.cached),
                         cache_hits=sum(1 for c in used if c.cached),
                         input_tokens=sum(c.input_tokens for c in used),
-                        duration_ms=round((self._clock() - t0) * 1000, 1), counts=_counts(claims))
+                        duration_ms=round((time.monotonic() - t0) * 1000, 1), counts=_counts(claims))
         log.info(json.dumps({"run_id": run_id, "policy_version": policy.version, "status": status,
                              "error_code": code, "claims": res.counts, "calls": res.calls,
                              "cache_hits": res.cache_hits, "input_tokens": res.input_tokens,

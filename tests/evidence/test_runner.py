@@ -31,7 +31,7 @@ class FakeClient:
         self.calls: list[str] = []
         self.active = self.max_active = 0
 
-    async def ask(self, state, questions, *, user_id, log_ctx=None):
+    async def ask(self, state, questions, *, user_id, log_ctx=None, usage=None):
         claim = _claim(state)
         self.calls.append(claim)
         self.active += 1
@@ -78,7 +78,6 @@ def test_provisional_policy_values():
     p = rn.A2_PROVISIONAL
     assert (p.version, p.tau_s, p.tau_c, p.theta_low, p.theta_high) == ("a2-provisional", 0.70, 0.35, None, None)
     assert (p.max_claims, p.concurrency, p.deadline_s) == (8, 3, 8.0)
-    assert not p.lex_filter
 
 
 def test_concurrency_limit_is_respected():
@@ -208,11 +207,47 @@ def test_some_claims_failing_is_partial():
 
 def test_429_stops_remaining_claims():
     hit = "회사는 제품 2번을 만든다."
-    client = FakeClient(lambda claim, n: ("fail", ("http_4xx", 429)) if claim == hit else ("probs", [(0.8, 0.0)] * n))
+    client = FakeClient(lambda claim, n: ("fail", ("http_429", 429)) if claim == hit else ("probs", [(0.8, 0.0)] * n))
     res = _run(client, _answer(4), policy=rn.Policy("seq", 0.70, 0.35, concurrency=1))
     assert client.calls == ["회사는 제품 1번을 만든다.", hit]
-    assert [c.reason for c in res.claims] == [None, "http_4xx", "rate_limited", "rate_limited"]
-    assert res.status == "partial" and res.error_code == "http_4xx"
+    assert [c.reason for c in res.claims] == [None, "http_429", "rate_limited", "rate_limited"]
+    assert res.status == "partial" and res.error_code == "http_429"
+
+
+def test_429_from_service_client_gives_run_error_http_429(fake_redis, jev_payload):
+    async def handler(request):
+        return httpx.Response(429, json={})
+
+    async def go():
+        quota, client = _real_client(fake_redis, handler)
+        return await rn.Runner(client, quota).run(company=CO, answer=_answer(1), passages=PASSAGES, user_id="u1")
+
+    res = asyncio.run(go())
+    assert res.status == "failed" and res.error_code == "http_429" and res.claims[0].reason == "http_429"
+
+
+def test_deadline_cancel_counts_every_sent_request(fake_redis, jev_payload):
+    """응답 0.3초, 마감 0.45초, 주장 8개, 동시성 3: 나간 요청 수 = 한도 calls 카운터 = 실행 calls."""
+    seen = []
+
+    async def handler(request):
+        seen.append(request)
+        await asyncio.sleep(0.3)
+        return httpx.Response(200, json=jev_payload(json.loads(request.content)["questions"]))
+
+    async def go():
+        quota, client = _real_client(fake_redis, handler)
+        policy = rn.Policy("t", 0.70, 0.35, deadline_s=0.45)
+        return await rn.Runner(client, quota).run(company=CO, answer=_answer(8), passages=PASSAGES,
+                                                  user_id="u1", policy=policy)
+
+    res = asyncio.run(go())
+    assert len(seen) == 6
+    assert fake_redis.data["evidence:quota:20261002:user:u1:calls"] == str(len(seen))
+    assert res.calls == len(seen)
+    assert res.input_tokens == 3 * 100 + 3 * jev_service.EST_TOKENS_PER_CALL
+    assert fake_redis.data["evidence:quota:20261002:user:u1:tokens"] == str(res.input_tokens)
+    assert [c.reason for c in res.claims].count("deadline") == 5
 
 
 def test_401_fails_run_even_after_success():

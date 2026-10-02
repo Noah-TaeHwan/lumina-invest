@@ -22,10 +22,7 @@ def char_bigrams(text: str) -> set[str]:
 
 def lex_score(claim: str, passages: list[str]) -> float:
     """B-lex: 숫자 확인을 통과한 문단에서 주장 바이그램 재현율의 최댓값."""
-    cb = char_bigrams(claim)
-    if not cb:
-        return 0.0
-    return max((len(cb & char_bigrams(p)) / len(cb) if number_check(claim, p) else 0.0) for p in passages)
+    return lex_best(claim, passages)[0]
 
 
 def lex_best(claim: str, passages: list[str]) -> tuple[float, int | None]:
