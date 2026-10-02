@@ -178,3 +178,17 @@ def test_kappa_ci_and_digest_check():
     assert cli.model_digest(tags, "llama3.2:1b", "baf6a787fdff") == "baf6a787fdff"
     with pytest.raises(SystemExit, match="digest"):
         cli.model_digest(tags, "llama3.2:1b", "ffffffffffff")
+
+
+# 실행 중 발견 — embed는 --split을 따른다(홀드아웃은 동결 전 임베딩하지 않음)
+def test_embed_respects_split(tmp_path, monkeypatch):
+    P = _root(tmp_path, COMPS)
+    cli.write_jsonl(P.priv / "passages.jsonl", [{"id": f"{c}-p", "corp_code": c, "text": c} for c in "abc"])
+
+    class Fake:
+        async def embed(self, model, text):
+            return [1.0]
+
+    monkeypatch.setattr(cli, "_ollama", lambda: Fake())
+    cli.cmd_embed(P, type("A", (), {"split": "tune"})())
+    assert [r["id"] for r in cli.read_jsonl(P.priv / "passage_vecs.jsonl")] == ["a-p"]

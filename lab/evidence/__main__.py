@@ -333,7 +333,7 @@ def _ollama():
 
 
 def cmd_embed(P: Paths, args) -> None:
-    """모든 문단을 임베딩해 비공개 파일에 캐시한다(이미 있는 ID는 건너뜀). 컨테이너에서 실행."""
+    """분할의 문단을 임베딩해 비공개 파일에 캐시한다(본문 해시가 같은 ID는 건너뜀). 컨테이너에서 실행."""
     import asyncio
 
     from app.services.evidence.retrieve import DOC_PREFIX
@@ -345,8 +345,9 @@ def cmd_embed(P: Paths, args) -> None:
     async def run():
         out.parent.mkdir(parents=True, exist_ok=True)
         with out.open("a") as f:
-            for rows in passages_by_corp(P).values():
-                for p in rows:
+            pbc = passages_by_corp(P)
+            for c in companies(P, args.split):
+                for p in pbc.get(c["corp_code"], []):
                     if p["id"] not in done:
                         vec = await llm.embed(EMBED_MODEL, DOC_PREFIX + p["text"])
                         f.write(json.dumps({"id": p["id"], "sha256": _sha(p["text"]), "vec": vec}) + "\n")
