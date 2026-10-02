@@ -21,7 +21,7 @@ def test_candidate_and_finance_filters():
 
 def test_clusters_merge_seed_groups_and_cross_mentions():
     names = {"a": "에이전자", "b": "비화학", "c": "씨바이오", "d": "디소재"}
-    texts = {"a": "주요 고객은 비화학이다", "b": "", "c": "", "d": ""}
+    texts = {"a": "주요 고객은 비화학이다. " * 10, "b": "", "c": "", "d": ""}
     assert split.clusters(names, texts, [["c", "d"]]) == [["a", "b"], ["c", "d"]]
 
 
@@ -30,3 +30,9 @@ def test_assign_respects_cap_and_is_deterministic():
     take, rest = split.assign(cl, 4)
     assert sum(len(x) for x in take) <= 4 and sorted(sum(take + rest, [])) == list("abcdefgh")
     assert split.assign(cl, 4) == (take, rest)
+
+
+def test_mention_edges_ignore_short_names_and_incidental_mentions():
+    names = {"a": "에이전자", "b": "SK", "c": "씨이화학"}
+    texts = {"a": "SK" * 30 + "씨이화학" * 9, "b": "에이전자" * 10, "c": ""}
+    assert split.mention_edges(names, texts) == [("b", "a", "에이전자")]

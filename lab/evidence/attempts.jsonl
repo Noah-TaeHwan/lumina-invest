@@ -1,0 +1,3 @@
+{"at": "2026-10-02T04:56:14.473361+00:00", "event": "split", "companies": 40, "clusters": 10, "random": 25, "tune": 0, "check": 31, "holdout": 9}
+{"at": "2026-10-02T04:57:24.659568+00:00", "event": "split", "companies": 40, "clusters": 31, "random": 25, "tune": 10, "check": 10, "holdout": 20}
+{"at": "2026-10-02T04:59:56.654742+00:00", "event": "rule-change", "what": "mention merge rule: any mention -> name>=3 chars and >=10 mentions", "why": "first split collapsed to one 31-company cluster (SK/DB substring noise, customer mentions); before any JEV call and before split.json"}

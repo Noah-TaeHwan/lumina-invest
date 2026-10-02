@@ -43,10 +43,19 @@ def is_finance(induty_code: str) -> bool:
     return str(induty_code).startswith(FINANCE_KSIC)
 
 
+MIN_NAME_LEN = 3
+MIN_MENTIONS = 10
+
+
 def mention_edges(names: dict[str, str], texts: dict[str, str]) -> list[tuple[str, str, str]]:
-    """(a, b, b의 이름): a 본문에 b 이름이 나오는 쌍. 군집 병합 근거로 원장에 남긴다."""
+    """(a, b, b의 이름): a 본문에 b 이름이 MIN_MENTIONS번 이상 나오는 쌍. 군집 병합 근거로 원장에 남긴다.
+
+    두 글자 약칭(SK·DB 등)은 다른 낱말 안에서도 걸리므로 보지 않는다(그런 계열은 시드 그룹으로 묶는다).
+    고객사로 몇 번 언급되는 정도는 상대 회사 사업을 서술한 것이 아니므로 병합하지 않는다.
+    """
     codes = sorted(names)
-    return [(a, b, names[b]) for a in codes for b in codes if a != b and names[b] in texts.get(a, "")]
+    return [(a, b, names[b]) for a in codes for b in codes
+            if a != b and len(names[b]) >= MIN_NAME_LEN and texts.get(a, "").count(names[b]) >= MIN_MENTIONS]
 
 
 def check_split_sizes(counts: dict[str, int], holdout_min: int = 15) -> None:

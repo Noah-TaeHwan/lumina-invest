@@ -83,8 +83,8 @@ def test_sections_accept_unicode_roman_numerals():
 
 # Important 5 — 교차 언급 근거를 남기고, 분할이 비면 실패한다
 def test_mention_edges_and_split_sanity():
-    names = {"a": "에이", "b": "비이", "c": "씨이"}
-    assert split.mention_edges(names, {"a": "비이와 거래", "b": "", "c": ""}) == [("a", "b", "비이")]
+    names = {"a": "에이사", "b": "비이사", "c": "씨이사"}
+    assert split.mention_edges(names, {"a": "비이사와 거래 " * 10, "b": "", "c": ""}) == [("a", "b", "비이사")]
     with pytest.raises(SystemExit, match="split"):
         split.check_split_sizes({"tune": 3, "check": 0, "holdout": 18})
     split.check_split_sizes({"tune": 9, "check": 8, "holdout": 18})
