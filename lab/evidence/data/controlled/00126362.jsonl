@@ -1,0 +1,6 @@
+{"qid": "00126362-q1", "true_text": "삼성SDI의 전자재료 사업부문은 반도체와 디스플레이에 쓰이는 소재를 만들어 판다.", "variant_text": "삼성SDI의 전자재료 사업부문은 반도체와 디스플레이에 쓰이는 소재를 만들어 팔지 않는다.", "variant_type": "부정", "source_passage": 8}
+{"qid": "00126362-q2", "true_text": "삼성SDI 전자재료 부문의 OLED 소재 수요는 OLED 패널이 모바일·IT 기기와 TV에 점점 더 많이 쓰이면서 크게 늘고 있다.", "variant_text": "LG생활건강은 화장품과 생활용품을 만들어 판매한다.", "variant_type": "다른 기업 사실", "source_passage": 8}
+{"qid": "00126362-q3", "true_text": "삼성SDI의 2025년 매출은 13조 2,667억원으로 1년 전보다 3조 3,255억원 줄었다.", "variant_text": "삼성SDI의 2025년 매출은 11조 9,480억원으로 1년 전보다 3조 3,255억원 줄었다.", "variant_type": "숫자 변경", "source_passage": 6}
+{"qid": "00126362-q4", "true_text": "삼성SDI 주식은 1979년 2월 27일부터 한국증권선물거래소에서 거래되기 시작했다.", "variant_text": "삼성SDI 주식은 1984년 2월 27일부터 한국증권선물거래소에서 거래되기 시작했다.", "variant_type": "기간 바꾸기", "source_passage": 1}
+{"qid": "00126362-q5", "true_text": "삼성SDI는 당기 중 새로 세운 SDI-GM Synergy Cells Holdings LLC.를 연결 대상 회사에 포함시켰다.", "variant_text": "삼성SDI는 당기 중 새로 세운 SDI-Ford Synergy Cells Holdings LLC.를 연결 대상 회사에 포함시켰다.", "variant_type": "주체 교체", "source_passage": 5}
+{"qid": "00126362-q6", "true_text": "삼성SDI의 미국 종속회사 Samsung SDI America, Inc.는 배터리를 공급하는 계약을 맺었다.", "variant_text": "삼성SDI의 미국 종속회사 Samsung SDI America, Inc.는 배터리를 공급하는 계약을 맺지 않았다.", "variant_type": "부정", "source_passage": 3}
