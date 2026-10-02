@@ -2,7 +2,7 @@
 
 기업 지표 조회와 AI 채팅을 출발점으로 발전시키는 **투자 리서치 포트폴리오**입니다.
 
-**현재 단계: 초기 개발 · 로컬 기본 동작 확인**
+**현재 단계: 초기 개발 · 로컬 기본 동작 확인 · JEV 판정력 실험 1차 완료(결과: 판정력 없음)**
 
 [edumgt/lumina-invest](https://github.com/edumgt/lumina-invest)의 교육용 코드에서 출발했습니다. 원본 기반을 유지하면서 자료 확인, AI의 설명, 사용자의 판단 기록을 연결하는 경험을 개발합니다.
 
@@ -17,6 +17,39 @@
 
 선택한 기업 자료와 AI의 출처 링크, 판단 노트를 연결하는 기능은 다음 개발 범위입니다.
 
+## JEV Gate Lab — 사전등록 판정력 실험
+
+TypeSafe의 판단 모델 JEV(`jev-1.13.0`)를 매매 진입 판단에 붙였을 때 실제로 도움이 되는지 검증한 실험입니다. 앱과 분리된 `lab/jev_gate/` 패키지에 있습니다.
+
+**질문:** BTCUSDT 5분봉 Donchian 돌파(240분 채널)의 진입 신호마다, JEV가 "이 돌파가 실패할 확률"을 답하게 했을 때 실제로 실패할 거래를 가려내는가?
+
+**설계**
+
+- 데이터: Binance 공개 아카이브 1분봉 1년치(2025-10~2026-09), 파일마다 체크섬 검증
+- JEV 입력: 종목명·날짜·가격을 뺀 익명 특징 11개(수익률·변동성 비율·거래량 z-score 등)
+- 라벨: 다음 봉 시가 진입, 코드가 정한 손절·익절·2시간 시간청산으로 낸 비용 차감 손실 여부
+- 비교: 무작위(0.5)와, 같은 특징으로 개발 구간에서 학습한 로지스틱 회귀
+- 사전등록: 구간·규칙·질문 해시·판단 기준을 [prereg.json](lab/jev_gate/prereg.json)에 먼저 고정하고, 홀드아웃은 [동결 파일](lab/jev_gate/prereg_holdout.json)을 커밋한 뒤 한 번만 열었습니다
+
+**결과(홀드아웃 476건)**
+
+| 모델 | AUC | 일 단위 블록 부트스트랩 95% 구간 |
+|---|---:|---|
+| JEV | 0.513 | 0.5 대비 −0.061 ~ +0.085 |
+| 로지스틱 회귀(같은 특징) | 0.649 | JEV 대비 +0.050 ~ +0.234 |
+
+미리 정한 기준에 따라 **이 과제에서 JEV에는 판정력이 없다**고 결론 냈습니다. 같은 특징에 신호는 있었지만(로지스틱 0.649) JEV는 그 신호를 쓰지 못했고, 실제 실패 비율 약 75%에 비해 실패 확률을 0.5 근처로 낮게 답했습니다.
+
+**과정에서 확인한 것**
+
+- JEV 실측 지연: 순차 호출 p50 약 0.2초, p99 0.29~0.44초(서울 가정 네트워크), 3,134회 호출 실패 0건, 같은 입력의 판정 일치율 96.4%
+- 1분봉 규칙은 익절폭이 왕복 비용(0.22%)보다 작아 5분봉으로 바꿨습니다. 개발 구간만으로 결정했고 이유는 [spec 15절](docs/superpowers/specs/2026-10-01-jev-gate-lab-design.md)에 남겼습니다
+- 돌파 규칙 자체도 이 기간에는 비용 전 우위가 없었습니다([분석](docs/lab/stage1-rule-options.md))
+
+**한계:** 단일 자산·단일 규칙·가격 특징만 다룬 결과입니다. 텍스트(공지·뉴스) 입력이나 다른 과제에서의 JEV 성능은 이 실험으로 판단하지 않습니다. 체결은 다음 봉 시가 근사이며 호가·시장 충격은 반영하지 않았습니다. 실거래가 아닙니다.
+
+리포트: [판정력](docs/lab/stage1-predict-report.md) · [실현 가능성 Stage 0 v3](docs/lab/stage0-v3-report.md) · [Stage 0 v2(1분봉)](docs/lab/stage0-report.md)
+
 ## 원본 기반과 개인 작업
 
 | 구분 | 범위 | 상태 |
@@ -26,6 +59,7 @@
 | 개인 작업 — 실행 환경 | 독립 Compose 환경, 전용 포트·볼륨, 시작 시장 동기화 가드와 최소 검사 | [PR #2로 main 반영](https://github.com/Noah-TaeHwan/lumina-invest/pull/2) |
 | 개인 작업 — 소개 | 제품 중심 README, 원본 교육 자료 보존, 로컬 재현 절차 가이드(새 clone 실행은 미확인) | [PR #2로 main 반영](https://github.com/Noah-TaeHwan/lumina-invest/pull/2), 교차 검수 후 문구 보완 |
 | 개인 작업 — 확인 | 회원가입·로그인, 종목 조회·지표 표시, 시드 그래프, 채팅 응답·저장 | 2026-10-01 로컬 확인 |
+| 개인 작업 — JEV Gate Lab | 데이터 로더·익명 특징·돌파 규칙·JEV 게이트·사전등록·판정력 통계·CLI와 테스트 | [PR #4](https://github.com/Noah-TaeHwan/lumina-invest/pull/4)·[#5](https://github.com/Noah-TaeHwan/lumina-invest/pull/5)·[#6](https://github.com/Noah-TaeHwan/lumina-invest/pull/6)·[#7](https://github.com/Noah-TaeHwan/lumina-invest/pull/7), 독립 리뷰 반영 |
 | 다음 개발 | 영속 관심종목, 자료 출처·시점, AI 근거 링크, 기업별 판단 노트 | 계획 |
 
 기능을 추가할 때 이 표에 개인 변경과 확인 근거를 함께 갱신합니다.
@@ -116,6 +150,7 @@ Docker Compose v2와 이미지·모델 다운로드가 가능한 네트워크가
 ## 상세 자료
 
 - [로컬 실행 가이드](PORTFOLIO_LOCAL.md)
+- [JEV Gate Lab 설계](docs/superpowers/specs/2026-10-01-jev-gate-lab-design.md) · [판정력 리포트](docs/lab/stage1-predict-report.md)
 - [원본 교육 자료·Mock 화면·개념 설명 보존본](docs/upstream/readme.md)
 - [AWS 목표 설계](aws.md) · [온프레미스 목표 설계](onprem.md) · [데이터 파이프라인 목표 설계](pipeline.md)
 
