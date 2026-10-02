@@ -1,0 +1,28 @@
+{"lid": "05d275cc97", "label": "contradicted", "passage": 2, "reason": "문단 2: 당사 및 종속회사는 매니지먼트·피규어·드라마 제작 사업을 영위"}
+{"lid": "36bd9d0e1c", "label": "supported", "passage": 2, "reason": "문단 2: 당사 및 종속회사가 드라마 제작 사업을 영위"}
+{"lid": "1e38951633", "label": "no_evidence", "passage": null, "reason": "영화 제작·OTT 플랫폼 등을 사업으로 영위한다는 내용이 어느 한 문단에도 없음"}
+{"lid": "29b2c742f1", "label": "supported", "passage": 5, "reason": "문단 5: 3D 모델링을 이용한 기믹 제작, 실질적인 모터 가동 피규어 제작"}
+{"lid": "760c4b7a27", "label": "supported", "passage": 4, "reason": "문단 4에 동일 문장이 있음"}
+{"lid": "1560e16613", "label": "no_evidence", "passage": null, "reason": "문단 4는 전속계약·매니지먼트 노하우를 매니지먼트 부문의 내용으로 기술하며 피규어 부문에 대한 근거는 없음"}
+{"lid": "566332ea12", "label": "no_evidence", "passage": null, "reason": "JYP엔터테인먼트에 관한 내용이 문단에 없음"}
+{"lid": "0574d09c20", "label": "non_claim", "passage": null, "reason": "문단 번호·섹션 표기 조각"}
+{"lid": "0f818fa679", "label": "contradicted", "passage": 5, "reason": "문단 5는 기술·노하우 축적 기간을 15년이 아니라 10년으로 기술"}
+{"lid": "c0add248fb", "label": "supported", "passage": 1, "reason": "문단 1의 신용위험·기대신용손실 관리 내용을 그대로 옮김"}
+{"lid": "21bed32a53", "label": "non_claim", "passage": null, "reason": "회사명 표기만 있는 조각"}
+{"lid": "9aec5aa61e", "label": "supported", "passage": 5, "reason": "문단 5: 지난 10년간 High-end 피규어 양산 기술과 노하우 확보"}
+{"lid": "7f7d4ac98e", "label": "contradicted", "passage": 7, "reason": "문단 7은 연구소 최초 인정일을 2018.02.05로 기술"}
+{"lid": "ca7eb30501", "label": "no_evidence", "passage": null, "reason": "피규어 원료 구성에 관한 내용이 문단에 없음"}
+{"lid": "33e4a1841d", "label": "non_claim", "passage": null, "reason": "답변 도입부 안내 문장"}
+{"lid": "9e8311af9b", "label": "supported", "passage": 7, "reason": "문단 7: 기업부설연구소 최초 인정일 2018.02.05"}
+{"lid": "ab173fb43b", "label": "no_evidence", "passage": null, "reason": "피규어 원료 구성·가격 변동에 관한 내용이 문단에 없음"}
+{"lid": "20eab14adb", "label": "no_evidence", "passage": null, "reason": "원료 구성·가격 변동에 관한 내용이 문단에 없음"}
+{"lid": "73aea1cf61", "label": "supported", "passage": 7, "reason": "문단 7: 피규어·컬렉터블 사업 2030년까지 일본·중국·북미 점유율 확대 목표로 현지 유통 네트워크 강화"}
+{"lid": "8f8199ee87", "label": "contradicted", "passage": 7, "reason": "문단 7은 2030년 일본·중국·북미 확장 계획 대상을 웹툰이 아니라 피규어·컬렉터블 사업으로 기술"}
+{"lid": "ebf50f201e", "label": "non_claim", "passage": null, "reason": "질문을 되풀이한 문장"}
+{"lid": "33d3b743db", "label": "no_evidence", "passage": null, "reason": "연구개발비 금액 추이가 문단에 없음"}
+{"lid": "20991c1fbd", "label": "no_evidence", "passage": null, "reason": "연구개발비 금액이 문단에 없음"}
+{"lid": "3c5e15fd97", "label": "supported", "passage": 5, "reason": "문단 5: 국내외 유통사 판매 자사 브랜드 피규어는 선주문으로 생산 예상 수량을 집계 후 양산"}
+{"lid": "58232aee8c", "label": "contradicted", "passage": 5, "reason": "문단 5는 선주문 방식으로 생산 수량을 집계한다고 기술"}
+{"lid": "ca78d2241b", "label": "no_evidence", "passage": null, "reason": "연구개발비의 매출 대비 비중이 문단에 없음"}
+{"lid": "2bce67bbd2", "label": "no_evidence", "passage": null, "reason": "연구개발비 추이가 문단에 없음"}
+{"lid": "6b0b3cc9e8", "label": "no_evidence", "passage": null, "reason": "문단 5의 49.42%는 2025년 5대 매출처 비중으로 다른 지표이며 연구개발비 비중 근거 없음"}

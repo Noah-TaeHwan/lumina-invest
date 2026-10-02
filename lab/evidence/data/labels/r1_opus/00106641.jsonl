@@ -1,0 +1,26 @@
+{"lid": "404cbe9180", "label": "contradicted", "passage": 8, "reason": "문단 8은 청소년 수련시설 사업 추가 시점을 1997.2로 적어 1999년 2월과 다르다"}
+{"lid": "494b7a05dd", "label": "no_evidence", "passage": null, "reason": "반복된 비문으로 기아가 주로 자동차 산업에 속한다는 진술을 직접 지지하는 문단이 없다"}
+{"lid": "59514fc280", "label": "supported", "passage": 8, "reason": "문단 8에 청소년 수련시설 설치 및 운영업 추가 (1997.2)"}
+{"lid": "191daf818a", "label": "supported", "passage": 8, "reason": "문단 8: 기초자산 발행회사(현대제철) 동일기업집단(현대차그룹)"}
+{"lid": "6d20e812d3", "label": "no_evidence", "passage": null, "reason": "대형차 2,000미터 기준·연대 구분은 문단에 없다"}
+{"lid": "01f683d25a", "label": "no_evidence", "passage": null, "reason": "대형차 2,000미터 기준·연대 구분은 문단에 없다"}
+{"lid": "ecbac2cc6e", "label": "no_evidence", "passage": null, "reason": "완성차를 대형차로 구분한다는 내용은 문단에 없다"}
+{"lid": "1c7596eb78", "label": "contradicted", "passage": 8, "reason": "문단 8은 기초자산 발행회사를 포스코가 아닌 현대제철로 적는다"}
+{"lid": "302d0832b7", "label": "non_claim", "passage": null, "reason": "뒤 목록을 안내하는 도입 문장"}
+{"lid": "cb0f41ba20", "label": "no_evidence", "passage": null, "reason": "대형차 2,000미터 기준·연대 구분은 문단에 없다"}
+{"lid": "e399c07e69", "label": "no_evidence", "passage": null, "reason": "연결 매출액 1,243억원과 4.1% 증가는 문단에 없다"}
+{"lid": "225bec2594", "label": "contradicted", "passage": 3, "reason": "문단 3은 국내 판매 54만 6천대가 전년비 1.1% 증가했다고 적는다"}
+{"lid": "eacb26a74b", "label": "supported", "passage": 3, "reason": "문단 3: 국내 시장 전년비 1.1% 증가한 54만 6천대"}
+{"lid": "157ef7c518", "label": "no_evidence", "passage": null, "reason": "삼성전자 메모리 사업은 문단에 없다"}
+{"lid": "69e15d368e", "label": "supported", "passage": 6, "reason": "문단 6: 생산능력 3,114,000대, 생산실적 2,851,092대, 가동률 91.6%"}
+{"lid": "73113ef56d", "label": "supported", "passage": 6, "reason": "문단 6: 2025년 기준 생산능력 3,114,000대(전체 합계)"}
+{"lid": "317cf4d146", "label": "supported", "passage": 4, "reason": "문단 4: 법적 허용 기준 대비 30% 미만 자체관리 기준"}
+{"lid": "7e02bb15a2", "label": "supported", "passage": 5, "reason": "문단 5 환위험 주요위험에 외화 매출액·외화 자산부채 원화 표시금액 변동 위험이 적혀 있다"}
+{"lid": "f5820a3d87", "label": "contradicted", "passage": 4, "reason": "문단 4는 45%가 아닌 30% 미만 기준을 적는다"}
+{"lid": "37308c5f5e", "label": "non_claim", "passage": null, "reason": "뒤 목록을 안내하는 도입 문장"}
+{"lid": "2a744dd096", "label": "no_evidence", "passage": null, "reason": "연구개발비용·비율 수치는 문단에 없다"}
+{"lid": "7242a5dc1f", "label": "supported", "passage": 8, "reason": "문단 8: 프로야구단 운영 및 스포츠 시설 운영업 추가 (2010.3)"}
+{"lid": "1da040f042", "label": "no_evidence", "passage": null, "reason": "연구개발비 비율 0.99% 유지 기간은 문단에 없다(문단 2의 3.14~6.30은 2025년 개소세 감면)"}
+{"lid": "d1a0119ca7", "label": "no_evidence", "passage": null, "reason": "연구개발비용·비율 수치는 문단에 없다"}
+{"lid": "e995edfc17", "label": "contradicted", "passage": 8, "reason": "문단 8은 프로야구단 사업 추가 시점을 2013.3이 아닌 2010.3으로 적는다"}
+{"lid": "47a8ad5cbf", "label": "no_evidence", "passage": null, "reason": "연구개발비용·비율 수치는 문단에 없다"}

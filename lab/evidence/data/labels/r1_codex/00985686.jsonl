@@ -1,0 +1,23 @@
+{"lid": "2992bb1cfc", "label": "contradicted", "passage": 8, "reason": "문단 8은 음반·공연을 엔터테인먼트 사업에 포함하고, 엔터테인먼트 외 사업을 팁코 유통으로 설명하므로 사업 구분이 다르다."}
+{"lid": "0d4f3b6110", "label": "supported", "passage": 8, "reason": "문단 8에 사업구조 재편을 위한 VT CUBE JAPAN 지분 전체의 관계회사 (주)브이티 양도가 명시되어 있다."}
+{"lid": "bd5ba4d95a", "label": "no_evidence", "passage": null, "reason": "제시 문단에는 VT CUBE JAPAN 지분 양도만 설명되어 있으며, KC MUSIC 지분 전체를 양도했다는 근거는 없다."}
+{"lid": "6f4d771bef", "label": "non_claim", "passage": null, "reason": "전기 대비 비중 변화를 묻는 질문이며 사실을 단정하지 않는다."}
+{"lid": "51d7a4cb44", "label": "no_evidence", "passage": null, "reason": "제시 문단에는 엔터테인먼트 부문 내 제품·서비스별 매출 비중이나 음반이 최대 비중이라는 정보가 없다."}
+{"lid": "f687ccf346", "label": "contradicted", "passage": 8, "reason": "문단 8은 국내뿐 아니라 일본·중국 등 다양한 지역에서 엔터테인먼트 매출이 발생한다고 명시한다."}
+{"lid": "6f3b66f558", "label": "supported", "passage": 8, "reason": "문단 8은 엔터테인먼트 부문이 국내·일본·중국 등 다양한 지역에서 매출을 거둔다고 설명한다."}
+{"lid": "981968bb31", "label": "supported", "passage": 6, "reason": "문단 6의 계속영업 매출 87,228,103천원과 102,595,690천원은 각각 약 872억원과 1,026억원이며 2025년 값이 더 작다."}
+{"lid": "ddb8bd90e3", "label": "non_claim", "passage": null, "reason": "매출 감소 규모와 해외 매출 증가 지역을 묻는 질문이다."}
+{"lid": "46ab139722", "label": "no_evidence", "passage": null, "reason": "제시된 큐브엔터 문단에는 오리온의 초코파이 등 제과 제품 생산·판매에 관한 정보가 없다."}
+{"lid": "0b9b29a276", "label": "contradicted", "passage": 4, "reason": "문단 4의 부채비율은 전기말 71%, 당기말 61%로, 주장한 당기말 54%와 다르다."}
+{"lid": "d0fc43b18c", "label": "supported", "passage": 1, "reason": "문단 1에 낮은 경기변동 민감도, 유행에 따른 짧은 상품 주기와 분야별 흥망이 모두 명시되어 있다."}
+{"lid": "667ef2b9c1", "label": "non_claim", "passage": null, "reason": "문단 번호와 잘린 항목 표기만 있는 단편으로 사실 주장이 없다."}
+{"lid": "f0986768ff", "label": "supported", "passage": 1, "reason": "문단 1에 디지털 음원 시장 확대, 접근성·편의성 증대와 저렴한 소비에 따른 경기변동 민감도 감소가 명시되어 있다."}
+{"lid": "14d43712af", "label": "supported", "passage": 1, "reason": "문단 1은 과거 음악산업의 사치품적 성격과 소득에 따른 수요 변동으로 경기변동에 민감했다고 설명한다."}
+{"lid": "5797a5d374", "label": "supported", "passage": 4, "reason": "문단 4에 부채비율이 전기말 71%, 당기말 61%로 제시되어 있다."}
+{"lid": "b26623c817", "label": "supported", "passage": 1, "reason": "문단 1에 장르별 라이프 사이클 차이와 대중가요 발매 후 3~4개월의 대량 구매 뒤 수요 급감이 명시되어 있다."}
+{"lid": "968af2d357", "label": "no_evidence", "passage": null, "reason": "문단 4의 상위 5대 매출처 비중 약 60.6%는 2025년말 별도 기준이며, 2022년말 비중은 제시되지 않았다."}
+{"lid": "3784c1f4c8", "label": "no_evidence", "passage": null, "reason": "제시 문단에는 환율 10% 변동에 따른 통화별 세후 손익 영향이나 그 최대 통화가 제시되지 않았다."}
+{"lid": "561faad246", "label": "supported", "passage": 4, "reason": "문단 4에 2025년말 별도 기준 주요 5대 매출처의 매출 비중이 약 60.6%라고 명시되어 있다."}
+{"lid": "db5d719829", "label": "supported", "passage": 3, "reason": "문단 3에 (주)카카오엔터테인먼트·텐센트 뮤직 등 전문 유통채널과 계약하여 음반·음원을 유통·판매한다고 명시되어 있다."}
+{"lid": "ff6103a690", "label": "no_evidence", "passage": null, "reason": "문단 3은 카카오엔터테인먼트·텐센트 뮤직 등을 제시하지만, 드림어스컴퍼니와의 음반·음원 유통 계약은 확인하지 않는다."}
+{"lid": "238acfc782", "label": "non_claim", "passage": null, "reason": "공급계약의 수주총액과 기말 수주잔고를 묻는 질문이다."}

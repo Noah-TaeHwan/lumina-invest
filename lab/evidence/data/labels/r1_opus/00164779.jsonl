@@ -1,0 +1,18 @@
+{"lid": "bdf12c3c42", "label": "no_evidence", "passage": null, "reason": "반도체 사업부문은 문단4에 있으나 생산기지·연구개발법인 운영 사실은 어느 문단에도 없음"}
+{"lid": "2ea12bfd2d", "label": "supported", "passage": 4, "reason": "문단4: 2025년 생산설비 평균가동률 100% 유지"}
+{"lid": "03040771ab", "label": "no_evidence", "passage": null, "reason": "주체가 마이크론으로, 문단은 SK하이닉스(당사) 보고서라 마이크론 정보 없음"}
+{"lid": "f9b793b16c", "label": "supported", "passage": 4, "reason": "문단4: 2025.3.28 영업양수도 최종 종결, 같은 날 합병등종료보고서 공시"}
+{"lid": "db74e561ef", "label": "supported", "passage": 4, "reason": "문단4: 2025.3.28 영업양수도 최종 종결, 같은 날 합병등종료보고서 공시"}
+{"lid": "38a8c9fff6", "label": "supported", "passage": 5, "reason": "문단5: HBM·eSSD 제품에 대해 탄소감축인증센터 탄소감축성과 크레디트 인증"}
+{"lid": "62c0ba61da", "label": "supported", "passage": 4, "reason": "문단4: 당사가 2025.3.28 영업양수도 최종 종결 및 합병등종료보고서 공시"}
+{"lid": "7cc2d9362f", "label": "contradicted", "passage": 5, "reason": "문단5는 HBM·eSSD로 크레디트를 인증받았다고 명시해 부정 주장과 반대"}
+{"lid": "3afedae028", "label": "no_evidence", "passage": null, "reason": "네이버 관련 내용은 어느 문단에도 없음"}
+{"lid": "659a2c1d3f", "label": "supported", "passage": 2, "reason": "문단2: 2025년 반도체 부문 누적 생산실적 41,216,512백만원"}
+{"lid": "45f50d2463", "label": "no_evidence", "passage": null, "reason": "709,330백만USD와 22.2%는 한국 총수출·반도체 수출 증감률이며 SK하이닉스 연결 매출액은 문단에 없음"}
+{"lid": "b5294a08b6", "label": "supported", "passage": 5, "reason": "문단5: 2025.12.31 기준 지식재산권 총 21,859건"}
+{"lid": "37df0162fd", "label": "no_evidence", "passage": null, "reason": "웨이퍼 매입액 금액은 어느 문단에도 없음"}
+{"lid": "87e1b600bf", "label": "contradicted", "passage": 5, "reason": "문단5는 2025년말 지식재산권 21,859건으로 23,417건과 다름"}
+{"lid": "daacb2c418", "label": "non_claim", "passage": null, "reason": "질문을 되풀이한 문장으로 구체적 수치나 사실 주장이 없음"}
+{"lid": "0da01f34cf", "label": "supported", "passage": 5, "reason": "문단5 연구개발비용 표: 제78기 인건비 2,718,918백만원"}
+{"lid": "71be366c49", "label": "no_evidence", "passage": null, "reason": "주체가 마이크론으로, 문단은 SK하이닉스 보고서라 마이크론 정보 없음"}
+{"lid": "dc80ce9bdb", "label": "no_evidence", "passage": null, "reason": "114,739는 원재료비 항목일 뿐 연구개발비용 총액·매출 대비 비율은 문단에 없음"}

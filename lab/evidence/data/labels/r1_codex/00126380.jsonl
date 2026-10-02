@@ -1,0 +1,22 @@
+{"lid": "620ed0d5ed", "label": "non_claim", "passage": null, "reason": "질문 표식이 붙은 미완성 나열로, 확정적인 사실을 진술하는 문장이 아니다."}
+{"lid": "21041cdcc9", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 LG화학의 사업본부나 화학 소재·의약품 생산·판매에 관한 근거가 없다."}
+{"lid": "be4aac120d", "label": "supported", "passage": 5, "reason": "문단 5가 해외 DX 산하 9개 지역총괄과 DS 산하 5개 지역총괄 및 생산·개발·마케팅·영업 활동을 명시한다."}
+{"lid": "e223fbf13f", "label": "supported", "passage": 2, "reason": "문단 2가 2025년 TV와 스마트폰 평균 판매가격이 전년 연간 평균 대비 각각 약 5%, 약 3% 하락했다고 명시한다."}
+{"lid": "8980461f75", "label": "contradicted", "passage": 2, "reason": "문단 2는 같은 기간 메모리 평균 판매가격 상승률을 약 14%로 명시하여 약 27%라는 주장과 다르다."}
+{"lid": "8a9021e26a", "label": "supported", "passage": 2, "reason": "문단 2가 2025년 메모리 평균 판매가격이 전년 연간 평균 대비 약 14% 상승했다고 명시한다."}
+{"lid": "d4bf3a79a7", "label": "no_evidence", "passage": null, "reason": "187조 9,673억원과 56.3%는 문단 7의 DX 부문 매출 정보이며, 연결 매출 총액이라는 주장은 제시된 문단에서 확인되지 않는다."}
+{"lid": "534f9c32b8", "label": "supported", "passage": 7, "reason": "문단 7이 2025년 DX 부문 매출을 187조 9,673억원, 매출 비중을 56.3%로 명시한다."}
+{"lid": "fe860b7c37", "label": "no_evidence", "passage": null, "reason": "문단 7의 해당 금액과 비중은 2025년 수치이며, 제시된 문단에는 2022년 DX 부문 매출과 비중의 근거가 없다."}
+{"lid": "fa5b7ae363", "label": "contradicted", "passage": 8, "reason": "문단 8은 2025년 52.7조원 시설투자의 중심을 DS 부문과 SDC 등으로 명시하여 IM 부문이라는 주장과 다르다."}
+{"lid": "03d185ba1b", "label": "supported", "passage": 8, "reason": "문단 8이 2025년 52.7조원 시설투자가 DS 부문과 SDC 등의 첨단공정 증설·전환 및 인프라 투자를 중심으로 이루어졌다고 명시한다."}
+{"lid": "8a85ce2b01", "label": "supported", "passage": 8, "reason": "문단 8이 2025년 시설투자 규모를 52.7조원으로 명시한다."}
+{"lid": "48e151cc4d", "label": "non_claim", "passage": null, "reason": "뒤에 이어질 영향 설명을 소개하는 안내 문장으로, 구체적인 사실이나 수치를 진술하지 않는다."}
+{"lid": "c663644d21", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 1년간 100,000달러의 당기손익이나 1,050,000달러라는 예시·계산 결과가 없다."}
+{"lid": "1f6077cbff", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 1년간 100,000달러의 당기손익이나 95,000달러라는 예시·계산 결과가 없다."}
+{"lid": "a2cab5ebdc", "label": "contradicted", "passage": 3, "reason": "문단 3은 기능통화와 다른 통화로 거래하여 USD, EUR 등의 환율변동위험에 노출되어 있다고 명시한다."}
+{"lid": "23eb77b378", "label": "no_evidence", "passage": null, "reason": "문단 3은 환율 5% 변동의 당기손익 영향을 소개할 뿐, 환율 5% 이상 하락 시 당기손익도 5% 이상 하락한다는 근거는 제시하지 않는다."}
+{"lid": "bbb611fb0f", "label": "no_evidence", "passage": null, "reason": "문단 3은 환율 5% 변동의 당기손익 영향을 소개할 뿐, 환율 5% 이상 상승 시 당기손익도 5% 이상 상승한다는 근거는 제시하지 않는다."}
+{"lid": "b7ee2a63cb", "label": "supported", "passage": 3, "reason": "문단 3이 기능통화와 다른 통화로 거래하여 환율변동위험에 노출되어 있고 주요 노출 통화가 USD, EUR 등이라고 명시한다."}
+{"lid": "b18aef38ec", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 현대자동차의 국내외 공장이나 승용차·상용차 생산·판매에 관한 근거가 없다."}
+{"lid": "b4de17276a", "label": "supported", "passage": 8, "reason": "문단 8이 2025년 DS 부문의 영업이익을 24조 8,581억원으로 명시한다."}
+{"lid": "caff6ebd85", "label": "no_evidence", "passage": null, "reason": "문단 8의 1,879,673억원과 56.3%는 DX 부문 매출과 비중이며, 연구개발비용과 매출액 대비 비율의 근거는 없다."}

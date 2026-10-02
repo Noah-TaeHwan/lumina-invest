@@ -1,0 +1,4 @@
+{"lid": "67ef4b3058", "label": "non_claim", "passage": null, "reason": "화장품 브랜드를 화장품을 파는 브랜드로 풀어 쓴 동어반복 정의로, 회사에 관한 사실 주장이 아니다."}
+{"lid": "a5906b7d99", "label": "non_claim", "passage": null, "reason": "유아동복 브랜드를 유아동 의류를 파는 브랜드로 풀어 쓴 동어반복 정의로, 회사에 관한 사실 주장이 아니다."}
+{"lid": "dc92610913", "label": "no_evidence", "passage": null, "reason": "문단 3은 런칭 다음해 매출이 100억원을 넘었다고만 하므로 180억원 초과 여부는 확인할 수 없다."}
+{"lid": "fd366a2675", "label": "supported", "passage": 1, "reason": "문단 1에 자료 출처가 토박스코리아 기업분석보고서(한국IR 협의회 기업리서치센터)로 그대로 적혀 있다."}

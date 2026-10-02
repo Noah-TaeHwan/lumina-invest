@@ -1,0 +1,29 @@
+{"lid": "d61d70a0bb", "label": "no_evidence", "passage": null, "reason": "문단 1의 IE소재 R&D 이관 계약 주체는 SK이노베이션→SK아이이테크놀로지이고 트레이딩 효과는 문단 2 내용이라, E&S CIC가 했다는 진술을 지지하는 문단 없음"}
+{"lid": "5babf0b153", "label": "supported", "passage": 8, "reason": "문단 8: E&S CIC 2025년 4분기 누적 매출 11조 8,631억원"}
+{"lid": "a36bba9799", "label": "supported", "passage": 8, "reason": "문단 8 원문과 동일"}
+{"lid": "8b245ff4b2", "label": "no_evidence", "passage": null, "reason": "문단 1(SK이노베이션의 IE소재 R&D 이관)과 문단 2(트레이딩 경쟁력)를 E&S CIC 주체로 엮은 것으로 단일 문단 근거 없음"}
+{"lid": "157ab727be", "label": "no_evidence", "passage": null, "reason": "현대건설에 관한 문단 없음"}
+{"lid": "78976e9166", "label": "supported", "passage": 8, "reason": "문단 8 원문과 동일"}
+{"lid": "9e494a8e72", "label": "contradicted", "passage": 5, "reason": "문단 5는 국내외 50여개 국, 주장은 70여 개 나라"}
+{"lid": "54e6a44d08", "label": "supported", "passage": 5, "reason": "문단 5: Green성장본부 아래 윤활유사업부를 통해 국내외 50여개 국에서 판매"}
+{"lid": "3d165aa0d6", "label": "supported", "passage": 2, "reason": "문단 2 원문과 동일"}
+{"lid": "dc53c66f44", "label": "supported", "passage": 5, "reason": "문단 5: 윤활유사업부를 통해 국내외 50여개 국에서 판매"}
+{"lid": "6278f67684", "label": "supported", "passage": 5, "reason": "문단 5: 중국, 러시아, 인도, 미주에 법인 설립·운영"}
+{"lid": "0f44580973", "label": "no_evidence", "passage": null, "reason": "소재 사업의 경쟁사 대비 기술적 우위를 말하는 문단 없음"}
+{"lid": "6f08457906", "label": "supported", "passage": 2, "reason": "문단 2: 해외 주요 거점에 물류터미널·탱크 확보 및 재고 보유"}
+{"lid": "d6abe06135", "label": "contradicted", "passage": 6, "reason": "문단 6상 2025년 전력부문 비율은 5.10%(금액 40,963억원), 주장은 40.96%"}
+{"lid": "15aaaf6378", "label": "no_evidence", "passage": null, "reason": "항공유 매출액(문단 8)만 있고 비중 1.02%는 어느 문단에도 없음"}
+{"lid": "c3438e11a1", "label": "no_evidence", "passage": null, "reason": "'금액'이라는 부문은 없음; 6.89%는 문단 6 표의 자산 총계 행 값이라 부문 매출 비중 근거 아님"}
+{"lid": "0a420f77a1", "label": "no_evidence", "passage": null, "reason": "경유 매출액(문단 8)만 있고 비중 2.10%는 어느 문단에도 없음"}
+{"lid": "ef9f03f3d5", "label": "non_claim", "passage": null, "reason": "'다음과 같습니다' 도입 문장"}
+{"lid": "e582e12198", "label": "supported", "passage": 6, "reason": "문단 6: 2025년 전력부문 40,963억원(=4조 963억원), 5.10%"}
+{"lid": "33269efee8", "label": "no_evidence", "passage": null, "reason": "문단 6의 4조 963억원·5.10%는 2025년 값이며 2018년 전력부문 매출은 어느 문단에도 없음"}
+{"lid": "5cf6fa03c8", "label": "supported", "passage": 7, "reason": "문단 7: 인천 부생수소 기반 연 3만톤 액화수소 생산·공급 시설 구축"}
+{"lid": "372f29c4d9", "label": "contradicted", "passage": 7, "reason": "문단 7상 해당 시설 산출물은 액화수소, 주장은 LPG"}
+{"lid": "4e7f204298", "label": "no_evidence", "passage": null, "reason": "배터리 생산능력 문단 없음; 4,200은 문단 4의 울산 기유 공장 배럴/일 생산능력"}
+{"lid": "882ec694c6", "label": "contradicted", "passage": 4, "reason": "문단 4는 통화선도·통화스왑으로 관리한다고 기재, 주장은 관리하지 않는다고 부정"}
+{"lid": "5ba9a42ded", "label": "supported", "passage": 4, "reason": "문단 4: 외화차입금 등 환율변동위험 회피 위해 통화선도·통화스왑 계약 체결·관리"}
+{"lid": "d1d0fbba5a", "label": "no_evidence", "passage": null, "reason": "통화별 법인세차감전순이익 민감도를 다루는 문단 없음"}
+{"lid": "1e66e89b75", "label": "no_evidence", "passage": null, "reason": "네이버에 관한 문단 없음"}
+{"lid": "32732d107c", "label": "supported", "passage": 6, "reason": "문단 6: 국내 엔진오일 소매는 판매 회사와 판매점을 거쳐 정비소(카센터)로 유통"}
+{"lid": "4dda03a865", "label": "non_claim", "passage": null, "reason": "질문 문장"}

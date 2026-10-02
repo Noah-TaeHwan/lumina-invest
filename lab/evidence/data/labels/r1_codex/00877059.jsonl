@@ -1,0 +1,29 @@
+{"lid": "69695829e1", "label": "non_claim", "passage": null, "reason": "참조 항목 제목이 중간에서 끊긴 문구로, 독립적인 사실 주장이 없다."}
+{"lid": "ed64103e29", "label": "non_claim", "passage": null, "reason": "녹색경영 항목을 참고했다는 답변 작성 과정의 안내이다."}
+{"lid": "18d9a5321d", "label": "supported", "passage": 8, "reason": "문단 8은 연구 서비스 진출을 위해 2025년 6월 삼성 오가노이드 사업을 신규 출시했다고 명시한다."}
+{"lid": "a154c50ef5", "label": "contradicted", "passage": 8, "reason": "문단 8의 삼성 오가노이드 사업 출시 시점은 2025년 6월로, 주장한 2021년 6월과 다르다."}
+{"lid": "5da681db21", "label": "no_evidence", "passage": null, "reason": "문단 1의 제조사업장·사내버스·임차 건물 목록은 온실가스·에너지 집계 대상이며, 이들이 X 항목에 포함된다는 근거는 없다."}
+{"lid": "15b4d5794d", "label": "non_claim", "passage": null, "reason": "보고서 항목 제목과 번호만 제시한 미완성 문구로, 사실 주장이 없다."}
+{"lid": "3a007d2b60", "label": "no_evidence", "passage": null, "reason": "문단 3의 세포주 플랫폼 개발·상표 등록 주체는 삼성바이오로직스이며, SK바이오사이언스에 관한 근거는 없다."}
+{"lid": "1bfaaeb8fa", "label": "contradicted", "passage": 5, "reason": "문단 5는 삼성에피스홀딩스가 삼성바이오에피스 지분 100%를 승계했다고 하므로, Samsung Biologics 지분을 승계했다는 내용과 다르다."}
+{"lid": "fb19135061", "label": "supported", "passage": 5, "reason": "문단 5는 삼성바이오로직스가 CDMO 사업을 영위한다고 명시한다."}
+{"lid": "20341e3c93", "label": "non_claim", "passage": null, "reason": "문단 번호와 잘린 제목 표기만 있어 사실 주장이 없다."}
+{"lid": "ef053a6e9f", "label": "supported", "passage": 3, "reason": "문단 3은 2020년 상반기 CDMO용 자체 세포주 플랫폼 개발과 상품명의 국내외 등록을 명시한다."}
+{"lid": "9031a1207c", "label": "contradicted", "passage": 5, "reason": "문단 5에서 2022년 4월 지분 취득 및 2025년 11월 지분 승계 대상은 삼성바이오에피스이며, Samsung Biologics가 아니다."}
+{"lid": "dffc3260a6", "label": "no_evidence", "passage": null, "reason": "문단 5는 삼성에피스홀딩스 설립을 위한 인적분할과 사업 부문 분리를 명시하지만, SEH가 그 회사라는 식별 근거는 없다."}
+{"lid": "57317e8beb", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에는 유럽의 연결 매출 비중 24.2%가 제시되어 있지 않다."}
+{"lid": "ab9d814179", "label": "supported", "passage": 4, "reason": "문단 4는 2025년 연결기준 매출의 주요 지역별 실적을 금액과 비중으로 제시한다."}
+{"lid": "611c0d90f5", "label": "contradicted", "passage": 4, "reason": "문단 4는 2025년 국내 매출 3,719억원과 비중 8.2%를 명시하므로, 8.2%를 차지하지 않았다는 부정과 충돌한다."}
+{"lid": "6dcb8a7ecd", "label": "supported", "passage": 4, "reason": "문단 4의 2025년 국내 연결 매출은 3,719억원이며 비중은 8.2%이다."}
+{"lid": "98b760773e", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에는 미국을 포함한 유럽 매출 비중이 없으며, 문단 4의 8.2%는 국내 비중이다."}
+{"lid": "d33752ba79", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에는 유럽 매출 비중이 없으며, 문단 4의 16.0%는 2024년 국내 비중이다."}
+{"lid": "989a64b39c", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에는 미국 매출 비중이 없으며, 문단 4의 8.2%는 2025년 국내 비중이다."}
+{"lid": "0ed3f5c603", "label": "no_evidence", "passage": null, "reason": "문단 6은 2025년도 생산능력 1,034배치를 제시하지만, 1분기 말 공장별 용량이나 1,034만 배당이라는 수치는 제시하지 않는다."}
+{"lid": "969eca683e", "label": "no_evidence", "passage": null, "reason": "이 질문의 8개 문단에는 이마트의 매장 운영이나 판매 품목에 관한 내용이 없다."}
+{"lid": "5708e16619", "label": "supported", "passage": 6, "reason": "문단 6은 2025년 생산능력 1,034배치, 생산실적 733배치, 가동률 70.9%를 모두 명시한다."}
+{"lid": "5788b84a28", "label": "supported", "passage": 5, "reason": "문단 5는 환위험 회피가 필요하다고 판단될 때 통화선도거래 등으로 관리할 계획을 수립한다고 명시한다."}
+{"lid": "0fb9144ede", "label": "supported", "passage": 8, "reason": "문단 8은 2019년 4월 26일 아시아 소재 제약사와 체결한 위탁생산 계약금액 105.6백만 달러를 명시한다."}
+{"lid": "b4fb2900ed", "label": "contradicted", "passage": 8, "reason": "문단 8의 2019년 4월 아시아 소재 제약사 위탁생산 계약금액은 42.2 및 105.6백만 달러로, 주장한 128.3백만 달러와 다르다."}
+{"lid": "40e8470c27", "label": "non_claim", "passage": null, "reason": "인수 대상 회사와 거래대금을 묻는 질문으로, 사실을 단정하는 문장이 아니다."}
+{"lid": "ce5e5e6253", "label": "supported", "passage": 4, "reason": "문단 4는 유가증권시장 주권상장일을 2016년 11월 10일로 명시한다."}
+{"lid": "5a97a5de52", "label": "contradicted", "passage": 4, "reason": "문단 4의 유가증권시장 주권상장일은 2016년 11월 10일로, 주장한 2013년 11월 10일과 다르다."}

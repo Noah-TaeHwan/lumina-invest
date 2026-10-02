@@ -1,0 +1,29 @@
+{"lid": "69695829e1", "label": "non_claim", "passage": null, "reason": "참조 안내 문장의 조각으로 사실 주장이 아님"}
+{"lid": "ed64103e29", "label": "non_claim", "passage": null, "reason": "다른 항목을 참고하라는 절차 안내 조각"}
+{"lid": "18d9a5321d", "label": "supported", "passage": 8, "reason": "문단 8: 2025년 6월 연구 서비스 분야 진출을 위한 '삼성 오가노이드' 사업 신규 출시"}
+{"lid": "a154c50ef5", "label": "contradicted", "passage": 8, "reason": "문단 8은 출시 시점을 2025년 6월로 적어 2021년 6월과 다름"}
+{"lid": "5da681db21", "label": "non_claim", "passage": null, "reason": "표 주석·참조 안내가 잘린 조각으로 사실 주장이 아님"}
+{"lid": "15b4d5794d", "label": "non_claim", "passage": null, "reason": "참조 안내 문장의 조각으로 사실 주장이 아님"}
+{"lid": "3a007d2b60", "label": "no_evidence", "passage": null, "reason": "문단 3의 세포주 플랫폼 개발 주체는 당사(삼성바이오로직스)이며 SK바이오사이언스에 대한 문단은 없음"}
+{"lid": "1bfaaeb8fa", "label": "contradicted", "passage": 5, "reason": "문단 5는 편입·승계 대상을 삼성바이오에피스, 신설 지주사를 삼성에피스홀딩스로 적어 Samsung Biologics 지분 승계·Samsung Electronics Holding과 다름"}
+{"lid": "fb19135061", "label": "supported", "passage": 5, "reason": "문단 5: 삼성바이오로직스는 CDMO 사업을 영위"}
+{"lid": "20341e3c93", "label": "non_claim", "passage": null, "reason": "문단 표지 조각으로 사실 주장이 아님"}
+{"lid": "ef053a6e9f", "label": "supported", "passage": 3, "reason": "문단 3: 2020년 상반기 CDMO서비스용 자체 세포주 플랫폼 개발 후 상품명 국내외 등록"}
+{"lid": "9031a1207c", "label": "contradicted", "passage": 5, "reason": "문단 5는 2022년 4월 지분 100% 취득 대상을 삼성바이오에피스로 적어 Samsung Biologics와 다름"}
+{"lid": "dffc3260a6", "label": "supported", "passage": 5, "reason": "문단 5: 삼성에피스홀딩스(SEH) 설립 인적분할 완료로 바이오의약품 개발·상업화 사업 부문 분리"}
+{"lid": "57317e8beb", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에 유럽 매출 비중 자료가 없음"}
+{"lid": "ab9d814179", "label": "non_claim", "passage": null, "reason": "뒤 내용을 소개하는 도입 문장으로 구체적 사실 주장이 없음"}
+{"lid": "611c0d90f5", "label": "contradicted", "passage": 4, "reason": "문단 4는 2025년 국내 매출 3,719억원, 비중 8.2%로 적어 부정 주장과 다름"}
+{"lid": "6dcb8a7ecd", "label": "supported", "passage": 4, "reason": "문단 4: 2025년 국내 3,719억원, 8.2%"}
+{"lid": "98b760773e", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에 유럽·미국 매출 비중 자료가 없음(8.2%는 국내 비중)"}
+{"lid": "d33752ba79", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에 유럽 매출 비중 자료가 없음(16.0%는 2024년 국내 비중)"}
+{"lid": "989a64b39c", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에 미국 매출 비중 자료가 없음(8.2%는 국내 비중)"}
+{"lid": "0ed3f5c603", "label": "no_evidence", "passage": null, "reason": "공장별 용량·2025년 1분기 말 기준 1,034만 배당 자료는 없음; 문단 6은 2025년 연간 생산능력 1,034배치만 제시"}
+{"lid": "969eca683e", "label": "no_evidence", "passage": null, "reason": "이마트에 대한 내용은 문단에 없음"}
+{"lid": "5708e16619", "label": "supported", "passage": 6, "reason": "문단 6: 2025년 생산능력 1,034배치, 생산실적 733배치, 가동률 70.9%"}
+{"lid": "5788b84a28", "label": "supported", "passage": 5, "reason": "문단 5에 동일 문장이 있음"}
+{"lid": "0fb9144ede", "label": "supported", "passage": 8, "reason": "문단 8: 2019.04.26 아시아 소재 제약사와 105.6백만 달러 위탁생산 계약"}
+{"lid": "b4fb2900ed", "label": "contradicted", "passage": 8, "reason": "문단 8의 2019년 4월 아시아 소재 제약사 계약금액은 42.2·105.6백만 달러로 128.3백만 달러가 없음"}
+{"lid": "40e8470c27", "label": "non_claim", "passage": null, "reason": "질문 문장으로 사실 주장이 아님"}
+{"lid": "ce5e5e6253", "label": "supported", "passage": 4, "reason": "문단 4: 유가증권시장 상장일자 2016년 11월 10일"}
+{"lid": "5a97a5de52", "label": "contradicted", "passage": 4, "reason": "문단 4는 상장일자를 2016년 11월 10일로 적어 2013년과 다름"}

@@ -1,0 +1,26 @@
+{"lid": "83a3239bc7", "label": "supported", "passage": 1, "reason": "문단 1: 1999년 11월 29일 상호를 삼성SDI 주식회사로 변경"}
+{"lid": "219594508a", "label": "supported", "passage": 8, "reason": "문단 8: 반도체 및 디스플레이 소재 등을 생산/판매하는 전자재료 사업부문"}
+{"lid": "5904d817b3", "label": "non_claim", "passage": null, "reason": "문단 머리말 조각으로 사실 주장이 아니다"}
+{"lid": "e734b42f8b", "label": "supported", "passage": 1, "reason": "문단 1: 명칭 삼성SDI 주식회사, 영문명 SAMSUNG SDI CO., LTD."}
+{"lid": "eb46d8f49b", "label": "supported", "passage": 1, "reason": "문단 1: 1970.1.20 삼성-NEC 설립, 1979.1.29 기업공개, 1979.2.27 상장"}
+{"lid": "e225116685", "label": "contradicted", "passage": 8, "reason": "문단 8은 전자재료 부문이 반도체·디스플레이 소재를 생산/판매한다고 적는다"}
+{"lid": "c3e224b900", "label": "non_claim", "passage": null, "reason": "문단 표기 조각으로 사실 주장이 아니다"}
+{"lid": "709df85012", "label": "no_evidence", "passage": null, "reason": "LG생활건강 사업은 문단에 없다"}
+{"lid": "be97df6db2", "label": "supported", "passage": 8, "reason": "문단 8 전자재료 사업부문의 반도체 소재 문장과 같다"}
+{"lid": "eb8343303b", "label": "supported", "passage": 8, "reason": "문단 8 디스플레이 소재·OLED 소재 수요 문장과 같다"}
+{"lid": "6bfb91da79", "label": "supported", "passage": 8, "reason": "문단 8 전자재료 사업부문: OLED 패널 모바일/IT·TV 채용 증가로 OLED 소재 수요 크게 성장"}
+{"lid": "aed81261b6", "label": "non_claim", "passage": null, "reason": "문단 표기 조각으로 사실 주장이 아니다"}
+{"lid": "b20c34439e", "label": "contradicted", "passage": 6, "reason": "문단 6은 영업이익이 적자 1조 7,224억원이라 적는다(2조 696억원은 에너지솔루션 부문 감소액)"}
+{"lid": "f99c1e945b", "label": "contradicted", "passage": 1, "reason": "문단 1은 상장일을 1984년이 아닌 1979년 2월 27일로 적는다"}
+{"lid": "819656f972", "label": "no_evidence", "passage": null, "reason": "원재료 품목 목록은 문단에 없다"}
+{"lid": "5461acae8d", "label": "supported", "passage": 1, "reason": "문단 1: 1979년 2월 27일 한국증권선물거래소 상장"}
+{"lid": "2951667204", "label": "no_evidence", "passage": null, "reason": "에너지솔루션 부문 원재료 매입 품목은 문단에 없다"}
+{"lid": "451a1180b1", "label": "non_claim", "passage": null, "reason": "질문 문장"}
+{"lid": "426911ba41", "label": "supported", "passage": 5, "reason": "문단 5: 신규연결 SDI-GM Synergy Cells Holdings LLC., 당기 중 신설"}
+{"lid": "32aacc906b", "label": "contradicted", "passage": 5, "reason": "문단 5의 당기 신규연결은 SDI-GM 2개사이며 SDI-Ford가 아니다"}
+{"lid": "df4c0efdb9", "label": "contradicted", "passage": 3, "reason": "문단 3은 Samsung SDI America, Inc.가 배터리 공급계약을 체결했다고 적는다"}
+{"lid": "df08469745", "label": "no_evidence", "passage": null, "reason": "문단 3의 2025.3.14 공시는 SDI-GM Synergy Cells Holdings와 연결되어 있지 않다"}
+{"lid": "ea2c9aa5fb", "label": "non_claim", "passage": null, "reason": "뒤 목록을 안내하는 도입 문장"}
+{"lid": "01a1d6e689", "label": "supported", "passage": 3, "reason": "문단 3: 종속회사 Samsung SDI America, Inc.는 배터리 공급계약을 체결"}
+{"lid": "7a4a8048a8", "label": "no_evidence", "passage": null, "reason": "문단 3의 2026.1.30 공시는 SDI America 계약이며 SDI-GM Synergy Cells LLC와 연결되지 않는다"}
+{"lid": "56353e6260", "label": "no_evidence", "passage": null, "reason": "반도체 시장 전망을 SDI-GM Synergy Cells Holdings에 귀속시키는 근거가 없다"}

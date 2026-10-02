@@ -30,3 +30,4 @@
 {"at": "2026-10-02T10:57:42.587951+00:00", "event": "stage1-tune", "tau_c": 0.35, "tau_s": 0.5, "b_star": "lex", "mde": 0.08344842644488189}
 {"at": "2026-10-02T10:58:13.342533+00:00", "event": "stage1-freeze-config"}
 {"at": "2026-10-02T11:16:26.181073+00:00", "event": "controlled-check", "accepted": 115, "rejected": 5}
+{"at": "2026-10-02T11:58:33.544369+00:00", "event": "labels-merge", "split": "holdout", "labeled": 560, "disputed": 11, "kappa_binary_r1": 0.9736}

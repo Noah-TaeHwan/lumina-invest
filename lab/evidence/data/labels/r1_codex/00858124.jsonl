@@ -1,0 +1,26 @@
+{"lid": "f970fd3bba", "label": "non_claim", "passage": null, "reason": "회사명을 표시한 머리말로, 검증할 사실 서술이 없다."}
+{"lid": "cc2d6f7f1a", "label": "supported", "passage": 1, "reason": "문단 1이 빛 에너지의 무한성과 여러 국가에서의 소규모·대규모 발전 활용을 명시한다."}
+{"lid": "cbc90e7517", "label": "contradicted", "passage": 2, "reason": "문단 2의 2025년 로봇모션제어 누적매출은 약 356억원으로, 주장한 412억원과 다르다."}
+{"lid": "4f51ad4938", "label": "non_claim", "passage": null, "reason": "문단 번호와 잘린 항목 표기만 있어 사실 주장이 아니다."}
+{"lid": "522ae320b8", "label": "supported", "passage": 2, "reason": "문단 2가 2025년 로봇모션제어 누적매출 약 356억원과 비중 53.1%를 함께 명시한다."}
+{"lid": "6b84710bec", "label": "supported", "passage": 1, "reason": "문단 1이 태양광 발전의 적은 고장, 수십년 이상의 수명, 간편한 설치·이동과 이용 편의성을 모두 명시한다."}
+{"lid": "f27cd2838e", "label": "supported", "passage": 1, "reason": "문단 1이 열거된 국가와 지붕·건물벽의 소용량 및 임야·간척지·저수지의 대규모 발전소 설치를 명시한다."}
+{"lid": "e2b6e94988", "label": "non_claim", "passage": null, "reason": "문단 번호와 잘린 항목 표기만 있어 사실 주장이 아니다."}
+{"lid": "d2aae75fba", "label": "supported", "passage": 1, "reason": "문단 1이 로봇 모션 제어 시장을 상위모션 제어기 시장과 모터 구동 드라이브 시장으로 구분한다."}
+{"lid": "ab495bc9c5", "label": "supported", "passage": 2, "reason": "문단 2가 2016년 국책 과제로 독일·일본에 이어 세계 세 번째로 22비트급 광학식 엔코더를 개발했음을 명시한다."}
+{"lid": "6a7a6e37ad", "label": "contradicted", "passage": 2, "reason": "문단 2의 해당 국책 과제 엔코더 개발 연도는 2016년으로, 주장한 2011년과 다르다."}
+{"lid": "e8af52045c", "label": "supported", "passage": 1, "reason": "문단 1이 국내 로봇모션 제어 부문의 경쟁대상으로 일본계 글로벌 업체 미쓰비시와 야스카와를 명시한다."}
+{"lid": "65ac0fee47", "label": "non_claim", "passage": null, "reason": "회사명을 표시한 머리말로, 검증할 사실 서술이 없다."}
+{"lid": "4419690c17", "label": "supported", "passage": 1, "reason": "문단 1의 국내 로봇모션 제어 경쟁기업 목록에 파나소닉과 옴론이 명시되어 있다."}
+{"lid": "7c2c0fca27", "label": "supported", "passage": 6, "reason": "문단 6이 2025년 기말 기준 매출의 약 54%가 로봇모션제어기 제품에서 발생한다고 명시한다."}
+{"lid": "c1ebb08f53", "label": "contradicted", "passage": 6, "reason": "문단 6은 해당 2025년 매출 비중 약 54%의 제품을 산업용 감속기가 아니라 로봇모션제어기로 명시한다."}
+{"lid": "7acb7fecec", "label": "no_evidence", "passage": null, "reason": "문단 6의 약 54%는 회사 전체 매출 중 로봇모션제어기 제품의 비중이며, 두 제품의 매출액 각각에 관한 서술은 뒷받침하지 않는다."}
+{"lid": "fdadbf4a88", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단 1~8에는 원재료·상품의 품목별 매입액이나 비중이 제시되지 않는다."}
+{"lid": "5148492954", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단 1~8에는 UPS의 매입처와 원재료 매입액 비중 59.05%를 확인하거나 반박할 자료가 없다."}
+{"lid": "667f67eb25", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단 1~8에는 UPS의 매입처와 원재료 매입액 비중 59.05%를 뒷받침할 자료가 없다."}
+{"lid": "5b19b50486", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 현대자동차의 완성차 생산·국내외 판매에 관한 내용이 없다."}
+{"lid": "3c51aa5195", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 환율 10% 변동에 따른 당기손익 영향 1,000억원 또는 14.3%가 없으며, 문단 5는 이자율 100bp 변동의 영향을 설명한다."}
+{"lid": "f3f123c07a", "label": "supported", "passage": 2, "reason": "문단 2가 360도를 약 400만개로 구분하는 22bit 광학식 절대치 엔코더의 자체 개발과 상용화를 모두 명시한다."}
+{"lid": "75e54b4032", "label": "supported", "passage": 3, "reason": "문단 3의 천원 단위 표가 2025년 연구개발비 합계 4,654,419와 매출액 대비 6.94%를 함께 제시한다."}
+{"lid": "b9dd677291", "label": "contradicted", "passage": 3, "reason": "문단 3의 금액 단위는 천원이므로 연구개발비는 4,654,419천원이며, 주장한 4,654,419백만원과는 1,000배 차이가 난다."}
+{"lid": "28490cfb47", "label": "contradicted", "passage": 3, "reason": "문단 3의 2025년 연구개발비 매출액 대비 비율은 6.94%로, 주장한 8.27%와 다르다."}

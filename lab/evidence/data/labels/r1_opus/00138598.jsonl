@@ -1,0 +1,28 @@
+{"lid": "6625ce1216", "label": "supported", "passage": 5, "reason": "문단 5: 부 연구소 충청북도 증평군, 설립 2023.05.08"}
+{"lid": "901d0a69c2", "label": "no_evidence", "passage": null, "reason": "문단에 '전자제품 사업부'는 없고 사업부문은 수동소자·PCB로만 나옴"}
+{"lid": "905499946c", "label": "non_claim", "passage": null, "reason": "뒤에 나올 목록을 예고하는 안내 문장"}
+{"lid": "fe68e5eaeb", "label": "no_evidence", "passage": null, "reason": "아비코전자를 리서치 보조라고 하는 내용은 문단에 없음"}
+{"lid": "a346105a0f", "label": "contradicted", "passage": 5, "reason": "문단 5는 증평 부 연구소 설립 시기를 2023.05.08로 기재(2019년 아님)"}
+{"lid": "f35de57e84", "label": "no_evidence", "passage": null, "reason": "문단에 '전기제품 사업부'는 없음"}
+{"lid": "794dd290f5", "label": "no_evidence", "passage": null, "reason": "전기제품 개발·생산·판매·서비스 사업부는 문단에 없음"}
+{"lid": "932045ce1e", "label": "non_claim", "passage": null, "reason": "뒤에 나올 목록을 예고하는 안내 문장"}
+{"lid": "76952cf2f1", "label": "supported", "passage": 5, "reason": "문단 5의 문장과 같음"}
+{"lid": "c93293920b", "label": "contradicted", "passage": 3, "reason": "문단 3은 수동소자 3대 부품 중 인덕터와 저항기를 생산·판매한다고 함(커패시터 아님)"}
+{"lid": "1faa3f9cdf", "label": "supported", "passage": 5, "reason": "문단 5: 인덕터 및 저항기는 필수 범용부품으로 꾸준히 판매되는 부품"}
+{"lid": "4f4d17f1f8", "label": "supported", "passage": 5, "reason": "문단 5의 문장과 같음"}
+{"lid": "24afc831ff", "label": "supported", "passage": 5, "reason": "문단 5의 문장과 같음"}
+{"lid": "096d247331", "label": "supported", "passage": 3, "reason": "문단 3: 수동소자 3대 부품 중 인덕터와 저항기를 생산 및 판매"}
+{"lid": "a4cfdf8069", "label": "contradicted", "passage": 1, "reason": "문단 1에서 62,015백만원은 아비코전자㈜ 인덕터 매출이고 PCB는 71,323백만원으로 일부일 뿐이어서 PCB 100%와 맞지 않음"}
+{"lid": "bdb971b4ca", "label": "contradicted", "passage": 2, "reason": "문단 2: 주요고객인 자동차 부품제조업체에 자동차용 PCB를 납품"}
+{"lid": "9879b7d2a8", "label": "supported", "passage": 2, "reason": "문단 2: 자동차 부품제조업체에 자동차용 PCB 납품"}
+{"lid": "2ed3705ce8", "label": "no_evidence", "passage": null, "reason": "가동률은 문단에 없음. 1.64%는 문단 3의 2023년 연구개발비/매출액 비율임"}
+{"lid": "3848d8039f", "label": "supported", "passage": 3, "reason": "문단 3: 별도기준 연구개발비/매출액 비율 2025년 1.30%"}
+{"lid": "1b7ceb04df", "label": "no_evidence", "passage": null, "reason": "SK텔레콤에 관한 내용은 문단에 없음"}
+{"lid": "c5c51dedda", "label": "supported", "passage": 1, "reason": "문단 1의 자원조달 특성 문장과 같음(오탈자만 다름)"}
+{"lid": "704cb2d4cc", "label": "supported", "passage": 1, "reason": "문단 1: 중국 및 신흥국 기업의 저가 수동부품 생산으로 경쟁이 한층 심화('한layer'는 오탈자)"}
+{"lid": "b910273041", "label": "supported", "passage": 1, "reason": "문단 1의 경쟁 요소 문장과 같음"}
+{"lid": "e5eb85377e", "label": "non_claim", "passage": null, "reason": "회사명 표기 조각으로 사실 주장이 아님"}
+{"lid": "777c039a7e", "label": "non_claim", "passage": null, "reason": "문단 표기 조각으로 사실 주장이 아님"}
+{"lid": "1da692e56f", "label": "supported", "passage": 8, "reason": "문단 8: 별도기준 제53기(2025년) 원재료비 99,911,613원"}
+{"lid": "6a8448469a", "label": "no_evidence", "passage": null, "reason": "원재료비를 연구개발비 규모·비율로 오인했고 '1:3.2 증가'는 문단에 없는 계산값(실제로는 2023→2025 감소)"}
+{"lid": "d7c5d1dcf6", "label": "no_evidence", "passage": null, "reason": "99,911,613원은 문단 8에서 2025년 값이며 2021년 원재료비는 문단에 없음"}

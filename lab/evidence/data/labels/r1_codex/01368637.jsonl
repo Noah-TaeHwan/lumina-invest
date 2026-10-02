@@ -1,0 +1,26 @@
+{"lid": "4803f98d6e", "label": "no_evidence", "passage": null, "reason": "2차전지 장비를 7개 분야로 나누어 진출했다는 사실과 각 분야의 납품 실적은 제시되지 않았다."}
+{"lid": "196dbcd8b9", "label": "contradicted", "passage": 5, "reason": "연료전지용 전극 생산 장치 특허의 등록일은 2022년 5월 2일로, 2014년 5월과 다르다."}
+{"lid": "951ed2a2cf", "label": "supported", "passage": 5, "reason": "유일에너테크의 연료전지용 전극 생산 장치 특허는 연료전지 장비에 적용되며 2022년 5월 2일 등록되었다."}
+{"lid": "72e7b8b6a6", "label": "supported", "passage": 7, "reason": "국내 주요 수소연료전지 생산 업체인 두산퓨얼셀에 발전용 소재 촉매코팅 양산장비를 납품했다고 명시한다."}
+{"lid": "2a3ee07fa3", "label": "no_evidence", "passage": null, "reason": "배터리 제조라는 명칭의 주력 장비와 해당 장비의 담당 공정은 문단에 제시되지 않았다."}
+{"lid": "c3aaa64896", "label": "contradicted", "passage": 7, "reason": "발전용 수소연료전지 소재 촉매코팅 양산장비의 납품처로 범한퓨얼셀이 아니라 두산퓨얼셀을 명시한다."}
+{"lid": "b898f4b83e", "label": "non_claim", "passage": null, "reason": "뒤에 장비 목록을 제시하겠다는 도입 문장으로, 구체적인 장비나 공정에 대한 사실 주장이 없다."}
+{"lid": "438cf60172", "label": "no_evidence", "passage": null, "reason": "장비에 전기차 배터리 제작 시설과 시설 관리 및 유지 보수가 포함된다는 근거가 없다."}
+{"lid": "7f453b20e2", "label": "no_evidence", "passage": null, "reason": "전기차 배터리 제작이라는 명칭의 주력 장비와 그 기능을 설명하는 문단이 없다."}
+{"lid": "42011ac117", "label": "no_evidence", "passage": null, "reason": "장비에 배터리 제조 공정 및 시설과 시설 관리 및 유지 보수가 포함된다는 근거가 없다."}
+{"lid": "4c92f2879d", "label": "contradicted", "passage": 2, "reason": "전체 매출의 수출 비중은 2024년 14.8%에서 2025년 59.9%로 커졌으므로 증가하지 않았다는 주장과 다르다."}
+{"lid": "b2cef4574f", "label": "contradicted", "passage": 2, "reason": "전체 수출 비중은 전년 14.8%에서 2025년 59.9%로 변했으며, 57.9%는 2025년 이차전지 조립장비의 수출 비중이다."}
+{"lid": "ff4b3e1c94", "label": "supported", "passage": 2, "reason": "전체 매출의 수출 비중이 2024년 14.8%, 2025년 59.9%로 제시되어 2025년에 커졌음을 지지한다."}
+{"lid": "66c0397c35", "label": "non_claim", "passage": null, "reason": "문단 번호와 잘린 항목 제목만 있어 사실을 주장하지 않는다."}
+{"lid": "63da13e837", "label": "non_claim", "passage": null, "reason": "잘린 항목 제목과 목차 표시만 있어 사실을 주장하지 않는다."}
+{"lid": "c3c9d86ad0", "label": "no_evidence", "passage": null, "reason": "피엔티의 전극 공정용 롤투롤 설비 제작 및 공급에 관한 근거는 제시되지 않았다."}
+{"lid": "079a4f3340", "label": "supported", "passage": 4, "reason": "당사가 배터리 제조 중 조립공정을 위한 설비를 제작한 후 납품한다고 명시한다."}
+{"lid": "7d667a7129", "label": "supported", "passage": 1, "reason": "수주내용이 회사의 기밀이므로 별도로 기재하지 않았다고 명시한다."}
+{"lid": "aef91a43a6", "label": "supported", "passage": 1, "reason": "사업보고서 기준일인 2025년 12월 31일 현재 수주잔고가 약 380억 원이라고 명시한다."}
+{"lid": "9965e89632", "label": "no_evidence", "passage": null, "reason": "제시된 8개 문단에는 회사명이 성원에너텍이라는 근거가 없다."}
+{"lid": "ca8372e721", "label": "no_evidence", "passage": null, "reason": "환율 10% 변동에 따른 통화별 당기 손익 영향과 수소가 가장 큰 영향을 미친다는 근거는 없다."}
+{"lid": "f655655cff", "label": "contradicted", "passage": 3, "reason": "2023년 글로벌 수소연료전지 시장 규모는 약 33억 달러로 제시되어 약 46억 달러와 다르다."}
+{"lid": "b6c53f303c", "label": "supported", "passage": 3, "reason": "2023년 기준 글로벌 수소연료전지 시장 규모가 약 33억 달러로 평가된다고 명시한다."}
+{"lid": "910e403084", "label": "supported", "passage": 3, "reason": "제조원가로 비용 처리한 연구개발비가 2024년 2,026,767에서 2025년 1,667,740으로 줄었다."}
+{"lid": "3268960828", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 연도별 매출액 대비 연구개발비 비중이나 그 비중이 1.5배로 증가했다는 수치가 없다."}
+{"lid": "98201527c7", "label": "no_evidence", "passage": null, "reason": "연구개발비 표는 2023~2025년만 제시하며 2021년 및 그 전년의 제조원가 처리 연구개발비는 없다."}

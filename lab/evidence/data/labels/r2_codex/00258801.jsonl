@@ -1,0 +1,2 @@
+{"lid": "3bd06881ae", "label": "non_claim", "passage": null, "reason": "날짜 표현이 무의미하게 반복되고 문장이 미완결되어 판정 가능한 사실 주장이 없다."}
+{"lid": "ebea43caa3", "label": "contradicted", "passage": 3, "reason": "문단 3은 카카오 연구개발 조직을 다섯 가지로 열거하고 데이터·LLM 연구와 신규 서비스 개발을 Kanana에 귀속하므로, 카카오브레인이라는 조직명과 충돌한다."}
