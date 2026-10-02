@@ -760,7 +760,7 @@ def cmd_stage0_report(P: Paths, args) -> None:
     out = P.ev / "results/stage0.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(summary, ensure_ascii=False, indent=1, default=str) + "\n")
-    report = P.root / "docs/lab/evidence-stage0-report.md"
+    report = P.ev / "results/stage0-gates.md"
     report.parent.mkdir(parents=True, exist_ok=True)
     lines = ["# 근거 판정 엔진 Stage 0 리포트", "",
              "> 정답 라벨은 사람이 아니라 AI(Claude Opus·Codex)가 만든 **AI 참조 라벨**이다. 결과는 AI 참조 라벨과의 일치 성능이다.", "",
