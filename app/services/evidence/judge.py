@@ -73,3 +73,21 @@ def passage_labels(j: Judgement) -> list[str]:
     """문단별 확률 최댓값 선택지(반복·묶기 일치 검사용)."""
     return [max((("supports", s), ("contradicts", c), ("says_nothing", 1 - s - c)), key=lambda x: x[1])[0]
             for s, c in zip(j.s, j.c)]
+
+
+def sys_decision(j: Judgement, valid: list[bool], tau_s: float, tau_c: float) -> tuple[str, int | None, float]:
+    """spec 3절 SYS 규칙. valid는 문단별 숫자 존재 확인 통과 여부다.
+
+    반박: max c ≥ τ_c이고 max c > S_V(숫자 확인을 통과한 문단의 지지 최댓값)일 때. 점수 0.
+    지지됨: S_V ≥ τ_s일 때, 그 문단이 출처. 점수 S_V. 나머지는 근거 없음(점수 S_V).
+    """
+    if not j.ok:
+        return "unjudged", None, 0.0
+    cand = [(s, i) for i, (s, v) in enumerate(zip(j.s, valid)) if v]
+    s_v, idx = max(cand) if cand else (0.0, None)
+    mc = max(j.c)
+    if mc >= tau_c and mc > s_v:
+        return "contradicted", j.c.index(mc), 0.0
+    if idx is not None and s_v >= tau_s:
+        return "supported", idx, s_v
+    return "no_evidence", None, s_v
