@@ -9,9 +9,10 @@
 - EVIDENCE_CHAT_ENABLED가 꺼져 있으면 모든 경로가 404다(로그인 여부와 무관).
 - 판정은 답변·실행 행을 커밋한 뒤 앱 프로세스 안 asyncio 작업으로 돈다. 저장에 실패하면 판정을 시작하지 않고 500.
 - 문단 검색은 주입 가능한 함수 하나(get_passage_search)다. 문단 저장소(P3, Qdrant evidence_passages)가
-  연결되기 전에는 None이라 503을 낸다. 검색 함수: async (corp_code, question) -> 문단 dict 8개
+  연결되기 전에는 None이라 503을 낸다. 연결 뒤 Qdrant·컬렉션이 없으면 검색이 예외를 내고 역시 503이다.
+  검색 함수: async (corp_code, question) -> 문단 dict 8개
   (passage_id, rcept_no, section, idx, sha256, text). 회사 목록(get_company_list)도 같은 저장소에서 온다.
-  앱 시작 시 store.wire()가 컬렉션이 있을 때만 둘을 연결한다.
+  앱 시작 시 store.wire()가 set_passage_store로 저장소 하나를 연결한다(EVIDENCE_CHAT_ENABLED일 때).
 - 근거 모드는 이력 없는 단발형이다(generate_answer는 이력을 받지 않는다). 기존 /api/chat·에이전트는 건드리지 않는다.
 """
 from __future__ import annotations
@@ -61,30 +62,21 @@ router = APIRouter(prefix="/api", tags=["evidence"], dependencies=[Depends(requi
 
 # ── 주입 지점(테스트·P3에서 바꾼다) ────────────────────────────────────────────
 
-_passage_search: PassageSearch | None = None
+_passage_store = None  # search(corp_code, question)·companies()를 가진 저장소(store.PassageStore)
 
 
-def set_passage_search(fn: PassageSearch | None) -> None:
-    """P3에서 Qdrant evidence_passages 검색 함수를 연결한다."""
-    global _passage_search
-    _passage_search = fn
+def set_passage_store(store) -> None:
+    """P3에서 Qdrant evidence_passages 저장소를 연결한다(None이면 끊는다)."""
+    global _passage_store
+    _passage_store = store
 
 
 def get_passage_search() -> PassageSearch | None:
-    return _passage_search
-
-
-_company_list: CompanyList | None = None
-
-
-def set_company_list(fn: CompanyList | None) -> None:
-    """P3에서 적재된 회사 목록 함수(store.companies)를 연결한다."""
-    global _company_list
-    _company_list = fn
+    return _passage_store.search if _passage_store is not None else None
 
 
 def get_company_list() -> CompanyList | None:
-    return _company_list
+    return _passage_store.companies if _passage_store is not None else None
 
 
 def get_krx_search() -> KrxSearch:
@@ -229,7 +221,7 @@ async def evidence_companies(
     if companies is None:
         raise HTTPException(503, "공시 문단 저장소가 아직 준비되지 않았습니다")
     try:
-        loaded = sorted(await companies(), key=lambda c: c["corp_name"])
+        loaded = await companies()  # 저장소가 회사명 순으로 준다
     except Exception as exc:  # noqa: BLE001
         log.error(json.dumps({"event": "company_list_failed", "error": type(exc).__name__}))
         raise HTTPException(503, "공시 문단 저장소를 조회하지 못했습니다.")
@@ -245,7 +237,7 @@ async def evidence_companies(
         hits = []
     by_stock = {c["stock_code"]: c for c in loaded}
     picked = [by_stock[h["symbol"].split(".")[0]] for h in hits if h.get("symbol", "").split(".")[0] in by_stock]
-    if not hits:
+    if not picked:  # KRX 실패·결과 없음·적재 회사가 KRX 상위 결과 밖
         picked = [c for c in loaded if q in c["corp_name"] or c["stock_code"].startswith(q)]
     return {"companies": list({c["corp_code"]: c for c in picked}.values())}
 

@@ -53,11 +53,9 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"[WARN] 근거 판정 stale 정리 실패: {e}")
     try:
-        # 근거 모드 문단 검색: EVIDENCE_CHAT_ENABLED이고 evidence_passages 컬렉션이 있을 때만 연결(없으면 503)
+        # 근거 모드 문단 검색: EVIDENCE_CHAT_ENABLED이면 연결. Qdrant·컬렉션이 없으면 요청마다 503(적재 후 재시작 불필요)
         if await evidence_store.wire():
-            print("[fin-agent] 근거 문단 저장소(evidence_passages) 연결")
-        elif settings.EVIDENCE_CHAT_ENABLED:
-            print("[WARN] evidence_passages 컬렉션이 없어 근거 모드 검색 비활성 (load_passages로 적재)")
+            print("[fin-agent] 근거 문단 저장소(evidence_passages) 연결 — 컬렉션이 없으면 검색은 503")
     except Exception as e:
         print(f"[WARN] 근거 문단 저장소 연결 실패: {type(e).__name__}")
     try:

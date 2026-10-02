@@ -121,7 +121,7 @@ def test_reload_skips_same_report_without_embedding(tmp_path):
     assert code == 0
     assert len(embed.calls) == n
     assert "변경 없음" in out
-    assert asyncio.run(s.count(SAMSUNG.corp_code)) == 3
+    assert len(asyncio.run(s.existing(SAMSUNG.corp_code))) == 3
 
 
 def test_corrected_report_replaces_points_without_duplicates(tmp_path):
@@ -134,7 +134,7 @@ def test_corrected_report_replaces_points_without_duplicates(tmp_path):
     assert code == 0
     rows = asyncio.run(s.search(SAMSUNG.corp_code, "q"))
     assert len(rows) == 3 and {r["rcept_no"] for r in rows} == {"20260601000999"}
-    assert asyncio.run(s.count(SAMSUNG.corp_code)) == 3
+    assert len(asyncio.run(s.existing(SAMSUNG.corp_code))) == 3
 
 
 def test_dart_http_failure_is_reported_without_key_and_others_continue(tmp_path):
@@ -146,7 +146,7 @@ def test_dart_http_failure_is_reported_without_key_and_others_continue(tmp_path)
     assert KEY not in out
     line = next(x for x in out.splitlines() if SAMSUNG.corp_code in x)
     assert "실패" in line and "HTTPStatusError" in line
-    assert asyncio.run(s.count(HYNIX.corp_code)) == 3
+    assert len(asyncio.run(s.existing(HYNIX.corp_code))) == 3
 
 
 def test_dart_status_error_message_is_scrubbed(tmp_path):

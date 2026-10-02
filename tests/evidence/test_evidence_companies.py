@@ -66,12 +66,13 @@ def test_unwired_store_is_503(enabled):
     assert r.json()["detail"] == "공시 문단 저장소가 아직 준비되지 않았습니다"
 
 
-def test_lists_loaded_companies_sorted_by_name(enabled):
-    app = make_app(None, Who(USER), companies=_list())
+def test_lists_loaded_companies_in_store_order(enabled):
+    """정렬은 저장소(store.companies, 이름순)가 한다. 라우트는 다시 정렬하지 않는다."""
+    rows = list(reversed(LOADED))
+    app = make_app(None, Who(USER), companies=_list(rows))
     r = _get(app, "/api/evidence/companies")
     assert r.status_code == 200
-    assert [c["corp_name"] for c in r.json()["companies"]] == ["SK하이닉스", "삼성SDI", "삼성전자"]
-    assert r.json()["companies"][0] == LOADED[0]
+    assert r.json()["companies"] == rows
 
 
 def test_query_intersects_krx_search_in_krx_order(enabled):
@@ -92,6 +93,14 @@ def test_query_falls_back_to_loaded_names_when_krx_unavailable(enabled):
     assert [c["corp_code"] for c in r.json()["companies"]] == ["00164779"]
 
 
+def test_query_falls_back_when_krx_hits_miss_loaded(enabled):
+    """KRX 상위 결과에 적재 회사가 없으면(상위 50 밖 등) 조용히 빈 목록이 아니라 적재 목록에서 찾는다."""
+    krx = _krx([{"symbol": "000661.KS", "name": "SK하이닉스우", "exchange": "KOSPI", "type": "주식"}])
+    app = make_app(None, Who(USER), companies=_list(), krx_search=krx)
+    r = _get(app, "/api/evidence/companies?q=하이닉스")
+    assert [c["corp_code"] for c in r.json()["companies"]] == ["00164779"]
+
+
 def test_query_by_stock_code_prefix_when_krx_empty(enabled):
     app = make_app(None, Who(USER), companies=_list(), krx_search=_krx([]))
     r = _get(app, "/api/evidence/companies?q=0059")
@@ -105,10 +114,43 @@ def test_store_failure_is_503(enabled):
     assert _get(app, "/api/evidence/companies").status_code == 503
 
 
-def test_set_company_list_roundtrip():
+def test_set_passage_store_wires_search_and_companies():
+    class Store:
+        async def search(self, corp_code, question):
+            return []
+
+        async def companies(self):
+            return []
+
+    st = Store()
     try:
-        fn = _list()
-        evidence.set_company_list(fn)
-        assert evidence.get_company_list() is fn
+        evidence.set_passage_store(st)
+        assert evidence.get_passage_search() == st.search
+        assert evidence.get_company_list() == st.companies
     finally:
-        evidence.set_company_list(None)
+        evidence.set_passage_store(None)
+    assert evidence.get_passage_search() is None and evidence.get_company_list() is None
+
+
+def test_missing_collection_is_503_then_lists_after_load(enabled):
+    """시작 때 컬렉션이 없던 실제 저장소: 503 → 적재 뒤 재시작 없이 200."""
+    from qdrant_client import AsyncQdrantClient
+
+    from app.services.evidence import store
+    from app.services.evidence.dart import Corp
+    from app.services.evidence.passages import Passage
+    from tests.evidence.test_passage_store import FakeEmbed
+
+    s = store.PassageStore(AsyncQdrantClient(location=":memory:"), FakeEmbed())
+    app = make_app(None, Who(USER), companies=s.companies)
+    corp = Corp("00126380", "삼성전자", "005930")
+
+    async def go():
+        async with client(app) as c:
+            before = await c.get("/api/evidence/companies")
+            await s.load(corp, [Passage("00126380-II-0000", corp.corp_code, "1", "II", 0, "본문")])
+            return before, await c.get("/api/evidence/companies")
+
+    before, after = asyncio.run(go())
+    assert before.status_code == 503
+    assert after.status_code == 200 and [c["corp_code"] for c in after.json()["companies"]] == ["00126380"]

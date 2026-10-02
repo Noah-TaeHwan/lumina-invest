@@ -114,7 +114,7 @@ def test_reload_same_report_skips_embedding_and_keeps_count():
         first = await s.load(SAMSUNG, sam)
         n = len(embed.calls)
         second = await s.load(SAMSUNG, sam)
-        return first, second, n, await s.count(SAMSUNG.corp_code)
+        return first, second, n, len(await s.existing(SAMSUNG.corp_code))
 
     first, second, n, count = asyncio.run(go())
     assert (first.embedded, first.removed, first.kept) == (5, 0, 0)
@@ -135,7 +135,7 @@ def test_reload_new_report_overwrites_changed_and_removes_tail():
         await s.load(SAMSUNG, old)
         res = await s.load(SAMSUNG, new)
         rows = await s.search(SAMSUNG.corp_code, "q", k=8)
-        return res, rows, await s.count(SAMSUNG.corp_code)
+        return res, rows, len(await s.existing(SAMSUNG.corp_code))
 
     res, rows, count = asyncio.run(go())
     assert (res.embedded, res.removed) == (4, 2)
@@ -168,7 +168,7 @@ def test_load_does_not_touch_other_corp():
         await s.load(SAMSUNG, _passages(SAMSUNG, 3))
         await s.load(HYNIX, _passages(HYNIX, 2))
         await s.load(SAMSUNG, _passages(SAMSUNG, 1, rcept_no="20260401000001"))
-        return await s.count(SAMSUNG.corp_code), await s.count(HYNIX.corp_code)
+        return len(await s.existing(SAMSUNG.corp_code)), len(await s.existing(HYNIX.corp_code))
 
     assert asyncio.run(go()) == (1, 2)
 
@@ -190,28 +190,36 @@ def test_embed_failure_leaves_previous_points():
         with pytest.raises(RuntimeError):
             await s.load(SAMSUNG, _passages(SAMSUNG, 2, rcept_no="20260401000001"))
         have = await s.existing(SAMSUNG.corp_code)  # 검색은 임베딩을 다시 부르므로 payload로 본다
-        return await s.count(SAMSUNG.corp_code), {r["rcept_no"] for r in have.values()}
+        return len(await s.existing(SAMSUNG.corp_code)), {r["rcept_no"] for r in have.values()}
 
     assert asyncio.run(go()) == (3, {"20260312000123"})
 
 
-def test_companies_lists_loaded_corps_with_counts():
+def test_companies_lists_loaded_corps_by_name_with_counts():
     s = _store()
 
     async def go():
-        before = await s.companies()
         await s.load(SAMSUNG, _passages(SAMSUNG, 3))
         await s.load(HYNIX, _passages(HYNIX, 2, rcept_no="20260310000777"))
-        return before, await s.companies()
+        return await s.companies()
 
-    before, after = asyncio.run(go())
-    assert before == []
-    assert after == [
-        {"corp_code": SAMSUNG.corp_code, "corp_name": "삼성전자", "stock_code": "005930",
-         "rcept_no": "20260312000123", "passages": 3},
+    assert asyncio.run(go()) == [
         {"corp_code": HYNIX.corp_code, "corp_name": "SK하이닉스", "stock_code": "000660",
          "rcept_no": "20260310000777", "passages": 2},
+        {"corp_code": SAMSUNG.corp_code, "corp_name": "삼성전자", "stock_code": "005930",
+         "rcept_no": "20260312000123", "passages": 3},
     ]
+
+
+def test_existing_reads_only_skip_fields():
+    s = _store()
+
+    async def go():
+        await s.load(SAMSUNG, _passages(SAMSUNG, 1))
+        return await s.existing(SAMSUNG.corp_code)
+
+    (row,) = asyncio.run(go()).values()
+    assert set(row) == {"passage_id", "rcept_no", "sha256"}
 
 
 def test_exists_is_false_before_first_load():
@@ -225,20 +233,55 @@ def test_exists_is_false_before_first_load():
     assert asyncio.run(go()) == (False, True)
 
 
+def test_search_and_companies_raise_without_collection():
+    """컬렉션이 없거나 Qdrant가 죽었으면 예외 → 라우트가 503(passage_search_failed·company_list_failed)으로 바꾼다."""
+    s = _store()
+
+    async def search():
+        await s.search(SAMSUNG.corp_code, "q")
+
+    async def companies():
+        await s.companies()
+
+    for fn in (search, companies):
+        with pytest.raises(Exception):
+            asyncio.run(fn())
+
+
+def test_query_embedding_has_short_timeout():
+    async def slow(text):
+        await asyncio.sleep(5)
+        return [1.0] * DIM
+
+    s = store.PassageStore(AsyncQdrantClient(location=":memory:"), slow, query_timeout=0.05)
+    assert store.QUERY_EMBED_TIMEOUT_S <= 10
+
+    async def go():
+        await s.search(SAMSUNG.corp_code, "q")
+
+    with pytest.raises(asyncio.TimeoutError):
+        asyncio.run(go())
+
+
 # ── 앱 시작 시 연결 ─────────────────────────────────────────────────────────────
 
 @pytest.fixture
 def unwired():
-    evidence_routes.set_passage_search(None)
-    evidence_routes.set_company_list(None)
+    def reset():
+        evidence_routes.set_passage_store(None)
+        store._wired = None
+    reset()
     yield
-    evidence_routes.set_passage_search(None)
-    evidence_routes.set_company_list(None)
+    reset()
 
 
-def test_wire_connects_search_when_flag_on_and_collection_exists(monkeypatch, unwired):
+def _enable(monkeypatch, on=True):
     from app.config import settings
-    monkeypatch.setattr(settings, "EVIDENCE_CHAT_ENABLED", True)
+    monkeypatch.setattr(settings, "EVIDENCE_CHAT_ENABLED", on)
+
+
+def test_wire_connects_search_and_companies_when_flag_on(monkeypatch, unwired):
+    _enable(monkeypatch)
     s = _store()
 
     async def go():
@@ -252,25 +295,33 @@ def test_wire_connects_search_when_flag_on_and_collection_exists(monkeypatch, un
     assert ok is True
     assert len(rows) == 2
     assert [c["corp_code"] for c in corps] == [SAMSUNG.corp_code]
+    assert store._wired is s
 
 
-def test_wire_leaves_503_when_collection_missing(monkeypatch, unwired):
-    from app.config import settings
-    monkeypatch.setattr(settings, "EVIDENCE_CHAT_ENABLED", True)
+def test_wire_without_collection_recovers_without_restart(monkeypatch, unwired):
+    """시작 때 컬렉션(또는 Qdrant)이 없어도 연결해 둔다. 나중에 적재되면 재시작 없이 검색된다."""
+    _enable(monkeypatch)
     s = _store()
 
     async def go():
         ok = await store.wire(s)
-        return ok, await s.exists()
+        search = evidence_routes.get_passage_search()
+        try:
+            await search(SAMSUNG.corp_code, "q")
+            first = "ok"
+        except Exception:
+            first = "error"
+        created = await s.exists()  # 시작 시 빈 컬렉션을 만들지 않는다
+        await s.load(SAMSUNG, _passages(SAMSUNG, 2))
+        return ok, first, created, await evidence_routes.get_passage_search()(SAMSUNG.corp_code, "q")
 
-    assert asyncio.run(go()) == (False, False)  # 시작 시 빈 컬렉션을 만들지 않는다
-    assert evidence_routes.get_passage_search() is None
-    assert evidence_routes.get_company_list() is None
+    ok, first, created, rows = asyncio.run(go())
+    assert (ok, first, created) == (True, "error", False)
+    assert len(rows) == 2
 
 
 def test_wire_does_nothing_when_flag_off(monkeypatch, unwired):
-    from app.config import settings
-    monkeypatch.setattr(settings, "EVIDENCE_CHAT_ENABLED", False)
+    _enable(monkeypatch, False)
     s = _store()
 
     async def go():
@@ -279,3 +330,22 @@ def test_wire_does_nothing_when_flag_off(monkeypatch, unwired):
 
     assert asyncio.run(go()) is False
     assert evidence_routes.get_passage_search() is None
+    assert evidence_routes.get_company_list() is None
+
+
+def test_unwire_disconnects_and_closes(monkeypatch, unwired):
+    _enable(monkeypatch)
+    s = _store()
+    closed = []
+
+    async def aclose():
+        closed.append(True)
+    s.aclose = aclose
+
+    async def go():
+        await store.wire(s)
+        await store.unwire()
+
+    asyncio.run(go())
+    assert evidence_routes.get_passage_search() is None and store._wired is None
+    assert closed == [True]
