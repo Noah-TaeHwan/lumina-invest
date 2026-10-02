@@ -16,6 +16,7 @@ from app.lib.redis_cache import connect_redis, close_redis
 from app.routes import auth, health, chat, stocks, library, admin, system, quant, ml, macro, documents, notification, graph, conversations, tasks, ingest, paper, openapi, lean
 from app.services.evidence.background import close_runner as close_evidence_runner
 from app.services.evidence.background import fail_stale_runs_on_startup as fail_stale_evidence_runs
+from app.services.evidence import store as evidence_store
 from app.services.graph_service import seed_graph
 from app.services.sync_scheduler import start_sync_scheduler, stop_sync_scheduler
 
@@ -52,6 +53,12 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"[WARN] 근거 판정 stale 정리 실패: {e}")
     try:
+        # 근거 모드 문단 검색: EVIDENCE_CHAT_ENABLED이면 연결. Qdrant·컬렉션이 없으면 요청마다 503(적재 후 재시작 불필요)
+        if await evidence_store.wire():
+            print("[fin-agent] 근거 문단 저장소(evidence_passages) 연결 — 컬렉션이 없으면 검색은 503")
+    except Exception as e:
+        print(f"[WARN] 근거 문단 저장소 연결 실패: {type(e).__name__}")
+    try:
         await connect_neo4j()
         await ensure_graph_schema()
         await seed_graph()
@@ -65,6 +72,7 @@ async def lifespan(app: FastAPI):
     # 종료
     stop_sync_scheduler()
     await close_evidence_runner()
+    await evidence_store.unwire()
     await close_redis()
     await close_postgres()
     await close_neo4j()

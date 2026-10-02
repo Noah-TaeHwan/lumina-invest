@@ -28,7 +28,8 @@ class StartupDataSyncTest(unittest.TestCase):
             with self.subTest(enabled=enabled):
                 namespace = {"asynccontextmanager": asynccontextmanager, "FastAPI": object,
                              "settings": SimpleNamespace(RUN_MIGRATIONS_ON_STARTUP=False, STARTUP_DATA_SYNC_ENABLED=enabled),
-                             "start_sync_scheduler": Mock(), "stop_sync_scheduler": Mock()}
+                             "start_sync_scheduler": Mock(), "stop_sync_scheduler": Mock(),
+                             "evidence_store": SimpleNamespace(wire=AsyncMock(return_value=True), unwire=AsyncMock())}
                 for name in ("connect_redis", "connect_postgres", "connect_neo4j", "ensure_graph_schema", "seed_graph",
                              "close_redis", "close_postgres", "close_neo4j", "fail_stale_evidence_runs",
                              "close_evidence_runner"):
@@ -41,12 +42,16 @@ class StartupDataSyncTest(unittest.TestCase):
                         namespace["stop_sync_scheduler"].assert_not_called()
                         # 근거 판정: 앞 프로세스가 남긴 pending·running 실행을 failed(stale)로 바꾼다
                         namespace["fail_stale_evidence_runs"].assert_awaited_once_with()
+                        # 근거 문단 저장소: 시작 시 한 번 연결(플래그만 보고, Qdrant 상태와 무관)
+                        namespace["evidence_store"].wire.assert_awaited_once_with()
+                        namespace["evidence_store"].unwire.assert_not_awaited()
 
                 asyncio.run(run())
                 namespace["stop_sync_scheduler"].assert_called_once_with()
                 # 근거 판정: 프로세스 단일 JEV httpx 클라이언트를 닫는다
                 for name in ("close_redis", "close_postgres", "close_neo4j", "close_evidence_runner"):
                     namespace[name].assert_awaited_once_with()
+                namespace["evidence_store"].unwire.assert_awaited_once_with()
 
 
 if __name__ == "__main__":

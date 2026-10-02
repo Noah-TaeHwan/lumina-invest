@@ -4,12 +4,15 @@
   GET  /api/evidence/runs/{run_id}          – 판정 실행과 문장 목록(소유자만, 아니면 404)
   POST /api/evidence/runs/{run_id}/retry    – 다시 판정(failed·partial만), 새 실행(trigger=retry)
   GET  /api/conversations/{cid}/evidence    – 스레드의 판정 실행 타임라인(기본 메시지별 최신, all=true면 전체)
+  GET  /api/evidence/companies              – 회사 선택 후보(문단이 적재된 회사만, q가 있으면 KRX 검색과 교집합)
 
 - EVIDENCE_CHAT_ENABLED가 꺼져 있으면 모든 경로가 404다(로그인 여부와 무관).
 - 판정은 답변·실행 행을 커밋한 뒤 앱 프로세스 안 asyncio 작업으로 돈다. 저장에 실패하면 판정을 시작하지 않고 500.
 - 문단 검색은 주입 가능한 함수 하나(get_passage_search)다. 문단 저장소(P3, Qdrant evidence_passages)가
-  연결되기 전에는 None이라 503을 낸다. 검색 함수: async (corp_code, question) -> 문단 dict 8개
-  (passage_id, rcept_no, section, idx, sha256, text).
+  연결되기 전에는 None이라 503을 낸다. 연결 뒤 Qdrant·컬렉션이 없으면 검색이 예외를 내고 역시 503이다.
+  검색 함수: async (corp_code, question) -> 문단 dict 8개
+  (passage_id, rcept_no, section, idx, sha256, text). 회사 목록(get_company_list)도 같은 저장소에서 온다.
+  앱 시작 시 store.wire()가 set_passage_store로 저장소 하나를 연결한다(EVIDENCE_CHAT_ENABLED일 때).
 - 근거 모드는 이력 없는 단발형이다(generate_answer는 이력을 받지 않는다). 기존 /api/chat·에이전트는 건드리지 않는다.
 """
 from __future__ import annotations
@@ -42,6 +45,9 @@ from app.services.evidence.generate import generate_answer
 log = logging.getLogger("app.evidence.api")
 
 PassageSearch = Callable[[str, str], Awaitable[list[dict]]]
+CompanyList = Callable[[], Awaitable[list[dict]]]
+KrxSearch = Callable[..., Awaitable[list[dict]]]
+KRX_SEARCH_LIMIT = 50
 GENERATE_TIMEOUT_S = 60.0  # spec 7.1: 측정 전 잠정값. P5에서 생성 지연 p95의 2배로 다시 정한다
 CITATION_FIELDS = ("passage_id", "rcept_no", "section", "idx", "sha256")
 
@@ -56,17 +62,29 @@ router = APIRouter(prefix="/api", tags=["evidence"], dependencies=[Depends(requi
 
 # ── 주입 지점(테스트·P3에서 바꾼다) ────────────────────────────────────────────
 
-_passage_search: PassageSearch | None = None
+_passage_store = None  # search(corp_code, question)·companies()를 가진 저장소(store.PassageStore)
 
 
-def set_passage_search(fn: PassageSearch | None) -> None:
-    """P3에서 Qdrant evidence_passages 검색 함수를 연결한다."""
-    global _passage_search
-    _passage_search = fn
+def set_passage_store(store) -> None:
+    """P3에서 Qdrant evidence_passages 저장소를 연결한다(None이면 끊는다)."""
+    global _passage_store
+    _passage_store = store
 
 
 def get_passage_search() -> PassageSearch | None:
-    return _passage_search
+    return _passage_store.search if _passage_store is not None else None
+
+
+def get_company_list() -> CompanyList | None:
+    return _passage_store.companies if _passage_store is not None else None
+
+
+def get_krx_search() -> KrxSearch:
+    """KRX 종목 검색(krx_companies.search_companies). bs4 등을 끌어오므로 필요할 때 import한다."""
+    async def search(q: str, limit: int = 10) -> list[dict]:
+        from app.services.krx_companies import search_companies
+        return await search_companies(q, limit)
+    return search
 
 
 def get_runner():
@@ -191,6 +209,37 @@ async def evidence_chat(
         pass
     await _launch(db, run, runner, factory)
     return await _started(db, run, answer)
+
+
+@router.get("/evidence/companies", summary="회사 선택 후보(문단이 적재된 회사)")
+async def evidence_companies(
+    q: str = Query("", max_length=100, description="회사명 또는 종목코드. 비우면 적재된 회사 전체"),
+    user=Depends(get_current_user_any),
+    companies: CompanyList | None = Depends(get_company_list),
+    krx: KrxSearch = Depends(get_krx_search),
+):
+    if companies is None:
+        raise HTTPException(503, "공시 문단 저장소가 아직 준비되지 않았습니다")
+    try:
+        loaded = await companies()  # 저장소가 회사명 순으로 준다
+    except Exception as exc:  # noqa: BLE001
+        log.error(json.dumps({"event": "company_list_failed", "error": type(exc).__name__}))
+        raise HTTPException(503, "공시 문단 저장소를 조회하지 못했습니다.")
+    q = q.strip()
+    if not q:
+        return {"companies": loaded}
+    # 자동완성은 기존 KRX 검색 순서를 따르고 적재된 회사만 남긴다(spec 결정 3-1).
+    # KRX 목록을 못 받으면 적재 목록에서 이름 부분일치·종목코드 앞부분으로 찾는다
+    try:
+        hits = await krx(q, KRX_SEARCH_LIMIT)
+    except Exception as exc:  # noqa: BLE001
+        log.warning(json.dumps({"event": "krx_search_failed", "error": type(exc).__name__}))
+        hits = []
+    by_stock = {c["stock_code"]: c for c in loaded}
+    picked = [by_stock[h["symbol"].split(".")[0]] for h in hits if h.get("symbol", "").split(".")[0] in by_stock]
+    if not picked:  # KRX 실패·결과 없음·적재 회사가 KRX 상위 결과 밖
+        picked = [c for c in loaded if q in c["corp_name"] or c["stock_code"].startswith(q)]
+    return {"companies": list({c["corp_code"]: c for c in picked}.values())}
 
 
 @router.get("/evidence/runs/{run_id}", summary="판정 실행 조회(폴링)")

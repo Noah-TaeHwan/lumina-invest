@@ -115,7 +115,7 @@ class Who:
         self.user = user
 
 
-def make_app(factory, who: Who, *, search=None, llm=None, runner=None) -> FastAPI:
+def make_app(factory, who: Who, *, search=None, llm=None, runner=None, companies=None, krx_search=None) -> FastAPI:
     from app.database.postgres import get_pg_session
     from app.lib.jwt_auth import get_current_user_any
     from app.lib.llm_client import get_llm_client
@@ -142,6 +142,9 @@ def make_app(factory, who: Who, *, search=None, llm=None, runner=None) -> FastAP
     app.dependency_overrides[get_current_user] = current
     app.dependency_overrides[evidence.get_session_factory] = lambda: factory
     app.dependency_overrides[evidence.get_passage_search] = lambda: search
+    app.dependency_overrides[evidence.get_company_list] = lambda: companies
+    if krx_search is not None:
+        app.dependency_overrides[evidence.get_krx_search] = lambda: krx_search
     app.dependency_overrides[get_llm_client] = lambda: llm or FakeLLM()
     app.dependency_overrides[evidence.get_runner] = lambda: runner or make_runner()
     return app
