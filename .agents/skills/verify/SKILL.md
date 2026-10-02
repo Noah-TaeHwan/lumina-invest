@@ -14,7 +14,7 @@ description: lumina-invest의 lab/jev_gate 명령줄을 격리된 루트에서 �
 cat > /tmp/lg.sh <<'EOF'
 #!/bin/bash
 cd /Users/noah/portfolios/lumina-invest
-exec uv run -q --no-project --python 3.12 --with pandas==3.0.6 --with numpy==2.5.3 --with httpx==0.28.1 python -m lab.jev_gate "$@"
+exec uv run -q --no-project --python 3.12 --with pandas==3.0.6 --with numpy==2.5.3 --with httpx==0.28.1 --with scikit-learn==1.9.1 python -m lab.jev_gate "$@"
 EOF
 chmod +x /tmp/lg.sh
 T=$(mktemp -d)

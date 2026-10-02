@@ -121,3 +121,16 @@ def test_called_at_uses_injected_clock(tmp_path):
     at = datetime(2026, 10, 1, 12, 0, tzinfo=timezone.utc)
     r = _gate(tmp_path / "calls.jsonl", Recorder(ok_response), clock=lambda: at).ask(STATE)
     assert r.called_at == at.isoformat()
+
+
+def test_model_mismatch_is_blocked_and_not_cached(tmp_path):
+    def other_model():
+        return httpx.Response(200, json={"model": "jev-1.14.0", "answers": {"fail": {"type": "noul", "noul": 0.4}},
+                                         "usage": {"input_tokens": 500, "output_tokens": 20}})
+    rec = Recorder(other_model)
+    g = _gate(tmp_path / "calls.jsonl", rec)
+    r = g.ask(STATE)
+    assert (r.ok, r.error, r.model, r.input_tokens) == (False, "model_mismatch", "jev-1.14.0", 500)
+    assert g.spent_usd > 0
+    g.ask(STATE)
+    assert len(rec.requests) == 2

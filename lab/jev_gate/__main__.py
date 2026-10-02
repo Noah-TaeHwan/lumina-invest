@@ -20,7 +20,7 @@ from pathlib import Path
 import httpx
 import numpy as np
 
-from lab.jev_gate import data, features, gate, rule, stage0
+from lab.jev_gate import candidates, data, features, gate, predict, rule, stage0
 
 PREREG_PATH = Path(__file__).with_name("prereg.json")
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -196,7 +196,9 @@ def cmd_stage0_repeat(paths: Paths, pre: dict, gate_factory=None) -> int:
 def cmd_stage0_report(paths: Paths, pre: dict, now: datetime | None = None) -> dict:
     """호출 기록을 요약해 통과 여부를 판정하고 리포트·summary·시도 원장을 쓴다."""
     s0, th = pre["stage0"], pre["stage0"]["thresholds"]
-    rs, sample, records = _read_json(paths.rule, None), _require_sample(paths), _read_jsonl(paths.calls)
+    rs, sample = _read_json(paths.rule, None), _require_sample(paths)
+    records = [r for r in _read_jsonl(paths.calls)  # 공유 기록에서 Stage 0 호출만(Stage 1 줄 제외)
+               if str(r.get("tag") or "").startswith("session-") or r.get("tag") == "repeat"]
     if rs is None:
         raise SystemExit("규칙 통계가 없습니다. stage0-rule을 먼저 실행하세요")
     if not records:
@@ -240,6 +242,118 @@ def cmd_stage0_report(paths: Paths, pre: dict, now: datetime | None = None) -> d
     return summary
 
 
+class Stage1Paths:
+    """Stage 1 입출력 경로. JEV 호출 기록은 Stage 1 전용 파일에 쓴다(Stage 0 기록과 덧붙이기 충돌 방지)."""
+
+    def __init__(self, root: Path, pre: dict):
+        s1 = pre["stage1"]
+        self.raw = root / "lab/data/raw"
+        self.results = root / s1["results_dir"]
+        self.report = root / s1["report"]
+        self.freeze = root / s1["freeze_file"]
+        self.calls = root / s1["calls_file"]
+        self.summary = self.results / "summary.json"
+
+
+def load_table(paths, pre: dict):
+    """전 구간 1분봉을 받아 봉 주기로 묶고 후보 표를 만든다."""
+    periods = pre["periods"]
+    months = data.month_range(periods["dev"][0][:7], periods["post_release"][1][:7])
+    with httpx.Client(timeout=120, follow_redirects=True) as client:
+        k = data.load_klines_range(pre["symbol"], months, paths.raw, client)
+    return candidates.build_table(data.resample_klines(k, pre.get("bar_minutes", 1)), pre)
+
+
+def _prereg_sha() -> str:
+    return hashlib.sha256(PREREG_PATH.read_bytes()).hexdigest()
+
+
+def check_freeze(paths, pre: dict) -> dict:
+    """동결 파일이 있고 현재 사전등록·질문과 일치해야 한다."""
+    frozen = _read_json(paths.freeze, None)
+    if frozen is None:
+        raise SystemExit("홀드아웃 동결 파일이 없습니다. stage1-freeze를 먼저 실행하세요")
+    if frozen["prereg_sha256"] != _prereg_sha() or frozen["question_sha256"] != gate.question_hash():
+        raise SystemExit("동결 이후 사전등록이나 질문이 바뀌었습니다. 홀드아웃을 열 수 없습니다")
+    return frozen
+
+
+def cmd_stage1_call(paths, pre: dict, period: str, gate_factory=None, table=None) -> int:
+    """한 구간의 모든 후보에 JEV를 순차 호출한다. 홀드아웃·공개 이후 구간은 동결 확인 후에만."""
+    if period not in pre["periods"]:
+        raise SystemExit(f"period는 {list(pre['periods'])} 중 하나여야 합니다")
+    if period in ("holdout", "post_release"):
+        check_freeze(paths, pre)
+    t = load_table(paths, pre) if table is None else table
+    states = list(t.loc[t["period"] == period, "state"])
+    g = (gate_factory or _default_gate)(paths, pre)
+    _ask_each(g, states, tag=f"stage1-{period}")
+    return 0
+
+
+def cmd_stage1_freeze(paths, pre: dict, table=None) -> int:
+    """개발 구간으로 로지스틱 기준선을 학습하고, 사전등록·질문 해시와 함께 동결한다(덮어쓰지 않음)."""
+    if paths.freeze.exists():
+        raise SystemExit("이미 동결했습니다. 동결 파일은 덮어쓰지 않습니다")
+    if any(str(r.get("tag")) in ("stage1-holdout", "stage1-post_release") for r in _read_jsonl(paths.calls)):
+        raise SystemExit("홀드아웃을 이미 호출했습니다. 다시 동결할 수 없습니다")
+    t = load_table(paths, pre) if table is None else table
+    dev = t[t["period"] == "dev"]
+    model = predict.fit_logistic(dev[list(features.STATE_FEATURES)].to_numpy(float), dev["label"].to_numpy())
+    _write_json(paths.freeze, {"frozen_at": datetime.now(timezone.utc).isoformat(), "prereg_sha256": _prereg_sha(),
+                               "question_sha256": gate.question_hash(), "dev_candidates": int(len(dev)),
+                               "features": list(features.STATE_FEATURES), "logistic": model})
+    print(f"동결: {paths.freeze} (dev {len(dev)}건)")
+    return 0
+
+
+def cmd_stage1_report(paths, pre: dict, table=None) -> dict:
+    """구간별 판정력과 홀드아웃 부트스트랩을 계산해 리포트를 쓴다."""
+    s1 = pre["stage1"]
+    t = load_table(paths, pre) if table is None else table
+    p_by_key = {}
+    for r in _read_jsonl(paths.calls):
+        if r["ok"] and r["key"] not in p_by_key:
+            p_by_key[r["key"]] = r["p_fail"]
+    frozen = check_freeze(paths, pre) if paths.freeze.exists() else None
+    cols = list(features.STATE_FEATURES)
+    out = {"periods": {}, "frozen": frozen is not None}
+    for period in pre["periods"]:
+        sub = t[t["period"] == period]
+        if frozen is None and period in ("holdout", "post_release"):
+            # 동결 전에는 홀드아웃 가격에서 나온 값(실패 비율·AUC)을 계산하지 않는다
+            out["periods"][period] = {"n": int(len(sub)), "coverage": float(sub["key"].isin(p_by_key).mean())
+                                      if len(sub) else 0.0, "fail_rate": None, "auc_jev": None,
+                                      "auc_logistic": None, "brier_jev": None}
+            continue
+        have = sub[sub["key"].isin(p_by_key)]
+        y = have["label"].to_numpy()
+        p = have["key"].map(p_by_key).to_numpy(float)
+        lg = predict.logistic_proba(frozen["logistic"], sub[cols].to_numpy(float)) if frozen and len(sub) else None
+        out["periods"][period] = {
+            "n": int(len(sub)), "coverage": float(len(have) / len(sub)) if len(sub) else 0.0,
+            "fail_rate": float(sub["label"].mean()) if len(sub) else None,
+            "auc_jev": predict.auc(y, p) if len(have) else None,
+            "auc_logistic": predict.auc(sub["label"].to_numpy(), lg) if lg is not None else None,
+            "brier_jev": predict.brier(y, p) if len(have) else None}
+    hold = t[(t["period"] == "holdout") & t["key"].isin(p_by_key)]
+    b = s1["bootstrap"]
+    if len(hold) and frozen:
+        y, p = hold["label"].to_numpy(), hold["key"].map(p_by_key).to_numpy(float)
+        lg = predict.logistic_proba(frozen["logistic"], hold[cols].to_numpy(float))
+        days = hold["day"].to_numpy()
+        out["holdout"] = {"n": int(len(hold)), "coverage": float(len(hold) / max(1, (t["period"] == "holdout").sum())),
+                          "vs_half": predict.block_bootstrap_auc_diff(y, p, None, days, b["n"], b["seed"]),
+                          "vs_logistic": predict.block_bootstrap_auc_diff(y, p, lg, days, b["n"], b["seed"]),
+                          "calibration": predict.calibration_table(y, p, s1["calibration_bins"])}
+    out["claim"] = s1["claim_rule"]
+    _write_json(paths.summary, out)
+    paths.report.parent.mkdir(parents=True, exist_ok=True)
+    paths.report.write_text(predict.render_report(out), encoding="utf-8")
+    print(json.dumps(out["periods"], ensure_ascii=False))
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     """명령줄 진입점."""
     p = argparse.ArgumentParser(prog="python -m lab.jev_gate")
@@ -250,8 +364,20 @@ def main(argv: list[str] | None = None) -> int:
     call.add_argument("--session", type=int, required=True)
     sub.add_parser("stage0-repeat")
     sub.add_parser("stage0-report")
+    s1call = sub.add_parser("stage1-call")
+    s1call.add_argument("--period", required=True)
+    sub.add_parser("stage1-freeze")
+    sub.add_parser("stage1-report")
     args = p.parse_args(argv)
     pre = load_prereg()
+    if args.cmd.startswith("stage1-"):
+        s1 = Stage1Paths(args.root, pre)
+        if args.cmd == "stage1-call":
+            return cmd_stage1_call(s1, pre, args.period)
+        if args.cmd == "stage1-freeze":
+            return cmd_stage1_freeze(s1, pre)
+        cmd_stage1_report(s1, pre)
+        return 0
     paths = Paths(args.root, pre)
     if args.cmd == "stage0-rule":
         return cmd_stage0_rule(paths, pre)
