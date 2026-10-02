@@ -1,0 +1,28 @@
+{
+ "split_sha256": "a93cd93b85b65c1d1d6adeca9311e9f99fd8c6bc0011f6ef2991397d1872ba66",
+ "passages_manifest_sha256": "6a69ed2639d2a05f151b58385457c67af98a3fd8886b44d4b2d3f754dc3fd39c",
+ "dart_ledger_sha256": "8309b7bb7f92ab1cabd6dd28b22692f2ea8d37405b1182cb45bc538471c4582b",
+ "questions_sha256": "144a9611e3f3cdd72a771b7f47fd05ecbcbc5672df92374f7a75abeef20bf18e",
+ "retrieval_sha256": "88bcb90319f83590c7adf399d03ab82d2021e343c17dd797226a9ddd1d56c3cb",
+ "answers_sha256": "fe13df29bb12a28e28978556b1c40daa658d32c526fc65fdc144759e9ff328a4",
+ "claims_sha256": "0661d373cc5ea7718077172f66ae294ed6cb3373b9fce2fb4af9a89d79410681",
+ "labels_sha256": "0b9b3884c579e9feb017b1ba613108c8d1acc1c780c56abbdc27cf96689c2a92",
+ "prompts_sha256": {
+  "labeler.md": "40e84ce81104f5db1f076196d2405725da341f4e5338e2472bdac5c1950cdc38",
+  "question_writer.md": "a5b290594089b370808a5355d1e2d831516e1b7da702a1fea5cc3b8359742f90",
+  "controlled_writer.md": "2e6dc64f2df19910b5f287952c86d110fe8f3ae0e77f881a99710a424ef01025"
+ },
+ "prereg_sha256": "1ad50ce1d78d93e2da711c93e1344f9e31149edf4568856761bfbee45c0fe022",
+ "code_sha256": "705efc66c0c2b2fe16dc57db3ac71583a57f0c06a30e4791820856f1b544b596",
+ "models": {
+  "jev": "jev-1.13.0",
+  "generator": "llama3.2:1b@baf6a787fdff",
+  "embedder": "nomic-embed-text@0a109f422b47",
+  "labelers": {
+   "opus": "claude-opus-5-5 (Claude Code subagent)",
+   "codex": "codex-cli 0.159.3→0.160.0, model gpt-6.1-sol, run with -c mcp_servers={}"
+  }
+ },
+ "code_commit": "8053a1a8b833e5da32fb7989aa414cbbc3b9f508",
+ "frozen_at": "2026-10-02T12:03:29.896671+00:00"
+}
