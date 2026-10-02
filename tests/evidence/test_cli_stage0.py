@@ -19,3 +19,20 @@ def test_stage0_gates_pass_and_fail():
     bad = cli.stage0_gates(corpus=(40, 40), kappa=0.5, controlled_agree=0.9, auc=(0.8, 0.45, 0.9),
                            batch_agree=0.95, p95_ms=900.0, fail=(0, 400), n_sessions=1, repeat_agree=0.95)
     assert bad["go"] is False and not bad["kappa"]["pass"] and not bad["h_ko"]["pass"] and not bad["latency_fail"]["pass"]
+
+
+def test_latency_rows_keep_stage0_tags_and_drop_holdout():
+    calls = [{"attempt": a, "tag": t, "latency_ms": float(i)}
+             for i, (a, t) in enumerate([(1, "check"), (2, "check"), (1, "repeat1"), (1, "repeat2"), (1, "repeat3"),
+                                         (2, "repeat3"), (1, "single"), (2, "single"), (1, "tune"), (2, "tune"),
+                                         (1, "holdout"), (2, "holdout")])]
+    gated, single = cli.latency_rows(calls)
+    assert [r["tag"] for r in gated] == ["check", "repeat1", "repeat2", "repeat3", "tune"]
+    assert [r["latency_ms"] for r in single] == [6.0]
+
+
+def test_stage0_input_tokens_exclude_holdout():
+    calls = [{"attempt": a, "tag": t, "input_tokens": n}
+             for a, t, n in [(1, "tune", 1), (2, "tune", 2), (1, "check", 4), (2, "repeat2", 8), (1, "single", 16),
+                             (2, "single", 32), (1, "holdout", 64), (2, "holdout", 128)]]
+    assert cli.stage0_input_tokens(calls) == 63

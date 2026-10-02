@@ -52,7 +52,7 @@ env -u TYPESAFE_API_KEY HOME=$(mktemp -d) /tmp/evv.sh judge --split tune --tag t
 
 - 단위 테스트: `uv run ... --with pytest python -m pytest tests/evidence -p no:cacheprovider`(외부 호출 없음)
 - **커밋별 재현:** `stage1-report`는 동결 묶음의 코드 해시(`app/lib/jev.py`, `app/services/evidence/*.py`, `lab/evidence/*.py`)를 다시 검증한다. 이 파일들이 바뀐 뒤에는 HEAD에서 거부되는 것이 정상이다. 그때는 홀드아웃 결과 커밋(`5f228fe`)을 체크아웃해 재현한다.
-- **Stage 0 지연 관문은 나중에 다시 돌리면 값이 달라진다.** `stage0-report`가 JEV 호출 기록 전체를 읽기 때문에 이후 Stage 1 호출이 섞인다. 판정은 커밋된 `lab/evidence/results/stage0.json`이 기준이다.
+- **Stage 0 지연 관문은 tune·check·repeat1~3 첫 시도만 읽고, holdout(Stage 1) 호출은 뺀다.** 입력 토큰 합계도 Stage 0 호출(single 포함)만 더하므로 나중에 다시 돌려도 Stage 1 호출이 섞이지 않는다. 판정은 여전히 커밋된 `lab/evidence/results/stage0.json`이 기준이다.
 - 생성·임베딩은 호스트 Ollama가 빠르다: `OLLAMA_BASE_URL=http://127.0.0.1:11434 /tmp/ev.sh ...`(Docker Ollama와 같은 모델 digest).
 
 ## 비용 없이 볼 수 있는 실패 경로
