@@ -116,6 +116,37 @@
         </div>
         <div id="chat-messages" class="flex-1 overflow-y-auto py-4 space-y-4 pr-1"></div>
         <div class="pt-4 border-t border-white/10">
+          <!-- 공시 근거 모드(A-2): 기능이 꺼져 있으면(API 404) 숨긴 채로 둔다. js/evidence.js -->
+          <div id="ev-bar" class="ev-bar hidden">
+            <label class="ev-toggle">
+              <input type="checkbox" id="ev-mode" role="switch" aria-describedby="ev-help" />
+              <span>공시 근거 모드</span>
+            </label>
+            <div id="ev-company-wrap" class="ev-company hidden">
+              <input id="ev-company" class="input" type="text" autocomplete="off" placeholder="회사 선택 (예: 삼성전자)"
+                     role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="ev-company-list"
+                     aria-label="근거 문단을 검색할 회사" />
+              <ul id="ev-company-list" class="ev-listbox hidden" role="listbox" aria-label="회사 후보"></ul>
+            </div>
+            <button id="ev-help-btn" type="button" class="ev-help-btn" aria-expanded="false" aria-controls="ev-help"
+                    title="공시 근거 모드 도움말"><i class="fa-solid fa-circle-info"></i><span>도움말</span></button>
+            <span id="ev-note" class="ev-note hidden"></span>
+            <div id="ev-help" class="ev-help hidden">
+              <p>공시 근거 모드는 고른 회사의 2025.12 사업보고서 문단을 검색해 답하고, 답변 문장마다 AI 판정 배지를 붙입니다. 질문마다 공시 문단을 새로 검색합니다(이전 대화 문맥을 쓰지 않습니다).</p>
+              <p>✅ 검색된 공시 문단에서 확인됨 · ⚠️ 검색된 공시 문단과 어긋남 · ❔ 검색된 공시 문단에서 확인되지 않음 · ⊘ 판정 불가. 배지는 AI 판정이며 검색된 문단 기준이라 사실 여부를 보증하지 않습니다. 검색이 놓친 근거는 ❔로 보일 수 있습니다.</p>
+              <p>근거 판정을 위해 AI 답변 문장과 공시 문단을 외부 판정 서비스(TypeSafe JEV)로 보냅니다. 질문 원문은 보내지 않습니다. 개인정보를 질문에 넣지 마세요.</p>
+              <p>판정에는 TypeSafe의 JEV 모델을 사용합니다. 이 프로젝트는 TypeSafe와 제휴 관계가 아닙니다.</p>
+            </div>
+          </div>
+          <dialog id="ev-notice" class="ev-notice" aria-labelledby="ev-notice-title">
+            <h3 id="ev-notice-title">공시 근거 모드 — 외부 전송 안내</h3>
+            <p>근거 판정을 위해 AI 답변 문장과 공시 문단을 외부 판정 서비스(TypeSafe JEV)로 보냅니다. 질문 원문은 보내지 않습니다. 개인정보를 질문에 넣지 마세요.</p>
+            <p class="ev-notice-sub">판정에는 TypeSafe의 JEV 모델을 사용합니다. 이 프로젝트는 TypeSafe와 제휴 관계가 아닙니다.</p>
+            <div class="ev-notice-actions">
+              <button id="ev-notice-cancel" type="button" class="btn-secondary text-xs">취소</button>
+              <button id="ev-notice-ok" type="button" class="btn-primary text-xs">확인하고 켜기</button>
+            </div>
+          </dialog>
           <div class="flex gap-2 items-end">
             <textarea id="chat-input" rows="2" class="input flex-1 resize-none"
               placeholder="예) 내 리스크 성향에 맞는 금융상품 추천해줘. 30대 남성 평균 신용점수는? 금리 3% 이상 정기예금 추천해줘."></textarea>
