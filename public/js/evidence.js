@@ -6,17 +6,12 @@ import { api, setToast, escHtml } from "/js/common.js";
 // ── 상수·문구 ─────────────────────────────────────────────────────
 // 근거 보고서는 2025.12 사업보고서뿐이다(spec 10절 범위). API에 기간 필드가 없어 화면 상수로 둔다
 export const REPORT_LABEL = "2025.12 사업보고서";
-// 정책별 τ_s(app/services/evidence/runner.py). 확신도 두 단계 표시에만 쓴다. 모르는 정책이면 표시하지 않는다
-export const POLICY_TAU_S = { "a2-provisional": 0.70 };
 const PROVISIONAL = new Set(["a2-provisional"]);  // 요약줄에 "(시험 기준)"(spec 6.4)
-const CONFIDENCE_BAND = 0.15;
 const ACTIVE = new Set(["pending", "running"]);
 const POLL_INTERVAL_MS = 500;
 const DEFAULT_POLL_UNTIL_S = 15;  // 서버가 상한을 주지 않을 때(spec 결정 4-1)
 
 export const BADGE_TOOLTIP = "AI 판정(JEV 모델) · 검색된 공시 문단 기준이며 사실 여부를 보증하지 않습니다";
-export const NOTICE_TEXT = "근거 판정을 위해 AI 답변 문장과 공시 문단을 외부 판정 서비스(TypeSafe JEV)로 보냅니다. 질문 원문은 보내지 않습니다. 개인정보를 질문에 넣지 마세요.";
-export const AFFILIATION_TEXT = "판정에는 TypeSafe의 JEV 모델을 사용합니다. 이 프로젝트는 TypeSafe와 제휴 관계가 아닙니다.";
 
 const BADGES = {
   pending:      { glyph: "⋯",  cls: "ev-b-pending", label: "AI 판정 중" },
@@ -35,9 +30,11 @@ const UNJUDGED_REASONS = {
 // ── 순수 함수 ─────────────────────────────────────────────────────
 
 /** 답변을 서버 오프셋으로 조각낸다. [{text, claim|null}], 이으면 answer와 같다.
+ *  서버 오프셋은 파이썬 str 인덱스(코드포인트)라 UTF-16 slice가 아니라 코드포인트 배열로 자른다(이모지 등 아스트랄 문자).
  *  오프셋 순으로 보고, 앞 조각과 겹치거나 범위를 벗어난 문장은 감싸지 않는다(배지 없음). */
 export function segmentsFromClaims(answer, claims) {
-  const text = String(answer ?? "");
+  const cps = Array.from(String(answer ?? ""));
+  const text = { length: cps.length, slice: (a, b) => cps.slice(a, b).join("") };
   const sorted = [...(claims || [])].sort((a, b) => a.start - b.start);
   const out = [];
   let cur = 0;
@@ -68,17 +65,21 @@ export function pollDecision(runStatus, elapsedMs, pollUntilS) {
   return elapsedMs >= limitS * 1000 ? "timeout" : "continue";
 }
 
+/** 폴링 경과 시간: 서버 실행 생성 시각(created_at) 기준(poll_until_s가 그 기준이다). 없으면 폴링 시작 시각 기준. */
+export function pollElapsedMs(run, startedMs, nowMs) {
+  const created = Date.parse(run?.created_at ?? "");
+  return nowMs - (Number.isFinite(created) ? created : startedMs);
+}
+
 export function pollInterval(ms) {
   return Number(ms) > 0 ? Number(ms) : POLL_INTERVAL_MS;
 }
 
-/** ✅ 문장의 확신도 "높음"/"보통"(τ_s 이상 0.15 구간 안이면 보통, spec 3.3). 확률 숫자는 내보내지 않는다. */
-export function confidenceLabel(claim, policyVersion) {
-  if (!claim || claim.status !== "supported") return null;
-  const tau = POLICY_TAU_S[policyVersion];
-  const s = Array.isArray(claim.s) ? claim.s[claim.source_idx] : undefined;
-  if (tau == null || typeof s !== "number") return null;
-  return s < tau + CONFIDENCE_BAND ? "보통" : "높음";
+/** ✅ 문장의 확신도 "높음"/"보통". 서버(records.confidence_label)가 정책 τ_s로 정해 준 값만 쓴다(spec 3.3).
+ *  확률 숫자는 보이지 않는다. */
+export function confidenceText(claim) {
+  const v = claim?.status === "supported" ? claim.confidence : null;
+  return v === "높음" || v === "보통" ? v : null;
 }
 
 const NUM_RE = /\d[\d,]*(?:\.\d+)?/g;
@@ -129,7 +130,7 @@ export function passageHeader(run, p) {
 
 function badgeTitle(kind, claim, run) {
   const parts = [BADGES[kind].label, BADGE_TOOLTIP];
-  const conf = confidenceLabel(claim, run.policy_version);
+  const conf = confidenceText(claim);
   if (conf) parts.push(`AI 판정 확신도: ${conf}`);
   return parts.join(" — ");
 }
@@ -150,17 +151,20 @@ function passageBlock(run, p, claimText, numberOk) {
     <div class="ev-passage-body">${highlightNumbers(p.text, claimText, numberOk)}</div>`;
 }
 
-function panelHtml(run, claim, kind) {
+export function panelHtml(run, claim, kind) {
   const passages = run.passages || [];
   const src = Number.isInteger(claim.source_idx) ? passages[claim.source_idx] : null;
   const foot = `<div class="ev-panel-foot">${escHtml(BADGE_TOOLTIP)}</div>`;
   if ((kind === "supported" || kind === "contradicted") && src) {
     const ok = Array.isArray(claim.number_ok) && claim.number_ok[claim.source_idx] === true;
-    const conf = confidenceLabel(claim, run.policy_version);
+    const conf = confidenceText(claim);
     return passageBlock(run, src, claim.text, ok)
       + (conf ? `<div class="ev-panel-meta">AI 판정 확신도 ${escHtml(conf)}</div>` : "") + foot;
   }
-  if (kind === "no_evidence" || kind === "supported" || kind === "contradicted") {
+  if (kind === "supported" || kind === "contradicted") {  // 판정은 있는데 근거 문단을 찾지 못함(스냅샷 누락 등)
+    return `<div>근거 문단 정보 없음: 판정 기록에서 이 문장의 근거 문단을 찾지 못했습니다.</div>${foot}`;
+  }
+  if (kind === "no_evidence") {
     const items = passages.map(p => `<li>${passageBlock(run, p, "", false)}</li>`).join("");
     return `<div>검색된 문단 ${passages.length}개에서 이 문장을 확인하지 못했습니다.</div>
       <details class="ev-list"><summary>검색된 문단 ${passages.length}개 보기</summary><ol>${items}</ol></details>${foot}`;
@@ -282,7 +286,7 @@ function startPolling(msg) {
       setRun(msg, await api(`/api/evidence/runs/${encodeURIComponent(runId)}`));
     } catch { /* 일시적 조회 실패: 상한 안에서 다시 본다 */ }
     if (msg.dead || msg.run.id !== runId) return;
-    const next = pollDecision(msg.run.status, Date.now() - t0, msg.run.poll_until_s);
+    const next = pollDecision(msg.run.status, pollElapsedMs(msg.run, t0, Date.now()), msg.run.poll_until_s);
     if (next === "continue") msg.timer = setTimeout(tick, pollInterval(msg.run.poll_interval_ms));
     else if (next === "timeout") renderSummary(msg, true);
   };
@@ -317,10 +321,11 @@ async function retry(msg) {
 export function stopAllEvidence() {
   for (const m of messages) { m.dead = true; clearTimeout(m.timer); }
   messages.clear();
+  state.conversationId = null;  // 초기화한 뒤 질문은 스레드 id 없이 보낸다(서버가 활성 스레드를 정한다)
 }
 
 // ── 화면: 모드 토글·회사 선택·고지 ─────────────────────────────────
-const state = { available: false, ready: false, acked: null, company: null, conversationId: null };
+const state = { available: false, acked: null, company: null, conversationId: null, sending: false };
 
 export function isEvidenceMode() {
   return state.available && document.getElementById("ev-mode")?.checked === true;
@@ -330,19 +335,15 @@ export function setConversationId(cid) {
   if (cid) state.conversationId = cid;
 }
 
-/** 기능 플래그 확인: /api/evidence/companies가 404(꺼짐)·401이면 토글을 숨긴다. 503은 준비 중으로 보여 준다. */
+/** 기능 플래그 확인: 가벼운 GET /api/evidence/notice로 본다. 404(꺼짐)·401 등 200이 아니면 토글을 숨긴다.
+ *  응답의 고지 확인 여부도 함께 기억한다. 저장소 준비 여부(503)는 회사를 찾을 때 알린다. */
 async function probe() {
   let res;
-  try { res = await fetch("/api/evidence/companies", { credentials: "include" }); } catch { return; }
-  if (res.status !== 200 && res.status !== 503) return;
+  try { res = await fetch("/api/evidence/notice", { credentials: "include" }); } catch { return; }
+  if (res.status !== 200) return;
+  try { state.acked = (await res.json()).acknowledged === true; } catch { state.acked = null; }
   state.available = true;
-  state.ready = res.status === 200;
   document.getElementById("ev-bar").classList.remove("hidden");
-  if (!state.ready) {
-    const note = document.getElementById("ev-note");
-    note.textContent = "공시 문단 저장소가 아직 준비되지 않았습니다.";
-    note.classList.remove("hidden");
-  }
 }
 
 async function noticeAcked() {
@@ -495,11 +496,15 @@ export async function initEvidence() {
 
 /** 근거 모드 질문 전송. 성공하면 true(말풍선을 그렸다), 보내지 않았거나 실패하면 false. */
 export async function sendEvidenceChat(question, { appendUserMsg, container, scroll }) {
+  if (state.sending) return false;  // 요청 중 Enter 연타: 생성·판정을 두 번 하지 않는다(한도 이중 차감 방지)
   if (!state.company) {
     setToast("공시 근거 모드에서는 회사를 먼저 선택하세요.", "error");
     document.getElementById("ev-company").focus();
     return false;
   }
+  state.sending = true;
+  const sendBtn = document.getElementById("chat-send");
+  sendBtn.disabled = true;
   appendUserMsg(question);
   const thinking = document.createElement("div");
   thinking.className = "flex justify-start ev-thinking";
@@ -519,5 +524,8 @@ export async function sendEvidenceChat(question, { appendUserMsg, container, scr
     thinking.remove();
     setToast(e.message, "error");
     return false;
+  } finally {
+    state.sending = false;
+    sendBtn.disabled = false;
   }
 }

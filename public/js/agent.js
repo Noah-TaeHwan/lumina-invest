@@ -4,6 +4,7 @@ import { api, getMe, setToast, escHtml, fmt, fmtPct, colorPct } from "/js/common
 import { appendEvidenceMsg, initEvidence, isEvidenceMode, sendEvidenceChat, setConversationId, stopAllEvidence } from "/js/evidence.js";
 
 let chatHistory = [];
+let msgSeq = 0;  // 말풍선 id. 복원처럼 같은 밀리초에 연달아 그려도 겹치지 않게 카운터를 쓴다
 // ── 1. AI 채팅 ────────────────────────────────────────────────────
 function appendUserMsg(text) {
   const d = document.createElement("div");
@@ -14,7 +15,7 @@ function appendUserMsg(text) {
 }
 
 function appendAssistantMsg(answer, steps) {
-  const msgId = "m" + Date.now();
+  const msgId = `m${++msgSeq}`;
   let stepsHtml = "";
   if (steps?.length) {
     const items = steps.map((s, i) => {

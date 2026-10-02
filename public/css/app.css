@@ -629,7 +629,7 @@
       font-size: 11px; font-weight: 600; color: var(--text-dim); background: var(--surf2); border: 1px solid var(--border);
     }
     .ev-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-bottom: 8px; font-size: 13px; min-width: 0; }
-    .ev-bar.hidden, .ev-company.hidden, .ev-help.hidden, .ev-note.hidden, .ev-listbox.hidden { display: none; }
+    .ev-bar.hidden, .ev-company.hidden, .ev-help.hidden, .ev-listbox.hidden { display: none; }
     .ev-toggle { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--text); cursor: pointer; }
     .ev-toggle input { width: 16px; height: 16px; accent-color: var(--accent); }
     .ev-company { position: relative; flex: 1 1 180px; max-width: 280px; min-width: 0; }
@@ -645,7 +645,6 @@
     .ev-opt-empty { padding: 6px 8px; }
     .ev-help-btn { display: inline-flex; align-items: center; gap: 4px; color: var(--text-mute); font-size: 12px; }
     .ev-help-btn:hover, .ev-help-btn[aria-expanded="true"] { color: var(--accent); }
-    .ev-note { color: var(--brand); font-size: 12px; }
     .ev-help {
       flex-basis: 100%; padding: 8px 10px; border-radius: 8px; background: var(--surf2); border: 1px solid var(--border);
       color: var(--text-dim); font-size: 12px; line-height: 1.6;

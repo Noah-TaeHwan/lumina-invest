@@ -30,6 +30,8 @@ POLL_INTERVAL_MS = 500
 POLL_MARGIN_S = 4  # 마감 뒤 취소 정리·저장 여유
 CLAIM_STATUSES = ("supported", "contradicted", "no_evidence", "not_claim", "unjudged", "pending")
 PASSAGE_FIELDS = ("passage_id", "section", "idx", "sha256", "text")
+POLICIES = {p.version: p for p in (A2_PROVISIONAL,)}  # 확신도 라벨에 쓰는 정책별 τ_s(새 정책을 넣으면 여기에도)
+CONFIDENCE_BAND = 0.15  # spec 3.3: τ_s 이상 0.15 구간 안이면 "보통"
 
 
 def now() -> datetime:
@@ -169,10 +171,21 @@ def counts(statuses) -> dict:
     return out
 
 
-def serialize_claim(c: EvidenceClaim) -> dict:
+def confidence_label(c: EvidenceClaim, policy_version: str) -> str | None:
+    """✅ 문장의 확신도 "높음"/"보통"(spec 3.3). 화면은 확률 숫자 대신 이 라벨만 보인다.
+    ✅가 아니거나, 근거 문단 확률이 없거나(lex 경로), 모르는 정책이면 None."""
+    policy = POLICIES.get(policy_version)
+    if c.status != "supported" or policy is None or not c.s or c.source_idx is None \
+            or not 0 <= c.source_idx < len(c.s):
+        return None
+    return "보통" if c.s[c.source_idx] < policy.tau_s + CONFIDENCE_BAND else "높음"
+
+
+def serialize_claim(c: EvidenceClaim, policy_version: str | None = None) -> dict:
     return {"idx": c.idx, "text": c.text, "start": c.start, "end": c.end, "status": c.status, "route": c.route,
             "reason": c.reason, "source_idx": c.source_idx, "s": c.s, "c": c.c, "lex": c.lex,
-            "number_ok": c.number_ok, "cached": c.cached, "attempts": c.attempts, "latency_ms": c.latency_ms}
+            "number_ok": c.number_ok, "cached": c.cached, "attempts": c.attempts, "latency_ms": c.latency_ms,
+            "confidence": confidence_label(c, policy_version)}
 
 
 def serialize_run(run: EvidenceRun, claims: list[EvidenceClaim], poll_until: int | None = None,
@@ -189,7 +202,7 @@ def serialize_run(run: EvidenceRun, claims: list[EvidenceClaim], poll_until: int
         "calls": run.calls, "cache_hits": run.cache_hits, "input_tokens": run.input_tokens,
         "created_at": _iso(run.created_at), "started_at": _iso(run.started_at), "finished_at": _iso(run.finished_at),
         "counts": counts(c.status for c in claims),
-        "claims": [serialize_claim(c) for c in claims],
+        "claims": [serialize_claim(c, run.policy_version) for c in claims],
         "poll_interval_ms": POLL_INTERVAL_MS if active else None,
         "poll_until_s": poll_until if active else None,
     }

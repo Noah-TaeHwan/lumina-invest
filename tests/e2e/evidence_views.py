@@ -9,6 +9,7 @@ pytest 수집 대상이 아니다(파일명이 test_* 가 아님). smoke_views.p
 종료 코드 0 = 모든 확인 통과, 1 = 실패 있음.
 """
 import asyncio
+import datetime
 import functools
 import glob
 import json
@@ -24,14 +25,20 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
 PUBLIC = os.path.join(ROOT, "public")
 
 CID = "c0000000-0000-0000-0000-000000000001"
-ANSWER = "삼성전자의 주요 제품은 메모리 반도체입니다. 2025년 DX 부문 매출은 174조 8,877억원입니다.\n- 본사는 부산에 있습니다.\n문단에서 확인할 수 없습니다. 영업이익은 32조원입니다."
-# 서버(claim_spans)가 나눈 오프셋을 흉내 낸다. 세 번째 문장은 글머리표를 뺀 오프셋이다
-_SENTS = ["삼성전자의 주요 제품은 메모리 반도체입니다.", "2025년 DX 부문 매출은 174조 8,877억원입니다.",
+# 이모지(아스트랄 문자)로 시작한다: 서버 오프셋은 파이썬 코드포인트라 JS UTF-16 길이와 1 어긋난다
+ANSWER = "📈 삼성전자의 주요 제품은 메모리 반도체입니다. 2025년 DX 부문 매출은 174조 8,877억원입니다.\n- 본사는 부산에 있습니다.\n문단에서 확인할 수 없습니다. 영업이익은 32조원입니다."
+# 서버(claim_spans)가 나눈 오프셋과 같다(파이썬 str 인덱스 = 코드포인트). 세 번째 문장은 글머리표를 뺀 오프셋이다.
+# claim_spans(ANSWER)로 확인한 값: (0,26) (27,59) (62,75) (76,92) (93,107)
+_SENTS = ["📈 삼성전자의 주요 제품은 메모리 반도체입니다.", "2025년 DX 부문 매출은 174조 8,877억원입니다.",
           "본사는 부산에 있습니다.", "문단에서 확인할 수 없습니다.", "영업이익은 32조원입니다."]
 PASSAGES = [{"passage_id": f"p{i}", "section": "II. 사업의 내용", "idx": 10 + i, "sha256": "x" * 8,
              "text": f"문단 {i} 본문 <b>태그</b> & 기호."} for i in range(8)]
 PASSAGES[1]["text"] = "[표: 부문별 매출, 단위 억원] DX 부문 2025년 매출 174조 8,877억원, 전년 대비 3.1% 증가."
 PASSAGES[2]["text"] = "본점 소재지는 경기도 수원시이다."
+
+
+def _now_iso() -> str:
+    return datetime.datetime.now(datetime.timezone.utc).isoformat()
 
 
 def _spans():
@@ -47,7 +54,7 @@ def claims_with(statuses: list[str], extra: dict | None = None) -> list[dict]:
     out = []
     for sp, st in zip(_spans(), statuses):
         c = {**sp, "status": st, "route": None, "reason": None, "source_idx": None, "s": None, "c": None,
-             "lex": None, "number_ok": None, "cached": False, "attempts": 0, "latency_ms": 0.0}
+             "lex": None, "number_ok": None, "confidence": None, "cached": False, "attempts": 0, "latency_ms": 0.0}
         c.update((extra or {}).get(sp["idx"], {}))
         out.append(c)
     return out
@@ -57,8 +64,9 @@ PENDING = ["pending", "pending", "pending", "not_claim", "pending"]
 DONE = {
     "statuses": ["supported", "supported", "contradicted", "not_claim", "no_evidence"],
     "extra": {
-        0: {"source_idx": 0, "s": [0.97] + [0.1] * 7, "c": [0.01] * 8, "number_ok": [True] * 8},
-        1: {"source_idx": 1, "s": [0.2, 0.78] + [0.1] * 6, "c": [0.01] * 8, "number_ok": [False, True] + [False] * 6},
+        0: {"source_idx": 0, "s": [0.97] + [0.1] * 7, "c": [0.01] * 8, "number_ok": [True] * 8, "confidence": "높음"},
+        1: {"source_idx": 1, "s": [0.2, 0.78] + [0.1] * 6, "c": [0.01] * 8, "number_ok": [False, True] + [False] * 6,
+            "confidence": "보통"},
         2: {"source_idx": 2, "s": [0.05] * 8, "c": [0.0, 0.0, 0.91] + [0.0] * 5, "number_ok": [True] * 8},
         4: {"s": [0.2] * 8, "c": [0.05] * 8, "number_ok": [False] * 8},
     },
@@ -66,7 +74,7 @@ DONE = {
 
 
 def run(run_id: str, status: str, statuses=None, extra=None, *, retryable=False, chat_id="h1", error_code=None,
-        poll_until_s=None):
+        poll_until_s=None, created_at=None):
     cl = claims_with(statuses or PENDING, extra)
     counts = {k: 0 for k in ("supported", "contradicted", "no_evidence", "not_claim", "unjudged", "pending")}
     for c in cl:
@@ -76,7 +84,7 @@ def run(run_id: str, status: str, statuses=None, extra=None, *, retryable=False,
             "error_code": error_code, "retryable": retryable, "company": "삼성전자", "corp_code": "00126380",
             "rcept_no": "20260312000123", "passages": PASSAGES, "policy_version": "a2-provisional",
             "jev_model": "jev-1.13.0", "generator_model": "llama3.1:8b", "calls": 3, "cache_hits": 0,
-            "input_tokens": 1, "created_at": "2026-10-02T00:00:00+00:00", "started_at": None, "finished_at": None,
+            "input_tokens": 1, "created_at": created_at or _now_iso(), "started_at": None, "finished_at": None,
             "counts": counts, "claims": cl, "poll_interval_ms": 500 if active else None,
             "poll_until_s": (poll_until_s or 12) if active else None}
 
@@ -95,10 +103,11 @@ class FakeApi:
     """시나리오별 가짜 API. runs[run_id]는 GET마다 하나씩 꺼내는 응답 목록(마지막은 계속 준다)."""
 
     def __init__(self, *, flag=200, acked=False, runs=None, chat=None, retry=None, active=None, conv=None,
-                 timeline=None, agent_answer="일반 에이전트 답변입니다."):
+                 timeline=None, agent_answer="일반 에이전트 답변입니다.", notice_status=200, chat_delay_s=0.0):
         self.flag, self.acked, self.runs = flag, acked, runs or {}
         self.chat, self.retry, self.active, self.conv, self.timeline = chat, retry, active, conv, timeline
         self.agent_answer = agent_answer
+        self.notice_status, self.chat_delay_s = notice_status, chat_delay_s
         self.calls: list[tuple[str, str, dict | None]] = []
 
     def respond(self, method: str, path: str, query: str, body: dict | None):
@@ -115,6 +124,10 @@ class FakeApi:
             q = unquote(q.group(1)) if q else ""
             return 200, {"companies": [c for c in COMPANIES if q in c["corp_name"]]}
         if path == "/api/evidence/notice":
+            if self.flag == 404:
+                return 404, {"detail": "Not Found"}
+            if self.notice_status != 200:
+                return self.notice_status, {"detail": "로그인이 필요합니다."}
             if method == "POST":
                 self.acked = True
             return 200, {"acknowledged": self.acked, "version": "a2-notice-v1"}
@@ -176,7 +189,7 @@ class Checks:
             print("  FAIL", label)
 
 
-async def open_app(browser, base: str, fake: FakeApi, *, width=1280, height=900):
+async def open_app(browser, base: str, fake: FakeApi, *, width=1280, height=900, init_script=None):
     ctx = await browser.new_context(viewport={"width": width, "height": height})
     ctx.set_default_timeout(5000)
     page = await ctx.new_page()
@@ -199,10 +212,14 @@ async def open_app(browser, base: str, fake: FakeApi, *, width=1280, height=900)
                 body = json.loads(route.request.post_data)
             except ValueError:
                 body = None
+        if path == "/api/evidence/chat" and fake.chat_delay_s:
+            await asyncio.sleep(fake.chat_delay_s)
         status, payload = fake.respond(route.request.method, path, query, body)
         await route.fulfill(status=status, content_type="application/json", body=json.dumps(payload))
 
     await page.route("**/*", handle)
+    if init_script:
+        await page.add_init_script(init_script)
     await page.goto(f"{base}/app.html#agent-chat")
     await page.wait_for_timeout(600)
     return ctx, page
@@ -262,10 +279,6 @@ async def s_pure(browser, base, ck: Checks):
         poll_fallback: m.pollDecision('running', 15000, null),
         poll_done: m.pollDecision('done', 99999, 12),
         interval: [m.pollInterval(500), m.pollInterval(null), m.pollInterval(0)],
-        conf_hi: m.confidenceLabel({status:'supported', source_idx:0, s:[0.86]}, 'a2-provisional'),
-        conf_mid: m.confidenceLabel({status:'supported', source_idx:0, s:[0.84]}, 'a2-provisional'),
-        conf_unknown: m.confidenceLabel({status:'supported', source_idx:0, s:[0.99]}, 'a9-unknown'),
-        conf_contra: m.confidenceLabel({status:'contradicted', source_idx:0, s:[0.99]}, 'a2-provisional'),
         hl: m.highlightNumbers("매출 1,234억원 & 5% <b>", "매출은 1,234억원", true),
         hl_off: m.highlightNumbers("매출 1,234억원", "매출은 1,234억원", false),
         hl_ent: m.highlightNumbers("it's 39", "39", true),
@@ -273,6 +286,23 @@ async def s_pure(browser, base, ck: Checks):
         s_running: m.summaryText({status:'running', passages:[]}),
         s_cap: m.summaryText({status:'done', policy_version:'a2-v1', counts:{supported:1}, passages:[1,2,3],
                               claims:[{status:'unjudged', reason:'claim_cap'}]}),
+        emoji: (() => {
+          const a = "📈 매출이 늘었습니다. 영업이익은 3조원입니다.";  // 서버 claim_spans: (0,12) (13,26), 코드포인트 26
+          const segs = m.segmentsFromClaims(a, [{idx:0,start:0,end:12,status:'supported'},
+                                                {idx:1,start:13,end:26,status:'supported'}]);
+          return {joined: segs.map(s => s.text).join('') === a,
+                  texts: segs.filter(s => s.claim).map(s => s.text)};
+        })(),
+        emoji_range: m.segmentsFromClaims("📈 가나다라", [{idx:0,start:2,end:7,status:'supported'}])
+                       .filter(s => s.claim).length,
+        elapsed_created: m.pollElapsedMs({created_at: new Date(Date.now() - 20000).toISOString()}, Date.now(), Date.now()),
+        elapsed_fallback: m.pollElapsedMs({}, Date.now() - 3000, Date.now()),
+        panel_nosrc: m.panelHtml({passages: [{section:'s', idx:1, text:'t'}], rcept_no:'1'},
+                                 {status:'supported', source_idx:null, text:'x'}, 'supported'),
+        panel_nosrc_w: m.panelHtml({passages: [], rcept_no:'1'}, {status:'contradicted', source_idx:9, text:'x'}, 'contradicted'),
+        conf_server: m.confidenceText({status:'supported', confidence:'보통'}),
+        conf_server_none: m.confidenceText({status:'supported', confidence:null}),
+        exports: Object.keys(m).filter(k => ['NOTICE_TEXT','AFFILIATION_TEXT','POLICY_TAU_S'].includes(k)),
         retry: [m.showRetry({status:'failed', retryable:true}), m.showRetry({status:'partial', retryable:false}),
                 m.showRetry({status:'limited', retryable:true}), m.showRetry({status:'done', retryable:true})],
       };
@@ -287,8 +317,15 @@ async def s_pure(browser, base, ck: Checks):
     ck.ok((res["poll_cont"], res["poll_to"], res["poll_fallback"], res["poll_done"])
           == ("continue", "timeout", "timeout", "done"), "pure: 폴링 상한(서버 값, 없으면 15초)")
     ck.ok(res["interval"] == [500, 500, 500], "pure: 폴링 간격 500ms")
-    ck.ok((res["conf_hi"], res["conf_mid"], res["conf_unknown"], res["conf_contra"]) == ("높음", "보통", None, None),
-          "pure: 확신도 높음/보통(τ_s+0.15), 모르는 정책·✅ 아님은 표시 안 함")
+    ck.ok(res["emoji"]["joined"] and res["emoji"]["texts"] == ["📈 매출이 늘었습니다.", "영업이익은 3조원입니다."],
+          f"pure: 서버 코드포인트 오프셋으로 감싼다(이모지) {res['emoji']}")
+    ck.ok(res["emoji_range"] == 0, "pure: 범위 검사는 코드포인트 길이(UTF-16 길이 아님)")
+    ck.ok(19000 <= res["elapsed_created"] <= 21000, f"pure: 폴링 경과는 실행 created_at 기준 {res['elapsed_created']}")
+    ck.ok(2900 <= res["elapsed_fallback"] <= 3100, "pure: created_at이 없으면 폴링 시작 시각 기준")
+    ck.ok("근거 문단 정보 없음" in res["panel_nosrc"] and "확인하지 못했습니다" not in res["panel_nosrc"]
+          and "근거 문단 정보 없음" in res["panel_nosrc_w"], "pure: ✅/⚠️인데 근거 문단이 없으면 '근거 문단 정보 없음'")
+    ck.ok(res["conf_server"] == "보통" and res["conf_server_none"] is None, "pure: 확신도는 서버 confidence 값을 쓴다")
+    ck.ok(res["exports"] == [], f"pure: 안 쓰는·복제 상수 export 없음 {res['exports']}")
     ck.ok(res["hl"] == "매출 <strong>1,234</strong>억원 &amp; 5% &lt;b&gt;", f"pure: 숫자 굵게·이스케이프 {res['hl']}")
     ck.ok("<strong>" not in res["hl_off"], "pure: 숫자 확인 미통과면 굵게 없음")
     ck.ok(res["hl_ent"] == "it&#39;s <strong>39</strong>", f"pure: 이스케이프 엔티티 숫자는 건드리지 않음 {res['hl_ent']}")
@@ -306,7 +343,8 @@ async def s_flag_off(browser, base, ck: Checks):
     print("[flag-off] 404면 토글 숨김")
     fake = FakeApi(flag=404)
     ctx, page = await open_app(browser, base, fake)
-    ck.ok(fake.n("GET", "/api/evidence/companies") >= 1, "flag-off: 기능 확인 요청")
+    ck.ok(fake.n("GET", "/api/evidence/notice") == 1, "flag-off: 기능 확인은 가벼운 /api/evidence/notice로")
+    ck.ok(fake.n("GET", "/api/evidence/companies") == 0, "flag-off: 회사 전체 목록을 기능 확인에 쓰지 않는다")
     ck.ok(not await page.is_visible("#ev-bar"), "flag-off: 근거 모드 토글이 보이지 않는다")
     await ask(page, "안녕")
     await page.wait_for_timeout(300)
@@ -314,6 +352,11 @@ async def s_flag_off(browser, base, ck: Checks):
     label = await page.locator("#chat-messages .ai-label").all_inner_texts()
     ck.ok(label == ["AI 생성 답변"], f"flag-off: 일반 답변에도 AI 생성 답변 라벨 {label}")
     ck.ok(not page.errors, f"flag-off: JS 오류 없음 {page.errors}")
+    await ctx.close()
+
+    fake = FakeApi(notice_status=401)
+    ctx, page = await open_app(browser, base, fake)
+    ck.ok(not await page.is_visible("#ev-bar"), "flag-off: 401이어도 토글을 숨긴다")
     await ctx.close()
 
 
@@ -384,6 +427,8 @@ async def s_done(browser, base, ck: Checks):
         "el => Array.from(el.childNodes).filter(n => !(n.classList && n.classList.contains('ev-badge')))"
         ".map(n => n.textContent).join('')")
     ck.ok(text == ANSWER, "done: 프런트가 문장을 다시 나누지 않는다(오프셋으로 감싼 원문이 그대로)")
+    spans = [t for t in await page.locator(".ev-msg .ev-claim").all_inner_texts()]
+    ck.ok(spans == _SENTS, f"done: 서버 코드포인트 오프셋대로 문장을 감싼다(이모지 앞) {spans}")
     ck.ok(await page.locator(".ev-msg .ev-claim.ev-muted").count() == 1, "done: 비주장은 옅은 글씨·배지 없음")
     ck.ok(await page.locator(".ev-msg .ai-label").inner_text() == "AI 생성 답변", "done: AI 생성 답변 라벨")
     title = await page.locator(".ev-msg .ev-badge").first.get_attribute("title")
@@ -434,7 +479,38 @@ async def s_done(browser, base, ck: Checks):
     await page.wait_for_function("document.querySelectorAll('.ev-msg').length === 2")
     b2 = fake.bodies("POST", "/api/evidence/chat")[1]
     ck.ok(b2.get("conversation_id") == CID, f"done: 후속 질문에 conversation_id {b2}")
+    # 초기화하면 스레드 id도 비운다
+    await page.click("#clear-chat")
+    fake.chat = started("r3", chat_id="h3")
+    fake.runs["r3"] = [run("r3", "done", DONE["statuses"], DONE["extra"], chat_id="h3")]
+    await ask(page, "초기화 뒤 질문")
+    await page.wait_for_selector(".ev-msg")
+    b3 = fake.bodies("POST", "/api/evidence/chat")[2]
+    ck.ok("conversation_id" not in b3, f"done: 초기화 뒤에는 conversation_id를 보내지 않는다 {b3}")
     ck.ok(not page.errors, f"done: JS 오류 없음 {page.errors}")
+    await ctx.close()
+
+
+async def s_double_send(browser, base, ck: Checks):
+    print("[double-send] 요청 중 중복 전송 막기")
+    fake = FakeApi(acked=True, chat=started("r1"), chat_delay_s=1.0,
+                   runs={"r1": [run("r1", "done", DONE["statuses"], DONE["extra"])]})
+    ctx, page = await open_app(browser, base, fake)
+    await turn_on(page)
+    await pick_company(page)
+    await page.fill("#chat-input", "주요 제품은?")
+    await page.press("#chat-input", "Enter")
+    await page.wait_for_timeout(100)
+    ck.ok(await page.is_disabled("#chat-send"), "double-send: 요청 중 전송 버튼 비활성")
+    await page.press("#chat-input", "Enter")
+    await page.press("#chat-input", "Enter")
+    await page.click("#chat-send", force=True)
+    await page.wait_for_selector(".ev-msg", timeout=5000)
+    await page.wait_for_timeout(300)
+    ck.ok(fake.n("POST", "/api/evidence/chat") == 1, f"double-send: 한 번만 보낸다 ({fake.n('POST', '/api/evidence/chat')})")
+    ck.ok(await page.locator(".ev-msg").count() == 1, "double-send: 말풍선 하나")
+    ck.ok(not await page.is_disabled("#chat-send"), "double-send: 끝나면 다시 보낼 수 있다")
+    ck.ok(not page.errors, f"double-send: JS 오류 없음 {page.errors}")
     await ctx.close()
 
 
@@ -552,6 +628,22 @@ async def s_restore(browser, base, ck: Checks):
     ck.ok(not page.errors, f"restore: JS 오류 없음 {page.errors}")
     await ctx.close()
 
+    print("[restore-steps] 복원한 일반 답변들의 추론 패널 id가 겹치지 않는다")
+    steps = [{"action": "search", "thought": "생각", "observation": "관찰"}]
+    plain = [{"id": f"g{i}", "question": f"질문{i}", "answer": f"답변{i}", "steps": steps, "citations": [],
+              "latest_evidence_run": None} for i in range(3)]
+    fake = FakeApi(flag=404, active={"id": CID, "title": "t"}, conv={"id": CID, "messages": plain, "msg_total": 3})
+    # 같은 밀리초에 연달아 그려도 겹치지 않아야 한다: Date.now를 고정한다
+    ctx, page = await open_app(browser, base, fake, init_script="Date.now = () => 1700000000000;")
+    await page.wait_for_selector(".steps-btn")
+    targets = await page.eval_on_selector_all(".steps-btn", "els => els.map(e => e.dataset.target)")
+    ck.ok(len(targets) == 3 and len(set(targets)) == 3, f"restore-steps: 패널 id가 모두 다르다 {targets}")
+    await page.locator(".steps-btn").nth(2).click()
+    vis = await page.eval_on_selector_all(".steps-btn", "els => els.map(e => !document.getElementById(e.dataset.target)"
+                                          ".classList.contains('hidden'))")
+    ck.ok(vis == [False, False, True], f"restore-steps: 세 번째 버튼은 세 번째 패널만 연다 {vis}")
+    await ctx.close()
+
     print("[restore-active] 진행 중 실행 복원 시 폴링 재개")
     fake = FakeApi(active={"id": CID, "title": "t"},
                    conv={"id": CID, "messages": [msgs[1]], "msg_total": 1},
@@ -598,7 +690,7 @@ async def main() -> int:
     ck = Checks()
     async with async_playwright() as p:
         browser = await p.chromium.launch(executable_path=_chromium())
-        for scenario in (s_pure, s_flag_off, s_notice, s_done, s_states, s_timeout, s_restore, s_mobile):
+        for scenario in (s_pure, s_flag_off, s_notice, s_done, s_double_send, s_states, s_timeout, s_restore, s_mobile):
             try:
                 await scenario(browser, base, ck)
             except Exception as exc:  # noqa: BLE001 — 한 시나리오가 죽어도 나머지를 본다
