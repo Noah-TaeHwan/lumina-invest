@@ -1,0 +1,550 @@
+{
+ "seed": 20261002,
+ "corpcode_sha256": "9221e18e7a11c58baf6a6b11206bd8e2610523e4dcca9c7f35fa6efbce832213",
+ "companies": [
+  {
+   "corp_code": "00105466",
+   "corp_name": "KCC건설",
+   "stock_code": "021320",
+   "rcept_no": "20260319001024",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 36545,
+   "cluster": 0,
+   "split": "tune"
+  },
+  {
+   "corp_code": "00106641",
+   "corp_name": "기아",
+   "stock_code": "000270",
+   "rcept_no": "20260312001224",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "seed",
+   "chars": 53253,
+   "cluster": 1,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "00108913",
+   "corp_name": "대교",
+   "stock_code": "019680",
+   "rcept_no": "20260609000080",
+   "report_nm": "[기재정정]사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 22346,
+   "cluster": 2,
+   "split": "check"
+  },
+  {
+   "corp_code": "00126362",
+   "corp_name": "삼성SDI",
+   "stock_code": "006400",
+   "rcept_no": "20260310002954",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "seed",
+   "chars": 37764,
+   "cluster": 3,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "00126380",
+   "corp_name": "삼성전자",
+   "stock_code": "005930",
+   "rcept_no": "20260310002820",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "seed",
+   "chars": 55860,
+   "cluster": 3,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "00136776",
+   "corp_name": "차AI헬스케어",
+   "stock_code": "025620",
+   "rcept_no": "20260319001268",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 15499,
+   "cluster": 4,
+   "split": "tune"
+  },
+  {
+   "corp_code": "00138598",
+   "corp_name": "아비코전자",
+   "stock_code": "036010",
+   "rcept_no": "20260316000805",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 60891,
+   "cluster": 3,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "00152729",
+   "corp_name": "광전자",
+   "stock_code": "017900",
+   "rcept_no": "20260319000424",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 55180,
+   "cluster": 5,
+   "split": "tune"
+  },
+  {
+   "corp_code": "00155319",
+   "corp_name": "POSCO홀딩스",
+   "stock_code": "005490",
+   "rcept_no": "20260311004517",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "seed",
+   "chars": 139433,
+   "cluster": 6,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "00158501",
+   "corp_name": "에스원",
+   "stock_code": "012750",
+   "rcept_no": "20260311004583",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 23316,
+   "cluster": 7,
+   "split": "check"
+  },
+  {
+   "corp_code": "00163345",
+   "corp_name": "DB",
+   "stock_code": "012030",
+   "rcept_no": "20260323001119",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 34931,
+   "cluster": 8,
+   "split": "check"
+  },
+  {
+   "corp_code": "00164742",
+   "corp_name": "현대자동차",
+   "stock_code": "005380",
+   "rcept_no": "20260318001394",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "seed",
+   "chars": 68874,
+   "cluster": 1,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "00164779",
+   "corp_name": "SK하이닉스",
+   "stock_code": "000660",
+   "rcept_no": "20260317000635",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "seed",
+   "chars": 59354,
+   "cluster": 9,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "00164788",
+   "corp_name": "현대모비스",
+   "stock_code": "012330",
+   "rcept_no": "20260309001878",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "seed",
+   "chars": 51634,
+   "cluster": 1,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "00173032",
+   "corp_name": "동화기업",
+   "stock_code": "025900",
+   "rcept_no": "20260608000293",
+   "report_nm": "[기재정정]사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 41922,
+   "cluster": 10,
+   "split": "tune"
+  },
+  {
+   "corp_code": "00181712",
+   "corp_name": "SK",
+   "stock_code": "034730",
+   "rcept_no": "20260318001157",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "seed",
+   "chars": 723743,
+   "cluster": 9,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "00216434",
+   "corp_name": "체리부로",
+   "stock_code": "066360",
+   "rcept_no": "20260323000992",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 28054,
+   "cluster": 11,
+   "split": "check"
+  },
+  {
+   "corp_code": "00243979",
+   "corp_name": "수성웹툰",
+   "stock_code": "084180",
+   "rcept_no": "20260714000336",
+   "report_nm": "[기재정정]사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 25876,
+   "cluster": 12,
+   "split": "tune"
+  },
+  {
+   "corp_code": "00258801",
+   "corp_name": "카카오",
+   "stock_code": "035720",
+   "rcept_no": "20260318001423",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "seed",
+   "chars": 95855,
+   "cluster": 13,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "00260958",
+   "corp_name": "케이티알파",
+   "stock_code": "036030",
+   "rcept_no": "20260319001242",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 13329,
+   "cluster": 14,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "00266961",
+   "corp_name": "NAVER",
+   "stock_code": "035420",
+   "rcept_no": "20260313001021",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "seed",
+   "chars": 58756,
+   "cluster": 15,
+   "split": "tune"
+  },
+  {
+   "corp_code": "00303396",
+   "corp_name": "한국컴퓨터",
+   "stock_code": "054040",
+   "rcept_no": "20260731000387",
+   "report_nm": "[기재정정]사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 31301,
+   "cluster": 16,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "00356361",
+   "corp_name": "LG화학",
+   "stock_code": "051910",
+   "rcept_no": "20260313001195",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "seed",
+   "chars": 82948,
+   "cluster": 17,
+   "split": "check"
+  },
+  {
+   "corp_code": "00359076",
+   "corp_name": "브리지텍",
+   "stock_code": "064480",
+   "rcept_no": "20260318000356",
+   "report_nm": "[첨부추가]사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 27009,
+   "cluster": 18,
+   "split": "check"
+  },
+  {
+   "corp_code": "00365590",
+   "corp_name": "HLB생명과학",
+   "stock_code": "067630",
+   "rcept_no": "20260323001728",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 91203,
+   "cluster": 19,
+   "split": "check"
+  },
+  {
+   "corp_code": "00413046",
+   "corp_name": "셀트리온",
+   "stock_code": "068270",
+   "rcept_no": "20260316001415",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "seed",
+   "chars": 79822,
+   "cluster": 20,
+   "split": "tune"
+  },
+  {
+   "corp_code": "00488989",
+   "corp_name": "한양디지텍",
+   "stock_code": "078350",
+   "rcept_no": "20260316001638",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 23815,
+   "cluster": 3,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "00533003",
+   "corp_name": "디케이락",
+   "stock_code": "105740",
+   "rcept_no": "20260316000413",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 25134,
+   "cluster": 21,
+   "split": "tune"
+  },
+  {
+   "corp_code": "00556712",
+   "corp_name": "힘스",
+   "stock_code": "238490",
+   "rcept_no": "20260626000038",
+   "report_nm": "[기재정정]사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 32732,
+   "cluster": 22,
+   "split": "tune"
+  },
+  {
+   "corp_code": "00631518",
+   "corp_name": "SK이노베이션",
+   "stock_code": "096770",
+   "rcept_no": "20260316000827",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "seed",
+   "chars": 165142,
+   "cluster": 9,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "00858124",
+   "corp_name": "알에스오토메이션",
+   "stock_code": "140670",
+   "rcept_no": "20260320000353",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 51312,
+   "cluster": 23,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "00877059",
+   "corp_name": "삼성바이오로직스",
+   "stock_code": "207940",
+   "rcept_no": "20260515001658",
+   "report_nm": "[기재정정]사업보고서 (2025.12)",
+   "source": "seed",
+   "chars": 45445,
+   "cluster": 3,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "00985686",
+   "corp_name": "큐브엔터",
+   "stock_code": "182360",
+   "rcept_no": "20260319001122",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 28056,
+   "cluster": 24,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "01185566",
+   "corp_name": "휴엠앤씨",
+   "stock_code": "263920",
+   "rcept_no": "20260323001218",
+   "report_nm": "[기재정정]사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 22232,
+   "cluster": 25,
+   "split": "check"
+  },
+  {
+   "corp_code": "01211889",
+   "corp_name": "이지스",
+   "stock_code": "261520",
+   "rcept_no": "20260320000003",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 57527,
+   "cluster": 26,
+   "split": "tune"
+  },
+  {
+   "corp_code": "01310773",
+   "corp_name": "엔시스",
+   "stock_code": "333620",
+   "rcept_no": "20260323000257",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 60021,
+   "cluster": 27,
+   "split": "check"
+  },
+  {
+   "corp_code": "01368637",
+   "corp_name": "성원에너텍",
+   "stock_code": "340930",
+   "rcept_no": "20260623000191",
+   "report_nm": "[기재정정]사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 43112,
+   "cluster": 28,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "01467503",
+   "corp_name": "뉴키즈온",
+   "stock_code": "462310",
+   "rcept_no": "20260319000611",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 34684,
+   "cluster": 29,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "01508855",
+   "corp_name": "블리츠웨이엔터테인먼트",
+   "stock_code": "369370",
+   "rcept_no": "20260319001297",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 37617,
+   "cluster": 30,
+   "split": "holdout"
+  },
+  {
+   "corp_code": "01515323",
+   "corp_name": "LG에너지솔루션",
+   "stock_code": "373220",
+   "rcept_no": "20260312000217",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "seed",
+   "chars": 46713,
+   "cluster": 17,
+   "split": "check"
+  }
+ ],
+ "clusters": [
+  [
+   "00105466"
+  ],
+  [
+   "00106641",
+   "00164742",
+   "00164788"
+  ],
+  [
+   "00108913"
+  ],
+  [
+   "00126362",
+   "00126380",
+   "00138598",
+   "00488989",
+   "00877059"
+  ],
+  [
+   "00136776"
+  ],
+  [
+   "00152729"
+  ],
+  [
+   "00155319"
+  ],
+  [
+   "00158501"
+  ],
+  [
+   "00163345"
+  ],
+  [
+   "00164779",
+   "00181712",
+   "00631518"
+  ],
+  [
+   "00173032"
+  ],
+  [
+   "00216434"
+  ],
+  [
+   "00243979"
+  ],
+  [
+   "00258801"
+  ],
+  [
+   "00260958"
+  ],
+  [
+   "00266961"
+  ],
+  [
+   "00303396"
+  ],
+  [
+   "00356361",
+   "01515323"
+  ],
+  [
+   "00359076"
+  ],
+  [
+   "00365590"
+  ],
+  [
+   "00413046"
+  ],
+  [
+   "00533003"
+  ],
+  [
+   "00556712"
+  ],
+  [
+   "00858124"
+  ],
+  [
+   "00985686"
+  ],
+  [
+   "01185566"
+  ],
+  [
+   "01211889"
+  ],
+  [
+   "01310773"
+  ],
+  [
+   "01368637"
+  ],
+  [
+   "01467503"
+  ],
+  [
+   "01508855"
+  ]
+ ]
+}

@@ -1,0 +1,32 @@
+{"lid": "ab7a6b9c7e", "label": "supported", "passage": 2, "reason": "문단2가 Recycle, Reuse, 차세대 전지, BaaS 등 미래 성장을 위한 신규 사업영역 발굴을 명시"}
+{"lid": "292a102a44", "label": "no_evidence", "passage": null, "reason": "차세대 전지·전기 및 전력 제조 판매 등 사업 내용을 지지하는 문단 없음(반복 생성 문장)"}
+{"lid": "6264d1f783", "label": "no_evidence", "passage": null, "reason": "현대자동차에 관한 내용은 문단에 없음"}
+{"lid": "d6ef62977f", "label": "contradicted", "passage": 1, "reason": "문단1은 국외 매출 중 해외 생산법인 직접 판매 비중을 84.1%로 기재(72.4% 아님)"}
+{"lid": "34cfc9f680", "label": "no_evidence", "passage": null, "reason": "문단2는 자동차·소형·ESS 전지를 현 사업 연구로, Recycle 등만 신규 사업영역으로 구분하며 주체도 연구개발활동이라 문장 전체를 지지하지 않음"}
+{"lid": "b55f72dd1f", "label": "no_evidence", "passage": null, "reason": "2020년 가격 1,000,000원~1,500,000원에 대한 문단 없음"}
+{"lid": "dd1a5b608f", "label": "supported", "passage": 1, "reason": "문단1 국외 해외 생산법인 직접 판매 비중 84.1%"}
+{"lid": "8861933b80", "label": "no_evidence", "passage": null, "reason": "대표 제품 판매가격 추세에 관한 문단 없음"}
+{"lid": "6672923862", "label": "non_claim", "passage": null, "reason": "제목 조각으로 사실 주장이 아님"}
+{"lid": "431b016ba2", "label": "no_evidence", "passage": null, "reason": "문단2는 연구개발 분야를 말할 뿐 대표 제품 목록을 제시하지 않음"}
+{"lid": "c092147e4d", "label": "non_claim", "passage": null, "reason": "질문을 되풀이한 내용 없는 문장"}
+{"lid": "c9ad7215cf", "label": "no_evidence", "passage": null, "reason": "2020년 내수 12,942건·8,942건 수치는 문단에 없음(12,942건은 2025년 국내 등록 특허)"}
+{"lid": "fcefab0829", "label": "supported", "passage": 8, "reason": "문단8: 2025년 12월 31일 기준 누적 국내 등록 특허 12,942건"}
+{"lid": "ef4ca9067e", "label": "no_evidence", "passage": null, "reason": "2020년 수출 38,464건 주장은 문단에 없음(38,464건은 2025년 해외 등록 특허)"}
+{"lid": "927d28765c", "label": "no_evidence", "passage": null, "reason": "2021년 수출 수치는 문단에 없음"}
+{"lid": "4b9dacd3d4", "label": "no_evidence", "passage": null, "reason": "2022년 수출 수치는 문단에 없음"}
+{"lid": "b868cc7e47", "label": "no_evidence", "passage": null, "reason": "문단8은 2025년 말 기준 수치만 제시, 2023년 말 수치는 없음"}
+{"lid": "433f6de4e6", "label": "non_claim", "passage": null, "reason": "목록 도입 문장으로 사실 주장이 아님"}
+{"lid": "6950ad3d8a", "label": "no_evidence", "passage": null, "reason": "원자재로 전기를 나열한 반복 문장, 지지 문단 없음"}
+{"lid": "9f614576dc", "label": "no_evidence", "passage": null, "reason": "SK온에 관한 문단 없음"}
+{"lid": "7ad11b1c8e", "label": "supported", "passage": 6, "reason": "문단6: 비철금속 대상 상품(원재료)스왑, 거래목적 현금흐름위험회피"}
+{"lid": "51ab9877a6", "label": "supported", "passage": 6, "reason": "문단6 원문과 동일"}
+{"lid": "d5e425f732", "label": "contradicted", "passage": 6, "reason": "문단6은 미래 예상거래 현금흐름 위험회피 계약 평가손익을 기타포괄손익누계액으로 처리한다고 기재"}
+{"lid": "9cbf2b4c48", "label": "supported", "passage": 6, "reason": "문단6 원문과 동일"}
+{"lid": "5e6be23f17", "label": "non_claim", "passage": null, "reason": "표 도입 문장으로 사실 주장이 아님"}
+{"lid": "df9c486e55", "label": "supported", "passage": 6, "reason": "문단6 원문과 동일"}
+{"lid": "33351b99cd", "label": "supported", "passage": 6, "reason": "문단6 원문과 동일"}
+{"lid": "50ca0ae41b", "label": "supported", "passage": 6, "reason": "문단6: 미래 예상거래 현금흐름 위험회피 계약 평가손익은 기타포괄손익누계액으로 처리"}
+{"lid": "6417086bcd", "label": "no_evidence", "passage": null, "reason": "네이버에 관한 문단 없음"}
+{"lid": "f71dda176d", "label": "no_evidence", "passage": null, "reason": "매출액 대비 연구개발비 비율 수치는 문단에 없음"}
+{"lid": "e8b5edcf81", "label": "supported", "passage": 2, "reason": "문단2: R&D 조직은 CTO, 사업부 개발센터, 생산기술혁신센터, 개발품질, CDO로 구성"}
+{"lid": "ab9e3654c8", "label": "no_evidence", "passage": null, "reason": "연구개발비 금액·추이는 문단에 없음"}

@@ -1,0 +1,6 @@
+{"qid": "00105466-q1", "true_text": "KCC건설은 2025년 시공능력평가에서 20위에 올랐다.", "variant_text": "KCC건설은 2025년 시공능력평가에서 33위에 올랐다.", "variant_type": "숫자 변경", "source_passage": 5}
+{"qid": "00105466-q2", "true_text": "KCC건설은 2001년 8월 코스닥시장에 상장되어 주식 거래가 시작되었다.", "variant_text": "KCC건설은 2003년 8월 코스닥시장에 상장되어 주식 거래가 시작되었다.", "variant_type": "기간 바꾸기", "source_passage": 1}
+{"qid": "00105466-q3", "true_text": "KCC건설은 진천 광혜원 물류센터 같은 창고시설 공사를 민간 공사로 수행하고 있다.", "variant_text": "태영건설은 진천 광혜원 물류센터 같은 창고시설 공사를 민간 공사로 수행하고 있다.", "variant_type": "주체 교체", "source_passage": 3}
+{"qid": "00105466-q4", "true_text": "KCC건설은 남부내륙철도(김천~거제) 4-1공구 같은 공공 공사를 지속적으로 맡아 시공하고 있다.", "variant_text": "KCC건설은 남부내륙철도(김천~거제) 4-1공구 같은 공공 공사를 맡아 시공하고 있지 않다.", "variant_type": "부정", "source_passage": 4}
+{"qid": "00105466-q5", "true_text": "KCC건설은 이행약정지분 가운데 1,818,864주를 주당 10,622원의 풋옵션 행사가격으로 인수하기로 했다.", "variant_text": "현대건설은 힐스테이트라는 아파트 브랜드로 주택사업을 하고 있다.", "variant_type": "다른 기업 사실", "source_passage": 2}
+{"qid": "00105466-q6", "true_text": "KCC건설이 옵션의 공정가치 변동으로 반영한 파생상품평가손실은 103,905천원이다.", "variant_text": "KCC건설이 옵션의 공정가치 변동으로 반영한 파생상품평가손실은 187,240천원이다.", "variant_type": "숫자 변경", "source_passage": 2}

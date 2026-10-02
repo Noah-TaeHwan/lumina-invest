@@ -1,0 +1,551 @@
+{"cid": "00105466-q1-n1", "qid": "00105466-q1", "source": "natural", "text": "KCC건설은 1989년 1월 27일 금강종합건설㈜로 설립되었으며, 2001년 상장되어 코스닥시장에서 매매가 개시되었습니다.", "variant": null, "expected": null}
+{"cid": "00105466-q1-n2", "qid": "00105466-q1", "source": "natural", "text": "그 후, 2005년 3월 주주총회 의결을 통하여 회사명을 ㈜케이씨씨건설로 변경하였습니다.", "variant": null, "expected": null}
+{"cid": "00105466-q2-c1", "qid": "00105466-q2", "source": "controlled", "text": "KCC건설은 2001년 8월 코스닥시장에 상장되어 주식 거래가 시작되었다.", "variant": "의역", "expected": "supported"}
+{"cid": "00105466-q2-c2", "qid": "00105466-q2", "source": "controlled", "text": "KCC건설은 2003년 8월 코스닥시장에 상장되어 주식 거래가 시작되었다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "00105466-q2-n1", "qid": "00105466-q2", "source": "natural", "text": "KCC건설은 아파트 및 주상복합 브랜드를 보유하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00105466-q3-c1", "qid": "00105466-q3", "source": "controlled", "text": "KCC건설은 진천 광혜원 물류센터 같은 창고시설 공사를 민간 공사로 수행하고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00105466-q3-c2", "qid": "00105466-q3", "source": "controlled", "text": "태영건설은 진천 광혜원 물류센터 같은 창고시설 공사를 민간 공사로 수행하고 있다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00105466-q3-n1", "qid": "00105466-q3", "source": "natural", "text": "[문단 1] KCC건설의 당기 매출에서 건축, 토목, 분양 부문이 각각 차지하는 금액과 비중은 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "00105466-q3-n2", "qid": "00105466-q3", "source": "natural", "text": "건축부문: 2023년 1월 1일부터 2023년 12월 31일까지의 당기 매출은 1,111,000억원으로, 2022년 1월 1일부터 2022년 12월 31일까지의 당기 매출은 1,044,000억원으로, 2021년 1월 1일부터 2021년 12월 31일까지의 당기 매출은 1,044,000억원으로, 2020년 1월 1일부터 2020년 12월 31일까지의 당기 매출은 1,044,000억원으로, 2019년 1월 1일부터 2019년 12월 31일까지의 당기 매출은 1,044,000억원으로, 2018년 1월 1일부터 2018년 12월 31일까지의 당기 매출은 1,044,000억원으로, 2017년 1월 1일부터 2017년 12월 31일까지의 당기 매", "variant": null, "expected": null}
+{"cid": "00105466-q4-c1", "qid": "00105466-q4", "source": "controlled", "text": "KCC건설은 남부내륙철도(김천~거제) 4-1공구 같은 공공 공사를 지속적으로 맡아 시공하고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00105466-q4-c2", "qid": "00105466-q4", "source": "controlled", "text": "KCC건설은 남부내륙철도(김천~거제) 4-1공구 같은 공공 공사를 맡아 시공하고 있지 않다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00105466-q4-n1", "qid": "00105466-q4", "source": "natural", "text": "[질문] KCC건설이 건설부문에서 가장 많이 매입한 원재료는 아라베스크(유)입니다.", "variant": null, "expected": null}
+{"cid": "00105466-q4-n2", "qid": "00105466-q4", "source": "natural", "text": "매입액은 103,905천원입니다.", "variant": null, "expected": null}
+{"cid": "00105466-q5-c1", "qid": "00105466-q5", "source": "controlled", "text": "KCC건설은 이행약정지분 가운데 1,818,864주를 주당 10,622원의 풋옵션 행사가격으로 인수하기로 했다.", "variant": "의역", "expected": "supported"}
+{"cid": "00105466-q5-c2", "qid": "00105466-q5", "source": "controlled", "text": "현대건설은 힐스테이트라는 아파트 브랜드로 주택사업을 하고 있다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00105466-q5-n1", "qid": "00105466-q5", "source": "natural", "text": "당사에 대한 풋옵션 행사에 대한 정보는 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "00105466-q5-n2", "qid": "00105466-q5", "source": "natural", "text": "2010년 9월 17일부터 2013년 7월 5일까지 아라베스크(유)와 KCC건설의 풋옵션 행사로, 아라베스크(유)의 풋옵션 행사에 대한 주식 매수청구권을 부여 받은 Macquarie Cheongna Investment PTY LTD의 풋옵션 행사로, 아라베스크(유)의 풋옵션 행사에 대한 주식 매수청구권을 부여 받은 Macquarie Cheongna Investment PTY LTD의 풋옵션 행사로, 아라베스크(유)의 풋옵션 행사에 대한 주식 매수청구권을 부여 받은 Macquarie Cheongna Investment PTY LTD의 풋옵션 행사로, 아라베스크(유)의 풋옵션 행사에 대한 주식 매수청구권을 부여 받은 Macquarie Cheongna Investment PTY LTD의 풋옵션 행사로, 아라베스크(유)의 풋옵션 행사에 대한 주식 매수청구권을 부여 받은 Macquarie Cheongna Investment PTY LTD의 풋옵", "variant": null, "expected": null}
+{"cid": "00105466-q6-c1", "qid": "00105466-q6", "source": "controlled", "text": "KCC건설이 옵션의 공정가치 변동으로 반영한 파생상품평가손실은 103,905천원이다.", "variant": "의역", "expected": "supported"}
+{"cid": "00105466-q6-c2", "qid": "00105466-q6", "source": "controlled", "text": "KCC건설이 옵션의 공정가치 변동으로 반영한 파생상품평가손실은 187,240천원이다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "00105466-q6-n1", "qid": "00105466-q6", "source": "natural", "text": "아래의 내용을 근거로 한국어 3~5문장으로 답해 드리겠습니다.", "variant": null, "expected": null}
+{"cid": "00105466-q6-n2", "qid": "00105466-q6", "source": "natural", "text": "KCC건설은 연구개발 전담조직을 운영하고 있으며, 경영상 주요계약이 있으므로 경영상 연구개발을 진행하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00108913-q1-c1", "qid": "00108913-q1", "source": "controlled", "text": "지배회사 ㈜대교는 1986년 12월에 세워졌으며 학습지를 출판·제조·판매하는 일을 핵심 사업으로 삼는 교육·문화기업이다.", "variant": "의역", "expected": "supported"}
+{"cid": "00108913-q1-c2", "qid": "00108913-q1", "source": "controlled", "text": "지배회사 ㈜대교는 1979년 12월에 세워졌으며 학습지를 출판·제조·판매하는 일을 핵심 사업으로 삼는 교육·문화기업이다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "00108913-q1-n1", "qid": "00108913-q1", "source": "natural", "text": "대교는 교육 서비스 사업을 영위하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00108913-q1-n2", "qid": "00108913-q1", "source": "natural", "text": "각 부문은 다음과 같이 나뉘며, 각 부문은 다른 회사들이 맡고 있어요.", "variant": null, "expected": null}
+{"cid": "00108913-q1-n3", "qid": "00108913-q1", "source": "natural", "text": "교육 서비스 사업 (㈜대교, ㈜대교에듀캠프 외)", "variant": null, "expected": null}
+{"cid": "00108913-q1-n4", "qid": "00108913-q1", "source": "natural", "text": "영업개황① 교육 서비스 사업 (㈜대교, ㈜대교에듀캠프 외)", "variant": null, "expected": null}
+{"cid": "00108913-q1-n5", "qid": "00108913-q1", "source": "natural", "text": "영업개황② 교육 서비스 사업 (㈜대교, ㈜대교에듀캠프 외)", "variant": null, "expected": null}
+{"cid": "00108913-q2-c1", "qid": "00108913-q2", "source": "controlled", "text": "중국어 학습 브랜드 '차이홍'은 중국 정부가 공인한 HSK 시험의 공식 주관기관으로서 국내 점유율 1위에 올랐다.", "variant": "의역", "expected": "supported"}
+{"cid": "00108913-q2-c2", "qid": "00108913-q2", "source": "controlled", "text": "중국어 학습 브랜드 '링구아랩'은 중국 정부가 공인한 HSK 시험의 공식 주관기관으로서 국내 점유율 1위에 올랐다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00108913-q2-n1", "qid": "00108913-q2", "source": "natural", "text": "대교의 주력 학습지와 외국어 학습 제품의 월 회비는 2020년 9월 1일부터 2022년 6월 30일까지 1,000만 원으로 변동했습니다.", "variant": null, "expected": null}
+{"cid": "00108913-q3-c1", "qid": "00108913-q3", "source": "controlled", "text": "대교는 2016년에 인공지능을 활용한 디지털 학습 서비스인 대교 써밋을 출시했다.", "variant": "의역", "expected": "supported"}
+{"cid": "00108913-q3-c2", "qid": "00108913-q3", "source": "controlled", "text": "대교는 2016년에 인공지능을 활용한 디지털 학습 서비스인 대교 써밋을 출시하지 않았다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00108913-q3-n1", "qid": "00108913-q3", "source": "natural", "text": "당사는 2023년 1월 1일부터 2023년 12월 31일까지 1년간 매출액을 1,000억원으로 정산하였습니다.", "variant": null, "expected": null}
+{"cid": "00108913-q4-c1", "qid": "00108913-q4", "source": "controlled", "text": "대교는 2022년부터 연구개발 활동에 드는 경비를 전부 발생한 기간의 비용으로 처리하고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00108913-q4-c2", "qid": "00108913-q4", "source": "controlled", "text": "농심은 신라면 등 라면 제품을 생산해 국내외에 판매하고 있다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00108913-q4-n1", "qid": "00108913-q4", "source": "natural", "text": "[질문] 대교는 교재 제작에 필요한 원재료와 외주가공을 어디서 조달하며, 자체 생산설비를 보유하고 있나요?", "variant": null, "expected": null}
+{"cid": "00108913-q5-c1", "qid": "00108913-q5", "source": "controlled", "text": "2025년 4분기말 현재 대교가 들고 있는 DLB 상품은 한 개이며 투자 규모는 모두 40억원이다.", "variant": "의역", "expected": "supported"}
+{"cid": "00108913-q5-c2", "qid": "00108913-q5", "source": "controlled", "text": "2025년 4분기말 현재 대교가 들고 있는 DLB 상품은 한 개이며 투자 규모는 모두 65억원이다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "00108913-q5-n1", "qid": "00108913-q5", "source": "natural", "text": "[질문] 대교가 현재 보유한 파생상품은 DLB 상품과는 달리 투자금액과 만기 조건이 다른 상품입니다.", "variant": null, "expected": null}
+{"cid": "00108913-q6-n1", "qid": "00108913-q6", "source": "natural", "text": "대교의 연구개발비용은 2020년 1월 1일부터 2023년 6월 30일까지 3년간 72.7%로 바뀌었습니다.", "variant": null, "expected": null}
+{"cid": "00108913-q6-n2", "qid": "00108913-q6", "source": "natural", "text": "매출액 대비 비율은 2020년 1월 1일부터 2023년 6월 30일까지 1.1%로 바뀌었습니다.", "variant": null, "expected": null}
+{"cid": "00136776-q1-c1", "qid": "00136776-q1", "source": "controlled", "text": "회사는 2016년 7월 임시주주총회 결의로 화장품을 만들어 파는 사업을 사업목적에 새로 넣었다.", "variant": "의역", "expected": "supported"}
+{"cid": "00136776-q1-c2", "qid": "00136776-q1", "source": "controlled", "text": "회사는 2016년 7월 임시주주총회 결의로 건강기능식품을 만들어 파는 사업을 사업목적에 새로 넣었다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00136776-q1-n1", "qid": "00136776-q1", "source": "natural", "text": "[회사] 차AI헬스케어는 2016년 7월 8일 임시주주총회를 통해 사업목적에 화장품 제조 및 판매업을 추가하였으며, 현재 스킨케어, 메이크업, 퍼스널케어 제품 등의 개발·제조·판매를 주요 사업으로 영위하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00136776-q2-c1", "qid": "00136776-q2", "source": "controlled", "text": "회사는 현재 외부 위탁(OEM) 방식으로 제품을 생산하고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00136776-q2-c2", "qid": "00136776-q2", "source": "controlled", "text": "회사는 현재 외부 위탁(OEM) 방식으로 제품을 생산하지 않는다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00136776-q2-n1", "qid": "00136776-q2", "source": "natural", "text": "[회사] 차AI헬스케어", "variant": null, "expected": null}
+{"cid": "00136776-q2-n2", "qid": "00136776-q2", "source": "natural", "text": "이 회사의 주력 제품은 차AI헬스케어입니다.", "variant": null, "expected": null}
+{"cid": "00136776-q2-n3", "qid": "00136776-q2", "source": "natural", "text": "이 회사의 공식 쇼핑몰 판매 가격은 최근 3년간 다음과 같이 변해 왔습니다.", "variant": null, "expected": null}
+{"cid": "00136776-q2-n4", "qid": "00136776-q2", "source": "natural", "text": "2020년 1월 1일부터 2022년 12월 31일까지: 1,500,000원에서 2,500,000원", "variant": null, "expected": null}
+{"cid": "00136776-q2-n5", "qid": "00136776-q2", "source": "natural", "text": "2023년 1월 1일부터 2023년 12월 31일까지: 2,000,000원에서 3,000,000원", "variant": null, "expected": null}
+{"cid": "00136776-q3-c1", "qid": "00136776-q3", "source": "controlled", "text": "회사는 국내 판매 경로를 넓히고 해외 판로를 새로 열어 실적을 끌어올리려 한다.", "variant": "의역", "expected": "supported"}
+{"cid": "00136776-q3-c2", "qid": "00136776-q3", "source": "controlled", "text": "농심은 라면 등 가공식품을 생산해 국내외 시장에 판매한다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00136776-q3-n1", "qid": "00136776-q3", "source": "natural", "text": "당기 연결 매출액은 2,296,171 천원입니다.", "variant": null, "expected": null}
+{"cid": "00136776-q3-n2", "qid": "00136776-q3", "source": "natural", "text": "전기와 비교해, 수출은 2,163,597 천원으로 1,133,574 천원 감소하고, 내수가 2,027,179 천원으로 1,000 천원 감소했습니다.", "variant": null, "expected": null}
+{"cid": "00136776-q4-c1", "qid": "00136776-q4", "source": "controlled", "text": "2025년 말 기준 화장품 부문 원재료 매입액 가운데 마스크팩 파우치 같은 부재료 비중은 98.38%에 이른다.", "variant": "의역", "expected": "not_supported", "expected_note": "검색된 8개 문단에 98.38% 원재료 표가 없음(감사)"}
+{"cid": "00136776-q4-c2", "qid": "00136776-q4", "source": "controlled", "text": "2025년 말 기준 화장품 부문 원재료 매입액 가운데 마스크팩 파우치 같은 부재료 비중은 87.25%에 이른다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "00136776-q4-n1", "qid": "00136776-q4", "source": "natural", "text": "[회사] 차AI헬스케어", "variant": null, "expected": null}
+{"cid": "00136776-q4-n2", "qid": "00136776-q4", "source": "natural", "text": "[문단 1] [5.", "variant": null, "expected": null}
+{"cid": "00136776-q4-n3", "qid": "00136776-q4", "source": "natural", "text": "위험관리 및 파생거래] 연결실체는 금융상품과 관련하여 신용위험, 유동성위험 및 시장위험에 노출되어 있습니다.", "variant": null, "expected": null}
+{"cid": "00136776-q4-n4", "qid": "00136776-q4", "source": "natural", "text": "본 주석은 연결실체가 노출되어 있는 위의 위험에 대한 정보와 연결실체의 목표, 정책, 위험 평가 및 관리 절차, 그리고 자본관리에 대해 공시하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00136776-q4-n5", "qid": "00136776-q4", "source": "natural", "text": "추가적인 계량적 정보에 대해서는 본 재무제표 전반에 걸쳐서 공시되어 있습니다.", "variant": null, "expected": null}
+{"cid": "00136776-q5-c1", "qid": "00136776-q5", "source": "controlled", "text": "전 세계 화장품 시장은 2024년을 기준으로 대략 5,000억 달러 규모로 추산된다.", "variant": "의역", "expected": "supported"}
+{"cid": "00136776-q5-c2", "qid": "00136776-q5", "source": "controlled", "text": "전 세계 화장품 시장은 2013년을 기준으로 대략 5,000억 달러 규모로 추산된다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "00136776-q5-n1", "qid": "00136776-q5", "source": "natural", "text": "당기 전환사채 관련 파생상품 평가는 손익에 어느 정도 영향을 미쳤는지는 알려지지 않았습니다.", "variant": null, "expected": null}
+{"cid": "00136776-q6-c1", "qid": "00136776-q6", "source": "controlled", "text": "회사는 화장품 사업부문에서 스킨케어·메이크업·퍼스널케어 제품을 개발해 만들고 판매하는 일을 주력으로 하고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00136776-q6-c2", "qid": "00136776-q6", "source": "controlled", "text": "회사는 의약품 사업부문에서 스킨케어·메이크업·퍼스널케어 제품을 개발해 만들고 판매하는 일을 주력으로 하고 있다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00136776-q6-n1", "qid": "00136776-q6", "source": "natural", "text": "[회사] 차AI헬스케어", "variant": null, "expected": null}
+{"cid": "00136776-q6-n2", "qid": "00136776-q6", "source": "natural", "text": "[문단 1] [5.", "variant": null, "expected": null}
+{"cid": "00136776-q6-n3", "qid": "00136776-q6", "source": "natural", "text": "위험관리 및 파생거래] 연결실체는 금융상품과 관련하여 신용위험, 유동성위험 및 시장위험에 노출되어 있습니다.", "variant": null, "expected": null}
+{"cid": "00136776-q6-n4", "qid": "00136776-q6", "source": "natural", "text": "본 주석은 연결실체가 노출되어 있는 위의 위험에 대한 정보와 연결실체의 목표, 정책, 위험 평가 및 관리 절차, 그리고 자본관리에 대해 공시하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00136776-q6-n5", "qid": "00136776-q6", "source": "natural", "text": "추가적인 계량적 정보에 대해서는 본 재무제표 전반에 걸쳐서 공시되어 있습니다.", "variant": null, "expected": null}
+{"cid": "00152729-q1-c1", "qid": "00152729-q1", "source": "controlled", "text": "광전자가 주력으로 삼는 Discrete 반도체, 광센서, LED는 모바일 기기·자동차·디지털 가전 같은 여러 IT 제품에 핵심 부품으로 들어간다.", "variant": "의역", "expected": "supported"}
+{"cid": "00152729-q1-c2", "qid": "00152729-q1", "source": "controlled", "text": "광전자가 주력으로 삼는 Discrete 반도체, 광센서, LED는 모바일 기기·자동차·디지털 가전 같은 여러 IT 제품에 핵심 부품으로 들어가지 않는다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00152729-q1-n1", "qid": "00152729-q1", "source": "natural", "text": "광전자는 전자부품 제조 업체로써 Discrete 반도체, 광센서, LED 등 폭넓은 전자부품 시장을 주도하며 한국, 중국, 일본의 탄탄한 네트워크 기반의 글로벌 기업으로 성장해가고 있습니다.", "variant": null, "expected": null}
+{"cid": "00152729-q1-n2", "qid": "00152729-q1", "source": "natural", "text": "주력 제품군인 Discrete 반도체, 광센서, LED는 고성능, 저전력, 경박단소라는 핵심 가치를 기반으로 하며, 이러한 강점을 지닌 제품들은 모바일 기기, 자동차, 디지털 가전 등 다양한 IT 제품의 핵심 부품으로 활용되어 빠르게 변화하는 IT 시장의 혁신을 이끌고 있습니다.", "variant": null, "expected": null}
+{"cid": "00152729-q2-c1", "qid": "00152729-q2", "source": "controlled", "text": "광전자의 PKG 제품 평균 판매단가는 제40기 142원에서 제41기 148원, 제42기 159원으로 해마다 올랐다.", "variant": "의역", "expected": "supported"}
+{"cid": "00152729-q2-c2", "qid": "00152729-q2", "source": "controlled", "text": "SK하이닉스는 D램과 낸드플래시 같은 메모리 반도체를 주력으로 생산한다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00152729-q2-n1", "qid": "00152729-q2", "source": "natural", "text": "[문단 1] [2.", "variant": null, "expected": null}
+{"cid": "00152729-q2-n2", "qid": "00152729-q2", "source": "natural", "text": "주요 제품 및 서비스] 가.", "variant": null, "expected": null}
+{"cid": "00152729-q2-n3", "qid": "00152729-q2", "source": "natural", "text": "주요 제품 등의 현황 당사의 연간 주요 제품에 대한 매출액 내역은 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "00152729-q2-n4", "qid": "00152729-q2", "source": "natural", "text": "주요 제품 및 서비스 표, 단위 백만원, %] 매출액 | 비율 [2.", "variant": null, "expected": null}
+{"cid": "00152729-q2-n5", "qid": "00152729-q2", "source": "natural", "text": "주요 제품 및 서비스 표, 단위 백만원, %] 전자부품제조 | 제품상품 | PKG | 전자기기 부품 | AUK 등 | 104,391 | 78.68% [2.", "variant": null, "expected": null}
+{"cid": "00152729-q3-c1", "qid": "00152729-q3", "source": "controlled", "text": "광전자의 당기말 부채비율은 7.12%로, 전기말 9.02%보다 낮아졌다.", "variant": "의역", "expected": "supported"}
+{"cid": "00152729-q3-c2", "qid": "00152729-q3", "source": "controlled", "text": "광전자의 당기말 부채비율은 6.48%로, 전기말 9.02%보다 낮아졌다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "00152729-q3-n1", "qid": "00152729-q3", "source": "natural", "text": "[질문] 광전자 사업연도 매출에서 수출과 내수는 각각 얼마이고, 전년과 비교하면 어떻게 달라졌나요?", "variant": null, "expected": null}
+{"cid": "00152729-q3-n2", "qid": "00152729-q3", "source": "natural", "text": "[답] 광전자 사업연도 매출에서 수출과 내수는 각각 1,000억원이고, 전년과 비교하면 1,200억원으로 달라졌습니다.", "variant": null, "expected": null}
+{"cid": "00152729-q4-c1", "qid": "00152729-q4", "source": "controlled", "text": "광전자 주식은 1996년 10월 16일에 유가증권시장에 상장됐다.", "variant": "의역", "expected": "supported"}
+{"cid": "00152729-q4-c2", "qid": "00152729-q4", "source": "controlled", "text": "광전자 주식은 1999년 10월 16일에 유가증권시장에 상장됐다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "00152729-q4-n1", "qid": "00152729-q4", "source": "natural", "text": "광전자는 광센서, LED, Discrete 반도체, 등 다양한 전자부품을 제조하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00152729-q4-n2", "qid": "00152729-q4", "source": "natural", "text": "주요 원재료의 매입 구성은 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "00152729-q4-n3", "qid": "00152729-q4", "source": "natural", "text": "광센서: 광전자는 광센서를 제조하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00152729-q4-n4", "qid": "00152729-q4", "source": "natural", "text": "광센서의 매입처는 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "00152729-q4-n5", "qid": "00152729-q4", "source": "natural", "text": "일본: 광전자는 일본의 광센서 제조업체인 Tokyo Electron Corporation과 같은 일본의 광센서 제조업체를 매입합니다.", "variant": null, "expected": null}
+{"cid": "00152729-q5-c1", "qid": "00152729-q5", "source": "controlled", "text": "광전자는 외화 환율이 10% 오르면 당기말 기준 손익이 합계 약 47억 원 늘어나는 것으로 측정했다.", "variant": "의역", "expected": "not_supported", "expected_note": "금액과 '손익 영향'이 서로 다른 문단에 나뉘어 단일 문단 지지 불가(감사)"}
+{"cid": "00152729-q5-c2", "qid": "00152729-q5", "source": "controlled", "text": "한빛전자는 외화 환율이 10% 오르면 당기말 기준 손익이 합계 약 47억 원 늘어나는 것으로 측정했다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00152729-q5-n1", "qid": "00152729-q5", "source": "natural", "text": "[문단 1] [5.", "variant": null, "expected": null}
+{"cid": "00152729-q5-n2", "qid": "00152729-q5", "source": "natural", "text": "위험관리 및 파생거래] 연결실체는 내부적으로 이자율 변동으로 인한 이자율위험을 정기적으로 측정하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00152729-q5-n3", "qid": "00152729-q5", "source": "natural", "text": "보고기간말 현재 각 자산 및 부채에 대한 이자율이 1% 변동시 이자율변동이 손익 및 순자산에 미치는 영향은 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "00152729-q5-n4", "qid": "00152729-q5", "source": "natural", "text": "[문단 2] [5.", "variant": null, "expected": null}
+{"cid": "00152729-q5-n5", "qid": "00152729-q5", "source": "natural", "text": "위험관리 및 파생거래] 가.", "variant": null, "expected": null}
+{"cid": "00152729-q6-c1", "qid": "00152729-q6", "source": "controlled", "text": "광전자의 매출액 대비 연구개발비 비중은 제42기에 3.73%로, 제41기 3.67%보다 높아졌다.", "variant": "의역", "expected": "supported"}
+{"cid": "00152729-q6-c2", "qid": "00152729-q6", "source": "controlled", "text": "광전자의 매출액 대비 연구개발비 비중은 제42기에 3.73%로, 제41기 3.67%보다 높아지지 않았다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00152729-q6-n1", "qid": "00152729-q6", "source": "natural", "text": "[문단 1] [3.", "variant": null, "expected": null}
+{"cid": "00152729-q6-n2", "qid": "00152729-q6", "source": "natural", "text": "원재료 및 생산설비] 산출기준 - 산출기준은 기간별 단순 산술평균가격을 계산하였음.", "variant": null, "expected": null}
+{"cid": "00152729-q6-n3", "qid": "00152729-q6", "source": "natural", "text": "(총매입액 / 총매입수량) - 외화매입은 원화로 환산하여 계산하였음.(2) 주요 가격변동원인 - 품목별 총매입액 대비 매입수량을 나누어 산출한 평균단가이기 때문에 품목내 의 가격대별 매입수량의 변화에 의해 영향을 받음.", "variant": null, "expected": null}
+{"cid": "00152729-q6-n4", "qid": "00152729-q6", "source": "natural", "text": "공급시장의 독과점 정도 및 안정성 당사의 원재료인 WAFER는 모두 국내 및 해외 업체를 통해 생산되고 있으며, 경쟁이 치열한 시장으로 공급시장 자체에 경쟁이 존재하여, 한 업체에 의해서 독과점이 이루어지고 있지 않습니다.", "variant": null, "expected": null}
+{"cid": "00152729-q6-n5", "qid": "00152729-q6", "source": "natural", "text": "따라서 당사는 원재료 매입과 관련하여 안정성을 유지하고 있다고 판단됩니다.", "variant": null, "expected": null}
+{"cid": "00158501-q1-c1", "qid": "00158501-q1", "source": "controlled", "text": "에스원의 시큐리티 사업은 물리보안과 디지털보안이라는 두 분야로 나뉜다.", "variant": "의역", "expected": "supported"}
+{"cid": "00158501-q1-c2", "qid": "00158501-q1", "source": "controlled", "text": "삼성전자의 사업은 DX와 DS라는 두 부문으로 나뉜다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00158501-q1-n1", "qid": "00158501-q1", "source": "natural", "text": "당사는 부동산 서비스를 전 영역으로 구성하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00158501-q2-c1", "qid": "00158501-q2", "source": "controlled", "text": "에스원은 부동산 서비스 분야에서 60년 남짓 쌓아 온 노하우를 갖추고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00158501-q2-c2", "qid": "00158501-q2", "source": "controlled", "text": "에스원은 부동산 서비스 분야에서 45년 남짓 쌓아 온 노하우를 갖추고 있다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "00158501-q2-n1", "qid": "00158501-q2", "source": "natural", "text": "[문단 1] [7.", "variant": null, "expected": null}
+{"cid": "00158501-q2-n2", "qid": "00158501-q2", "source": "natural", "text": "기타 참고사항] 연결회사의 새로운 성장 동력으로 출시한 보안 및 건물관리 솔루션은 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "00158501-q3-c1", "qid": "00158501-q3", "source": "controlled", "text": "2025년 말을 기준으로 집계한 에스원의 보안SI 매출은 약 3,422억원이었다.", "variant": "의역", "expected": "supported"}
+{"cid": "00158501-q3-c2", "qid": "00158501-q3", "source": "controlled", "text": "2021년 말을 기준으로 집계한 에스원의 보안SI 매출은 약 3,422억원이었다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "00158501-q3-n1", "qid": "00158501-q3", "source": "natural", "text": "2025년 에스원의 연결 매출은 사업부문별로 각각 구성되어 있지 않습니다.", "variant": null, "expected": null}
+{"cid": "00158501-q4-c1", "qid": "00158501-q4", "source": "controlled", "text": "에스원은 관제센터 등의 용도로 수원사옥을 쓰고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00158501-q4-c2", "qid": "00158501-q4", "source": "controlled", "text": "에스원은 관제센터 등의 용도로 광주사옥을 쓰고 있다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00158501-q4-n1", "qid": "00158501-q4", "source": "natural", "text": "[회사] 에스원은 원재료 매입이나 생산설비 없이 서비스 제공을 위해 주로 주택을 보유하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00158501-q5-c1", "qid": "00158501-q5", "source": "controlled", "text": "에스원이 가진 상장주식 등의 가격이 30% 오르거나 내리면 당기 총포괄손익이 약 29억원 움직이는 것으로 분석되었다.", "variant": "의역", "expected": "supported"}
+{"cid": "00158501-q5-c2", "qid": "00158501-q5", "source": "controlled", "text": "에스원이 가진 상장주식 등의 가격이 30% 오르거나 내려도 당기 총포괄손익은 움직이지 않는 것으로 분석되었다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00158501-q5-n1", "qid": "00158501-q5", "source": "natural", "text": "[질문] 에스원이 보유한 상장 지분증권 가격이 크게 변동할 경우 당기 총포괄손익에 미치는 영향은 아래와 같습니다.", "variant": null, "expected": null}
+{"cid": "00158501-q5-n2", "qid": "00158501-q5", "source": "natural", "text": "**지분증권 가격의 상승** : 지분증권 가격이 상승하면 당기 총포괄손익에 미치는 영향은 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "00158501-q5-n3", "qid": "00158501-q5", "source": "natural", "text": "지분증권의 가격이 상승하면 당기 총포괄손익은 2,911,413,927 원으로 증가합니다.", "variant": null, "expected": null}
+{"cid": "00158501-q5-n4", "qid": "00158501-q5", "source": "natural", "text": "이로 인해 당기 총포괄손익은 2,866,824,761 원으로 감소합니다.", "variant": null, "expected": null}
+{"cid": "00158501-q5-n5", "qid": "00158501-q5", "source": "natural", "text": "**지분증권 가격의 하락** : 지분증권 가격이 하락하면 당기 총포괄손익에 미치는 영향은 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "00158501-q6-c1", "qid": "00158501-q6", "source": "controlled", "text": "에스원의 시스템 보안 서비스는 관제센터 감시와 긴급출동으로 주거·상업 시설의 침입·도난·화재 같은 이상 상황에 대응한다.", "variant": "의역", "expected": "supported"}
+{"cid": "00158501-q6-c2", "qid": "00158501-q6", "source": "controlled", "text": "현대모비스는 완성차 업체에 자동차 모듈과 핵심 부품을 공급한다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00158501-q6-n1", "qid": "00158501-q6", "source": "natural", "text": "[회사] 에스원은 시큐리티 사업과 관련해 다음과 같은 경영상 주요계약을 맺고 있으며 그 대가는 다음과 같이 지급하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00158501-q6-n2", "qid": "00158501-q6", "source": "natural", "text": "**보안 서비스** : 보안 서비스는 연결회사 차원에서 관리되고 있습니다.", "variant": null, "expected": null}
+{"cid": "00158501-q6-n3", "qid": "00158501-q6", "source": "natural", "text": "신용위험은 보유하고 있는 수취채권 및 확정계약을 포함한 거래처에 대한 신용위험뿐 아니라 현금및현금성자산, 은행 및 금융기관 예치금으로부터 발생하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00158501-q6-n4", "qid": "00158501-q6", "source": "natural", "text": "은행 및 금융기관의 경우, 독립적인 신용평가기관으로부터의 신용등급이 최소 A이상인 경우에 한하여 거래를 하고있습니다.", "variant": null, "expected": null}
+{"cid": "00158501-q6-n5", "qid": "00158501-q6", "source": "natural", "text": "독립적으로 신용평가를 받는다면 평가된 신용등급이 사용되며, 독립적인 신용 등급이 없는 경우에는 고객의 재무상태, 과거경험 등 기타 요소들을 고려하여 신용을 평가하게 됩니다.", "variant": null, "expected": null}
+{"cid": "00163345-q1-c1", "qid": "00163345-q1", "source": "controlled", "text": "상사부문은 무역·전자·투자를 각각 맡는 세 개의 사업부로 나뉘어 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00163345-q1-c2", "qid": "00163345-q1", "source": "controlled", "text": "상사부문은 무역·전자·투자를 각각 맡는 네 개의 사업부로 나뉘어 있다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "00163345-q1-n1", "qid": "00163345-q1", "source": "natural", "text": "[회사] DB는 다음과 같은 부문으로 구성되어 있습니다.", "variant": null, "expected": null}
+{"cid": "00163345-q1-n2", "qid": "00163345-q1", "source": "natural", "text": "**IT 사업**: 이 회사는 IT 사업을 통해 고객의 IT 환경 및 요구사항에 맞추어 전산 인프라 및 네트워크를 구축하고 운영, 유지보수의 수행, 대형 서버, 스토리지, 데이터 베이스 등을 운영 및 관리하는 사업을 수행합니다.", "variant": null, "expected": null}
+{"cid": "00163345-q1-n3", "qid": "00163345-q1", "source": "natural", "text": "**무역 사업**: 이 회사는 무역 사업을 통해 금융, 제조, 서비스, 공공 부문의 IT 전산 프로젝트와 관련하여 최적의 정보시스템을 구축하는 사업을 수행합니다.", "variant": null, "expected": null}
+{"cid": "00163345-q1-n4", "qid": "00163345-q1", "source": "natural", "text": "**제조 사업**: 이 회사는 제조 사업을 통해 철강, 금속, 광물, 에너지, 화학제품, 곡물, 농산물 등의 수출입을 통한 무역 사업을 수행합니다.", "variant": null, "expected": null}
+{"cid": "00163345-q1-n5", "qid": "00163345-q1", "source": "natural", "text": "**บรanding 사업**: 이 회사는 브랜드 사업을 통해 DB 상표권 관리 및 브랜드 가치 제고 활동, 대내외 홍보 활동, 계열사 커뮤니케이션 통합 운영, 계열사 디자인 제작물 관리 등 그룹의 브랜드와 광고 활동을 총괄하는 사업을 수행합니다.", "variant": null, "expected": null}
+{"cid": "00163345-q2-c1", "qid": "00163345-q2", "source": "controlled", "text": "KRG 전망에 따르면 2026년 국내 IT시장은 전년보다 4.3% 커진 30.2조원 규모가 될 것으로 보인다.", "variant": "의역", "expected": "supported"}
+{"cid": "00163345-q2-c2", "qid": "00163345-q2", "source": "controlled", "text": "KRG 전망에 따르면 2028년 국내 IT시장은 전년보다 4.3% 커진 30.2조원 규모가 될 것으로 보인다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "00163345-q2-n1", "qid": "00163345-q2", "source": "natural", "text": "IT 부문의 어플리케이션 사업과 인프라 사업은 각각 다른 서비스를 제공합니다.", "variant": null, "expected": null}
+{"cid": "00163345-q2-n2", "qid": "00163345-q2", "source": "natural", "text": "어플리케이션 사업: 고객이 발주한 프로젝트별로 고객의 요구사항에 따라 시스템 구축과 IT 서비스 운영을 통해 다양한 서비스를 제공합니다.", "variant": null, "expected": null}
+{"cid": "00163345-q2-n3", "qid": "00163345-q2", "source": "natural", "text": "예를 들어, 고객이 구축한 시스템을 운영하고, IT 서비스를 제공하는 것이 어플리케이션 사업입니다.", "variant": null, "expected": null}
+{"cid": "00163345-q2-n4", "qid": "00163345-q2", "source": "natural", "text": "인프라 사업: 고객이 발주한 프로젝트별로 고객의 요구사항에 따라 전산 인프라 및 네트워크를 구축하고 운영, 유지보수의 수행, 대형 서버, 스토리지, 데이터 베이스 등을 운영 및 관리하는 사업입니다.", "variant": null, "expected": null}
+{"cid": "00163345-q3-c1", "qid": "00163345-q3", "source": "controlled", "text": "상사부문의 전자사업부는 정보보안 솔루션 위주로 소프트웨어와 하드웨어를 공급하고 구축·유지보수까지 맡는다.", "variant": "의역", "expected": "supported"}
+{"cid": "00163345-q3-c2", "qid": "00163345-q3", "source": "controlled", "text": "상사부문의 물류사업부는 정보보안 솔루션 위주로 소프트웨어와 하드웨어를 공급하고 구축·유지보수까지 맡는다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00163345-q3-n1", "qid": "00163345-q3", "source": "natural", "text": "[문단 1] [1.", "variant": null, "expected": null}
+{"cid": "00163345-q3-n2", "qid": "00163345-q3", "source": "natural", "text": "사업의 개요] 당사는 차별화된 IT 서비스를 제공하기 위해 IT 아웃소싱 서비스 역량을 지속적으로 고도화하여 서비스 품질을 제고하는 한편 다양한 계열사에 IT 서비스를 제공한 경험을 바탕으로 당사의 강점이 있는 분야에서 대외사업을 확대하기 위한 노력을 지속하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00163345-q3-n3", "qid": "00163345-q3", "source": "natural", "text": "특히 금융분야는 금융 계열사를 대상으로 한 다양한 사업경험을 기반으로 유사 대외사업을 지속 확대하여 당사의 강점분야로 자리매김 하였습니다.", "variant": null, "expected": null}
+{"cid": "00163345-q3-n4", "qid": "00163345-q3", "source": "natural", "text": "[문단 2] [5.", "variant": null, "expected": null}
+{"cid": "00163345-q3-n5", "qid": "00163345-q3", "source": "natural", "text": "위험관리 및 파생거래] 신용위험은 계약상대방이 계약상의 의무를 이행하지 않아 연결실체에 재무손실을 미칠 위험을 의미합니다.", "variant": null, "expected": null}
+{"cid": "00163345-q4-c1", "qid": "00163345-q4", "source": "controlled", "text": "연결실체는 일정 수준 이상의 신용도를 갖춘 거래처하고만 거래하는 정책을 두고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00163345-q4-c2", "qid": "00163345-q4", "source": "controlled", "text": "연결실체는 일정 수준 이상의 신용도를 갖춘 거래처하고만 거래하는 정책을 두고 있지 않다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00163345-q4-n1", "qid": "00163345-q4", "source": "natural", "text": "[문단 1] [1.", "variant": null, "expected": null}
+{"cid": "00163345-q4-n2", "qid": "00163345-q4", "source": "natural", "text": "사업의 개요] 당사는 차별화된 IT 서비스를 제공하기 위해 IT 아웃소싱 서비스 역량을 지속적으로 고도화하여 서비스 품질을 제고하는 한편 다양한 계열사에 IT 서비스를 제공한 경험을 바탕으로 당사의 강점이 있는 분야에서 대외사업을 확대하기 위한 노력을 지속하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00163345-q4-n3", "qid": "00163345-q4", "source": "natural", "text": "특히 금융분야는 금융 계열사를 대상으로 한 다양한 사업경험을 기반으로 유사 대외사업을 지속 확대하여 당사의 강점분야로 자리매김 하였습니다.", "variant": null, "expected": null}
+{"cid": "00163345-q4-n4", "qid": "00163345-q4", "source": "natural", "text": "상사부문은 무역사업부, 전자사업부, 투자사업부의 세 사업부로 구성되어 있으며, 각 사업부는 고유의 사업영역을 기반으로 안정적인 수익 창출과 중장기적 성장 기반 확보를 추진하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00163345-q4-n5", "qid": "00163345-q4", "source": "natural", "text": "상사부문 중 무역사업부는 화학 및 철강 분야를 중심으로 국내외 상품의 수출입 및 중개무역 사업을 영위하고 있으며, 범세계적인 시장 공략을 통해 다수의 안정적인 거래처를 확보하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00163345-q5-c1", "qid": "00163345-q5", "source": "controlled", "text": "연결실체는 유동자금과 파생상품을 신용등급이 높은 금융기관과 거래하기 때문에 금융기관 쪽 신용위험은 크지 않다.", "variant": "의역", "expected": "supported"}
+{"cid": "00163345-q5-c2", "qid": "00163345-q5", "source": "controlled", "text": "현대자동차는 국내외 공장에서 완성차를 생산해 판매한다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00163345-q5-n1", "qid": "00163345-q5", "source": "natural", "text": "[질문] 회사는 환율과 금리 변동 위험을 줄이기 위해 연결실체의 신용위험을 제한하기 위해 금융부채의 만기구조를 대응시키고, 연결실체의 경영진은 영업활동에서 발생하는 현금흐름과 보유금융자산으로 금융부채의 상환이 가능하다고 판단하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00163345-q6-c1", "qid": "00163345-q6", "source": "controlled", "text": "이 회사 주식은 1993년 1월 6일 유가증권시장에 상장되었다.", "variant": "의역", "expected": "supported"}
+{"cid": "00163345-q6-c2", "qid": "00163345-q6", "source": "controlled", "text": "이 회사 주식은 1993년 1월 28일 유가증권시장에 상장되었다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "00163345-q6-n1", "qid": "00163345-q6", "source": "natural", "text": "[문단 1] [1.", "variant": null, "expected": null}
+{"cid": "00163345-q6-n2", "qid": "00163345-q6", "source": "natural", "text": "브랜드 사업부문] 브랜드 사업부는 2018년 1월 1일부터 2022년 12월 31일까지 5년간의 브랜드 사용 계약을 체결하여 'DB' 브랜드를 사용하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00173032-q1-c1", "qid": "00173032-q1", "source": "controlled", "text": "섬유판 강마루(접착식 강화마루) 시장은 2021년 이후 커지는 흐름을 보이고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00173032-q1-c2", "qid": "00173032-q1", "source": "controlled", "text": "섬유판 강마루(접착식 강화마루) 시장은 2016년 이후 커지는 흐름을 보이고 있다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "00173032-q1-n1", "qid": "00173032-q1", "source": "natural", "text": "당사는 소재사업 부문과 화학사업 부문, 하우징사업 부문으로 구성되어 있습니다.", "variant": null, "expected": null}
+{"cid": "00173032-q2-c1", "qid": "00173032-q2", "source": "controlled", "text": "동화기업의 2025년 판매 비율에서 베트남 남부 해외 사업이 차지한 몫은 23.5%였다.", "variant": "의역", "expected": "supported"}
+{"cid": "00173032-q2-c2", "qid": "00173032-q2", "source": "controlled", "text": "동화기업의 2025년 판매 비율에서 인도네시아 해외 사업이 차지한 몫은 23.5%였다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00173032-q2-n1", "qid": "00173032-q2", "source": "natural", "text": "동화기업의 2025년 판매 비율 기준으로 가장 큰 비중을 차지한 품목은 MDF (MDF)입니다.", "variant": null, "expected": null}
+{"cid": "00173032-q3-c1", "qid": "00173032-q3", "source": "controlled", "text": "동화기업의 베트남 북부 종속법인은 2022년부터 MDF와 마루를 본격적으로 만들어 내고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00173032-q3-c2", "qid": "00173032-q3", "source": "controlled", "text": "동화기업의 베트남 북부 종속법인은 2022년부터 MDF와 마루를 본격적으로 만들어 내고 있지 않다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00173032-q3-n1", "qid": "00173032-q3", "source": "natural", "text": "동화기업의 2025년 연결 기준 매출액은 100.0입니다.", "variant": null, "expected": null}
+{"cid": "00173032-q3-n2", "qid": "00173032-q3", "source": "natural", "text": "동화기업의 사업부문별 매출은 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "00173032-q3-n3", "qid": "00173032-q3", "source": "natural", "text": "동화에코보드: 13.2%", "variant": null, "expected": null}
+{"cid": "00173032-q3-n4", "qid": "00173032-q3", "source": "natural", "text": "한솔홈데코: 42.2%", "variant": null, "expected": null}
+{"cid": "00173032-q3-n5", "qid": "00173032-q3", "source": "natural", "text": "유니드비티플러스: 31.6%", "variant": null, "expected": null}
+{"cid": "00173032-q4-c1", "qid": "00173032-q4", "source": "controlled", "text": "동화기업은 2025년에 국내에서 MDF를 365,598㎥ 생산했다.", "variant": "의역", "expected": "supported"}
+{"cid": "00173032-q4-c2", "qid": "00173032-q4", "source": "controlled", "text": "현대자동차는 국내 공장에서 승용차를 생산한다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00173032-q4-n1", "qid": "00173032-q4", "source": "natural", "text": "[질문] 동화기업의 2025년 국내 MDF와 PB 공장의 평균 가동률은 각각 몇 퍼센트였나요?", "variant": null, "expected": null}
+{"cid": "00173032-q5-c1", "qid": "00173032-q5", "source": "controlled", "text": "회사가 제품 판매대금에 대해 허용하는 신용기간은 평균 60일이다.", "variant": "의역", "expected": "supported"}
+{"cid": "00173032-q5-c2", "qid": "00173032-q5", "source": "controlled", "text": "회사가 제품 판매대금에 대해 허용하는 신용기간은 평균 45일이다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "00173032-q5-n1", "qid": "00173032-q5", "source": "natural", "text": "아, 동화기업은 환율 및 이자율 위험을 관리하기 위해 파생상품 계약을 활용하고 있어요.", "variant": null, "expected": null}
+{"cid": "00173032-q6-c1", "qid": "00173032-q6", "source": "controlled", "text": "동화기업은 2019년 8월에 전해액 제조사인 동화일렉트로라이트(옛 파낙스이텍)를 사들였다.", "variant": "의역", "expected": "supported"}
+{"cid": "00173032-q6-c2", "qid": "00173032-q6", "source": "controlled", "text": "동화기업은 2016년 8월에 전해액 제조사인 동화일렉트로라이트(옛 파낙스이텍)를 사들였다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "00173032-q6-n1", "qid": "00173032-q6", "source": "natural", "text": "동화기업 화학사업군의 2025년 연구개발비용 총액과 매출액 대비 비율은 29.9%에서 32.6%까지 증가했습니다.", "variant": null, "expected": null}
+{"cid": "00216434-q1-c1", "qid": "00216434-q1", "source": "controlled", "text": "체리부로 그룹에서 육계·종계를 기르고 부화하는 종계및부화부문은 농업회사법인 (주)한국원종이 담당한다.", "variant": "의역", "expected": "supported"}
+{"cid": "00216434-q1-c2", "qid": "00216434-q1", "source": "controlled", "text": "체리부로 그룹에서 육계·종계를 기르고 부화하는 종계및부화부문은 농업회사법인 (주)대한종계가 담당한다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00216434-q1-n1", "qid": "00216434-q1", "source": "natural", "text": "체리부로의 사업부문은 육가공유통부문, 종계 및 부화부문으로 나뉘어 있습니다.", "variant": null, "expected": null}
+{"cid": "00216434-q2-c1", "qid": "00216434-q2", "source": "controlled", "text": "체리부로는 닭가슴살 육포용 조성물과 그 육포 제조방법에 관한 특허를 2018년 4월 13일에 등록했다.", "variant": "의역", "expected": "supported"}
+{"cid": "00216434-q2-c2", "qid": "00216434-q2", "source": "controlled", "text": "체리부로는 닭가슴살 육포용 조성물과 그 육포 제조방법에 관한 특허를 2018년 4월 13일에 등록하지 않았다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00216434-q2-n1", "qid": "00216434-q2", "source": "natural", "text": "체리부로가 판매하는 주요 제품은 닭고기 products입니다.", "variant": null, "expected": null}
+{"cid": "00216434-q2-n2", "qid": "00216434-q2", "source": "natural", "text": "닭고기 products의 판매 가격은 최근 몇 년간 변해 왔습니다.", "variant": null, "expected": null}
+{"cid": "00216434-q2-n3", "qid": "00216434-q2", "source": "natural", "text": "닭고기 products의 판매 가격은 2017년 하반기에 체리부로가 인수한 체리푸드(구.", "variant": null, "expected": null}
+{"cid": "00216434-q2-n4", "qid": "00216434-q2", "source": "natural", "text": "동양종합식품)를 통해 시작한 체리부로의 원료육을 이용한 육가공 제품의 생산 및 유통 사업을 활발히 전개 중입니다.", "variant": null, "expected": null}
+{"cid": "00216434-q2-n5", "qid": "00216434-q2", "source": "natural", "text": "품질 좋은 체리부로의 닭고기를 사용한 가공제품을 생산하여 기존 가공제품과는 차별화된 가정간편식 제품 라인업을 강화하며 중장기적인 시장변화에 대응하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00216434-q3-c1", "qid": "00216434-q3", "source": "controlled", "text": "체리부로는 익산과 옥천에 둔 사료공장에서 육계에 특화된 전용 사료를 만들고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00216434-q3-c2", "qid": "00216434-q3", "source": "controlled", "text": "삼성전자는 평택과 화성에 둔 반도체 공장에서 메모리 반도체를 만들고 있다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00216434-q3-n1", "qid": "00216434-q3", "source": "natural", "text": "[질문] 최근 사업연도 체리부로의 총매출액은 얼마이고, 육계 매출은 판매경로별로 어떻게 나뉘어 있나요?", "variant": null, "expected": null}
+{"cid": "00216434-q4-c1", "qid": "00216434-q4", "source": "controlled", "text": "연결실체가 보유한 단기금융상품 장부금액은 제35기 말 640,000천원으로 제34기 말보다 늘었다.", "variant": "의역", "expected": "supported"}
+{"cid": "00216434-q4-c2", "qid": "00216434-q4", "source": "controlled", "text": "연결실체가 보유한 단기금융상품 장부금액은 제35기 말 720,000천원으로 제34기 말보다 늘었다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "00216434-q4-n1", "qid": "00216434-q4", "source": "natural", "text": "체리부로의 주요 원재료 매입 구성은 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "00216434-q4-n2", "qid": "00216434-q4", "source": "natural", "text": "육가공제품: 70%", "variant": null, "expected": null}
+{"cid": "00216434-q4-n3", "qid": "00216434-q4", "source": "natural", "text": "사료: 20%", "variant": null, "expected": null}
+{"cid": "00216434-q4-n4", "qid": "00216434-q4", "source": "natural", "text": "병아리: 10%", "variant": null, "expected": null}
+{"cid": "00216434-q4-n5", "qid": "00216434-q4", "source": "natural", "text": "육가공제품의 가동률은 70%입니다.", "variant": null, "expected": null}
+{"cid": "00216434-q5-c1", "qid": "00216434-q5", "source": "controlled", "text": "체리부로는 농가협의회 활성화 등의 노력을 인정받아 2014년 7월 농림축산식품부로부터 육계계열화사업 모범사업자 지정을 받았다.", "variant": "의역", "expected": "supported"}
+{"cid": "00216434-q5-c2", "qid": "00216434-q5", "source": "controlled", "text": "체리부로는 농가협의회 활성화 등의 노력을 인정받아 2011년 7월 농림축산식품부로부터 육계계열화사업 모범사업자 지정을 받았다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "00216434-q5-n1", "qid": "00216434-q5", "source": "natural", "text": "체리부로는 유동성위험에 대응하고 있으며, 환율이 10% 변동하면 세전순이익에 어느 정도 영향을 받습니다.", "variant": null, "expected": null}
+{"cid": "00216434-q6-c1", "qid": "00216434-q6", "source": "controlled", "text": "체리부로는 네덜란드 헤치텍사의 부화기를 들여와 국내 최상위 수준의 부화율을 확보했다.", "variant": "의역", "expected": "supported"}
+{"cid": "00216434-q6-c2", "qid": "00216434-q6", "source": "controlled", "text": "체리부로는 네덜란드 페터심사의 부화기를 들여와 국내 최상위 수준의 부화율을 확보했다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00216434-q6-n1", "qid": "00216434-q6", "source": "natural", "text": "체리부로의 연구개발비는 매출액 대비 약 10% 정도입니다.", "variant": null, "expected": null}
+{"cid": "00243979-q1-c1", "qid": "00243979-q1", "source": "controlled", "text": "이 회사의 중심 사업은 물류장비 분야이고, 반도체와 웹툰 사업은 종속회사들이 맡아 운영한다.", "variant": "의역", "expected": "supported"}
+{"cid": "00243979-q1-c2", "qid": "00243979-q1", "source": "controlled", "text": "이 회사의 중심 사업은 물류장비 분야가 아니며, 반도체와 웹툰 사업은 종속회사들이 맡아 운영한다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00243979-q1-n1", "qid": "00243979-q1", "source": "natural", "text": "당사는 물류장비 사업을 주력으로 하는 회사로 반도체 및 웹툰 사업을 운영하는 종속기업(이하 연결회사)을 보유하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00243979-q2-c1", "qid": "00243979-q2", "source": "controlled", "text": "회사는 전동지게차에 수소연료전지를 적용하는 연구를 통해 연료전지형 전동지게차를 개발하고 제품 경쟁력을 높이려 한다.", "variant": "의역", "expected": "supported"}
+{"cid": "00243979-q2-c2", "qid": "00243979-q2", "source": "controlled", "text": "삼성전자는 고대역폭메모리(HBM) 개발을 통해 메모리 반도체 제품 경쟁력을 높이려 한다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00243979-q2-n1", "qid": "00243979-q2", "source": "natural", "text": "물류장비 사업에서 매출 비중이 가장 큰 제품군은 industry truck 및 적재기 제조업입니다.", "variant": null, "expected": null}
+{"cid": "00243979-q3-n1", "qid": "00243979-q3", "source": "natural", "text": "[회사] 수성웹툰", "variant": null, "expected": null}
+{"cid": "00243979-q3-n2", "qid": "00243979-q3", "source": "natural", "text": "[문단 1] [7.", "variant": null, "expected": null}
+{"cid": "00243979-q3-n3", "qid": "00243979-q3", "source": "natural", "text": "기타 참고사항] 또한, AI 및 데이터 기술의 발전으로 웹툰 제작 및 번역이 자동화되면서 웹툰의 글로벌 진출이 더욱 용이해지고 있으며, 개인화된 추천 시스템을 통해 독자 맞춤형 콘텐츠 제공이 가능해지는 등 산업 경쟁력이 강화되고 있습니다.", "variant": null, "expected": null}
+{"cid": "00243979-q3-n4", "qid": "00243979-q3", "source": "natural", "text": "소비자 트렌드 측면에서도 MZ세대가 웹툰의 주요 소비층으로 자리 잡고 있으며, 이들의 높은 선호도와 충성도는 산업 성장의 중요한 기반이 되고 있습니다.", "variant": null, "expected": null}
+{"cid": "00243979-q3-n5", "qid": "00243979-q3", "source": "natural", "text": "3) 경기변동의 특성 웹툰 산업은 경기변동에 대한 민감도가 낮은 산업으로 평가됩니다.", "variant": null, "expected": null}
+{"cid": "00243979-q4-c1", "qid": "00243979-q4", "source": "controlled", "text": "웹툰 플랫폼 투믹스는 2015년에 세워졌다.", "variant": "의역", "expected": "supported"}
+{"cid": "00243979-q4-c2", "qid": "00243979-q4", "source": "controlled", "text": "웹툰 플랫폼 투믹스는 2011년에 세워졌다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "00243979-q4-n1", "qid": "00243979-q4", "source": "natural", "text": "[질문] 전동지게차의 연간 생산능력은 몇 대이고, 당기 실제 생산실적은 어느 정도였나요?", "variant": null, "expected": null}
+{"cid": "00243979-q5-c1", "qid": "00243979-q5", "source": "controlled", "text": "회사의 위험관리부서와 그 밖의 위험관리정책은 전기말 이후 중요하게 달라진 점이 없다.", "variant": "의역", "expected": "supported"}
+{"cid": "00243979-q5-c2", "qid": "00243979-q5", "source": "controlled", "text": "회사의 내부감사팀과 그 밖의 위험관리정책은 전기말 이후 중요하게 달라진 점이 없다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00243979-q5-n1", "qid": "00243979-q5", "source": "natural", "text": "[질문] 회사가 노출된 주요 금융위험에는 다음과 같은 것들이 있습니다.", "variant": null, "expected": null}
+{"cid": "00243979-q5-n2", "qid": "00243979-q5", "source": "natural", "text": "재무위험관리요소회사는 여러 활동으로 인하여 시장위험(환위험, 공정가치 이자율 위험, 현금흐름 이자율 위험 및 가격위험), 신용위험 및 유동성 위험과 같은 다양한 금융 위험에 노출되어 있습니다.", "variant": null, "expected": null}
+{"cid": "00243979-q5-n3", "qid": "00243979-q5", "source": "natural", "text": "요약반기재무제표는 연차 재무제표에서 요구되는 모든 재무위험관리와 공시사항을 포함하지 않으므로 2024년 12월 31일의 연차재무제표를 참고하시기 바랍니다.", "variant": null, "expected": null}
+{"cid": "00243979-q5-n4", "qid": "00243979-q5", "source": "natural", "text": "회사의 위험관리부서 및 기타 위험관리정책에는 전기말과 비교하여 금융부채에 대한 계약상 할인되지 않은 현금흐름에 대한 중요한 변동이 있습니다.", "variant": null, "expected": null}
+{"cid": "00243979-q6-c1", "qid": "00243979-q6", "source": "controlled", "text": "제45기 연구개발비가 매출액에서 차지하는 비율은 1.44%로 집계되었다.", "variant": "의역", "expected": "supported"}
+{"cid": "00243979-q6-c2", "qid": "00243979-q6", "source": "controlled", "text": "제45기 연구개발비가 매출액에서 차지하는 비율은 1.44%로 집계되지 않았다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00243979-q6-n1", "qid": "00243979-q6", "source": "natural", "text": "당기 연구개발비용 총액은 313,973만 원이며, 매출액은 69,752만 원입니다.", "variant": null, "expected": null}
+{"cid": "00243979-q6-n2", "qid": "00243979-q6", "source": "natural", "text": "따라서 연구개발비 비율은 313,973만 원 / 69,752만 원 = 0.45입니다.", "variant": null, "expected": null}
+{"cid": "00266961-q1-c1", "qid": "00266961-q1", "source": "controlled", "text": "네이버와 그 종속회사들은 국내 1위 검색 포털인 네이버 서비스를 토대로 광고, 커머스, 핀테크 같은 여러 사업을 운영하고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00266961-q1-c2", "qid": "00266961-q1", "source": "controlled", "text": "현대자동차는 승용차와 상용차를 생산해 국내외 시장에 판매하는 사업을 운영하고 있다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00266961-q1-n1", "qid": "00266961-q1", "source": "natural", "text": "네이버는 국내 1위 인터넷 검색 포털 '네이버(NAVER)' 서비스를 기반으로 다양한 사업을 영위하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00266961-q1-n2", "qid": "00266961-q1", "source": "natural", "text": "이 사업 영역 중에서 가장 큰 사업은 광고 사업입니다.", "variant": null, "expected": null}
+{"cid": "00266961-q1-n3", "qid": "00266961-q1", "source": "natural", "text": "네이버는 광고를 통해 매출을 창출하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00266961-q2-c1", "qid": "00266961-q2", "source": "controlled", "text": "네이버의 제27기 누적 연결 영업수익은 12,035,007백만원이며, 서비스별 구분에서 커머스는 커머스 광고, 중개 및 판매, 멤버십 등을 주된 영업으로 한다.", "variant": "의역", "expected": "supported"}
+{"cid": "00266961-q2-c2", "qid": "00266961-q2", "source": "controlled", "text": "네이버의 제27기 누적 연결 영업수익은 13,482,516백만원이며, 서비스별 구분에서 커머스는 커머스 광고, 중개 및 판매, 멤버십 등을 주된 영업으로 한다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "00266961-q2-n1", "qid": "00266961-q2", "source": "natural", "text": "네이버 커머스 부문의 매출은 다음과 같이 구성되어 있어요.", "variant": null, "expected": null}
+{"cid": "00266961-q2-n2", "qid": "00266961-q2", "source": "natural", "text": "**서치플랫폼** - 네이버페이와 디지털금융 서비스를 통해 수익을 얻는 서비스를 포함합니다.", "variant": null, "expected": null}
+{"cid": "00266961-q2-n3", "qid": "00266961-q2", "source": "natural", "text": "**커머스** - 커머스 광고, 중개 및 판매, 멤버십 등으로 수익을 얻는 서비스를 포함합니다.", "variant": null, "expected": null}
+{"cid": "00266961-q2-n4", "qid": "00266961-q2", "source": "natural", "text": "**핀테크** - 페이, 플랫폼 서비스 등으로 수익을 얻는 서비스를 포함합니다.", "variant": null, "expected": null}
+{"cid": "00266961-q2-n5", "qid": "00266961-q2", "source": "natural", "text": "**콘텐츠** - 웹툰, SNOW 등으로 수익을 얻는 서비스를 포함합니다.", "variant": null, "expected": null}
+{"cid": "00266961-q3-c1", "qid": "00266961-q3", "source": "controlled", "text": "국내 전체 온라인 커머스 거래액은 2025년에 272조원으로 전년보다 4.9% 늘어나는 데 그쳐 성장세가 둔화되었다.", "variant": "의역", "expected": "supported"}
+{"cid": "00266961-q3-c2", "qid": "00266961-q3", "source": "controlled", "text": "국내 전체 온라인 커머스 거래액은 2017년에 272조원으로 전년보다 4.9% 늘어나는 데 그쳐 성장세가 둔화되었다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "00266961-q3-n1", "qid": "00266961-q3", "source": "natural", "text": "2025년(제27기) 연결 영업수익에서 가장 큰 비중을 차지한 서비스 부문은 온라인 쇼핑 서비스입니다.", "variant": null, "expected": null}
+{"cid": "00266961-q4-c1", "qid": "00266961-q4", "source": "controlled", "text": "네이버의 제27기 연결 누적 시설투자액은 1,317.1십억원이었고, 이 가운데 서버 및 비품 등에 들어간 금액이 1,159.5십억원이었다.", "variant": "의역", "expected": "supported"}
+{"cid": "00266961-q4-c2", "qid": "00266961-q4", "source": "controlled", "text": "카카오의 제27기 연결 누적 시설투자액은 1,317.1십억원이었고, 이 가운데 서버 및 비품 등에 들어간 금액이 1,159.5십억원이었다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00266961-q4-n1", "qid": "00266961-q4", "source": "natural", "text": "네이버의 시설투자(CapEx) 총액은 2024년 259조원으로, 그중 서버 및 비품 등에 대한 투자는 1,159.5억원입니다.", "variant": null, "expected": null}
+{"cid": "00266961-q5-c1", "qid": "00266961-q5", "source": "controlled", "text": "네이버 연결회사는 국제적으로 영업하기 때문에 주로 미국 달러화, 일본 엔화, 유로화의 환율 변동 위험에 노출되어 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00266961-q5-c2", "qid": "00266961-q5", "source": "controlled", "text": "네이버 연결회사는 국제적으로 영업하지만 미국 달러화, 일본 엔화, 유로화의 환율 변동 위험에는 노출되어 있지 않다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00266961-q5-n1", "qid": "00266961-q5", "source": "natural", "text": "원화 대비 일본 엔화 환율이 5% 상승하면 네이버의 세후이익에 대한 영향은 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "00266961-q5-n2", "qid": "00266961-q5", "source": "natural", "text": "네이버의 세후이익은 원화 대비 일본 엔화 환율에 따라 달라질 수 있습니다.", "variant": null, "expected": null}
+{"cid": "00266961-q5-n3", "qid": "00266961-q5", "source": "natural", "text": "원화 대비 일본 엔화 환율이 5% 상승하면 네이버의 세후이익은 원화 대비 일본 엔화 환율에 따라 5% 상승할 것입니다.", "variant": null, "expected": null}
+{"cid": "00266961-q6-c1", "qid": "00266961-q6", "source": "controlled", "text": "2021년부터 2025년까지 네이버가 거둔 주요 연구개발실적은 모두 163건이다.", "variant": "의역", "expected": "supported"}
+{"cid": "00266961-q6-c2", "qid": "00266961-q6", "source": "controlled", "text": "SK하이닉스는 D램과 낸드플래시 같은 메모리 반도체를 주력 제품으로 생산한다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00266961-q6-n1", "qid": "00266961-q6", "source": "natural", "text": "2025년(제27기) 연결기준 연구개발비용은 10.1%입니다.", "variant": null, "expected": null}
+{"cid": "00356361-q1-c1", "qid": "00356361-q1", "source": "controlled", "text": "2025년 말 기준 LG화학 연결 매출에서 석유화학 사업부문이 차지한 비중은 38.2%였다.", "variant": "의역", "expected": "supported"}
+{"cid": "00356361-q1-c2", "qid": "00356361-q1", "source": "controlled", "text": "2025년 말 기준 LG화학 연결 매출에서 석유화학 사업부문이 차지한 비중은 41.3%였다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "00356361-q1-n1", "qid": "00356361-q1", "source": "natural", "text": "LG화학은 석유화학 사업부문, 첨단소재 사업부문, 생명과학 사업부문, 공통 및 기타 사업부문에 속합니다.", "variant": null, "expected": null}
+{"cid": "00356361-q2-c1", "qid": "00356361-q2", "source": "controlled", "text": "LG화학 생명과학사업은 2025년에 세계 최초로 개발한 경구용 희귀비만치료제를 라이선스 아웃해 매출이 늘고 수익성이 좋아졌다.", "variant": "의역", "expected": "supported"}
+{"cid": "00356361-q2-c2", "qid": "00356361-q2", "source": "controlled", "text": "LG화학 생명과학사업은 2023년에 세계 최초로 개발한 경구용 희귀비만치료제를 라이선스 아웃해 매출이 늘고 수익성이 좋아졌다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "00356361-q2-n1", "qid": "00356361-q2", "source": "natural", "text": "LG화학 생명과학 사업부문에서 생산·판매하는 주요 의약품은 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "00356361-q2-n2", "qid": "00356361-q2", "source": "natural", "text": "당뇨신약 제미글로", "variant": null, "expected": null}
+{"cid": "00356361-q2-n3", "qid": "00356361-q2", "source": "natural", "text": "인간 성장호르몬제 유트로핀", "variant": null, "expected": null}
+{"cid": "00356361-q2-n4", "qid": "00356361-q2", "source": "natural", "text": "관절염주사제 시노비안", "variant": null, "expected": null}
+{"cid": "00356361-q2-n5", "qid": "00356361-q2", "source": "natural", "text": "류머티스 관절염 치료제 유셉", "variant": null, "expected": null}
+{"cid": "00356361-q3-c1", "qid": "00356361-q3", "source": "controlled", "text": "LG화학의 2025년 연결 매출 가운데 첨단소재 사업부문 몫은 5.7%였다.", "variant": "의역", "expected": "supported"}
+{"cid": "00356361-q3-c2", "qid": "00356361-q3", "source": "controlled", "text": "LG화학의 2025년 연결 매출 가운데 반도체소재 사업부문 몫은 5.7%였다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00356361-q3-n1", "qid": "00356361-q3", "source": "natural", "text": "LG화학의 2025년 연결 매출액은 약 26,560억원입니다.", "variant": null, "expected": null}
+{"cid": "00356361-q3-n2", "qid": "00356361-q3", "source": "natural", "text": "LG화학의 사업부문별 매출 비중은 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "00356361-q3-n3", "qid": "00356361-q3", "source": "natural", "text": "LG에너지솔루션: 10.5조원", "variant": null, "expected": null}
+{"cid": "00356361-q3-n4", "qid": "00356361-q3", "source": "natural", "text": "석유화학: 38.2%", "variant": null, "expected": null}
+{"cid": "00356361-q3-n5", "qid": "00356361-q3", "source": "natural", "text": "첨단소재: 5.7%", "variant": null, "expected": null}
+{"cid": "00356361-q4-c1", "qid": "00356361-q4", "source": "controlled", "text": "LG화학 석유화학 사업부문은 범용제품 외에 고부가 제품을 늘리고 신제품을 개발해 사업구조를 고도화하는 판매전략을 펴고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00356361-q4-c2", "qid": "00356361-q4", "source": "controlled", "text": "LG화학 석유화학 사업부문은 범용제품 외에 고부가 제품을 늘리고 신제품을 개발해 사업구조를 고도화하는 판매전략을 펴고 있지 않다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00356361-q4-n1", "qid": "00356361-q4", "source": "natural", "text": "LG화학 석유화학 사업부문의 주요 원재료는 고부가 제품 확대와 신제품 개발을 통한 사업구조 고도화, 신시장 개척 및 영업, 마케팅, CS 등을 포괄하는 현지 완결형 영업 전략을 강화하고 있으며, 첨단소재 사업부문은 주요 고객별 가치 향상을 위한 전략적 제휴를 통해 매출 규모를 증대시킬 예정입니다.", "variant": null, "expected": null}
+{"cid": "00356361-q4-n2", "qid": "00356361-q4", "source": "natural", "text": "또한, 생명과학 사업부문은 내수의 경우 당뇨치료제 등 차별화되고 경쟁력이 있는 제품군에 집중하여 제품력을 강화하고 있으며, 수출의 경우 단기적으로 신흥시장 중심으로 매출을 확대하고 장기적으로 R&D에서 확보되는 제품들을 통하여 선진시장에 진출하고자 합니다.", "variant": null, "expected": null}
+{"cid": "00356361-q4-n3", "qid": "00356361-q4", "source": "natural", "text": "LG에너지솔루션은 연구개발에 대한 지속적인 투자와 고도의 핵심 기술 확보 및 융합을 통한 신규 유망사업 발굴을 위해 끊임없이 노력하고 있으며, 특히 차세대 고용량/고안전성 소재, 스마트팩토리 가속화 등과 같은 당사의 핵심 기술을 중심으로 현 사업의 경쟁력을 강화하고 신제품 개발에 집중하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00356361-q4-n4", "qid": "00356361-q4", "source": "natural", "text": "LG에너", "variant": null, "expected": null}
+{"cid": "00356361-q5-c1", "qid": "00356361-q5", "source": "controlled", "text": "LG화학은 미국, 독일, 일본에 위성 연구소를 두고 글로벌 R&D 네트워크를 운영하고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00356361-q5-c2", "qid": "00356361-q5", "source": "controlled", "text": "현대자동차는 울산 공장에서 승용차와 SUV 등 완성차를 생산하고 있다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00356361-q5-n1", "qid": "00356361-q5", "source": "natural", "text": "LG화학은 환율 변동 위험을 관리하기 위해 CDO (Credit Default Swap) 계약을 체결하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00356361-q5-n2", "qid": "00356361-q5", "source": "natural", "text": "CDO는 환율 변동 위험을 관리하기 위해 환율에 대한 보증을 제공하는 계약입니다.", "variant": null, "expected": null}
+{"cid": "00356361-q5-n3", "qid": "00356361-q5", "source": "natural", "text": "CDO는 환율의 변동을 예상하는 기회를 제공하고, 환율의 변동을 예상하는 기회를 제공하는 데 도움이 됩니다.", "variant": null, "expected": null}
+{"cid": "00356361-q6-c1", "qid": "00356361-q6", "source": "controlled", "text": "LG화학은 2025년 말 기준으로 연간 약 45조 9,322억원의 매출을 올렸다.", "variant": "의역", "expected": "supported"}
+{"cid": "00356361-q6-c2", "qid": "00356361-q6", "source": "controlled", "text": "LG화학은 2025년 말 기준으로 연간 약 52조 7,140억원의 매출을 올렸다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "00356361-q6-n1", "qid": "00356361-q6", "source": "natural", "text": "LG화학의 최근 사업연도 연구개발비용은 2020년 12월 1일부터 2021년 12월 31일까지 1,000억원으로, 이전 연도 대비 1,000억원으로 1,000% 증가했습니다.", "variant": null, "expected": null}
+{"cid": "00359076-q1-c1", "qid": "00359076-q1", "source": "controlled", "text": "브리지텍은 순수 자사 기술로 만든 클라우드 컨택센터 서비스 IPRON Cloud를 2021년에 출시했다.", "variant": "의역", "expected": "supported"}
+{"cid": "00359076-q1-c2", "qid": "00359076-q1", "source": "controlled", "text": "브리지텍은 순수 자사 기술로 만든 클라우드 컨택센터 서비스 IPRON Cloud를 2018년에 출시했다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "00359076-q1-n1", "qid": "00359076-q1", "source": "natural", "text": "브리지텍은 콜센터, 통신, 서비스를 제공하는 회사입니다.", "variant": null, "expected": null}
+{"cid": "00359076-q1-n2", "qid": "00359076-q1", "source": "natural", "text": "브리지텍의 사업영역을 구분하는 방법은 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "00359076-q1-n3", "qid": "00359076-q1", "source": "natural", "text": "콜센터: 브리지텍의 콜센터 사업은 여러 기능의 각기 시스템들의 연동, 개발업무 등이 투입되는 복합적인 프로젝트이기 때문에 제품별로 전체시장 점유율 산정은 어렵습니다.", "variant": null, "expected": null}
+{"cid": "00359076-q1-n4", "qid": "00359076-q1", "source": "natural", "text": "통신: 브리지텍의 통신 사업은 주로 IP기반 유무선 멀티미디어 서비스를 제공하는 것입니다.", "variant": null, "expected": null}
+{"cid": "00359076-q1-n5", "qid": "00359076-q1", "source": "natural", "text": "서비스: 브리지텍의 서비스 사업은 콜센터와 통신의 일부입니다.", "variant": null, "expected": null}
+{"cid": "00359076-q2-c1", "qid": "00359076-q2", "source": "controlled", "text": "브리지텍의 AI 음성봇 솔루션 Catch Bot은 기존 IPCC 솔루션과 연계되어 AI 음성 상담원 기능을 수행한다.", "variant": "의역", "expected": "supported"}
+{"cid": "00359076-q2-c2", "qid": "00359076-q2", "source": "controlled", "text": "브리지텍의 AI 음성봇 솔루션 VoiceMate는 기존 IPCC 솔루션과 연계되어 AI 음성 상담원 기능을 수행한다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00359076-q2-n1", "qid": "00359076-q2", "source": "natural", "text": "[질문] 브리지텍이 공급하는 AICC 음성봇 솔루션은 AI 기술을 종합해 고객응대 업무에 적용한 서비스입니다.", "variant": null, "expected": null}
+{"cid": "00359076-q2-n2", "qid": "00359076-q2", "source": "natural", "text": "이 기술은 음성인식, 자연어 이해, 가상 상담 등을 포함하여 다양한 기술 요소로 구성되어 있습니다.", "variant": null, "expected": null}
+{"cid": "00359076-q3-c1", "qid": "00359076-q3", "source": "controlled", "text": "2025년 말 기준 콜센터 인프라 및 소프트웨어 매출은 35,067,101천원으로 전체 매출의 70.6%를 차지했다.", "variant": "의역", "expected": "supported"}
+{"cid": "00359076-q3-c2", "qid": "00359076-q3", "source": "controlled", "text": "2025년 말 기준 콜센터 인프라 및 소프트웨어 매출은 35,067,101천원으로 전체 매출의 70.6%를 차지하지 않았다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00359076-q3-n1", "qid": "00359076-q3", "source": "natural", "text": "브리지텍의 2025년 전체 매출액은 36,603,589원이며, 그중 콜센터 솔루션이 차지하는 비중은 70.6%입니다.", "variant": null, "expected": null}
+{"cid": "00359076-q4-c1", "qid": "00359076-q4", "source": "controlled", "text": "브리지텍 제품매출에 들어가는 원재료는 주로 서버와 하드웨어로 이루어진다.", "variant": "의역", "expected": "supported"}
+{"cid": "00359076-q4-c2", "qid": "00359076-q4", "source": "controlled", "text": "현대제철 제품 생산에 들어가는 원재료는 주로 철광석과 원료탄으로 이루어진다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00359076-q4-n1", "qid": "00359076-q4", "source": "natural", "text": "[원재료] 당사의 제품매출에 대한 원재료는 서버 및 하드웨어가 주를 이루고 있으며 프로젝트마다 동일한 원재료 투입이 이루어지는 방식이 아니라 원재료에 대한 가격변동 측정치를 구할 수 없습니다.", "variant": null, "expected": null}
+{"cid": "00359076-q4-n2", "qid": "00359076-q4", "source": "natural", "text": "또한 당사는 특수관계인과 거래한 사실이 없습니다.", "variant": null, "expected": null}
+{"cid": "00359076-q4-n3", "qid": "00359076-q4", "source": "natural", "text": "[ 생산설비] 당사는 콜센터 및 통신 관련 소프트웨어를 개발, 공급하는 회사로 일정한 제품을 생산라인에 따라 제조하는 방식의 제품 생산을 위한 설비를 필요로 하지 않습니다.", "variant": null, "expected": null}
+{"cid": "00359076-q4-n4", "qid": "00359076-q4", "source": "natural", "text": "따라서 생산 및 생산설비에 관한 사항은 해당이 없으며, 솔루션을 개발 하기 위해 일단의 컴퓨터 장비(서버) 설비를 보유하지만, 이는 생산 능력을 측정할 수 있는 기계장치가 아니므로 생산능력을 산정할 수는 없습니다.", "variant": null, "expected": null}
+{"cid": "00359076-q5-c1", "qid": "00359076-q5", "source": "controlled", "text": "브리지텍은 세금계산서를 발행한 뒤 평균적으로 약 60일 안에 매출대금을 회수한다.", "variant": "의역", "expected": "supported"}
+{"cid": "00359076-q5-c2", "qid": "00359076-q5", "source": "controlled", "text": "브리지텍은 세금계산서를 발행한 뒤 평균적으로 약 90일 안에 매출대금을 회수한다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "00359076-q5-n1", "qid": "00359076-q5", "source": "natural", "text": "[회사] 브리지텍는 금리나 환율 같은 시장위험에 얼마나 노출되어 있고 파생상품 거래를 하고 있나요?", "variant": null, "expected": null}
+{"cid": "00359076-q6-c1", "qid": "00359076-q6", "source": "controlled", "text": "브리지텍의 2025 회계연도 연구개발비용 합계는 약 43억 2천만 원으로 매출액의 8.70% 수준이었다.", "variant": "의역", "expected": "supported"}
+{"cid": "00359076-q6-c2", "qid": "00359076-q6", "source": "controlled", "text": "브리지텍의 2019 회계연도 연구개발비용 합계는 약 43억 2천만 원으로 매출액의 8.70% 수준이었다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "00359076-q6-n1", "qid": "00359076-q6", "source": "natural", "text": "브리지텍의 2025년 연구개발비용은 8.70%로, 매출액 대비 비율은 27.7%입니다.", "variant": null, "expected": null}
+{"cid": "00365590-q1-c1", "qid": "00365590-q1", "source": "controlled", "text": "메디케어사업 부문은 체외진단의료기기와 그 밖의 의료용 기기를 만들어 팔며, 2025년 매출에서 차지하는 비중이 40.8%이다.", "variant": "의역", "expected": "supported"}
+{"cid": "00365590-q1-c2", "qid": "00365590-q1", "source": "controlled", "text": "헬스케어솔루션사업 부문은 체외진단의료기기와 그 밖의 의료용 기기를 만들어 팔며, 2025년 매출에서 차지하는 비중이 40.8%이다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00365590-q1-n1", "qid": "00365590-q1", "source": "natural", "text": "HLB생명과학 R&D는 의료기기 사업부문으로 구성되어 있으며, 그중 HLB생명과학 R&D는 의료기기 제조 및 판매업을 주 사업으로 삼고 있습니다.", "variant": null, "expected": null}
+{"cid": "00365590-q2-c1", "qid": "00365590-q2", "source": "controlled", "text": "회사는 해당 의료기기에 대해 2025년 8월 1일 품목허가를 신청했다.", "variant": "의역", "expected": "supported"}
+{"cid": "00365590-q2-c2", "qid": "00365590-q2", "source": "controlled", "text": "회사는 해당 의료기기에 대해 2025년 8월 1일 품목허가를 신청하지 않았다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00365590-q2-n1", "qid": "00365590-q2", "source": "natural", "text": "[회사] HLB생명과학의 의료기기 사업부는 바이오 신약(세포치료제)로 인한 의료기기 사업을开展하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00365590-q2-n2", "qid": "00365590-q2", "source": "natural", "text": "이 사업부는 바이오 신약(세포치료제)로 인한 의료기기 사업을开展하고 있으며, 이 사업부는 현재 임상시험 2b상에서 진행 중인 바이오 신약(세포치료제) 제품을 생산하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00365590-q2-n3", "qid": "00365590-q2", "source": "natural", "text": "이 사업부는 현재 임상시험 2b상에서 진행 중인 바이오 신약(세포치료제) 제품을 생산하고 있으며, 이 제품은 환자 혈장 접촉 조건에서 단일 간세포보다 월등히 높은 간기능을 더 오래 유지함으로써 환자에게 더 좋은 치료를 제공하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00365590-q2-n4", "qid": "00365590-q2", "source": "natural", "text": "이 사업부는 현재 임상시험 2b상에서 진행 중인 바이오 신약(세포치료제) 제품을 생산하고 있으며, 이 제품은 간세포 구상체를 직경 1 mm의 칼슘-알긴산 미세캡슐화를 통해 면역세포와 항체로 인한 간세포 손상을 방지하고, 기존 중공사막 반응기보다 약 50% 증대된 접촉 표면적을 제공하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00365590-q2-n5", "qid": "00365590-q2", "source": "natural", "text": "이 사업부는", "variant": null, "expected": null}
+{"cid": "00365590-q3-c1", "qid": "00365590-q3", "source": "controlled", "text": "2025년 연결 매출 합계는 45,752백만원으로, 2024년의 32,771백만원보다 커졌다.", "variant": "의역", "expected": "supported"}
+{"cid": "00365590-q3-c2", "qid": "00365590-q3", "source": "controlled", "text": "삼성전자는 D램과 낸드플래시 같은 메모리 반도체를 생산해 판매한다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00365590-q3-n1", "qid": "00365590-q3", "source": "natural", "text": "2025년 연결 매출액은 45,752 백만 달러이며, 전년보다 100% 증가했습니다.", "variant": null, "expected": null}
+{"cid": "00365590-q4-c1", "qid": "00365590-q4", "source": "controlled", "text": "당기 연결 매출은 45,752백만원으로, 전기와 비교해 39.6% 늘어났다.", "variant": "의역", "expected": "supported"}
+{"cid": "00365590-q4-c2", "qid": "00365590-q4", "source": "controlled", "text": "당기 연결 매출은 45,752백만원으로, 전기와 비교해 27.3% 늘어났다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "00365590-q4-n1", "qid": "00365590-q4", "source": "natural", "text": "[회사] HLB생명과학", "variant": null, "expected": null}
+{"cid": "00365590-q4-n2", "qid": "00365590-q4", "source": "natural", "text": "[문단 1] [5.", "variant": null, "expected": null}
+{"cid": "00365590-q4-n3", "qid": "00365590-q4", "source": "natural", "text": "위험관리 및 파생거래] 연결회사는 영업활동에서 발생하는 현금, 예금, 단기예치금, 매출채권, 기타채권, 매도가능금융자산 등을 보유하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00365590-q4-n4", "qid": "00365590-q4", "source": "natural", "text": "연속성과 유연성간의 조화를 유지하기 위해 금융부채를 조달하기 위해 차입금과 매입채무를 사용합니다.", "variant": null, "expected": null}
+{"cid": "00365590-q4-n5", "qid": "00365590-q4", "source": "natural", "text": "[문단 2] [1.", "variant": null, "expected": null}
+{"cid": "00365590-q5-c1", "qid": "00365590-q5", "source": "controlled", "text": "국내 주사기·주사침류 생산액은 2023년에 7,523억원을 기록해 전년보다 11.4% 줄었다.", "variant": "의역", "expected": "supported"}
+{"cid": "00365590-q5-c2", "qid": "00365590-q5", "source": "controlled", "text": "국내 주사기·주사침류 생산액은 2018년에 7,523억원을 기록해 전년보다 11.4% 줄었다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "00365590-q5-n1", "qid": "00365590-q5", "source": "natural", "text": "당사 사업의 개요에 따르면, 변동금리 차입금 규모는 1%포인트로, 당기순손익에 어느 정도 영향을 받을 수 있습니다.", "variant": null, "expected": null}
+{"cid": "00365590-q6-c1", "qid": "00365590-q6", "source": "controlled", "text": "항서제약의 캄렐리주맙과 함께 쓰는 간암 1차 치료제는 2025년 3월 미국 FDA로부터 두 번째 CRL을 받았고, 그에 대한 답변을 준비하고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00365590-q6-c2", "qid": "00365590-q6", "source": "controlled", "text": "베이진의 캄렐리주맙과 함께 쓰는 간암 1차 치료제는 2025년 3월 미국 FDA로부터 두 번째 CRL을 받았고, 그에 대한 답변을 준비하고 있다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00365590-q6-n1", "qid": "00365590-q6", "source": "natural", "text": "[질문] 계열사가 추진 중인 간암 1차 병용요법의 미국 FDA 신약 허가 절차는 현재 어느 단계까지 진행됐나요?", "variant": null, "expected": null}
+{"cid": "00413046-q1-c1", "qid": "00413046-q1", "source": "controlled", "text": "셀트리온은 현재까지 바이오시밀러 11종에 대해 글로벌 시판 허가를 확보했다.", "variant": "의역", "expected": "supported"}
+{"cid": "00413046-q1-c2", "qid": "00413046-q1", "source": "controlled", "text": "셀트리온은 현재까지 바이오시밀러 11종에 대해 글로벌 시판 허가를 확보하지 못했다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00413046-q1-n1", "qid": "00413046-q1", "source": "natural", "text": "셀트리온은 11개 바이오시밀러 제품에 대해 글로벌 품목 허가를 받았으며, 현재까지 이 제품은 유럽과 미국을 포함한 전 세계 각국에서 판매되고 있습니다.", "variant": null, "expected": null}
+{"cid": "00413046-q2-c1", "qid": "00413046-q2", "source": "controlled", "text": "셀트리온의 유럽 직접판매 전환은 2020년 램시마부터 시작되었다.", "variant": "의역", "expected": "supported"}
+{"cid": "00413046-q2-c2", "qid": "00413046-q2", "source": "controlled", "text": "현대자동차는 미국 앨라배마 공장에서 자동차를 생산하고 있다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00413046-q2-n1", "qid": "00413046-q2", "source": "natural", "text": "셀트리온의 첫 항체 바이오시밀러 제품은 2025년 3분기 말 기준 유럽과 미국 시장에서 각각 점유율이 어느 정도인가요?", "variant": null, "expected": null}
+{"cid": "00413046-q3-c1", "qid": "00413046-q3", "source": "controlled", "text": "2025년 말 기준 셀트리온 연결기업의 자본총계 대비 부채총계 비율은 28.71%로 집계되었다.", "variant": "의역", "expected": "supported"}
+{"cid": "00413046-q3-c2", "qid": "00413046-q3", "source": "controlled", "text": "2025년 말 기준 셀트리온 연결기업의 자본총계 대비 부채총계 비율은 34.52%로 집계되었다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "00413046-q3-n1", "qid": "00413046-q3", "source": "natural", "text": "[문단 1] [5.", "variant": null, "expected": null}
+{"cid": "00413046-q3-n2", "qid": "00413046-q3", "source": "natural", "text": "위험관리 및 파생거래 표, 단위 천원] 2025.12.31: 매출채권 | 1,806,685,314 | 1,215,250,841 | 69,288,405 | 179,829,209 | 124,588,786 | 5,000,000 | 3,690,096,954 | 2,161,912,537", "variant": null, "expected": null}
+{"cid": "00413046-q3-n3", "qid": "00413046-q3", "source": "natural", "text": "[문단 2] [5.", "variant": null, "expected": null}
+{"cid": "00413046-q3-n4", "qid": "00413046-q3", "source": "natural", "text": "위험관리 및 파생거래 표, 단위 천원] 구분: 매출채권 | 2025.12.31: 1,806,685,314 | 1,215,250,841 | 69,288,405 | 179,829,209 | 124,588,786 | 5,000,000 | 3,690,096,954 | 2,161,912,537", "variant": null, "expected": null}
+{"cid": "00413046-q3-n5", "qid": "00413046-q3", "source": "natural", "text": "[문단 3] [5.", "variant": null, "expected": null}
+{"cid": "00413046-q4-c1", "qid": "00413046-q4", "source": "controlled", "text": "셀트리온은 2025년에 약 4조 1,625억 원의 매출을 올렸다.", "variant": "의역", "expected": "supported"}
+{"cid": "00413046-q4-c2", "qid": "00413046-q4", "source": "controlled", "text": "셀트리온은 2019년에 약 4조 1,625억 원의 매출을 올렸다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "00413046-q4-n1", "qid": "00413046-q4", "source": "natural", "text": "[질문] 셀트리온 국내 공장들의 연간 생산능력은 배치 기준으로 1,000만 개의 램시마(CT-P13)입니다.", "variant": null, "expected": null}
+{"cid": "00413046-q5-c1", "qid": "00413046-q5", "source": "controlled", "text": "셀트리온 연결기업이 환율 변동 위험에 주로 노출된 통화는 미국 달러화와 유로화 등이다.", "variant": "의역", "expected": "supported"}
+{"cid": "00413046-q5-c2", "qid": "00413046-q5", "source": "controlled", "text": "유한양행 연결기업이 환율 변동 위험에 주로 노출된 통화는 미국 달러화와 유로화 등이다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00413046-q5-n1", "qid": "00413046-q5", "source": "natural", "text": "[질문] 주요 외화 환율이 상승하거나 하락하면 셀트리온의 세전이익은 어느 정도 영향을 받나요?", "variant": null, "expected": null}
+{"cid": "00413046-q5-n2", "qid": "00413046-q5", "source": "natural", "text": "[답] 연결기업은 정상적인 거래로부터 기인하는 환율변동위험에 노출되어 있습니다.", "variant": null, "expected": null}
+{"cid": "00413046-q5-n3", "qid": "00413046-q5", "source": "natural", "text": "동 위험의 대부분은 연결기업의 기능통화와는 다른 통화로 거래되는 구매대금 등으로부터 발생합니다.", "variant": null, "expected": null}
+{"cid": "00413046-q5-n4", "qid": "00413046-q5", "source": "natural", "text": "연결기업이 외환위험에 노출되어 있는 주요 통화는 USD, EUR 등 입니다.", "variant": null, "expected": null}
+{"cid": "00413046-q5-n5", "qid": "00413046-q5", "source": "natural", "text": "따라서 연결기업의 세전이익은 환율변동위험에 따라 상승하거나 하락할 수 있습니다.", "variant": null, "expected": null}
+{"cid": "00413046-q6-c1", "qid": "00413046-q6", "source": "controlled", "text": "셀트리온은 2014년 9월 온실가스 배출권거래제의 할당 대상 기업으로 지정되었다.", "variant": "의역", "expected": "supported"}
+{"cid": "00413046-q6-c2", "qid": "00413046-q6", "source": "controlled", "text": "셀트리온은 2014년 9월 온실가스 배출권거래제의 할당 대상 기업으로 지정되지 않았다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00413046-q6-n1", "qid": "00413046-q6", "source": "natural", "text": "셀트리온의 2025년 연결 기준 연구개발비용은 1,844,595,921 천원입니다.", "variant": null, "expected": null}
+{"cid": "00413046-q6-n2", "qid": "00413046-q6", "source": "natural", "text": "이 비용은 2025년 12월 31일까지의 연구개발비용을 의미하며, 이는 2025년 12월 31일까지의 연구개발비용의 1/3입니다.", "variant": null, "expected": null}
+{"cid": "00413046-q6-n3", "qid": "00413046-q6", "source": "natural", "text": "이 비용은 2025년 12월 31일까지의 매출액 대비 비율은 1,520,437,157 천원입니다.", "variant": null, "expected": null}
+{"cid": "00413046-q6-n4", "qid": "00413046-q6", "source": "natural", "text": "이 비용은 2025년 12월 31일까지의 매출액의 1/3입니다.", "variant": null, "expected": null}
+{"cid": "00533003-q1-c1", "qid": "00533003-q1", "source": "controlled", "text": "디케이락은 45개 나라에 퍼진 대리점망을 거쳐 해외 고객사에 자사 제품을 공급한다.", "variant": "의역", "expected": "supported"}
+{"cid": "00533003-q1-c2", "qid": "00533003-q1", "source": "controlled", "text": "농심은 라면과 스낵을 만들어 국내외 소비자에게 판매한다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00533003-q1-n1", "qid": "00533003-q1", "source": "natural", "text": "디케이락의 계장용 피팅 및 밸브는 주로 항공 산업에 쓰입니다.", "variant": null, "expected": null}
+{"cid": "00533003-q1-n2", "qid": "00533003-q1", "source": "natural", "text": "내수 비중은 70%이며, 수출 비중은 30%입니다.", "variant": null, "expected": null}
+{"cid": "00533003-q2-c1", "qid": "00533003-q2", "source": "controlled", "text": "디케이락의 제35기 매출액 대비 연구개발비 비중은 1.28%였다.", "variant": "의역", "expected": "supported"}
+{"cid": "00533003-q2-c2", "qid": "00533003-q2", "source": "controlled", "text": "디케이락의 제35기 매출액 대비 연구개발비 비중은 2.45%였다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "00533003-q2-n1", "qid": "00533003-q2", "source": "natural", "text": "[회사] 디케이락의 주요 제품은 장단기차입금, 매입채무및기타채무로 구성되어 있으며 금융부채와 현금및현금성자산, 장단기금융상품, 매출채권및기타채권 등의 금융자산을 보유하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00533003-q2-n2", "qid": "00533003-q2", "source": "natural", "text": "당사는 금융상품을 운용함에 따라 시장위험, 신용위험, 유동성위험 등에 노출되어 있으며, 당사의 위험관리는 당사의 재무적 성과에 영향을 미치는 잠재적 위험을 식별하여 당사가 허용가능한 수준으로 감소, 제거 및 회피하는 것을 목적으로 하고 당사의 주요 경영진은 아래에서 설명하는 바와 같이, 각 위험별 관리절차를 검토하고 정책에 부합하는지 검토하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00533003-q2-n3", "qid": "00533003-q2", "source": "natural", "text": "[문단 1] [5.", "variant": null, "expected": null}
+{"cid": "00533003-q2-n4", "qid": "00533003-q2", "source": "natural", "text": "위험관리 및 파생거래] 당사의 주요 금융부채는 장단기차입금, 매입채무및기타채무로 구성되어 있으며 금융부채와 현금및현금성자산, 장단기금융상품, 매출채권및기타채권 등의 금융자산을 보유하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00533003-q2-n5", "qid": "00533003-q2", "source": "natural", "text": "당사는 금융상품을 운용함에 따라 시장위험, 신용위험, 유동성위", "variant": null, "expected": null}
+{"cid": "00533003-q3-c1", "qid": "00533003-q3", "source": "controlled", "text": "디케이락의 2025년 국내시장 매출은 27,102백만원으로 집계됐다.", "variant": "의역", "expected": "supported"}
+{"cid": "00533003-q3-c2", "qid": "00533003-q3", "source": "controlled", "text": "디케이락의 2021년 국내시장 매출은 27,102백만원으로 집계됐다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "00533003-q3-n1", "qid": "00533003-q3", "source": "natural", "text": "2025년 디케이락의 국내시장 매출은 27,102백만원으로, 전년보다 11.80% 증가했습니다.", "variant": null, "expected": null}
+{"cid": "00533003-q4-c1", "qid": "00533003-q4", "source": "controlled", "text": "디케이락이 공시 대상으로 삼는 사업은 관이음쇠와 밸브를 만들어 파는 활동 하나뿐이다.", "variant": "의역", "expected": "supported"}
+{"cid": "00533003-q4-c2", "qid": "00533003-q4", "source": "controlled", "text": "디케이락이 공시 대상으로 삼는 사업은 산업용 펌프를 만들어 파는 활동 하나뿐이다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00533003-q4-n1", "qid": "00533003-q4", "source": "natural", "text": "[질문] 디케이락의 원재료 매입에서 비중이 가장 큰 재질은 주석입니다.", "variant": null, "expected": null}
+{"cid": "00533003-q5-c1", "qid": "00533003-q5", "source": "controlled", "text": "디케이락은 해외 영업과 원자재 수입과 관련해 미국 달러와 유로 등 외화의 환율 변동 위험을 안고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00533003-q5-c2", "qid": "00533003-q5", "source": "controlled", "text": "디케이락은 해외 영업과 원자재 수입과 관련해 미국 달러와 유로 등 외화의 환율 변동 위험을 안고 있지 않다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00533003-q5-n1", "qid": "00533003-q5", "source": "natural", "text": "[문단 1] - 디케이락은 환율 변동 위험에 노출되어 있으며, 이자율위험, 환율위험, 유동성위험 등이 있습니다.", "variant": null, "expected": null}
+{"cid": "00533003-q5-n2", "qid": "00533003-q5", "source": "natural", "text": "[문단 2] - 환율위험은 만기까지 모든 금융계약상의 약정사항들을 이행할 수 있도록 자금을 조달하지 못할 위험으로, 당사는 유동성위험을 관리하기 위하여 단기 및 중장기 자금관리계획을 수립하고 현금유출예산과 실제 현금유출액을 지속적으로 분석, 검토하고있습니다.", "variant": null, "expected": null}
+{"cid": "00533003-q5-n3", "qid": "00533003-q5", "source": "natural", "text": "[문단 3] - 이자율위험은 미래 시장 이자율 변동에 따라 예금 또는 차입금 등에서 발생하는 이자수익 및 이자비용이 변동될 위험으로, 당사는 이자율 현황을 주기적으로 검토하고 외부차입의 최소화, 장단기 차입구조 개선, 변동금리부 조건의 차입금을 적정하게 유지토록하고 있으며, reports는 이자율 현황을 주기적으로 검토하고 외부차입의 최소화, 장단기 차입구조 개선, 변동금리부 조건의 차입금을 적정하게 유지토록하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00533003-q5-n4", "qid": "00533003-q5", "source": "natural", "text": "[문단 4] - 환", "variant": null, "expected": null}
+{"cid": "00533003-q6-c1", "qid": "00533003-q6", "source": "controlled", "text": "디케이락은 사내 기술연구소를 두고 신제품과 신규 장비 개발, 프로젝트 연구를 그곳에서 함께 수행한다.", "variant": "의역", "expected": "supported"}
+{"cid": "00533003-q6-c2", "qid": "00533003-q6", "source": "controlled", "text": "LG화학은 석유화학 제품과 배터리 소재를 생산해 국내외 고객사에 판매한다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00533003-q6-n1", "qid": "00533003-q6", "source": "natural", "text": "회사의 개요] - 당사는 사업보고서 제출일 직전 3사업년도간 회사채 및 기업어음 등의 차입조달을 목적으로 신용등급을 평가받은 사실이 없습니다.", "variant": null, "expected": null}
+{"cid": "00533003-q6-n2", "qid": "00533003-q6", "source": "natural", "text": "회사의 주권상장(또는 등록ㆍ지정)여부 및 특례상장에 관한 사항", "variant": null, "expected": null}
+{"cid": "00533003-q6-n3", "qid": "00533003-q6", "source": "natural", "text": "회사의 개요 표] 주권상장(또는 등록ㆍ지정)현황: 코스닥시장 상장 | 주권상장(또는 등록ㆍ지정)일자: 2010년 11월 12일 | 특례상장 유형: 해당사항 없음", "variant": null, "expected": null}
+{"cid": "00533003-q6-n4", "qid": "00533003-q6", "source": "natural", "text": "[문단 2] [5.", "variant": null, "expected": null}
+{"cid": "00533003-q6-n5", "qid": "00533003-q6", "source": "natural", "text": "위험관리 및 파생거래] 당사의 주요 금융부채는 장단기차입금, 매입채무및기타채무로 구성되어 있으며 금융부채와 현금및현금성자산, 장단기금융상품, 매출채권및기타채권 등의 금융자산을 보유하고 있습니다.", "variant": null, "expected": null}
+{"cid": "00556712-q1-c1", "qid": "00556712-q1", "source": "controlled", "text": "힘스 매출 가운데 OLED장비가 차지하는 몫은 80%를 웃돈다.", "variant": "의역", "expected": "supported"}
+{"cid": "00556712-q1-c2", "qid": "00556712-q1", "source": "controlled", "text": "힘스 매출 가운데 OLED장비가 차지하는 몫은 55%를 웃돈다.", "variant": "숫자 변경", "expected": "supported", "expected_note": "문단2 '매출비중 80% 이상 OLED장비'로 '55% 상회'가 성립(감사)"}
+{"cid": "00556712-q1-n1", "qid": "00556712-q1", "source": "natural", "text": "당사 주력으로는 OLED 장비를 개발 및 공급하는 패널업체에 주력으로 하고 있으며, 주요 고객은 대기업과 중소기업이 있습니다.", "variant": null, "expected": null}
+{"cid": "00556712-q2-c1", "qid": "00556712-q2", "source": "controlled", "text": "OLED 소자는 1987년 Eastman Kodak 소속 칭 탕 박사가 처음 개발해 냈다.", "variant": "의역", "expected": "supported"}
+{"cid": "00556712-q2-c2", "qid": "00556712-q2", "source": "controlled", "text": "OLED 소자는 1979년 Eastman Kodak 소속 칭 탕 박사가 처음 개발해 냈다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "00556712-q2-n1", "qid": "00556712-q2", "source": "natural", "text": "[문단 1] 당사의 주력 장비인 OLED Mask 인장기 부문에서 실질적인 경쟁업체는 없는 것으로 판단됩니다.", "variant": null, "expected": null}
+{"cid": "00556712-q2-n2", "qid": "00556712-q2", "source": "natural", "text": "이는 삼성디스플레이가 전세계 중소형 OLED 생산량의 대부분을 점하고 있으며, 당사가 삼성디스플레이에 독점적으로 장비를 판매하고 있기 때문입니다.", "variant": null, "expected": null}
+{"cid": "00556712-q2-n3", "qid": "00556712-q2", "source": "natural", "text": "그러나 최근 중국 업체들이 OLED 투자를 시작하고 있으며, 생산설비 구축을 위하여 nation내의 디스플레이 장비업체인 K사 H사와 거래 중인 것으로 알려져 있습니다.", "variant": null, "expected": null}
+{"cid": "00556712-q2-n4", "qid": "00556712-q2", "source": "natural", "text": "OLED Mask 인장기는 OLED 공정 중 유기물 증착공정 전 단계인 메탈 Mask를 인장하는장비로서 생산 수율과 밀접한 관련이 있는 공정 장비입니다.", "variant": null, "expected": null}
+{"cid": "00556712-q2-n5", "qid": "00556712-q2", "source": "natural", "text": "향후 OLED 시장의 확대에 따라 제품에 대한 경쟁의 강도는 높아질 수 있겠으나 samsung디스플레이에 대한 독점 공급 경험과 압도적인 기술경쟁력 등을 고려시 당사가 지속적으로 OLED Mask 인장기 시장을 주도해 갈 것으로 예상됩니다.", "variant": null, "expected": null}
+{"cid": "00556712-q3-c1", "qid": "00556712-q3", "source": "controlled", "text": "2025년 힘스 매출에서 OLED장비의 국내 판매가 차지한 비중은 33.6%였다.", "variant": "의역", "expected": "supported"}
+{"cid": "00556712-q3-c2", "qid": "00556712-q3", "source": "controlled", "text": "2025년 힘스 매출에서 LCD장비의 국내 판매가 차지한 비중은 33.6%였다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "00556712-q3-n1", "qid": "00556712-q3", "source": "natural", "text": "당신은 다음과 같이 답변할 수 있습니다.", "variant": null, "expected": null}
+{"cid": "00556712-q3-n2", "qid": "00556712-q3", "source": "natural", "text": "당신은 2025년 매출액 합계는 41,830,248 백만 원이며, 내수는 34,797 백만 원, 수출은 59,259 백만 원입니다.", "variant": null, "expected": null}
+{"cid": "00556712-q4-c1", "qid": "00556712-q4", "source": "controlled", "text": "힘스가 사들이는 주요 원재료는 공급 안정성이 상당 부분 확보된 상태다.", "variant": "의역", "expected": "supported"}
+{"cid": "00556712-q4-c2", "qid": "00556712-q4", "source": "controlled", "text": "힘스가 사들이는 주요 원재료는 공급 안정성이 확보되지 않은 상태다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "00556712-q4-n1", "qid": "00556712-q4", "source": "natural", "text": "[질문] 힘스 제품에서 가장 큰 비중을 차지하는 원재료는 OLED 장비입니다.", "variant": null, "expected": null}
+{"cid": "00556712-q5-c1", "qid": "00556712-q5", "source": "controlled", "text": "힘스는 국내 OLED 패널 제조사와 그 협력사, 그리고 중국 OLED 패널 제조사를 주요 매출처로 두고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "00556712-q5-c2", "qid": "00556712-q5", "source": "controlled", "text": "오리온은 국내외 대형마트와 편의점 같은 유통 채널을 주요 매출처로 두고 있다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "00556712-q5-n1", "qid": "00556712-q5", "source": "natural", "text": "[회사] 힘스는 재무위험을 3가지로 나누어 관리하고 있어요.", "variant": null, "expected": null}
+{"cid": "00556712-q5-n2", "qid": "00556712-q5", "source": "natural", "text": "재무위험은 재무기금을 사용하여 재무적 목표를 달성하는 데 사용되는 재무기금을 말합니다.", "variant": null, "expected": null}
+{"cid": "00556712-q5-n3", "qid": "00556712-q5", "source": "natural", "text": "재무기금은 재무적 목표를 달성하기 위해 사용되는 재무기금입니다.", "variant": null, "expected": null}
+{"cid": "00556712-q5-n4", "qid": "00556712-q5", "source": "natural", "text": "재무기금은 재무적 목표를 달성하기 위해 사용되는 재무기금입니다.", "variant": null, "expected": null}
+{"cid": "00556712-q5-n5", "qid": "00556712-q5", "source": "natural", "text": "재무기금은 재무적 목표를 달성하기 위해 사용되는 재무기금입니다.", "variant": null, "expected": null}
+{"cid": "00556712-q6-c1", "qid": "00556712-q6", "source": "controlled", "text": "2025년 힘스의 매출액 대비 연구개발비 비중은 9.1%였다.", "variant": "의역", "expected": "supported"}
+{"cid": "00556712-q6-c2", "qid": "00556712-q6", "source": "controlled", "text": "2025년 힘스의 매출액 대비 연구개발비 비중은 7.4%였다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "00556712-q6-n1", "qid": "00556712-q6", "source": "natural", "text": "당신은 다음과 같이 답할 수 있습니다.", "variant": null, "expected": null}
+{"cid": "00556712-q6-n2", "qid": "00556712-q6", "source": "natural", "text": "2025년 연구개발비용은 5,395,029원입니다.", "variant": null, "expected": null}
+{"cid": "00556712-q6-n3", "qid": "00556712-q6", "source": "natural", "text": "매출액 대비 비율은 9.1%입니다.", "variant": null, "expected": null}
+{"cid": "01185566-q1-c1", "qid": "01185566-q1", "source": "controlled", "text": "휴엠앤씨의 주식은 2017년 9월부터 코스닥시장에서 거래되기 시작했다.", "variant": "의역", "expected": "supported"}
+{"cid": "01185566-q1-c2", "qid": "01185566-q1", "source": "controlled", "text": "휴엠앤씨의 주식은 2014년 9월부터 코스닥시장에서 거래되기 시작했다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "01185566-q1-n1", "qid": "01185566-q1", "source": "natural", "text": "[질문] 휴엠앤씨는 국내 의료용 유리용기 시장에서 점유율이 어느 정도이고, 같은 생산설비를 갖춘 국내 업체는 몇 곳인가요?", "variant": null, "expected": null}
+{"cid": "01185566-q2-c1", "qid": "01185566-q2", "source": "controlled", "text": "휴엠앤씨의 코스메틱 부문은 메이크업 스펀지, 퍼프, 함침스펀지 같은 화장품 부자재를 만들어 파는 것을 주된 사업으로 삼고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "01185566-q2-c2", "qid": "01185566-q2", "source": "controlled", "text": "휴엠앤씨의 헬스케어 부문은 메이크업 스펀지, 퍼프, 함침스펀지 같은 화장품 부자재를 만들어 파는 것을 주된 사업으로 삼고 있다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "01185566-q2-n1", "qid": "01185566-q2", "source": "natural", "text": "[회사] 휴엠앤씨 코스메틱 부문은 메이크업 스펀지, 퍼프 및 함침스펀지 등 화장품 부자재의 제조·판매를 주요 사업으로 하고 있습니다.", "variant": null, "expected": null}
+{"cid": "01185566-q2-n2", "qid": "01185566-q2", "source": "natural", "text": "당사는 제품 품질과 공급 대응력을 기반으로 기존 거래처와의 안정적인 거래관계를 유지하는 한편, 신규 거래처 발굴 및 판매처 다변화를 지속 추진하고 있습니다.", "variant": null, "expected": null}
+{"cid": "01185566-q2-n3", "qid": "01185566-q2", "source": "natural", "text": "또한 2024년 유일 산업의 화장품 부자재 사업 및 관련 자산 양수를 통해 코스메틱 부문의 영업력과 전문성을 강화하였으며, 이를 바탕으로 시장 내 입지 확대와 매출 증대를 추진하고 있습니다.", "variant": null, "expected": null}
+{"cid": "01185566-q3-c1", "qid": "01185566-q3", "source": "controlled", "text": "휴엠앤씨는 국내외 고객사와 개발 방향 및 기본 아이디어를 공유한 뒤에 연구개발에 들어간다.", "variant": "의역", "expected": "supported"}
+{"cid": "01185566-q3-c2", "qid": "01185566-q3", "source": "controlled", "text": "휴엠앤씨는 국내외 고객사와 개발 방향 및 기본 아이디어를 공유하지 않은 채 연구개발에 들어간다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "01185566-q3-n1", "qid": "01185566-q3", "source": "natural", "text": "2025년 휴엠앤씨 글라스 부문에서 매출 비중이 가장 큰 제품은 루비셀입니다.", "variant": null, "expected": null}
+{"cid": "01185566-q4-c1", "qid": "01185566-q4", "source": "controlled", "text": "휴엠앤씨의 연구개발은 NBR 스펀지를 이용한 메이크업 소품 개발에 초점을 맞추고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "01185566-q4-c2", "qid": "01185566-q4", "source": "controlled", "text": "삼성전자의 연구개발은 메모리 반도체 개발에 초점을 맞추고 있다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "01185566-q4-n1", "qid": "01185566-q4", "source": "natural", "text": "2024년 휴엠앤씨 글라스 부문의 앰플 생산설비 가동률은 2023년 3,273 백만 원으로, 2025년 2,956 백만 원으로 0.2%의 가동률을 나타냈습니다.", "variant": null, "expected": null}
+{"cid": "01185566-q5-n1", "qid": "01185566-q5", "source": "natural", "text": "[질문] 휴엠앤씨의 차입금은 금리 변동 위험에 얼마나 노출되어 있고, 현재 파생상품이나 풋백옵션 거래가 있나요?", "variant": null, "expected": null}
+{"cid": "01185566-q5-n2", "qid": "01185566-q5", "source": "natural", "text": "[답] 휴엠앤씨의 차입금은 금리 변동 위험에 노출되어 있습니다.", "variant": null, "expected": null}
+{"cid": "01185566-q5-n3", "qid": "01185566-q5", "source": "natural", "text": "연결회사의 차입금은 전액 고정이자 부 차입금으로 이자율변동이 금융부채의 현금흐름에 미치는 영향은 중요하지 아니합니다.", "variant": null, "expected": null}
+{"cid": "01185566-q5-n4", "qid": "01185566-q5", "source": "natural", "text": "연결회사는 재무상태나 현금흐름에 중요한 영향을 미치는 시장성있는 금융상품과 관련하여 시장가격위험이 발생합니다.", "variant": null, "expected": null}
+{"cid": "01185566-q5-n5", "qid": "01185566-q5", "source": "natural", "text": "연결회사는 재무상태나 현금흐름에 중요한 영향을 미치는 시장성있는 금융상품은 없습니다.", "variant": null, "expected": null}
+{"cid": "01185566-q6-c1", "qid": "01185566-q6", "source": "controlled", "text": "이 회사는 2019년 3월에 사명을 '블러썸엠앤씨'로 바꾼 적이 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "01185566-q6-c2", "qid": "01185566-q6", "source": "controlled", "text": "이 회사는 2016년 3월에 사명을 '블러썸엠앤씨'로 바꾼 적이 있다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "01185566-q6-n1", "qid": "01185566-q6", "source": "natural", "text": "[문단 1] [3.", "variant": null, "expected": null}
+{"cid": "01185566-q6-n2", "qid": "01185566-q6", "source": "natural", "text": "원재료 및 생산설비 표, 단위 백만원] 자산항목: 기계장치 | 사업소: 베트남공장 | 소재지: 베트남 | 구분: 앰플 원동기 외 | 기초장부가액: 2,142 | 당기증가: 514 | 당기감소: -98 | 당기상각: -641 | 환율차이조정: - | 기말장부가액: 1,917 [3.", "variant": null, "expected": null}
+{"cid": "01185566-q6-n3", "qid": "01185566-q6", "source": "natural", "text": "원재료 및 생산설비 표, 단위 백만원] 자산항목: 차량운반구 | 사업소: 논산공장 | 소재지: 논산 | 구분: 지게차 외 | 기초장부가액: 7 | 당기증가: - | 당기감소: - | 당기상각: -2 | 환율차이조정: - | 기말장부가액: 5 [3.", "variant": null, "expected": null}
+{"cid": "01185566-q6-n4", "qid": "01185566-q6", "source": "natural", "text": "원재료 및 생산설비 표, 단위 백만원] 자산항목: 비품 | 사업소: 논산공장, 판교사업장 | 소재지: 논산,성남 등 | 구분: 노트북 외 | 기초장부가액: 264 | 당기증가: 9 | 당기감소: -26", "variant": null, "expected": null}
+{"cid": "01211889-q1-c1", "qid": "01211889-q1", "source": "controlled", "text": "이 제품은 국토지리정보원과 한국수자원공사 등 여러 기관에서 정밀 지도를 만들고 검증하는 일에 쓰이고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "01211889-q1-c2", "qid": "01211889-q1", "source": "controlled", "text": "이 제품은 국토지리정보원과 한국도로공사 등 여러 기관에서 정밀 지도를 만들고 검증하는 일에 쓰이고 있다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "01211889-q1-n1", "qid": "01211889-q1", "source": "natural", "text": "당사는 주로 주무 부처와 산하 공공기관, 연구소 등에 디지털 트윈 서비스를 공급하고 있습니다.", "variant": null, "expected": null}
+{"cid": "01211889-q1-n2", "qid": "01211889-q1", "source": "natural", "text": "이지스는 주무 부처와 산하 공공기관, 연구소 등에 디지털 트윈 서비스를 공급하는 업종입니다.", "variant": null, "expected": null}
+{"cid": "01211889-q1-n3", "qid": "01211889-q1", "source": "natural", "text": "당사의 핵심 기술은 주무 부처와 산하 공공기관, 연구소 등에 디지털 트윈 서비스를 제공하는 기술입니다.", "variant": null, "expected": null}
+{"cid": "01211889-q2-c1", "qid": "01211889-q2", "source": "controlled", "text": "앱 스토어 서비스에서는 회사가 공개한 1,600여 개의 오픈소스 API로 누구나 서비스를 만들어 올리고 수익을 얻을 수 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "01211889-q2-c2", "qid": "01211889-q2", "source": "controlled", "text": "앱 스토어 서비스에서는 회사가 공개한 1,600여 개의 오픈소스 API로 누구나 서비스를 만들어 올리고 수익을 얻을 수는 없다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "01211889-q2-n1", "qid": "01211889-q2", "source": "natural", "text": "[질문] 이지스의 디지털 트윈 플랫폼은 다음과 같은 서비스들로 구성되어 있습니다.", "variant": null, "expected": null}
+{"cid": "01211889-q2-n2", "qid": "01211889-q2", "source": "natural", "text": "디지털 트윈 플랫폼 구독", "variant": null, "expected": null}
+{"cid": "01211889-q2-n3", "qid": "01211889-q2", "source": "natural", "text": "디지털 트윈 플랫폼 및 솔루션 구독", "variant": null, "expected": null}
+{"cid": "01211889-q2-n4", "qid": "01211889-q2", "source": "natural", "text": "공간정보 플랫폼 구독", "variant": null, "expected": null}
+{"cid": "01211889-q2-n5", "qid": "01211889-q2", "source": "natural", "text": "공간정보 플랫폼 구독 시장", "variant": null, "expected": null}
+{"cid": "01211889-q3-c1", "qid": "01211889-q3", "source": "controlled", "text": "회사는 공간정보 플랫폼 사업을 구축형 모델에서 클라우드 기반 구독형 모델로 옮기는 전략을 밀고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "01211889-q3-c2", "qid": "01211889-q3", "source": "controlled", "text": "삼성전자는 메모리 반도체와 스마트폰을 직접 생산해 판매하는 사업을 하고 있다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "01211889-q3-n1", "qid": "01211889-q3", "source": "natural", "text": "당사에 따르면, 이지스의 최근 사업연도 매출에서 구축 용역과 구독 서비스가 각각 차지하는 금액과 비중은 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "01211889-q3-n2", "qid": "01211889-q3", "source": "natural", "text": "구축 용역: 2022년 12월 31일까지 1,000만 달러 이상을 수익을 거두었습니다.", "variant": null, "expected": null}
+{"cid": "01211889-q3-n3", "qid": "01211889-q3", "source": "natural", "text": "이 지배율은 2022년 12월 31일까지 1,000만 달러 이상을 수익을 거두었습니다.", "variant": null, "expected": null}
+{"cid": "01211889-q3-n4", "qid": "01211889-q3", "source": "natural", "text": "구독 서비스: 2022년 12월 31일까지 1,000만 달러 이상을 수익을 거두었습니다.", "variant": null, "expected": null}
+{"cid": "01211889-q3-n5", "qid": "01211889-q3", "source": "natural", "text": "이 지배율은 2022년 12월 31일까지 1,000만 달러 이상을 수익을 거두었습니다.", "variant": null, "expected": null}
+{"cid": "01211889-q4-c1", "qid": "01211889-q4", "source": "controlled", "text": "회사는 2024년 12월 20일 과학기술정보통신부로부터 인증번호 제2024-261호로 혁신제품 지정을 받았다.", "variant": "의역", "expected": "supported"}
+{"cid": "01211889-q4-c2", "qid": "01211889-q4", "source": "controlled", "text": "회사는 2024년 12월 20일 과학기술정보통신부로부터 인증번호 제2024-487호로 혁신제품 지정을 받았다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "01211889-q4-n1", "qid": "01211889-q4", "source": "natural", "text": "당사는 용역 제공 및 라이선스 매출을 주요 사업영역으로 영위하고 있어 별도의 원재료가 투입되지 않고 있으며, 이에 보고서 작성기준일 현재 해당사항 없습니다.", "variant": null, "expected": null}
+{"cid": "01211889-q5-c1", "qid": "01211889-q5", "source": "controlled", "text": "2025년 4월 코리아크레딧뷰로가 매긴 회사의 신용등급은 A-였다.", "variant": "의역", "expected": "supported"}
+{"cid": "01211889-q5-c2", "qid": "01211889-q5", "source": "controlled", "text": "2021년 4월 코리아크레딧뷰로가 매긴 회사의 신용등급은 A-였다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "01211889-q5-n1", "qid": "01211889-q5", "source": "natural", "text": "아, 이지스는 환율과 이자율 변동 위험에 어느 정도 노출되어 있으며, 파생상품 거래는 하고 있어요.", "variant": null, "expected": null}
+{"cid": "01211889-q6-c1", "qid": "01211889-q6", "source": "controlled", "text": "XDBuilder는 해저 DEM 데이터를 이용해 5대양의 해저 지형을 만들어 내는 기능을 갖추고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "01211889-q6-c2", "qid": "01211889-q6", "source": "controlled", "text": "GeoMaster는 해저 DEM 데이터를 이용해 5대양의 해저 지형을 만들어 내는 기능을 갖추고 있다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "01211889-q6-n1", "qid": "01211889-q6", "source": "natural", "text": "이지스의 최근 사업연도 연구개발비 비율은 2001년 1월 1일부터 2022년 12월 31일까지의 21년간의 연도에 대한 연구 개발비 비율을 확인할 수 있습니다.", "variant": null, "expected": null}
+{"cid": "01211889-q6-n2", "qid": "01211889-q6", "source": "natural", "text": "2001년 1월 1일부터 2022년 12월 31일까지의 21년간의 연도에 대한 연구 개발비 비율은 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "01211889-q6-n3", "qid": "01211889-q6", "source": "natural", "text": "2001년 1월 1일부터 2022년 12월 31일까지의 21년간의 연도에 대한 연구 개발비 비율은 2001년 1월 1일부터 2022년 12월 31일까지의 21년간의 연도에 대한 연구 개발비 비율을 확인할 수 있습니다.", "variant": null, "expected": null}
+{"cid": "01211889-q6-n4", "qid": "01211889-q6", "source": "natural", "text": "2001년 1월 1일부터 2022년 12월 31일까지의 21년간의 연도에 대한 연구 개발비 비율은 2001년 1월 1일부터 2022년 12월 31일까지의 21년간의 연도에 대한 연구 개발비 비율을 확인할 수 있습니다.", "variant": null, "expected": null}
+{"cid": "01211889-q6-n5", "qid": "01211889-q6", "source": "natural", "text": "2001년 1월 1일부터 2022년 12월 31일까지의 21년간", "variant": null, "expected": null}
+{"cid": "01310773-q1-c1", "qid": "01310773-q1", "source": "controlled", "text": "엔시스는 2차전지 배터리 제품을 검사하는 장비를 공급하는 회사다.", "variant": "의역", "expected": "supported"}
+{"cid": "01310773-q1-c2", "qid": "01310773-q1", "source": "controlled", "text": "엔시스는 2차전지 배터리 제품을 검사하는 장비를 공급하지 않는 회사다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "01310773-q1-n1", "qid": "01310773-q1", "source": "natural", "text": "[회사] 엔시스는 2차전지 산업의 특성에 따라 다양한 기술을 바탕으로 고객에게 다양한 방식으로 장비를 공급하는 사업을 하고 있어요.", "variant": null, "expected": null}
+{"cid": "01310773-q2-c1", "qid": "01310773-q2", "source": "controlled", "text": "엔시스에서 매출 비중이 가장 큰 제품은 2차전지 배터리의 각 제조 공정에 쓰이는 머신비전 검사장비다.", "variant": "의역", "expected": "supported"}
+{"cid": "01310773-q2-c2", "qid": "01310773-q2", "source": "controlled", "text": "농심에서 매출 비중이 가장 큰 제품은 라면을 비롯한 면류다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "01310773-q2-n1", "qid": "01310773-q2", "source": "natural", "text": "[질문] 엔시스가 2차전지 제조 공정별로 공급하는 주요 장비에는 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "01310773-q2-n2", "qid": "01310773-q2", "source": "natural", "text": "2차전지 검사장비: 2차전지의 용도에 맞는 다양한 검사 기능을 필요로 합니다.", "variant": null, "expected": null}
+{"cid": "01310773-q2-n3", "qid": "01310773-q2", "source": "natural", "text": "2차전지 분야는 매우 다양한 전방 산업이 존재하므로, 각 제품의 기능과 성격에 적합한 검사를 수행하는 것이 중요합니다.", "variant": null, "expected": null}
+{"cid": "01310773-q2-n4", "qid": "01310773-q2", "source": "natural", "text": "생산되는 제품이 다양한 응용처에서 활용되기 때문에, 각 부품의 생산 공정에서는 제품 특성을 살리기 위한 작업이 이루어지며, 이에 적합화 된 안정적인 품질 수준을 확보하기 위한 검사가 필요합니다.", "variant": null, "expected": null}
+{"cid": "01310773-q2-n5", "qid": "01310773-q2", "source": "natural", "text": "2차전지 배터리 검사장비: 2차전지 배터리 제작 공정에서 사용되는 리튬이온의 폭발 위험성 때문에 전문적인 기술력이 없이는 영위할 수 없는 사업분야이며, 진입장벽이 높습니다.", "variant": null, "expected": null}
+{"cid": "01310773-q3-c1", "qid": "01310773-q3", "source": "controlled", "text": "2025년 엔시스의 용역(setup 대응) 매출은 21,371백만원으로, 전년의 15,011백만원보다 늘었다.", "variant": "의역", "expected": "supported"}
+{"cid": "01310773-q3-c2", "qid": "01310773-q3", "source": "controlled", "text": "2025년 엔시스의 용역(setup 대응) 매출은 23,950백만원으로, 전년의 15,011백만원보다 늘었다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "01310773-q3-n1", "qid": "01310773-q3", "source": "natural", "text": "2025년 엔시스의 매출은 제품과 용역으로 각각 약 27,465만 달러, 47,295만 달러, 35,683만 달러, 26,915만 달러, 15,011만 달러, 13,324만 달러, 14,432만 달러, 21,371만 달러, 15,011만 달러, 13,324만 달러, 14,432만 달러, 0만 달러, 14만 달러, 237만 달러, 0만 달러, 14만 달러, 237만 달러, 0만 달러, 14만 달러, 237만 달러, 0만 달러, 14만 달러, 237만 달러, 0만 달러, 14만 달러, 237만 달러, 0만 달러, 14만 달러, 237만 달러, 0만 달러, 14만 달러, 237만 달러, 0만 달러, 14만 달러, 237만 달러, 0만 달러, 14만 달러, 237만 달러, 0만 달러, 14만 달러, 237만 달러, 0만 달러, 14만 달러, 237만 달", "variant": null, "expected": null}
+{"cid": "01310773-q4-c1", "qid": "01310773-q4", "source": "controlled", "text": "엔시스는 2026년 2월에 믹싱 사업부를 새로 만들어 믹싱 장비 사업에 나섰다.", "variant": "의역", "expected": "supported"}
+{"cid": "01310773-q4-c2", "qid": "01310773-q4", "source": "controlled", "text": "엔시스는 2019년 2월에 믹싱 사업부를 새로 만들어 믹싱 장비 사업에 나섰다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "01310773-q4-n1", "qid": "01310773-q4", "source": "natural", "text": "[원재료 매입] 당사의 원재료 매입에서 가장 큰 비중을 차지하는 품목은 2차전지입니다.", "variant": null, "expected": null}
+{"cid": "01310773-q4-n2", "qid": "01310773-q4", "source": "natural", "text": "2차전지의 매입처는 주로 한국의 전기차 주행차량 데이터 분석 및 진단용 프로그램 알고리즘 개발 및 고도화, 전기차 주행차량 데이터 분석 및 진단용 프로그램 알고리즘 개발 및 고도화, 차세대 전지 - 정부과제 3건 수행 - 황화물 고체 전해질 Roll to Roll 코팅 및 평가 분석 진행, 차세대 전지 - 정부과제 3건 수행 - 황화물 고체 전해질 Roll to Roll 코팅 및 평가 분석 진행, 차세대 전지 - 정부과제 3건 수행 - 황화물 고체 전해질 Roll to Roll 코팅 및 평가 분석 진행, 차세대 전지 - 정부과제 3건 수행 - 황화물 고체 전해질 Roll to Roll 코팅 및 평가 분석 진행, 차세대 전지 - 정부과제 3건 수행 - 황화물 고체 전해질 Roll to Roll 코팅 및 평가 분석 진행, 차세대 전지 - 정부과제 3건 수행 - 황화물 고체 전해질 Roll to Roll 코팅 및 평가 분석 진행, 차세대 전지 - 정부과제 3건 수행 - 황화물 고체 전해질", "variant": null, "expected": null}
+{"cid": "01310773-q5-c1", "qid": "01310773-q5", "source": "controlled", "text": "엔시스 머신비전 검사의 핵심 기술 중 하나는 2D 광학계로 3D 광학계와 같은 효과를 내는 2.5D 알고리즘 영상처리 기술이다.", "variant": "의역", "expected": "supported"}
+{"cid": "01310773-q5-c2", "qid": "01310773-q5", "source": "controlled", "text": "파크시스템스 머신비전 검사의 핵심 기술 중 하나는 2D 광학계로 3D 광학계와 같은 효과를 내는 2.5D 알고리즘 영상처리 기술이다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "01310773-q5-n1", "qid": "01310773-q5", "source": "natural", "text": "이러한 정보를 통해, 엔시스가 노출된 외환위험 중 환율이 10% 변동할 때 세후 이익에 가장 큰 영향을 주는 통화는 미국 달러입니다.", "variant": null, "expected": null}
+{"cid": "01310773-q6-c1", "qid": "01310773-q6", "source": "controlled", "text": "엔시스의 연구개발비는 2023년부터 2025년까지 해마다 늘었다.", "variant": "의역", "expected": "supported"}
+{"cid": "01310773-q6-c2", "qid": "01310773-q6", "source": "controlled", "text": "엔시스의 연구개발비는 2023년부터 2025년까지 해마다 늘지 않았다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "01310773-q6-n1", "qid": "01310773-q6", "source": "natural", "text": "[질문] 엔시스의 최근 3년간 연구개발비 규모와 매출액 대비 비율은 어떻게 변해 왔나요?", "variant": null, "expected": null}
+{"cid": "01515323-q1-c1", "qid": "01515323-q1", "source": "controlled", "text": "LG에너지솔루션은 미래 성장 동력으로 배터리 재활용·재사용, 차세대 전지, BaaS 같은 신규 사업 영역을 발굴하고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "01515323-q1-c2", "qid": "01515323-q1", "source": "controlled", "text": "현대자동차는 승용차와 상용차를 생산해 국내외 시장에 판매한다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "01515323-q1-n1", "qid": "01515323-q1", "source": "natural", "text": "LG에너지솔루션은 차세대 전지 제조 및 판매, 스마트폰 전지 제조 및 판매, 전력망 및 주택용 ESS 전지 제조 및 판매, 전동공구 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및 판매, 전기 및 전력 제조 및", "variant": null, "expected": null}
+{"cid": "01515323-q2-c1", "qid": "01515323-q2", "source": "controlled", "text": "LG에너지솔루션의 국외 매출 가운데 84.1%는 해외 생산법인이 거래선에 직접 판매해 발생했다.", "variant": "의역", "expected": "supported"}
+{"cid": "01515323-q2-c2", "qid": "01515323-q2", "source": "controlled", "text": "LG에너지솔루션의 국외 매출 가운데 72.4%는 해외 생산법인이 거래선에 직접 판매해 발생했다.", "variant": "숫자 변경", "expected": "not_supported"}
+{"cid": "01515323-q2-n1", "qid": "01515323-q2", "source": "natural", "text": "LG에너지솔루션은 자동차 전지, 스마트폰, e-mobility, 전력망, 주택용 등 ESS전지 분야, Recycle, Reuse, 차세대 전지, BaaS 등의 미래 성장을 위한 신규 사업영역을 지속적으로 발굴해 나가는 데 핵심 역할을 하고 있습니다.", "variant": null, "expected": null}
+{"cid": "01515323-q2-n2", "qid": "01515323-q2", "source": "natural", "text": "LG에너지솔루션의 대표 제품은 차세대 전지, 스마트폰, ESS전지, Recycle, Reuse, 차세대 전지, BaaS 등입니다.", "variant": null, "expected": null}
+{"cid": "01515323-q2-n3", "qid": "01515323-q2", "source": "natural", "text": "LG에너지솔루션의 대표 제품의 판매 가격은 최근 몇 년간 다양한 추세를 보입니다.", "variant": null, "expected": null}
+{"cid": "01515323-q2-n4", "qid": "01515323-q2", "source": "natural", "text": "차세대 전지:", "variant": null, "expected": null}
+{"cid": "01515323-q2-n5", "qid": "01515323-q2", "source": "natural", "text": "2020년: 1,000,000원에서 1,500,000원", "variant": null, "expected": null}
+{"cid": "01515323-q3-c1", "qid": "01515323-q3", "source": "controlled", "text": "2025년 말 시점에 LG에너지솔루션이 국내에 등록해 보유한 누적 특허는 12,942건이다.", "variant": "의역", "expected": "supported"}
+{"cid": "01515323-q3-c2", "qid": "01515323-q3", "source": "controlled", "text": "2023년 말 시점에 LG에너지솔루션이 국내에 등록해 보유한 누적 특허는 12,942건이다.", "variant": "기간 바꾸기", "expected": "not_supported"}
+{"cid": "01515323-q3-n1", "qid": "01515323-q3", "source": "natural", "text": "LG에너지솔루션의 최근 3년 매출은 수출과 내수로 나누어 구성되고, 주요 매출처에 대한 의존도는 어느 정도입니다.", "variant": null, "expected": null}
+{"cid": "01515323-q3-n2", "qid": "01515323-q3", "source": "natural", "text": "수출: 2020년 12월 31일 기준, 수출은 38,464건으로, 이 중 24,547건은 해외에서 수출되었습니다.", "variant": null, "expected": null}
+{"cid": "01515323-q3-n3", "qid": "01515323-q3", "source": "natural", "text": "2021년 12월 31일 기준, 수출은 34,191건으로, 이 중 21,191건은 해외에서 수출되었습니다.", "variant": null, "expected": null}
+{"cid": "01515323-q3-n4", "qid": "01515323-q3", "source": "natural", "text": "2022년 12월 31일 기준, 수출은 29,191건으로, 이 중 19,191건은 해외에서 수출되었습니다.", "variant": null, "expected": null}
+{"cid": "01515323-q3-n5", "qid": "01515323-q3", "source": "natural", "text": "내수: 2020년 12월 31일 기준, 내수은 12,942건으로, 이 중 8,942건은 국내에서 수출되었습니다.", "variant": null, "expected": null}
+{"cid": "01515323-q4-c1", "qid": "01515323-q4", "source": "controlled", "text": "LG에너지솔루션은 비철금속 원재료 가격 변동에 따른 현금흐름 위험을 줄이기 위해 상품스왑 계약을 맺고 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "01515323-q4-c2", "qid": "01515323-q4", "source": "controlled", "text": "SK온은 비철금속 원재료 가격 변동에 따른 현금흐름 위험을 줄이기 위해 상품스왑 계약을 맺고 있다.", "variant": "주체 교체", "expected": "not_supported"}
+{"cid": "01515323-q4-n1", "qid": "01515323-q4", "source": "natural", "text": "LG에너지솔루션의 주요 원재료는 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "01515323-q4-n2", "qid": "01515323-q4", "source": "natural", "text": "**원자재**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: - **전기**: -", "variant": null, "expected": null}
+{"cid": "01515323-q5-c1", "qid": "01515323-q5", "source": "controlled", "text": "LG에너지솔루션은 미래 예상거래의 현금흐름 변동을 헤지하는 파생계약에서 생긴 평가손익을 기타포괄손익누계액으로 반영한다.", "variant": "의역", "expected": "supported"}
+{"cid": "01515323-q5-c2", "qid": "01515323-q5", "source": "controlled", "text": "LG에너지솔루션은 미래 예상거래의 현금흐름 변동을 헤지하는 파생계약에서 생긴 평가손익을 기타포괄손익누계액으로 반영하지 않는다.", "variant": "부정", "expected": "not_supported"}
+{"cid": "01515323-q5-n1", "qid": "01515323-q5", "source": "natural", "text": "LG에너지솔루션은 환율 및 상품가격 변동에 따른 위험 등을 회피하기 위해 파생상품을 활용할 수 있습니다.", "variant": null, "expected": null}
+{"cid": "01515323-q5-n2", "qid": "01515323-q5", "source": "natural", "text": "파생상품은 계약에 따라 발생된 권리와 의무를 공정가액으로 평가하여 자산과 부채로 계상하고, 동 계약으로부터 발생한 손익은 발생시점에 당기손익으로 인식하고 있습니다.", "variant": null, "expected": null}
+{"cid": "01515323-q5-n3", "qid": "01515323-q5", "source": "natural", "text": "다만, 위험회피를 목적으로 하는 경우, 특정위험으로 인한 자산ㆍ부채 및 확정계약의 공정가액 변동위험을 회피하는 계약에서 발생한 평가손익은 당기손익으로 처리하고, 미래 예상거래의 현금흐름변동위험을 회피하는 계약에서 발생한 평가손익은 기타포괄손익누계액으로 처리하고 있습니다.", "variant": null, "expected": null}
+{"cid": "01515323-q5-n4", "qid": "01515323-q5", "source": "natural", "text": "파생상품의 공정가액은 거래은행에서 제공한 평가내역을 이용하고 있습니다.", "variant": null, "expected": null}
+{"cid": "01515323-q5-n5", "qid": "01515323-q5", "source": "natural", "text": "(1) 보고기간말 현재 회사가 체결하고 있는 상품스왑 계약은 다음과 같습니다.", "variant": null, "expected": null}
+{"cid": "01515323-q6-c1", "qid": "01515323-q6", "source": "controlled", "text": "LG에너지솔루션의 연구개발 조직은 CTO, 사업부 개발센터, 생산기술혁신센터, 개발품질, CDO로 짜여 있다.", "variant": "의역", "expected": "supported"}
+{"cid": "01515323-q6-c2", "qid": "01515323-q6", "source": "controlled", "text": "네이버는 국내에서 검색 포털과 온라인 커머스 플랫폼을 운영한다.", "variant": "다른 기업 사실", "expected": "not_supported"}
+{"cid": "01515323-q6-n1", "qid": "01515323-q6", "source": "natural", "text": "LG에너지솔루션의 연구개발비는 2020년 1월 1일부터 2022년 12월 31일까지 3년간 지속적으로 증가하고 있습니다.", "variant": null, "expected": null}
+{"cid": "01515323-q6-n2", "qid": "01515323-q6", "source": "natural", "text": "매출액 대비 연구개발비 비율은 2020년 1월 1일부터 2022년 12월 31일까지 100%를 차지하고 있습니다.", "variant": null, "expected": null}

@@ -1,0 +1,32 @@
+{"lid": "ab7a6b9c7e", "label": "supported", "passage": 2, "reason": "배터리 재활용·재사용, 차세대 전지, BaaS를 미래 성장을 위한 신규 사업영역으로 발굴한다고 명시한다."}
+{"lid": "292a102a44", "label": "no_evidence", "passage": null, "reason": "전지 연구 분야는 나오지만 차세대 전지·전동공구·전기·전력 등을 제조·판매한다는 모든 사실 단위를 뒷받침하지 않는다."}
+{"lid": "6264d1f783", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 현대자동차의 승용차·상용차 생산 및 판매에 관한 근거가 없다."}
+{"lid": "d6ef62977f", "label": "contradicted", "passage": 1, "reason": "국외 매출의 해외 생산법인 직접 판매 비중은 72.4%가 아니라 84.1%로 제시된다."}
+{"lid": "34cfc9f680", "label": "no_evidence", "passage": null, "reason": "문단 2는 자동차·소형·ESS 전지를 현 사업 연구 분야로, Recycle·Reuse·차세대 전지·BaaS를 신규 영역으로 구분하며 나열된 분야 모두가 신규 사업이라는 근거는 없다."}
+{"lid": "b55f72dd1f", "label": "no_evidence", "passage": null, "reason": "2020년 판매가격이 1,000,000원에서 1,500,000원으로 변했다는 수치는 제시되지 않는다."}
+{"lid": "dd1a5b608f", "label": "supported", "passage": 1, "reason": "국외 판매경로 중 해외 생산법인 직접 판매의 매출액 비중이 84.1%라고 명시한다."}
+{"lid": "8861933b80", "label": "no_evidence", "passage": null, "reason": "대표 제품의 최근 몇 년간 판매가격이나 그 추세에 관한 정보가 없다."}
+{"lid": "6672923862", "label": "non_claim", "passage": null, "reason": "차세대 전지라는 항목 제목만 있어 사실을 단정하지 않는다."}
+{"lid": "431b016ba2", "label": "no_evidence", "passage": null, "reason": "문단 2의 연구 분야와 신규 사업영역을 대표 제품으로 단정할 근거가 없으며 스마트폰 자체가 대표 제품이라는 근거도 없다."}
+{"lid": "c092147e4d", "label": "no_evidence", "passage": null, "reason": "판매경로별 비중만 나오며 최근 3년 수출·내수 매출 구성과 주요 매출처 의존도는 제시되지 않는다."}
+{"lid": "c9ad7215cf", "label": "no_evidence", "passage": null, "reason": "2020년 내수 12,942건과 국내 수출 8,942건은 제시되지 않으며 12,942건은 2025년 국내 등록 특허 수다."}
+{"lid": "fcefab0829", "label": "supported", "passage": 8, "reason": "2025년 12월 31일 기준 누적 국내 등록 특허가 12,942건이라고 명시한다."}
+{"lid": "ef4ca9067e", "label": "no_evidence", "passage": null, "reason": "2020년 수출 건수는 없으며 38,464건과 24,547건은 각각 2025년 해외 등록 특허와 출원 중 특허 수다."}
+{"lid": "927d28765c", "label": "no_evidence", "passage": null, "reason": "2021년 수출 34,191건 및 해외 수출 21,191건에 관한 근거가 없다."}
+{"lid": "4b9dacd3d4", "label": "no_evidence", "passage": null, "reason": "2022년 수출 29,191건 및 해외 수출 19,191건에 관한 근거가 없다."}
+{"lid": "b868cc7e47", "label": "no_evidence", "passage": null, "reason": "12,942건은 2025년 말 국내 등록 특허 수로 제시되며 2023년 말 수치는 없어 다른 기간의 사실을 확정할 수 없다."}
+{"lid": "433f6de4e6", "label": "non_claim", "passage": null, "reason": "구체적인 원재료를 제시하지 않고 뒤따를 목록을 안내하는 문장이다."}
+{"lid": "6950ad3d8a", "label": "no_evidence", "passage": null, "reason": "전기를 원자재로 나열하지만 제시된 문단에는 전기가 주요 원재료라는 근거가 없다."}
+{"lid": "9f614576dc", "label": "no_evidence", "passage": null, "reason": "상품스왑 계약은 LG에너지솔루션에 관한 내용이며 SK온의 계약 여부는 제시되지 않는다."}
+{"lid": "7ad11b1c8e", "label": "supported", "passage": 6, "reason": "보고기간말 상품스왑 계약의 대상자산이 비철금속이고 거래목적이 현금흐름위험회피라고 명시한다."}
+{"lid": "51ab9877a6", "label": "supported", "passage": 6, "reason": "파생상품의 공정가액에 거래은행이 제공한 평가내역을 이용한다고 명시한다."}
+{"lid": "d5e425f732", "label": "contradicted", "passage": 6, "reason": "미래 예상거래의 현금흐름변동위험을 회피하는 계약의 평가손익은 기타포괄손익누계액으로 처리한다고 명시한다."}
+{"lid": "9cbf2b4c48", "label": "supported", "passage": 6, "reason": "환율 및 상품가격 변동 위험 등을 회피하기 위해 파생상품을 활용할 수 있다고 명시한다."}
+{"lid": "5e6be23f17", "label": "non_claim", "passage": null, "reason": "상품스왑 계약의 구체적 내용을 단정하지 않고 뒤따를 계약 목록을 안내하는 문장이다."}
+{"lid": "df9c486e55", "label": "supported", "passage": 6, "reason": "파생상품의 권리·의무를 공정가액으로 평가해 자산·부채로 계상하고 발생 손익을 발생시점에 당기손익으로 인식한다고 명시한다."}
+{"lid": "33351b99cd", "label": "supported", "passage": 6, "reason": "공정가액 변동위험 회피 계약의 평가손익은 당기손익으로, 미래 예상거래의 현금흐름변동위험 회피 계약의 평가손익은 기타포괄손익누계액으로 처리한다고 명시한다."}
+{"lid": "50ca0ae41b", "label": "supported", "passage": 6, "reason": "미래 예상거래의 현금흐름변동위험을 회피하는 계약의 평가손익을 기타포괄손익누계액으로 처리한다고 명시한다."}
+{"lid": "6417086bcd", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 네이버의 국내 검색 포털 및 온라인 커머스 플랫폼 운영에 관한 근거가 없다."}
+{"lid": "f71dda176d", "label": "no_evidence", "passage": null, "reason": "2020년부터 2022년까지 매출액 대비 연구개발비 비율이 100%라는 정보는 없다."}
+{"lid": "e8b5edcf81", "label": "supported", "passage": 2, "reason": "R&D 조직이 CTO, 사업부 개발센터, 생산기술혁신센터, 개발품질, CDO로 구성된다고 명시한다."}
+{"lid": "ab9e3654c8", "label": "no_evidence", "passage": null, "reason": "연구개발에 지속적으로 투자한다는 서술만 있으며 2020년부터 2022년까지 연구개발비가 계속 증가했다는 연도별 근거는 없다."}

@@ -1,0 +1,23 @@
+{"lid":"a311fd0943","label":"supported","passage":7,"reason":"문단 7은 엔시스가 2차전지 배터리 제품의 검사장비를 납품하는 회사라고 명시한다."}
+{"lid":"162db0385e","label":"no_evidence","passage":null,"reason":"검사장비 납품과 머신비전 기술은 설명되지만 다양한 방식으로 장비를 공급한다는 사실까지 지지하는 단일 문단은 없다."}
+{"lid":"ed2f30beb1","label":"contradicted","passage":7,"reason":"문단 7은 엔시스가 2차전지 배터리 검사장비를 납품한다고 하므로 공급하지 않는다는 주장과 반대다."}
+{"lid":"7de409de84","label":"supported","passage":4,"reason":"문단 4은 매출비중이 가장 높은 제품이 2차전지 배터리 공정별 머신비전검사장비라고 명시한다."}
+{"lid":"26314a6615","label":"no_evidence","passage":null,"reason":"제시된 문단에는 농심의 제품이나 매출 구성에 관한 정보가 없다."}
+{"lid":"e1e52a6f2b","label":"supported","passage":3,"reason":"문단 3은 다양한 응용처에 맞춘 생산 공정 작업과 이에 적합한 안정적 품질 확보를 위한 검사 필요성을 모두 설명한다."}
+{"lid":"a620903ce5","label":"non_claim","passage":null,"reason":"구체적인 장비에 관한 사실을 제시하지 않고 뒤에 나올 목록을 소개하는 안내 문장이다."}
+{"lid":"ec1b79e53f","label":"supported","passage":3,"reason":"문단 3은 다양한 전방산업 때문에 각 제품의 기능과 성격에 적합한 검사가 중요하다고 명시한다."}
+{"lid":"34fb391726","label":"supported","passage":3,"reason":"문단 3은 2차전지 검사장비가 제품의 용도에 맞는 다양한 검사 기능을 필요로 한다고 명시한다."}
+{"lid":"a2c38d30d9","label":"supported","passage":4,"reason":"문단 4은 리튬이온의 폭발 위험성 때문에 전문 기술력이 필요하고 해당 사업의 진입장벽이 높다고 설명한다."}
+{"lid":"07b96c5afa","label":"supported","passage":2,"reason":"문단 2의 용역 setup 대응 매출은 2025년 21,371백만원과 2024년 15,011백만원으로 전년 대비 증가했다."}
+{"lid":"d0fea83e31","label":"contradicted","passage":2,"reason":"문단 2는 2025년 제품 매출 27,465와 용역 매출 21,371의 단위를 백만원으로 명시하며 주장에 적힌 만 달러와 다르다."}
+{"lid":"d16a8ca20c","label":"contradicted","passage":2,"reason":"문단 2의 2025년 용역 setup 대응 매출은 21,371백만원으로 주장한 23,950백만원과 다르다."}
+{"lid":"cf82cfd668","label":"contradicted","passage":8,"reason":"문단 8의 믹싱 사업부 신설 및 장비사업 시작 시점은 2026년 2월로 주장한 2019년 2월과 다르다."}
+{"lid":"43f00c77f5","label":"no_evidence","passage":null,"reason":"문단 4의 2차전지는 매출 제품에 관한 설명이며 제시된 문단에는 원재료 매입 품목별 비중이 없다."}
+{"lid":"0eb5fb7d55","label":"supported","passage":8,"reason":"문단 8은 2026년 2월 믹싱 사업부를 신설하고 믹싱 장비사업을 시작했다고 명시한다."}
+{"lid":"3bfca840e3","label":"no_evidence","passage":null,"reason":"문단 3의 데이터 분석과 고체전해질 코팅은 연구원의 연구실적이며 2차전지 매입처에 관한 근거가 아니다."}
+{"lid":"a82928e8c8","label":"no_evidence","passage":null,"reason":"문단 8은 엔시스의 2.5D 알고리즘 기술을 설명할 뿐 파크시스템스의 기술에 관한 정보는 없다."}
+{"lid":"04d3ebba40","label":"supported","passage":8,"reason":"문단 8은 엔시스의 핵심 기술로 2D 광학계를 활용해 3D 광학계 효과를 실현하는 2.5D 알고리즘 영상처리를 명시한다."}
+{"lid":"1d68279b6a","label":"no_evidence","passage":null,"reason":"문단 5에는 CAD 민감도만 제시되어 있고 미국 달러의 영향이나 통화별 최대 영향을 확인할 정보는 없다."}
+{"lid":"a13e0cd49f","label":"non_claim","passage":null,"reason":"연구개발비 규모와 매출액 대비 비율의 변화를 묻는 질문이며 사실을 단정하지 않는다."}
+{"lid":"a5261e183a","label":"contradicted","passage":5,"reason":"문단 5의 연구개발비는 2023년 705, 2024년 1,167, 2025년 3,018백만원으로 해마다 증가해 주장과 반대다."}
+{"lid":"77c609c824","label":"supported","passage":5,"reason":"문단 5의 연구개발비는 2023년 705, 2024년 1,167, 2025년 3,018백만원으로 해마다 증가했다."}

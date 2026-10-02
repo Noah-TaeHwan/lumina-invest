@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "spec": "docs/superpowers/specs/2026-10-02-evidence-assistant-design.md (4판 + 2절 군집 규칙 개정 2026-10-02)",
+  "seed": 20261002,
+  "split_sha256": "a93cd93b85b65c1d1d6adeca9311e9f99fd8c6bc0011f6ef2991397d1872ba66",
+  "split_counts": {
+    "tune": 10,
+    "check": 10,
+    "holdout": 20
+  },
+  "cluster_rule": {
+    "min_name_len": 3,
+    "min_mentions": 10
+  },
+  "k": 8,
+  "jev_model": "jev-1.13.0",
+  "judge_question_sha": "30b0f5e33c70a59602c31830a917ae0b5572732fa57898368e28af988cc4874e",
+  "generator": {
+    "model": "llama3.2:1b",
+    "digest": "baf6a787fdff",
+    "prompt_sha": "e3f0379c2d7937d46aca4ff7de604205fba2811fcb922a44f09d5f920b7b4e21",
+    "options": {
+      "temperature": 0,
+      "seed": 20261002,
+      "num_ctx": 8192,
+      "num_predict": 300
+    },
+    "fallback": "qwen2.5:3b",
+    "fallback_rule": "tune natural non_claim share > 0.5, decided before check labels are read",
+    "runtime": "host Ollama 0.35.0 (Metal, M1 Pro); same model digest. Docker CPU (4-core cap) took 3-10 min per answer and timed out"
+  },
+  "embedder": {
+    "model": "nomic-embed-text",
+    "prefixes": [
+      "search_query: ",
+      "search_document: "
+    ]
+  },
+  "labels": {
+    "prompt": "lab/evidence/prompts/labeler.md",
+    "prompt_sha256": "40e84ce81104f5db1f076196d2405725da341f4e5338e2472bdac5c1950cdc38",
+    "labelers": [
+      "claude-opus subagent",
+      "codex exec"
+    ],
+    "blind": [
+      "source",
+      "variant",
+      "judge output"
+    ],
+    "reconcile": "one round with the other labeler's label and reason, then disputed (excluded, sensitivity reported)"
+  },
+  "stage0_gates": {
+    "corpus_min": 38,
+    "kappa_min": 0.6,
+    "controlled_min": 0.85,
+    "auc_min": 0.7,
+    "auc_lo_gt": 0.5,
+    "batch_agree_min": 0.9,
+    "first_requests_min": 300,
+    "sessions_min": 2,
+    "session_gap_hours": 1,
+    "p95_ms_max": 1500,
+    "fail_upper_max": 0.02,
+    "repeat_agree_min": 0.9
+  },
+  "stage0_measure": {
+    "h_ko": "JEV score = max p(supports) over 8 passages, natural claims of the check split, final labels excluding disputed and non_claim",
+    "latency": "first attempts of batched requests (tags other than single)",
+    "question_tuning": "tune split only, at most 3 wording revisions, each logged"
+  },
+  "bootstrap": {
+    "levels": [
+      "cluster",
+      "question"
+    ],
+    "n": 2000,
+    "seed": 20261002
+  },
+  "token_cap": 20000000,
+  "stop": "any gate fails -> NO-GO, publish the report, move to module B if h_ko fails"
+}

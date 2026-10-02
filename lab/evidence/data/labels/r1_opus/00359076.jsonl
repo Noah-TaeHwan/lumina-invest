@@ -1,0 +1,26 @@
+{"lid": "5195eba94a", "label": "non_claim", "passage": null, "reason": "뒤 내용을 예고하는 도입 문장으로 사실 주장이 아님"}
+{"lid": "8d43cd7001", "label": "supported", "passage": 7, "reason": "문단 7이 복합 프로젝트라 제품별 시장점유율 산정이 어렵다고 명시"}
+{"lid": "a129efada9", "label": "supported", "passage": 8, "reason": "문단 8: 영업활동은 크게 콜센터, 통신 및 서비스로 구분"}
+{"lid": "d0d5bcafec", "label": "contradicted", "passage": 2, "reason": "문단 2는 IPRON Cloud 런칭을 2021년으로 기재, 주장은 2018년"}
+{"lid": "799e7b9371", "label": "supported", "passage": 8, "reason": "문단 8: 통신 매출유형의 품목이 IP기반 유무선 멀티미디어 서비스"}
+{"lid": "84a5946c3c", "label": "contradicted", "passage": 8, "reason": "문단 8은 서비스를 콜센터·통신과 별개 구분으로 제시, 주장은 그 일부라고 함"}
+{"lid": "5ea2ae5f6e", "label": "supported", "passage": 2, "reason": "문단 2: 2021년 순수 자체 기술로 개발한 IPRON Cloud 서비스 런칭"}
+{"lid": "197afcccd7", "label": "supported", "passage": 5, "reason": "문단 5: Catch Bot은 기존 IPCC 솔루션과 연동해 음성 AI 상담사 역할"}
+{"lid": "e74101bea7", "label": "no_evidence", "passage": null, "reason": "음성인식·자연어이해(문단 3)와 가상 상담(문단 2)을 합쳐야 하며 단일 문단 지지 없음"}
+{"lid": "1bb15f4b65", "label": "contradicted", "passage": 5, "reason": "문단 5는 해당 음성봇 솔루션 이름을 Catch Bot으로 기재, 주장은 VoiceMate"}
+{"lid": "68d93feece", "label": "supported", "passage": 3, "reason": "문단 3: AICC는 AI 언어 처리 기술을 종합해 고객 응대 업무에 적용한 서비스"}
+{"lid": "4e592cde6b", "label": "contradicted", "passage": 7, "reason": "문단 7은 콜센터 인프라 및 소프트웨어 35,067,101천원, 매출비중 70.6%로 기재"}
+{"lid": "284766a980", "label": "supported", "passage": 7, "reason": "문단 7: 2025.12.31 기준 콜센터 인프라 및 소프트웨어 35,067,101천원(70.6%)"}
+{"lid": "f47487b290", "label": "no_evidence", "passage": null, "reason": "36,603,589는 문단 1의 수주총액 합계(천원)이며 전체 매출액은 문단에 없음"}
+{"lid": "11437308f6", "label": "supported", "passage": 8, "reason": "문단 8 생산설비 항목과 동일한 문장"}
+{"lid": "5e47f86165", "label": "supported", "passage": 8, "reason": "문단 8: 특수관계인과 거래한 사실이 없음"}
+{"lid": "090442db49", "label": "no_evidence", "passage": null, "reason": "현대제철 원재료에 대한 내용은 문단에 없음"}
+{"lid": "fd22316a7e", "label": "supported", "passage": 8, "reason": "문단 8 주요 원재료 항목과 동일한 문장"}
+{"lid": "3208649e17", "label": "supported", "passage": 8, "reason": "문단 8: 제품매출 원재료는 서버 및 하드웨어가 주를 이룸"}
+{"lid": "8094573401", "label": "supported", "passage": 8, "reason": "문단 8 생산설비 항목과 동일한 문장"}
+{"lid": "87d3b70d03", "label": "non_claim", "passage": null, "reason": "질문 문장으로 사실 주장이 아님"}
+{"lid": "90702c69b1", "label": "supported", "passage": 2, "reason": "문단 2: 회수기간은 평균적으로 세금계산서 발행 후 약 60일 이내"}
+{"lid": "d8cb6f3476", "label": "contradicted", "passage": 2, "reason": "문단 2는 약 60일 이내로 기재, 주장은 약 90일"}
+{"lid": "fe5f595b36", "label": "no_evidence", "passage": null, "reason": "문단 2는 2023~2025년만 제시하며 2019 회계연도 연구개발비 정보 없음"}
+{"lid": "ab8513b307", "label": "supported", "passage": 2, "reason": "문단 2: 제31기(2025년) 연구개발비용 계 4,322,343천원(약 43.2억), 매출액 대비 8.70%"}
+{"lid": "88f1421dbd", "label": "contradicted", "passage": 2, "reason": "문단 2는 2025년 연구개발비/매출액 비율을 8.70%로 기재, 주장은 27.7%"}

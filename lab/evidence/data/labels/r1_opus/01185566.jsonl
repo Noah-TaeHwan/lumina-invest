@@ -1,0 +1,25 @@
+{"lid": "83742184ef", "label": "contradicted", "passage": 5, "reason": "문단 5는 2017년 9월 코스닥 상장·매매 개시라고 적어 2014년 9월과 다르다"}
+{"lid": "c4f274a8ab", "label": "supported", "passage": 5, "reason": "문단 5: 2017년 9월 코스닥시장에 주권상장되어 매매가 개시되었다"}
+{"lid": "b5fbfe8a97", "label": "non_claim", "passage": null, "reason": "질문 문장이다"}
+{"lid": "c2ee7355a1", "label": "supported", "passage": 1, "reason": "문단 1에 같은 문장이 있다"}
+{"lid": "eae48aec23", "label": "supported", "passage": 1, "reason": "문단 1: 코스메틱 부문은 메이크업 스펀지·퍼프·함침스펀지 등 화장품 부자재 제조·판매가 주요 사업"}
+{"lid": "5e58dfd37e", "label": "no_evidence", "passage": null, "reason": "문단들은 이 사업을 코스메틱 부문으로 적을 뿐 헬스케어 부문에 대한 서술은 없다"}
+{"lid": "11492245ea", "label": "supported", "passage": 1, "reason": "문단 1에 2024년 유일산업 화장품 부자재 사업·자산 양수와 영업력 강화 내용이 그대로 있다"}
+{"lid": "87ed278073", "label": "supported", "passage": 1, "reason": "문단 1: 코스메틱 부문은 메이크업 스펀지, 퍼프 및 함침스펀지 등 화장품 부자재의 제조·판매가 주요 사업"}
+{"lid": "d313edd0ce", "label": "no_evidence", "passage": null, "reason": "글라스 부문 품목별 매출 비중은 문단에 없고, 루비셀은 코스메틱 원재료로만 나온다"}
+{"lid": "be93153ee2", "label": "supported", "passage": 1, "reason": "문단 1: 모든 연구개발은 국내, 특히 해외 고객사로부터 개발 방향과 기본 아이디어를 공유하여 착수"}
+{"lid": "3baa012f26", "label": "contradicted", "passage": 1, "reason": "문단 1은 고객사와 개발 방향·아이디어를 공유해 착수한다고 적어 정반대다"}
+{"lid": "29aa52448c", "label": "supported", "passage": 2, "reason": "문단 2: 연구개발은 NBR 스펀지를 활용한 메이크업 소품 개발에 집중"}
+{"lid": "1f85a50591", "label": "no_evidence", "passage": null, "reason": "앰플 설비 가동률은 문단에 없다. 3,273·2,956은 백색 유리관 매입액이고 0.2%는 연구개발비 비율이다"}
+{"lid": "51c293c2c3", "label": "no_evidence", "passage": null, "reason": "삼성전자에 대한 문단이 없다"}
+{"lid": "cacbd34b28", "label": "supported", "passage": 1, "reason": "문단 1에 같은 내용이 있다(전액 고정이자부 차입금, 영향 중요하지 않음)"}
+{"lid": "ad36d64a56", "label": "non_claim", "passage": null, "reason": "질문 문장이다"}
+{"lid": "a5bcb5041b", "label": "contradicted", "passage": 1, "reason": "문단 1은 재무상태·현금흐름에 중요한 영향을 미치는 시장성 있는 금융상품이 없다고 적는다"}
+{"lid": "eca360e708", "label": "contradicted", "passage": 1, "reason": "문단 1: 차입금은 전액 고정이자부라 이자율 변동이 현금흐름에 미치는 영향이 중요하지 않다"}
+{"lid": "e55f7ed884", "label": "supported", "passage": 1, "reason": "문단 1: 중요한 영향을 미치는 시장성 있는 금융상품은 없다"}
+{"lid": "7bf7493b15", "label": "supported", "passage": 6, "reason": "문단 6의 비품 행(논산공장·판교사업장, 기초 264, 증가 9, 감소 -26)과 일치"}
+{"lid": "785668b11d", "label": "supported", "passage": 1, "reason": "문단 1: 2019년 3월 블러썸엠앤씨로 상호 변경"}
+{"lid": "dba26c6613", "label": "non_claim", "passage": null, "reason": "내용이 없는 조각 문자열이다"}
+{"lid": "222795412e", "label": "contradicted", "passage": 6, "reason": "문단 6에서 앰플 원동기 외 기계장치(2,142→1,917)는 논산공장 소속이고, 베트남공장 기계장치는 카트리지 설비(문단 5)다"}
+{"lid": "59773a1c07", "label": "supported", "passage": 6, "reason": "문단 6의 논산공장 차량운반구 행(7, -2, 기말 5)과 일치"}
+{"lid": "d26ca19e80", "label": "contradicted", "passage": 1, "reason": "문단 1은 블러썸엠앤씨로의 상호 변경 시점이 2019년 3월이라고 적는다"}

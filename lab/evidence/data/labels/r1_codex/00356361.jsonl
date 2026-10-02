@@ -1,0 +1,31 @@
+{"lid": "08fa340d13", "label": "supported", "passage": 6, "reason": "문단 6에 2025년 말 석유화학 사업부문의 매출 비중이 38.2%로 명시되어 있다."}
+{"lid": "6747099452", "label": "contradicted", "passage": 6, "reason": "문단 6은 같은 기간 석유화학 사업부문의 매출 비중을 41.3%가 아닌 38.2%로 제시한다."}
+{"lid": "2d52c41246", "label": "supported", "passage": 6, "reason": "문단 6의 LG화학 사업부문별 매출 구성에 석유화학, 첨단소재, 생명과학, 공통 및 기타부문이 모두 포함되어 있다."}
+{"lid": "a5ba91c3d6", "label": "supported", "passage": 5, "reason": "문단 5에 생명과학사업이 생산·판매하는 인간 성장호르몬제로 유트로핀이 명시되어 있다."}
+{"lid": "bad7f07cca", "label": "supported", "passage": 5, "reason": "문단 5에 생명과학사업이 생산·판매하는 관절염주사제로 시노비안이 명시되어 있다."}
+{"lid": "952c1b8e54", "label": "non_claim", "passage": null, "reason": "구체적인 의약품이나 사실을 제시하지 않고 뒤에 나올 목록을 소개하는 안내 문장이다."}
+{"lid": "bf37cade5a", "label": "contradicted", "passage": 5, "reason": "문단 5는 경구용 희귀비만치료제 라이선스 아웃에 따른 매출 증대와 수익성 개선을 2023년이 아닌 2025년의 성과로 서술한다."}
+{"lid": "a5580a75d2", "label": "supported", "passage": 5, "reason": "문단 5에 생명과학사업이 생산·판매하는 당뇨신약으로 제미글로가 명시되어 있다."}
+{"lid": "2af83ed435", "label": "no_evidence", "passage": null, "reason": "문단 5에는 류머티스 관절염 치료제 유셉트가 나오지만 유셉이라는 제품명이나 약칭은 제시되어 있지 않다."}
+{"lid": "f186540240", "label": "supported", "passage": 5, "reason": "문단 5에 2025년 세계 최초 개발 경구용 희귀비만치료제 라이선스 아웃을 통한 매출 증대와 수익성 개선이 명시되어 있다."}
+{"lid": "b7705399fd", "label": "supported", "passage": 1, "reason": "문단 1에 2025년 말 첨단소재 사업부문의 매출 비중이 5.7%로 명시되어 있다."}
+{"lid": "a8b9a15870", "label": "supported", "passage": 1, "reason": "문단 1에 석유화학 사업부문의 매출 비중이 38.2%로 명시되어 있다."}
+{"lid": "0ada8a3958", "label": "contradicted", "passage": 1, "reason": "문단 1은 2025년 연결 매출액을 약 45조 9,322억원으로 제시하며 주장한 26,560억원과 다르다."}
+{"lid": "9091dffe82", "label": "no_evidence", "passage": null, "reason": "문단 1의 5.7%는 첨단소재 사업부문 수치이며 반도체소재 사업부문의 매출 비중은 제시되어 있지 않다."}
+{"lid": "8f5aacd3af", "label": "supported", "passage": 2, "reason": "문단 2에 LG에너지솔루션이 2025년 신·증설 및 품질 강화 투자 등에 총 10.5조원을 사용했다고 명시되어 있으며 주장 자체에는 금액의 지표가 특정되어 있지 않다."}
+{"lid": "da40bc9cfb", "label": "non_claim", "passage": null, "reason": "구체적인 매출 비중을 제시하지 않고 뒤에 나올 목록을 소개하는 안내 문장이다."}
+{"lid": "4fcc0debdf", "label": "supported", "passage": 1, "reason": "문단 1에 첨단소재 사업부문의 매출 비중이 5.7%로 명시되어 있다."}
+{"lid": "c105a29355", "label": "supported", "passage": 2, "reason": "문단 2에 생명과학사업의 내수 제품력 강화, 단기 신흥시장 매출 확대, 장기 R&D 제품을 통한 선진시장 진출 전략이 모두 명시되어 있다."}
+{"lid": "ad0dcf4e79", "label": "non_claim", "passage": null, "reason": "LG에너는 이름이 중간에 끊긴 단편으로 사실을 주장하는 내용이 없다."}
+{"lid": "003f4c8cf6", "label": "supported", "passage": 2, "reason": "문단 2에 석유화학 사업부문이 고부가 제품 확대와 신제품 개발을 통해 사업구조를 고도화하는 판매전략을 강화한다고 명시되어 있다."}
+{"lid": "fe62bf1efc", "label": "contradicted", "passage": 2, "reason": "문단 2는 석유화학 사업부문이 고부가 제품 확대와 신제품 개발을 통한 사업구조 고도화 전략을 강화한다고 서술하여 주장의 부정을 반박한다."}
+{"lid": "0327fd5081", "label": "supported", "passage": 3, "reason": "문단 3에 LG에너지솔루션의 지속적인 R&D 투자, 핵심 기술 확보·융합, 차세대 소재 및 스마트팩토리 중심 경쟁력 강화와 신제품 개발이 모두 명시되어 있다."}
+{"lid": "2e43d9ede9", "label": "no_evidence", "passage": null, "reason": "문단 2는 석유화학의 판매전략과 첨단소재의 제휴 전략을 설명할 뿐 이를 석유화학의 주요 원재료라고 뒷받침하지 않는다."}
+{"lid": "adf57a7c53", "label": "no_evidence", "passage": null, "reason": "이 질문의 8개 문단에는 LG화학이 환율 위험 관리를 위해 CDO 계약을 체결한다는 내용이 없다."}
+{"lid": "2717bb2001", "label": "no_evidence", "passage": null, "reason": "이 질문의 8개 문단에는 현대자동차의 울산 공장이나 승용차·SUV 생산에 관한 내용이 없다."}
+{"lid": "0c53396592", "label": "supported", "passage": 6, "reason": "문단 6에 LG화학이 미국, 독일, 일본에 위성 Lab을 두어 글로벌 R&D 네트워크를 구축한다고 명시되어 있다."}
+{"lid": "b154cf45fb", "label": "no_evidence", "passage": null, "reason": "문단 2는 CDO를 R&D 조직 구성에 포함할 뿐 환율 변동 예측에 도움을 준다는 기능은 설명하지 않는다."}
+{"lid": "3e515e29df", "label": "no_evidence", "passage": null, "reason": "이 질문의 8개 문단에는 CDO가 환율 위험 관리용 보증 계약이라는 정의가 없다."}
+{"lid": "060723dbfc", "label": "no_evidence", "passage": null, "reason": "이 질문의 8개 문단에는 해당 기간의 연구개발비용 1,000억원이나 이전 연도 대비 금액·증가율이 제시되어 있지 않다."}
+{"lid": "db5c9906f2", "label": "supported", "passage": 6, "reason": "문단 6에 LG화학이 2025년 말 기준 약 45조 9,322억원의 매출을 달성했다고 명시되어 있다."}
+{"lid": "95b163b258", "label": "contradicted", "passage": 6, "reason": "문단 6은 같은 기간 LG화학 매출을 약 45조 9,322억원으로 제시하며 주장한 52조 7,140억원과 다르다."}

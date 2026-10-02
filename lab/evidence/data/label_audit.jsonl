@@ -1,0 +1,53 @@
+{"cid": "00413046-q4-n1", "final": "no_evidence", "audited": "no_evidence", "note": "8개 문단 어디에도 국내 공장 생산능력·배치 수치 없음(문단4·7은 11개 허가·매출만)"}
+{"cid": "00365590-q5-n1", "final": "no_evidence", "audited": "no_evidence", "note": "변동금리 차입금·1%p 금리민감도 문단 없음(문단2는 부채비율·환위험만), 문장 자체도 비문"}
+{"cid": "00173032-q3-c2", "final": "contradicted", "audited": "contradicted", "note": "문단8 '2022년부터 MDF 및 마루 본격적으로 생산 중'과 부정문이 정면 충돌", "expected_ok": true}
+{"cid": "00105466-q5-n2", "final": "contradicted", "audited": "contradicted", "note": "술어 없는 반복 단편이나 문단5는 2010.9.17~2013.7.5 옵션계약의 체결주체를 Macquarie와 건설출자자(KCC건설·롯데건설)로, Macquarie가 건설출자자에 대한 주식매수청구권을 부여받았다고 명시; 주장은 같은 기간 주체를 아라베스크(유)·KCC건설로, 청구권을 아라베스크 풋옵션에 대한 것으로 바꿔 다른 사실을 말함"}
+{"cid": "00413046-q6-n1", "final": "no_evidence", "audited": "no_evidence", "note": "1,844,595,921천원은 문단2의 차입금 6개월 이하 만기 현금흐름이며 연구개발비 문단은 8개 중 없음"}
+{"cid": "00413046-q1-c1", "final": "supported", "audited": "supported", "note": "문단7(및 문단4 계열) '현재까지 11개 바이오시밀러 제품에 대한 글로벌 품목 허가를 획득' 한 문단이 전부 지지", "expected_ok": true}
+{"cid": "00556712-q2-c2", "final": "contradicted", "audited": "contradicted", "note": "문단8은 OLED 소자 개발 연도를 1987년(Eastman Kodak 칭 탕)으로 명시, 주장 1979년과 충돌", "expected_ok": true}
+{"cid": "00105466-q1-n2", "final": "supported", "audited": "supported", "note": "문단1 '2005년 3월 주주총회 의결을 통하여 회사명을 ㈜케이씨씨건설로 변경' 그대로"}
+{"cid": "00163345-q2-c2", "final": "no_evidence", "audited": "no_evidence", "note": "문단4의 KRG 전망은 2026년 4.3% 성장 30.2조원; 2028년에 대한 문단은 없어 기간이 달라 반박도 지지도 아님", "expected_ok": true}
+{"cid": "01310773-q5-c1", "final": "supported", "audited": "supported", "note": "문단8 핵심기술 ③ '2D 광학계를 활용하여 3D광학계 효과를 실현할 수 있는 2.5D 알고리즘 영상처리 기술'과 일치", "expected_ok": true}
+{"cid": "00356361-q6-n1", "final": "no_evidence", "audited": "no_evidence", "note": "LG화학 연구개발비 금액·증가율 문단 없음(문단5는 R&D 조직 설명뿐), 1,000억원·1,000%는 근거 없음"}
+{"cid": "00216434-q4-n3", "final": "no_evidence", "audited": "no_evidence", "note": "'사료 20%'에 해당하는 비중·수치가 8개 문단 어디에도 없음(문단4는 사료공장 보유만 언급)"}
+{"cid": "00108913-q3-c1", "final": "supported", "audited": "supported", "note": "문단6 '2016년에는 AI 기반 디지털학습 서비스인 대교 써밋을 론칭' 한 문단이 전부 지지", "expected_ok": true}
+{"cid": "01310773-q3-c1", "final": "supported", "audited": "supported", "note": "문단2 매출실적 표 용역 setup 대응 2025년 21,371백만원, 2024년 15,011백만원으로 증가 일치", "expected_ok": true}
+{"cid": "00356361-q1-c1", "final": "supported", "audited": "supported", "note": "문단6 2025년말 매출 45조 9,322억원 중 석유화학 사업부문 38.2% 일치", "expected_ok": true}
+{"cid": "00356361-q3-n1", "final": "contradicted", "audited": "contradicted", "note": "문단1은 2025년말 매출을 약 45조 9,322억원(=459,322억원)으로 명시; 26,560억원은 문단2의 시설투자 합계로 매출과 불일치"}
+{"cid": "00413046-q6-c1", "final": "supported", "audited": "supported", "note": "문단6 '2014년 9월 ... 온실가스 배출권거래제 할당대상업체로 지정' 일치", "expected_ok": true}
+{"cid": "01310773-q4-c1", "final": "supported", "audited": "supported", "note": "문단8 '2026년 2월 믹싱 사업부를 신설하고 믹싱 장비사업을 시작' 일치", "expected_ok": true}
+{"cid": "01211889-q3-n2", "final": "no_evidence", "audited": "no_evidence", "note": "구축 용역 수익·달러 금액·2022년 실적 문단 없음(문단2·5는 사업 설명뿐)"}
+{"cid": "00173032-q1-c2", "final": "contradicted", "audited": "contradicted", "note": "문단6은 섬유판 강마루 시장 확대 시작을 '2021년부터'로 명시; 같은 시장·같은 추세의 시작 시점을 2016년으로 바꾼 주장과 충돌", "expected_ok": true}
+{"cid": "01185566-q2-n3", "final": "supported", "audited": "supported", "note": "문단1에 '2024년 유일산업의 화장품 부자재 사업 및 관련 자산 양수 ... 매출 증대를 추진' 문장이 그대로 있음"}
+{"cid": "00266961-q3-c2", "final": "no_evidence", "audited": "no_evidence", "note": "문단3·4의 272조원(4.9%↑)은 2025년 수치이고 2017년 거래액은 8개 문단에 없음; 기간이 달라 반박 아닌 근거 없음", "expected_ok": true}
+{"cid": "00105466-q4-c2", "final": "contradicted", "audited": "contradicted", "note": "문단4 '남부내륙철도(김천~거제) 4-1공구 ... 등의 공공 공사를 꾸준히 수행'과 부정문이 정면 충돌", "expected_ok": true}
+{"cid": "00216434-q4-n5", "final": "no_evidence", "audited": "no_evidence", "note": "육가공제품 가동률 수치가 8개 문단에 없음(문단1은 체리푸드 인수·육가공 사업 소개뿐)"}
+{"cid": "01211889-q3-n3", "final": "no_evidence", "audited": "no_evidence", "note": "지시 대상 불명 비문; 2022년 수익·달러 금액 문단 없음"}
+{"cid": "01310773-q1-n1", "final": "no_evidence", "audited": "no_evidence", "note": "문단7은 2차전지 검사장비 납품 회사라고만 함; '다양한 기술로 다양한 방식으로 장비 공급'이라는 사실 단위는 어느 문단도 지지하지 않음(경계 사례)"}
+{"cid": "00413046-q4-c2", "final": "no_evidence", "audited": "no_evidence", "note": "문단4의 매출 4조 1,625억 원은 2025년 기준; 2019년 매출 문단은 없어 기간 불일치로 근거 없음", "expected_ok": true}
+{"cid": "00158501-q5-c2", "final": "contradicted", "audited": "contradicted", "note": "문단7은 상장주식 등 가격 30% 증감 시 당기 총포괄손익 영향 2,911,413,927원(전기 2,866,824,761원)으로 측정; '움직이지 않는다'와 충돌", "expected_ok": true}
+{"cid": "01310773-q5-n1", "final": "no_evidence", "audited": "no_evidence", "note": "문단5 민감도 표에는 CAD/원(5,574천원)만 보이고 USD 민감도·통화 간 비교가 없음; 세후이익 영향 최대 통화 판단 근거 없음"}
+{"cid": "00136776-q2-n5", "final": "no_evidence", "audited": "no_evidence", "note": "기간·금액 범위만 있는 단편; 2023년 2,000,000~3,000,000원에 해당하는 항목이 8개 문단에 없음"}
+{"cid": "00533003-q3-c2", "final": "no_evidence", "audited": "no_evidence", "note": "문단7의 국내시장 27,102백만원은 2025년 수치(2024년 24,241); 2021년 국내매출은 문단에 없어 기간 불일치로 근거 없음", "expected_ok": true}
+{"cid": "01185566-q4-n1", "final": "no_evidence", "audited": "no_evidence", "note": "3,273·2,956백만원은 문단1의 백색 유리관 매입액, 0.2%는 문단2의 연구개발비/매출 비율; 앰플 설비 가동률 문단은 없음(문단8은 스펀지·퍼프 가동율)"}
+{"cid": "00152729-q4-c2", "final": "contradicted", "audited": "contradicted", "note": "문단2 주권상장일자 '1996년 10월 16일'(유가증권시장)과 주장 1999년 10월 16일 불일치", "expected_ok": true}
+{"cid": "00533003-q2-c1", "final": "supported", "audited": "supported", "note": "문단6(및 문단5) 연구개발비/매출액 비율 제35기 1.28% 일치", "expected_ok": true}
+{"cid": "01185566-q6-n2", "final": "contradicted", "audited": "contradicted", "note": "2,142/514/-98/-641/1,917(앰플 원동기 외)은 문단6에서 논산공장 기계장치 값; 문단5의 베트남공장 기계장치는 카트리지 설비 외 기초 11·기말 1,197로 다름"}
+{"cid": "00413046-q4-c1", "final": "supported", "audited": "supported", "note": "문단4 '2025년 기준 매출액 4조 1,625억 원' 일치", "expected_ok": true}
+{"cid": "01211889-q5-c1", "final": "supported", "audited": "supported", "note": "문단7 평가일 2025년 04월 16일, 코리아크레딧뷰로, 신용등급 A- 일치", "expected_ok": true}
+{"cid": "00413046-q6-n2", "final": "no_evidence", "audited": "no_evidence", "note": "지시어 '이 비용'의 대상 불명·자기모순적 문장; 연구개발비용 금액이나 1/3 비율을 담은 문단 없음"}
+{"cid": "00359076-q3-c1", "final": "supported", "audited": "supported", "note": "문단7 판매경로 표 콜센터 인프라 및 소프트웨어 매출비중 35,067,101천원(70.6%) 일치(2025.12.31 기준)", "expected_ok": true}
+{"cid": "00108913-q5-c2", "final": "contradicted", "audited": "contradicted", "note": "문단4 '2025년 4분기말 기준 총 1개의 DLB 상품, 투자금액 총 40억원'; 개수는 맞으나 65억원과 불일치", "expected_ok": true}
+{"cid": "00136776-q1-c2", "final": "contradicted", "audited": "contradicted", "note": "문단4는 2016.7.8 임시주총으로 사업목적에 추가한 사업을 화장품 제조 및 판매업으로 명시; 같은 결의로 추가된 사업을 건강기능식품으로 바꾼 주장은 같은 주체·시점·항목에 대한 다른 사실", "expected_ok": true}
+{"cid": "00108913-q3-n1", "final": "no_evidence", "audited": "no_evidence", "note": "대교 2023년 매출액 1,000억원 문단 없음(8개 문단은 산업·R&D·특허 설명)"}
+{"cid": "00136776-q1-c1", "final": "supported", "audited": "supported", "note": "문단4 '2016년 7월 8일 임시주주총회를 통해 사업목적에 화장품 제조 및 판매업을 추가' 일치", "expected_ok": true}
+{"cid": "00556712-q5-n1", "final": "no_evidence", "audited": "no_evidence", "note": "8개 문단 중 힘스의 재무위험 관리(위험 분류) 문단이 없음"}
+{"cid": "00556712-q6-n2", "final": "contradicted", "audited": "contradicted", "note": "문단2 표 단위가 천원이므로 2025년 연구개발비용 계는 5,395,029천원(약 54억원); 주장의 5,395,029원은 1,000배 작아 단위 불일치로 반박"}
+{"cid": "00163345-q6-c2", "final": "contradicted", "audited": "contradicted", "note": "문단7 주권상장일자 '1993년 01월 06일'(유가증권시장)과 주장 1993년 1월 28일 불일치", "expected_ok": true}
+{"cid": "00266961-q3-n1", "final": "no_evidence", "audited": "no_evidence", "note": "8개 문단에 네이버 연결 영업수익의 서비스 부문별 비중이 없음(시장·업계 통계뿐)"}
+{"cid": "00136776-q3-n2", "final": "no_evidence", "audited": "no_evidence", "note": "2,163,597·2,027,179천원은 문단6의 외화 매출채권 당기말·전기말 잔액이지 수출·내수 매출이 아님; 수출/내수 매출 문단이 없고 감소액은 문단에 없는 계산값"}
+{"cid": "00173032-q3-c1", "final": "supported", "audited": "supported", "note": "문단8 '베트남 북부법인 ... 2022년부터 MDF 및 마루 본격적으로 생산 중' 일치", "expected_ok": true}
+{"cid": "00266961-q2-c2", "final": "contradicted", "audited": "contradicted", "note": "문단4 서비스별 영업현황(누적, 백만원) 제27기 영업수익 12,035,007(제26기 10,737,719); 13,482,516과 불일치(커머스 주된 영업 설명은 같은 문단과 일치하나 금액이 반박됨)", "expected_ok": true}
+{"cid": "00136776-q4-c1", "final": "no_evidence", "audited": "no_evidence", "note": "이 주장의 8개 문단에는 화장품 원재료 매입 표가 없음(위험관리·사업개요·약정뿐); 98.38%는 다른 패킷(00136776-q2-n5 문단5)에만 있어 보여준 문단 기준 기대 라벨 supported는 성립하지 않음", "expected_ok": false}
+{"cid": "00152729-q5-c1", "final": "disputed", "audited": "no_evidence", "note": "문단3 당기말 합계 10% 상승시 4,704,127천원(≈47.0억원)으로 금액은 맞으나 측정 대상이 '손익'이라는 진술은 문단6에만 있어 두 문단을 합쳐야 함(단일 문단 규칙상 supported 불가, 청크 분할 경계 사례)", "expected_ok": false}
+{"cid": "00556712-q1-c2", "final": "supported", "audited": "supported", "note": "문단2 '당사 매출비중을 보면 80% 이상이 OLED장비'; 80% 이상이면 55% 초과가 함의되므로 지지됨, 기대 라벨 not_supported는 틀림", "expected_ok": false}

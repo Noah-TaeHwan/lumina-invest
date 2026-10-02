@@ -1,0 +1,21 @@
+{"lid": "9ae27cd54e", "label": "non_claim", "passage": null, "reason": "목록을 이끄는 도입 문장으로 구체적 사실 내용이 없다"}
+{"lid": "8ce42120fc", "label": "contradicted", "passage": 8, "reason": "문단 8은 교육서비스 사업을 영업개황①로 적는데 주장은 ②라고 한다"}
+{"lid": "4eb790ac7a", "label": "supported", "passage": 8, "reason": "문단 8의 '(2) 영업개황① 교육서비스 사업 (㈜대교, ㈜대교에듀캠프 외)'와 일치한다"}
+{"lid": "6a276d79c0", "label": "supported", "passage": 7, "reason": "문단 7: 1986년 12월 설립, 학습지 출판·제조·판매를 주력으로 하는 교육·문화기업"}
+{"lid": "ece5e2459a", "label": "contradicted", "passage": 7, "reason": "문단 7은 설립 시점을 1986년 12월로 적는데 주장은 1979년 12월이라고 한다"}
+{"lid": "9d02aea286", "label": "supported", "passage": 8, "reason": "문단 8의 교육서비스 사업 (㈜대교, ㈜대교에듀캠프 외) 표제와 일치한다"}
+{"lid": "bd9da479b6", "label": "supported", "passage": 7, "reason": "문단 7: 주요 사업부문이 교육서비스사업이다"}
+{"lid": "81e17047e3", "label": "contradicted", "passage": 8, "reason": "문단 8은 HSK 공식 주관기관·점유율 1위 브랜드를 '차이홍'으로 적는데 주장은 '링구아랩'이라고 한다"}
+{"lid": "cc2857e2ea", "label": "supported", "passage": 8, "reason": "문단 8: 중국어 브랜드 '차이홍'이 HSK 공식 주관기관으로 국내 점유율 1위를 달성했다"}
+{"lid": "d5559b254d", "label": "no_evidence", "passage": null, "reason": "월 회비 정보가 어느 문단에도 없다"}
+{"lid": "2a8ee4b0e3", "label": "no_evidence", "passage": null, "reason": "2023년 매출액 1,000억원은 어느 문단에도 없다"}
+{"lid": "3c716930d2", "label": "contradicted", "passage": 6, "reason": "문단 6은 2016년에 AI 기반 디지털학습 서비스 대교 써밋을 론칭했다고 적는다"}
+{"lid": "068010170c", "label": "supported", "passage": 6, "reason": "문단 6: 2016년 AI 기반 디지털학습 서비스인 대교 써밋을 론칭했다"}
+{"lid": "0480f2cf05", "label": "non_claim", "passage": null, "reason": "질문 문장이다"}
+{"lid": "c6d547c323", "label": "supported", "passage": 7, "reason": "문단 7: 2022년부터 모든 연구개발활동 경비를 당기 비용으로 인식한다"}
+{"lid": "9f2c44d1a9", "label": "no_evidence", "passage": null, "reason": "농심·신라면 관련 내용은 문단에 없다"}
+{"lid": "e3e35e9d60", "label": "supported", "passage": 4, "reason": "문단 4: 2025년 4분기말 기준 DLB 상품 1개 보유, 투자금액 총 40억원"}
+{"lid": "289457a080", "label": "contradicted", "passage": 4, "reason": "문단 4는 투자금액을 총 40억원으로 적는데 주장은 65억원이라고 한다"}
+{"lid": "603c4da255", "label": "contradicted", "passage": 4, "reason": "문단 4는 보유 파생상품이 DLB 상품 1개라고 적는데 주장은 DLB와 다른 상품이라고 한다"}
+{"lid": "eda6e877fe", "label": "no_evidence", "passage": null, "reason": "문단 1의 1.1%는 제39기 값이고 2020.1.1~2023.6.30 기간과 연결할 근거가 없다"}
+{"lid": "bbf226d343", "label": "no_evidence", "passage": null, "reason": "문단 1의 72.7은 제39기 연구개발비용(억원)이고, 퍼센트 단위나 주장한 기간과 맞는 값은 없다"}

@@ -1,0 +1,26 @@
+{"lid": "9e3d2e2a73", "label": "supported", "passage": 2, "reason": "문단 2가 국내 1위 검색 포털 기반 광고·커머스·핀테크 등 사업 영위를 그대로 기술"}
+{"lid": "fcf2bf80b0", "label": "supported", "passage": 2, "reason": "문단 2가 국내 1위 검색 포털 '네이버(NAVER)' 기반 다양한 사업 영위를 기술"}
+{"lid": "607cacbcb1", "label": "supported", "passage": 2, "reason": "문단 2가 광고 사업을 영위한다고 기술(광고가 사업 영역)"}
+{"lid": "9a4ea8ea8a", "label": "no_evidence", "passage": null, "reason": "광고가 가장 큰 사업이라는 비교 근거 없음(문단 5는 '주요 사업영역 중 하나'로만 기술)"}
+{"lid": "46153819d2", "label": "no_evidence", "passage": null, "reason": "현대자동차에 관한 문단 없음"}
+{"lid": "c7a8339834", "label": "non_claim", "passage": null, "reason": "뒤 목록을 소개하는 도입 문장"}
+{"lid": "306af91da7", "label": "contradicted", "passage": 4, "reason": "문단 4의 제27기 영업수익은 12,035,007백만원으로 13,482,516백만원과 다름"}
+{"lid": "cb2d17cec6", "label": "supported", "passage": 4, "reason": "문단 4 표에서 핀테크 주요영업이 페이, 플랫폼 서비스 등"}
+{"lid": "a178038eff", "label": "supported", "passage": 4, "reason": "문단 4 표에서 커머스 주요영업이 커머스 광고, 중개 및 판매, 멤버십 등"}
+{"lid": "5a5af3577d", "label": "supported", "passage": 4, "reason": "문단 4 표에서 콘텐츠 주요영업이 웹툰, SNOW 등"}
+{"lid": "f0f4d5a2ff", "label": "contradicted", "passage": 4, "reason": "문단 4 표에서 서치플랫폼 주요영업은 검색, 디스플레이 등(네이버페이·디지털금융은 핀테크)"}
+{"lid": "83e65a8144", "label": "supported", "passage": 4, "reason": "문단 4가 제27기 영업수익 12,035,007백만원과 커머스 주요영업을 함께 기술"}
+{"lid": "cca7a6d143", "label": "supported", "passage": 3, "reason": "문단 3: 2025년 272조원(4.9%↑)으로 성장세 둔화"}
+{"lid": "2d4a86813d", "label": "no_evidence", "passage": null, "reason": "서비스 부문별 영업수익 금액·비중이 문단에 없음"}
+{"lid": "1156b81e69", "label": "no_evidence", "passage": null, "reason": "문단 3은 2022~2025년만 다루며 2017년 거래액 정보 없음(272조원은 2025년 값)"}
+{"lid": "66cf129229", "label": "no_evidence", "passage": null, "reason": "카카오에 관한 문단 없음(문단 1은 당사 네이버의 CapEx)"}
+{"lid": "ec192b9409", "label": "supported", "passage": 1, "reason": "문단 1: 제27기 CapEx 1,317.1십억원, 서버 및 비품 등 1,159.5십억원"}
+{"lid": "ebc34b70b2", "label": "contradicted", "passage": 1, "reason": "문단 1의 제26기(2024) CapEx는 580.3십억원·서버 482.3십억원이고 서버 1,159.5는 십억원 단위(=11,595억원)로 주장과 다름"}
+{"lid": "59bed32e5a", "label": "non_claim", "passage": null, "reason": "뒤 내용을 소개하는 도입 문장"}
+{"lid": "9f69d70d8b", "label": "supported", "passage": 2, "reason": "문단 2가 엔화 포함 외화 환율 5% 변동 시 세후이익에 미치는 영향을 민감도분석으로 제시"}
+{"lid": "31c6eb9908", "label": "supported", "passage": 7, "reason": "문단 7이 국제 영업으로 미국달러·엔화·유로화 환율 변동 위험에 노출된다고 기술"}
+{"lid": "bb7c4e3ce9", "label": "no_evidence", "passage": null, "reason": "민감도분석 결과 수치가 문단에 없어 세후이익 5% 상승 여부 확인 불가"}
+{"lid": "2261ca2c5e", "label": "contradicted", "passage": 7, "reason": "문단 7은 미국달러·엔화·유로화 환율 변동 위험에 노출되어 있다고 기술"}
+{"lid": "94958bca30", "label": "no_evidence", "passage": null, "reason": "SK하이닉스에 관한 문단 없음"}
+{"lid": "dd1897b007", "label": "supported", "passage": 8, "reason": "문단 8: 2021~2025년 주요 연구개발실적 건수 계 163"}
+{"lid": "414279ef66", "label": "no_evidence", "passage": null, "reason": "연구개발비용 금액이 문단에 없고 비율 표의 열(연도·연결/별도) 구분이 불명확해 2025년 연결 10.1% 확인 불가"}

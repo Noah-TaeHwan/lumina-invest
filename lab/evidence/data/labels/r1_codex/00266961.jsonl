@@ -1,0 +1,26 @@
+{"lid":"9e3d2e2a73","label":"supported","passage":2,"reason":"문단 2는 네이버와 종속회사들이 국내 1위 검색 포털 네이버를 기반으로 광고·커머스·핀테크 사업을 영위한다고 명시한다."}
+{"lid":"fcf2bf80b0","label":"supported","passage":2,"reason":"문단 2는 국내 1위 인터넷 검색 포털 네이버 서비스를 기반으로 다양한 사업을 영위한다고 명시한다."}
+{"lid":"607cacbcb1","label":"supported","passage":5,"reason":"문단 5는 온라인 광고가 네이버의 주요 사업영역이며 검색·디스플레이·플레이스 광고를 통해 성장한다고 설명한다."}
+{"lid":"9a4ea8ea8a","label":"no_evidence","passage":null,"reason":"광고가 주요 사업영역이라는 설명은 있으나 사업별 규모 비교나 광고가 가장 크다는 근거는 없다."}
+{"lid":"46153819d2","label":"no_evidence","passage":null,"reason":"제시된 문단에는 현대자동차의 생산·판매 사업에 관한 정보가 없다."}
+{"lid":"c7a8339834","label":"non_claim","passage":null,"reason":"구체적인 매출 항목을 주장하지 않고 뒤따를 설명을 안내하는 도입 문장이다."}
+{"lid":"306af91da7","label":"contradicted","passage":4,"reason":"문단 4의 제27기 누적 연결 영업수익은 12,035,007백만원으로 주장한 13,482,516백만원과 다르다."}
+{"lid":"cb2d17cec6","label":"supported","passage":4,"reason":"문단 4의 서비스별 영업현황 표는 핀테크의 주요영업을 페이·플랫폼 서비스 등으로 제시한다."}
+{"lid":"a178038eff","label":"supported","passage":4,"reason":"문단 4의 서비스별 영업현황 표는 커머스의 주요영업을 커머스 광고·중개 및 판매·멤버십 등으로 제시한다."}
+{"lid":"5a5af3577d","label":"supported","passage":4,"reason":"문단 4의 서비스별 영업현황 표는 콘텐츠의 주요영업을 웹툰·SNOW 등으로 제시한다."}
+{"lid":"f0f4d5a2ff","label":"contradicted","passage":4,"reason":"문단 4는 서치플랫폼의 주요영업을 검색·디스플레이 등으로 구분하고 페이·플랫폼 서비스는 핀테크에 배정한다."}
+{"lid":"83e65a8144","label":"supported","passage":4,"reason":"문단 4 하나에 제27기 누적 연결 영업수익 12,035,007백만원과 커머스의 주요영업 항목이 모두 제시된다."}
+{"lid":"cca7a6d143","label":"supported","passage":3,"reason":"문단 3은 전체 온라인 커머스 거래액이 2025년 272조원이고 증가율이 4.9%이며 성장세가 둔화한다고 명시한다."}
+{"lid":"2d4a86813d","label":"no_evidence","passage":null,"reason":"제시된 문단에는 네이버의 제27기 연결 영업수익에 대한 서비스별 금액·비중이나 최대 부문 정보가 없다."}
+{"lid":"1156b81e69","label":"no_evidence","passage":null,"reason":"272조원과 증가율 4.9%는 2025년 수치로 제시되며 2017년의 거래액·증가율·성장 둔화는 제시되지 않는다."}
+{"lid":"66cf129229","label":"no_evidence","passage":null,"reason":"문단 1의 시설투자 수치는 네이버에 관한 것이며 카카오의 제27기 시설투자 정보는 없다."}
+{"lid":"ec192b9409","label":"supported","passage":1,"reason":"문단 1은 네이버의 제27기 연결 누적 CapEx 1,317.1십억원과 서버 및 비품 등 투자 1,159.5십억원을 제시한다."}
+{"lid":"ebc34b70b2","label":"contradicted","passage":1,"reason":"문단 1의 전기인 제26기 CapEx는 580.3십억원이고 서버 및 비품 등은 482.3십억원으로 주장한 2024년 금액과 다르다."}
+{"lid":"59bed32e5a","label":"non_claim","passage":null,"reason":"환율 상승의 구체적인 영향을 제시하지 않고 뒤따를 설명을 안내하는 도입 문장이다."}
+{"lid":"9f69d70d8b","label":"supported","passage":2,"reason":"문단 2는 일본 엔화를 포함한 외화에 대한 원화 환율이 5% 변동할 때 세후이익과 자본에 영향이 있음을 설명한다."}
+{"lid":"31c6eb9908","label":"supported","passage":7,"reason":"문단 7은 국제 영업활동 때문에 주로 미국 달러화·일본 엔화·유로화 관련 환율 변동 위험에 노출된다고 명시한다."}
+{"lid":"bb7c4e3ce9","label":"no_evidence","passage":null,"reason":"환율 5% 변동에 관한 민감도분석 안내는 있으나 엔화 환율 상승 시 세후이익이 5% 상승한다는 수치는 없다."}
+{"lid":"2261ca2c5e","label":"contradicted","passage":7,"reason":"문단 7은 국제 영업활동에 따른 미국 달러화·일본 엔화·유로화 환율 변동 위험에 노출되어 있다고 명시한다."}
+{"lid":"94958bca30","label":"no_evidence","passage":null,"reason":"제시된 문단에는 SK하이닉스의 D램·낸드플래시 생산이나 주력 제품에 관한 정보가 없다."}
+{"lid":"dd1897b007","label":"supported","passage":8,"reason":"문단 8의 2021~2025년 주요 연구개발실적 표에 건수 합계 163건이 제시된다."}
+{"lid":"414279ef66","label":"no_evidence","passage":null,"reason":"문단 8의 10.1%는 연구개발비/영업수익 비율이며 2025년 연결 연구개발비용 금액은 제시되지 않는다."}

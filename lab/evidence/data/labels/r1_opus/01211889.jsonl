@@ -1,0 +1,32 @@
+{"lid": "21a5babfd7", "label": "supported", "passage": 6, "reason": "문단6: 국가 주무 부처와 산하 공공기관, 연구소 등에 디지털 트윈 서비스를 공급"}
+{"lid": "92baf2306d", "label": "no_evidence", "passage": null, "reason": "문단4 목록은 국토지리정보원·한국국토정보공사·한국수자원공사이며 한국도로공사는 언급 없음(목록이 '등'이라 반박까지는 아님)"}
+{"lid": "78f8e99b51", "label": "supported", "passage": 4, "reason": "문단4: 국토지리정보원, 한국수자원공사 등 여러 기관의 정밀 지도 제작과 검증 업무에 활용"}
+{"lid": "d70148ee9d", "label": "supported", "passage": 6, "reason": "문단6: 주무 부처와 산하 공공기관, 연구소 등에 디지털 트윈 서비스 제공"}
+{"lid": "2a3569db2a", "label": "no_evidence", "passage": null, "reason": "핵심 기술을 서비스 제공 기술로 규정하는 문단 없음"}
+{"lid": "f502d7dc86", "label": "non_claim", "passage": null, "reason": "명사구 조각으로 사실 주장 아님"}
+{"lid": "9b49b1fb74", "label": "non_claim", "passage": null, "reason": "명사구 조각으로 사실 주장 아님"}
+{"lid": "bf654fadfa", "label": "non_claim", "passage": null, "reason": "명사구 조각으로 사실 주장 아님"}
+{"lid": "32ea9872f0", "label": "contradicted", "passage": 8, "reason": "문단8: 1,600여 개 오픈소스 API로 누구나 서비스를 개발·등록해 수익 창출 가능"}
+{"lid": "992441d714", "label": "non_claim", "passage": null, "reason": "목록을 여는 도입 문장"}
+{"lid": "70e38f7f78", "label": "supported", "passage": 8, "reason": "문단8: 1,600여 개 오픈소스 API로 누구나 서비스를 개발·등록해 수익 창출 가능"}
+{"lid": "658af5fdc6", "label": "non_claim", "passage": null, "reason": "명사구 조각으로 사실 주장 아님"}
+{"lid": "0ee260f592", "label": "no_evidence", "passage": null, "reason": "구축 용역 매출 금액(달러) 언급 문단 없음"}
+{"lid": "700458a23a", "label": "supported", "passage": 3, "reason": "문단3: 구축형 사업모델에서 클라우드 기반 구독형 사업모델로 전환을 전략적으로 추진"}
+{"lid": "93c69e1099", "label": "no_evidence", "passage": null, "reason": "구독 서비스 매출 금액(달러) 언급 문단 없음"}
+{"lid": "bb4282ba24", "label": "no_evidence", "passage": null, "reason": "삼성전자 관련 문단 없음"}
+{"lid": "15659ccbbd", "label": "no_evidence", "passage": null, "reason": "지배율·달러 수익 언급 문단 없음"}
+{"lid": "dc47e91623", "label": "no_evidence", "passage": null, "reason": "지배율·달러 수익 언급 문단 없음"}
+{"lid": "a838c98a6f", "label": "non_claim", "passage": null, "reason": "답변을 여는 도입 문장"}
+{"lid": "df9ac214e5", "label": "supported", "passage": 1, "reason": "문단1 원재료 매입 현황 문장과 동일"}
+{"lid": "5695ef807f", "label": "supported", "passage": 5, "reason": "문단5: 2024년 12월 20일 과기정통부 혁신제품(제2024-261호) 지정"}
+{"lid": "b67ec1c344", "label": "contradicted", "passage": 5, "reason": "문단5 인증번호는 제2024-261호로 제2024-487호와 다름"}
+{"lid": "8ef03e78a0", "label": "no_evidence", "passage": null, "reason": "문단7 신용평가 내역은 2023~2025년만 있고 2021년 평가 없음"}
+{"lid": "46848070a6", "label": "contradicted", "passage": 2, "reason": "문단2: 파생상품 거래 해당사항 없음(문단5도 이자율위험 노출 없음)"}
+{"lid": "247ed642de", "label": "supported", "passage": 7, "reason": "문단7: 2025년 04월 16일 코리아크레딧뷰로 신용등급 A-"}
+{"lid": "dc22ef04b4", "label": "no_evidence", "passage": null, "reason": "연구개발비 비율이나 2001~2022 기간 자료 언급 문단 없음"}
+{"lid": "5e243ed073", "label": "non_claim", "passage": null, "reason": "목록을 여는 도입 문장"}
+{"lid": "6c79d7b38c", "label": "no_evidence", "passage": null, "reason": "연구개발비 비율 언급 문단 없음"}
+{"lid": "af9a5d18c6", "label": "no_evidence", "passage": null, "reason": "문단6의 해저 지형 생성 기능은 XDBuilder이며 GeoMaster는 언급 없음"}
+{"lid": "c29307144c", "label": "non_claim", "passage": null, "reason": "기간만 적은 조각으로 사실 주장 아님"}
+{"lid": "bb16da6666", "label": "supported", "passage": 6, "reason": "문단6: XDBuilder 해저 DEM 데이터 활용 5대양 해저지형 생성"}
+{"lid": "3f09adacde", "label": "no_evidence", "passage": null, "reason": "연구개발비 비율 언급 문단 없음"}

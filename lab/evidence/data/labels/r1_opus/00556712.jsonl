@@ -1,0 +1,29 @@
+{"lid": "39681ff1bc", "label": "supported", "passage": 2, "reason": "문단 2: 매출의 80% 이상이 OLED장비이므로 55%를 웃돈다는 주장이 성립"}
+{"lid": "4f37bd063f", "label": "no_evidence", "passage": null, "reason": "주요 고객은 국내외 OLED 패널제조사와 협력업체로만 나오며 '대기업과 중소기업'이라는 구분은 어느 문단에도 없음"}
+{"lid": "4ab7f6696a", "label": "supported", "passage": 2, "reason": "문단 2: 매출비중 80% 이상이 OLED장비"}
+{"lid": "d916d53cfe", "label": "supported", "passage": 1, "reason": "문단 1에 같은 문장이 있음"}
+{"lid": "257ef53d44", "label": "supported", "passage": 1, "reason": "문단 1의 회사 전망 문장과 같음"}
+{"lid": "f8179133d7", "label": "supported", "passage": 8, "reason": "문단 8: 1987년 Eastman Kodak의 칭 탕 박사가 개발"}
+{"lid": "daa1d86437", "label": "supported", "passage": 1, "reason": "문단 1: 중국 업체가 국내 장비업체 K사·H사와 거래 중"}
+{"lid": "df305f7a6a", "label": "supported", "passage": 1, "reason": "문단 1에 같은 문장이 있음"}
+{"lid": "4e0e9cac35", "label": "supported", "passage": 1, "reason": "문단 1: 주력 장비인 Mask 인장기 부문에서 실질적 경쟁업체는 없다고 판단"}
+{"lid": "039bed8be0", "label": "contradicted", "passage": 8, "reason": "문단 8은 개발 연도를 1979년이 아니라 1987년으로 적음"}
+{"lid": "920d158ae1", "label": "no_evidence", "passage": null, "reason": "문단 5의 내수 33.6%는 OLED장비의 비중이고, LCD장비는 어느 문단에도 없음"}
+{"lid": "404a7b1931", "label": "contradicted", "passage": 5, "reason": "문단 5에서 59,259는 수출이 아니라 매출 합계이고, 내수 34,797과 같은 열의 수출은 24,462임. 41,830,248은 문단 3의 원재료 매입 국내 총합계(천원)"}
+{"lid": "0e7c4866cc", "label": "non_claim", "passage": null, "reason": "답변을 시작하는 말일 뿐 사실 주장이 아님"}
+{"lid": "73175983d7", "label": "supported", "passage": 5, "reason": "문단 5: OLED장비 내수 2025년 매출비중 33.6%"}
+{"lid": "37edcd8cab", "label": "contradicted", "passage": 4, "reason": "문단 4는 주요 원재료의 공급 안정성이 상당히 확보됐다고 적음"}
+{"lid": "146dc4a993", "label": "supported", "passage": 4, "reason": "문단 4: 공급의 안정성은 상당히 확보된 상황"}
+{"lid": "b7460174b1", "label": "no_evidence", "passage": null, "reason": "가장 비중이 큰 원재료를 밝힌 문단이 없음. OLED 장비는 원재료가 아니라 제품임"}
+{"lid": "4cc0f16c6b", "label": "no_evidence", "passage": null, "reason": "오리온이나 그 유통 채널을 다룬 문단이 없음"}
+{"lid": "413180c080", "label": "supported", "passage": 3, "reason": "문단 3: 매출처는 국내 OLED 패널제조사와 그 협력업체, 중국 OLED 패널제조사"}
+{"lid": "9e6b2baf34", "label": "no_evidence", "passage": null, "reason": "재무위험이나 재무기금을 정의한 문단이 없음"}
+{"lid": "58ab48ce68", "label": "no_evidence", "passage": null, "reason": "재무기금을 다룬 문단이 없음"}
+{"lid": "2b84a417d2", "label": "no_evidence", "passage": null, "reason": "재무위험을 몇 가지로 나누는지 적은 문단이 없음"}
+{"lid": "0151c855af", "label": "no_evidence", "passage": null, "reason": "재무기금을 다룬 문단이 없음"}
+{"lid": "05a41ff8fc", "label": "no_evidence", "passage": null, "reason": "재무기금을 다룬 문단이 없음"}
+{"lid": "3c66d837f1", "label": "contradicted", "passage": 2, "reason": "문단 2는 2025년 연구개발비/매출액 비율을 7.4%가 아니라 9.1%로 적음"}
+{"lid": "2c260370fd", "label": "contradicted", "passage": 2, "reason": "문단 2의 단위는 천원이라 5,395,029천원(약 54억 원)이며 5,395,029원이 아님"}
+{"lid": "93e53826e3", "label": "supported", "passage": 2, "reason": "문단 2: 2025년 연구개발비/매출액 비율 9.1%"}
+{"lid": "5d00c19647", "label": "non_claim", "passage": null, "reason": "답변을 시작하는 말일 뿐 사실 주장이 아님"}
+{"lid": "f5dfcdcd5e", "label": "supported", "passage": 2, "reason": "문단 2: 2025년 매출액 대비 비율 9.1%"}

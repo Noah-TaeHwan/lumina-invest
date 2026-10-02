@@ -1,0 +1,90 @@
+{
+ "gates": {
+  "corpus": {
+   "value": [
+    40,
+    40
+   ],
+   "pass": true
+  },
+  "kappa": {
+   "value": 0.9566962792253652,
+   "pass": true
+  },
+  "controlled": {
+   "value": 0.9978448275862069,
+   "pass": true
+  },
+  "h_ko": {
+   "value": [
+    0.9249999999999999,
+    0.85043395808094,
+    0.986860039601975
+   ],
+   "pass": true
+  },
+  "batching": {
+   "value": 0.995,
+   "pass": true
+  },
+  "latency_fail": {
+   "value": {
+    "p95_ms": 297.86000000000007,
+    "first_requests": 604,
+    "fail_upper": 0.00494754203952122,
+    "sessions": 2
+   },
+   "pass": true
+  },
+  "repeat": {
+   "value": 0.9,
+   "pass": true
+  },
+  "go": true
+ },
+ "check_rows": 117,
+ "check_supported": 52,
+ "latency_ms": {
+  "50": 220.1,
+  "95": 297.86000000000007,
+  "99": 399.6790000000003
+ },
+ "first_requests": 604,
+ "input_tokens": 4119562,
+ "session_sizes": [
+  454,
+  150
+ ],
+ "disputed": 7,
+ "sessions": [
+  {
+   "start": "2026-10-02T09:00:25.675085+00:00",
+   "n": 454,
+   "failures": 0,
+   "p50_ms": 225.35000000000002,
+   "p95_ms": 302.505,
+   "tokens_p50": 4581.0
+  },
+  {
+   "start": "2026-10-02T10:06:05.336473+00:00",
+   "n": 150,
+   "failures": 0,
+   "p50_ms": 210.55,
+   "p95_ms": 250.44,
+   "tokens_p50": 4553.0
+  }
+ ],
+ "single_requests": {
+  "n": 400,
+  "failures": 0
+ },
+ "kappa_ci": [
+  0.9001760614343894,
+  1.0
+ ],
+ "kappa_pairs": 233,
+ "kappa_non_claim_excluded": 86,
+ "batch_pairs": 400,
+ "repeat_claims": 50,
+ "controlled_pairs": 464
+}

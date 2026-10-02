@@ -1,0 +1,24 @@
+{"lid": "7057602050", "label": "supported", "passage": 8, "reason": "문단 8에 물류장비가 주력 사업이며 반도체·웹툰 사업을 운영하는 종속기업을 보유한다고 명시되어 있다."}
+{"lid": "a52819a35e", "label": "supported", "passage": 8, "reason": "문단 8이 물류장비 중심 사업과 종속기업의 반도체·웹툰 사업 운영을 모두 지지한다."}
+{"lid": "6f5cced740", "label": "contradicted", "passage": 8, "reason": "문단 8은 물류장비사업이 주력이라고 명시하므로 물류장비가 중심 사업이 아니라는 주장과 반대다."}
+{"lid": "3c87e22310", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 삼성전자의 HBM 개발이나 메모리 반도체 경쟁력에 대한 내용이 없다."}
+{"lid": "89935c643e", "label": "supported", "passage": 2, "reason": "문단 2에 전동지게차 수소연료전지 적용 연구와 연료전지 전동지게차 개발을 통한 제품 경쟁력 제고가 함께 제시되어 있다."}
+{"lid": "efde728803", "label": "no_evidence", "passage": null, "reason": "문단 4는 물류사업부문의 주요제품·서비스를 산업용 트럭 및 적재기 제조업으로 설명하지만 물류장비 제품군별 매출 비중이나 최대 제품군은 제시하지 않는다."}
+{"lid": "d06d0d25dd", "label": "non_claim", "passage": null, "reason": "회사명만 표시한 제목·메타정보이며 독립적인 사실 진술이 아니다."}
+{"lid": "24499c6467", "label": "supported", "passage": 1, "reason": "문단 1에 MZ세대가 웹툰의 주요 소비층이며 높은 선호도와 충성도가 산업 성장의 기반이라고 명시되어 있다."}
+{"lid": "9fe3e9744a", "label": "non_claim", "passage": null, "reason": "문단 번호와 잘린 제목 조각으로 사실 주장이 없다."}
+{"lid": "63ddf97e0e", "label": "supported", "passage": 1, "reason": "문단 1은 웹툰 산업이 경기변동에 대한 민감도가 낮은 산업으로 평가된다고 명시한다."}
+{"lid": "6ce9273c4d", "label": "supported", "passage": 1, "reason": "문단 1이 AI·데이터 기술에 따른 제작·번역 자동화, 글로벌 진출 용이성, 개인화 추천과 산업 경쟁력 강화를 모두 설명한다."}
+{"lid": "fe10328ec9", "label": "contradicted", "passage": 7, "reason": "문단 7은 투믹스의 설립연도를 2015년으로 명시하여 2011년이라는 주장과 다르다."}
+{"lid": "7d00d5de53", "label": "non_claim", "passage": null, "reason": "전동지게차 생산능력과 생산실적을 묻는 질문이며 사실을 주장하지 않는다."}
+{"lid": "e3626a15f4", "label": "supported", "passage": 7, "reason": "문단 7에 투믹스가 2015년 설립된 웹툰 플랫폼이라고 명시되어 있다."}
+{"lid": "c29ca13f9f", "label": "supported", "passage": 4, "reason": "문단 4에 요약반기재무제표가 모든 재무위험관리·공시사항을 포함하지 않는다는 사실과 2024년 12월 31일 연차재무제표 참고 안내가 모두 있다."}
+{"lid": "f46d50d0c1", "label": "non_claim", "passage": null, "reason": "다음에 금융위험 목록을 소개하겠다는 도입 문구로 구체적인 위험 사실을 제시하지 않는다."}
+{"lid": "a2f04310d1", "label": "no_evidence", "passage": null, "reason": "문단 4가 변동이 없다고 설명한 주체는 위험관리부서이며 내부감사팀의 변동 여부는 제시되지 않는다."}
+{"lid": "397164500c", "label": "supported", "passage": 4, "reason": "문단 4가 환위험·공정가치 및 현금흐름 이자율 위험·가격위험을 포함한 시장위험과 신용위험·유동성 위험에 대한 노출을 모두 명시한다."}
+{"lid": "2f04cef594", "label": "supported", "passage": 4, "reason": "문단 4에 위험관리부서 및 기타 위험관리정책의 전기말 이후 중요한 변동사항이 없다고 명시되어 있다."}
+{"lid": "eceb630b70", "label": "contradicted", "passage": 4, "reason": "문단 4는 금융부채의 계약상 할인되지 않은 현금흐름에 전기말 대비 중요한 변동이 없다고 명시하므로 변동이 있다는 주장과 반대다."}
+{"lid": "4bf1552893", "label": "contradicted", "passage": 1, "reason": "문단 1의 제45기 연구개발비/매출액 비율은 1.44%로 제시되어 있어 해당 비율로 집계되지 않았다는 주장과 반대다."}
+{"lid": "955b9b15a2", "label": "contradicted", "passage": 1, "reason": "문단 1의 당기 연구개발비용 총액은 313,973천 원으로 31,397.3만 원이며 주장한 313,973만 원과 다르다."}
+{"lid": "db99e35b13", "label": "contradicted", "passage": 1, "reason": "문단 1의 당기 연구개발비/매출액 비율은 1.44%이며 주장한 비율 0.45를 백분율로 환산한 45%와 다르다."}
+{"lid": "50d775de4a", "label": "supported", "passage": 1, "reason": "문단 1의 연구개발비/매출액 비율 행에 제45기 비율이 1.44%로 제시되어 있다."}
