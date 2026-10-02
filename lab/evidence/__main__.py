@@ -66,19 +66,133 @@ SPLITS = ("tune", "check", "dev", "holdout", "all")
 
 
 def holdout_frozen(P: Paths) -> bool:
-    """동결 파일이 있고 분할·주장 해시를 담고 있어야 홀드아웃 봉인이 풀린다."""
+    """동결 파일이 있고 분할·주장 해시를 담고 있으면 True(내용 재검증은 verify_freeze)."""
     if not P.prereg_holdout.exists():
         return False
     data = json.loads(P.prereg_holdout.read_text() or "{}")
     return bool(data.get("split_sha256")) and bool(data.get("claims_sha256"))
 
 
-def companies(P: Paths, split_name: str) -> list[dict]:
-    """분할 이름에 속한 회사 목록. 홀드아웃이 포함되면(holdout·all) 동결 전까지 거부한다."""
+def holdout_data_open(P: Paths) -> bool:
+    """사전등록에 stage1 블록(임계값·B*·MDE·프롬프트)이 있어야 홀드아웃 데이터를 만들 수 있다."""
+    return P.prereg.exists() and bool(json.loads(P.prereg.read_text()).get("stage1"))
+
+
+def companies(P: Paths, split_name: str, stage: str = "judge") -> list[dict]:
+    """분할의 회사 목록. 홀드아웃은 두 단계로 연다.
+
+    데이터(stage="data"): stage1 사전등록 뒤부터 동결 전까지만. 판정(그 밖): 동결 뒤, 동결 해시가 그대로일 때만.
+    """
     names = {"dev": {"tune", "check"}, "all": {"tune", "check", "holdout"}}.get(split_name, {split_name})
-    if "holdout" in names and not holdout_frozen(P):
-        raise SystemExit("holdout is frozen until prereg_holdout.json")
+    if "holdout" in names:
+        if stage == "data":
+            if not holdout_data_open(P):
+                raise SystemExit("holdout data is sealed until prereg.json has a stage1 block")
+            if P.prereg_holdout.exists():
+                raise SystemExit("holdout data is frozen (prereg_holdout.json exists)")
+        else:
+            if not holdout_frozen(P):
+                raise SystemExit("holdout is frozen until prereg_holdout.json")
+            verify_freeze(P)
     return [c for c in load_split(P)["companies"] if c["split"] in names]
+
+
+def once(P: Paths, path: Path, split_name: str, event: str, tag: str) -> None:
+    """홀드아웃 판정·기준선은 한 번만. 비공개 출력 파일뿐 아니라 커밋되는 원장으로도 확인한다."""
+    if split_name == "all":
+        raise SystemExit("use --split holdout or a dev split (not all) for judge/baselines")
+    if split_name != "holdout":
+        return
+    done = any(r.get("event") == event and r.get("split") == "holdout" and r.get("tag") == tag
+               for r in read_jsonl(P.attempts))
+    if Path(path).exists() or done:
+        raise SystemExit(f"holdout {event} {tag} already ran")
+
+
+def _code_sha(P: Paths) -> str:
+    """판정·평가 코드 파일 내용의 해시(동결 뒤 코드가 바뀌었는지 확인)."""
+    files = sorted([P.root / "app/lib/jev.py", *(P.root / "app/services/evidence").glob("*.py"),
+                    *(P.root / "lab/evidence").glob("*.py")])
+    h = hashlib.sha256()
+    for f in files:
+        h.update(f.name.encode() + b"\0" + f.read_bytes())
+    return h.hexdigest()
+
+
+def _git_head(P: Paths) -> str:
+    """현재 커밋 해시. git이 없는 환경(앱 이미지)에서는 빈 문자열."""
+    import subprocess
+
+    try:
+        return subprocess.run(["git", "-C", str(P.root), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+    except FileNotFoundError:
+        return ""
+
+
+def _tree_dirty(P: Paths) -> bool:
+    """코드·평가 데이터에 커밋되지 않은 변경이 있으면 True."""
+    import subprocess
+
+    out = subprocess.run(["git", "-C", str(P.root), "status", "--porcelain", "--", "app", "lab/evidence"],
+                         capture_output=True, text=True).stdout
+    return bool(out.strip())
+
+
+def _file_sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else ""
+
+
+def freeze_bundle(P: Paths) -> dict:
+    """spec 7절 5단계 동결 묶음: 원문·문단·검색·답변·주장·라벨·프롬프트·사전등록·코드 해시."""
+    codes = {c["corp_code"] for c in load_split(P)["companies"] if c["split"] == "holdout"}
+    pick = lambda name, key: [r for r in read_jsonl(P.jsonl(name)) if r[key].split("-q")[0] in codes]
+    return {"split_sha256": _file_sha(P.split_json),
+            "passages_manifest_sha256": _file_sha(P.jsonl("passages_manifest.jsonl")),
+            "dart_ledger_sha256": _file_sha(P.jsonl("dart_ledger.jsonl")),
+            "questions_sha256": _sha_rows(pick("questions.jsonl", "qid")),
+            "retrieval_sha256": _sha_rows(pick("retrieval.jsonl", "qid")),
+            "answers_sha256": _sha_rows(pick("answers.jsonl", "qid")),
+            "claims_sha256": _sha_rows(pick("claims.jsonl", "cid")),
+            "labels_sha256": _sha_rows(pick("labels.jsonl", "cid")),
+            "prompts_sha256": {n: _file_sha(P.ev / "prompts" / n) for n in ("labeler.md", "question_writer.md", "controlled_writer.md")},
+            "prereg_sha256": _file_sha(P.prereg),
+            "code_sha256": _code_sha(P)}
+
+
+def verify_freeze(P: Paths) -> None:
+    """동결 묶음을 다시 계산해 다르면 멈춘다(라벨·주장·코드를 동결 뒤 바꾸지 못하게)."""
+    frozen = json.loads(P.prereg_holdout.read_text())
+    now = freeze_bundle(P)
+    bad = [k for k, v in now.items() if frozen.get(k) != v]
+    if bad:
+        raise SystemExit(f"holdout freeze mismatch: {bad}")
+
+
+def split_by_counts(values: list, counts: list[int]) -> list[list]:
+    """평평한 점수 목록을 주장별 문단 수로 자른다."""
+    out, i = [], 0
+    for n in counts:
+        out.append(values[i:i + n])
+        i += n
+    return out
+
+
+def missing_baselines(scores: dict, n: int) -> list[str]:
+    """조정에 필요한 기준선 4종 중 빠지거나 점수가 비거나 개수가 다른 것."""
+    return [t for t in ("lex", "emb", "nli", "llm")
+            if t not in scores or len(scores[t]) != n or any(v is None for v in scores[t])]
+
+
+def reported_verdict(lo, hi, descriptive_only: bool, exploratory: bool) -> dict:
+    """spec 6절: 표본 하한 미달이면 기술 통계, 탐색적이면 탐색적. 그 밖에는 통계 판정."""
+    from lab.evidence.metrics import verdict
+
+    v = verdict(lo, hi)
+    if descriptive_only:
+        v["statistical"] = "descriptive"
+    elif exploratory:
+        v["statistical"] = "exploratory"
+    return v
 
 
 def passages_by_corp(P: Paths) -> dict[str, list[dict]]:
@@ -305,7 +419,7 @@ def cmd_question_packets(P: Paths, args) -> None:
     """회사마다 지시문 + 지정 절 문단 전체를 담은 질문 작성 꾸러미를 비공개 폴더에 쓴다."""
     guide = (P.ev / "prompts/question_writer.md").read_text()
     pbc = passages_by_corp(P)
-    for c in companies(P, args.split):
+    for c in companies(P, args.split, stage="data"):
         body = "\n".join(f"[{p['id']}] {p['text']}" for p in pbc[c["corp_code"]])
         out = P.priv / "packets/questions" / f"{c['corp_code']}.md"
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -317,9 +431,9 @@ def cmd_question_packets(P: Paths, args) -> None:
 def cmd_questions_merge(P: Paths, args) -> None:
     """회사별 질문 파일을 검증·병합해 questions.jsonl을 쓴다(다른 분할의 기존 행은 보존)."""
     keep = [r for r in read_jsonl(P.jsonl("questions.jsonl")) if r["split"] not in
-            {c["split"] for c in companies(P, args.split)}]
+            {c["split"] for c in companies(P, args.split, stage="data")}]
     rows = []
-    for c in companies(P, args.split):
+    for c in companies(P, args.split, stage="data"):
         rows += merge_questions(read_jsonl(P.data / "questions" / f"{c['corp_code']}.jsonl"), c["corp_code"], c["split"])
     write_jsonl(P.jsonl("questions.jsonl"), sorted(keep + rows, key=lambda r: r["qid"]))
     print(f"{len(rows)} questions")
@@ -346,7 +460,7 @@ def cmd_embed(P: Paths, args) -> None:
         out.parent.mkdir(parents=True, exist_ok=True)
         with out.open("a") as f:
             pbc = passages_by_corp(P)
-            for c in companies(P, args.split):
+            for c in companies(P, args.split, stage="data"):
                 for p in pbc.get(c["corp_code"], []):
                     if p["id"] not in done:
                         vec = await llm.embed(EMBED_MODEL, DOC_PREFIX + p["text"])
@@ -364,10 +478,10 @@ def cmd_retrieve(P: Paths, args) -> None:
 
     vecs = load_vectors(P)
     pbc = passages_by_corp(P)
-    missing = [p["id"] for c in companies(P, args.split) for p in pbc[c["corp_code"]] if p["id"] not in vecs]
+    missing = [p["id"] for c in companies(P, args.split, stage="data") for p in pbc[c["corp_code"]] if p["id"] not in vecs]
     if missing:
         raise SystemExit(f"{len(missing)} passages lack current vectors; run embed")
-    codes = {c["corp_code"] for c in companies(P, args.split)}
+    codes = {c["corp_code"] for c in companies(P, args.split, stage="data")}
     answered = {a["qid"] for a in read_jsonl(P.jsonl("answers.jsonl"))}
     qs = retrieval_targets([q for q in read_jsonl(P.jsonl("questions.jsonl")) if q["corp_code"] in codes], answered)
     llm = _ollama()
@@ -404,7 +518,7 @@ def cmd_generate(P: Paths, args) -> None:
     text = _passage_text(P)
     names = _corp_names(P)
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
-    codes = {c["corp_code"] for c in companies(P, args.split)}
+    codes = {c["corp_code"] for c in companies(P, args.split, stage="data")}
     existing = read_jsonl(P.jsonl("answers.jsonl"))
     done = {a["qid"] for a in existing}
     todo = [q for q in read_jsonl(P.jsonl("questions.jsonl")) if q["corp_code"] in codes and q["qid"] not in done]
@@ -424,7 +538,7 @@ def cmd_generate(P: Paths, args) -> None:
 
 def cmd_claims(P: Paths, args) -> None:
     """분할의 답변에서 자연 주장을 만든다(통제 주장 행은 보존)."""
-    codes = {c["corp_code"] for c in companies(P, args.split)}
+    codes = {c["corp_code"] for c in companies(P, args.split, stage="data")}
     answers = [a for a in read_jsonl(P.jsonl("answers.jsonl")) if a["qid"].split("-q")[0] in codes]
     keep = [c for c in read_jsonl(P.jsonl("claims.jsonl"))
             if c["source"] == "controlled" or c["qid"].split("-q")[0] not in codes]
@@ -438,7 +552,7 @@ def cmd_controlled_packets(P: Paths, args) -> None:
     guide = (P.ev / "prompts/controlled_writer.md").read_text()
     text = _passage_text(P)
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
-    codes = [c["corp_code"] for c in companies(P, args.split)]
+    codes = [c["corp_code"] for c in companies(P, args.split, stage="data")]
     all_q = read_jsonl(P.jsonl("questions.jsonl"))
     all_qids = [q["qid"] for q in all_q]
     qs = [q for q in all_q if q["corp_code"] in codes]
@@ -460,7 +574,7 @@ def cmd_controlled_check(P: Paths, args) -> None:
     text = _passage_text(P)
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
     names = tuple(_corp_names(P).values())
-    codes = {c["corp_code"] for c in companies(P, args.split)}
+    codes = {c["corp_code"] for c in companies(P, args.split, stage="data")}
     all_qids = [q["qid"] for q in read_jsonl(P.jsonl("questions.jsonl"))]
     rows, rejected = [], []
     for corp in sorted(codes):
@@ -557,7 +671,7 @@ def cmd_label_packets(P: Paths, args) -> None:
     text = _passage_text(P)
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
     qtext = {q["qid"]: q["question"] for q in read_jsonl(P.jsonl("questions.jsonl"))}
-    codes = {c["corp_code"] for c in companies(P, args.split)}
+    codes = {c["corp_code"] for c in companies(P, args.split, stage="data")}
     claims = [c for c in read_jsonl(P.jsonl("claims.jsonl")) if c["qid"].split("-q")[0] in codes]
     only, other = None, {}
     if args.round == 2:
@@ -594,7 +708,7 @@ def cmd_labels_merge(P: Paths, args) -> None:
     """1·2차 라벨을 병합해 labels.jsonl을 쓰고 1차 κ(이진, 비주장 제외)를 출력한다."""
     from lab.evidence.metrics import kappa
 
-    codes = {c["corp_code"] for c in companies(P, args.split)}
+    codes = {c["corp_code"] for c in companies(P, args.split, stage="data")}
     claims = [c for c in read_jsonl(P.jsonl("claims.jsonl")) if c["qid"].split("-q")[0] in codes]
     cids = {lid(c["cid"]): c["cid"] for c in claims}
     r1 = {lb: _read_labels(P, 1, lb, codes, cids) for lb in ("opus", "codex")}
@@ -635,12 +749,13 @@ def sessions(times: list[str], gap_hours: float = 1.0) -> list[list[str]]:
     return out
 
 
-def _judgeable(P: Paths, split_name: str) -> list[dict]:
-    """분할의 주장 중 최종 라벨이 disputed·non_claim이 아닌 것(라벨 포함)."""
+def _judgeable(P: Paths, split_name: str, include_disputed: bool = False) -> list[dict]:
+    """분할의 주장 중 판정 대상(라벨 포함). 기본은 disputed·non_claim 제외, 민감도용으로 disputed 포함 가능."""
     codes = {c["corp_code"] for c in companies(P, split_name)}
     lab = {r["cid"]: r["label"] for r in read_jsonl(P.jsonl("labels.jsonl"))}
+    skip = {None, "non_claim"} | (set() if include_disputed else {"disputed"})
     return [dict(c, label=lab[c["cid"]]) for c in read_jsonl(P.jsonl("claims.jsonl"))
-            if c["qid"].split("-q")[0] in codes and lab.get(c["cid"]) not in (None, "disputed", "non_claim")]
+            if c["qid"].split("-q")[0] in codes and lab.get(c["cid"]) not in skip]
 
 
 def cmd_judge(P: Paths, args) -> None:
@@ -652,7 +767,10 @@ def cmd_judge(P: Paths, args) -> None:
         raise SystemExit("prereg.json must be committed before JEV calls")
     if not args.tag:
         raise SystemExit("--tag is required")
-    claims = _judgeable(P, args.split)
+    if args.split == "holdout" and (args.tag != "holdout" or args.limit or args.single or args.no_cache):
+        raise SystemExit("holdout judge runs once with --tag holdout and no --limit/--single/--no-cache")
+    once(P, P.priv / "scores" / f"{args.tag}.jsonl", args.split, "judge", args.tag)
+    claims = _judgeable(P, args.split, include_disputed=(args.split == "holdout"))
     if args.limit:
         keep = set(subset([c["cid"] for c in claims if c["source"] == "natural"], args.limit))
         claims = [c for c in claims if c["cid"] in keep]
@@ -777,6 +895,305 @@ def cmd_stage0_report(P: Paths, args) -> None:
 
 
 COMMANDS.update({"judge": cmd_judge, "stage0-report": cmd_stage0_report})
+
+
+def _claims_for(P: Paths, split_name: str, stage: str = "judge") -> list[dict]:
+    codes = {c["corp_code"] for c in companies(P, split_name, stage=stage)}
+    return [c for c in read_jsonl(P.jsonl("claims.jsonl")) if c["qid"].split("-q")[0] in codes]
+
+
+def cmd_claim_embed(P: Paths, args) -> None:
+    """주장을 QUERY 접두어로 임베딩한다(cid+본문 해시가 같으면 건너뜀). 호스트 Ollama."""
+    import asyncio
+
+    from app.services.evidence.retrieve import QUERY_PREFIX
+
+    out = P.priv / "claim_vecs.jsonl"
+    done = {(r["cid"], r["sha256"]) for r in read_jsonl(out)}
+    todo = [c for c in _claims_for(P, args.split) if (c["cid"], _sha(c["text"])) not in done]
+    llm = _ollama()
+
+    async def run():
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with out.open("a") as f:
+            for c in todo:
+                f.write(json.dumps({"cid": c["cid"], "sha256": _sha(c["text"]),
+                                    "vec": await llm.embed(EMBED_MODEL, QUERY_PREFIX + c["text"])}) + "\n")
+
+    asyncio.run(run())
+    print(f"{len(todo)} claim vectors")
+
+
+def nli_revision() -> str:
+    from huggingface_hub import HfApi
+
+    from lab.evidence.baselines import NLI_MODEL
+    return HfApi().model_info(NLI_MODEL).sha
+
+
+def cmd_baselines(P: Paths, args) -> None:
+    """기준선 하나를 분할 주장에 실행한다. 홀드아웃은 한 번만, NLI는 사전등록 리비전으로."""
+    import asyncio
+    import os
+
+    import httpx
+
+    from lab.evidence import baselines as bl
+
+    out = P.priv / "baselines" / f"{args.tag}_{args.split}.jsonl"
+    once(P, out, args.split, "baselines", args.tag)
+    claims = _judgeable(P, args.split, include_disputed=(args.split == "holdout"))
+    text = _passage_text(P)
+    ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
+    rows: list[dict] = []
+    if args.tag == "lex":
+        rows = [{"cid": c["cid"], "score": bl.lex_score(c["text"], [text[i] for i in ret[c["qid"]]]), "ok": True} for c in claims]
+    elif args.tag == "emb":
+        pv = load_vectors(P)
+        cv = {r["cid"]: r["vec"] for r in read_jsonl(P.priv / "claim_vecs.jsonl")}
+        rows = [{"cid": c["cid"], "score": bl.emb_score(cv[c["cid"]], [pv[i] for i in ret[c["qid"]]]), "ok": True} for c in claims]
+    elif args.tag == "nli":
+        pre = json.loads(P.prereg.read_text()).get("stage1") or {}
+        rev = pre.get("nli_revision") if args.split == "holdout" else None
+        rev = rev or nli_revision()
+        pairs = [(text[i], c["text"]) for c in claims for i in ret[c["qid"]]]
+        per = split_by_counts(bl.nli_entailment(pairs, rev), [len(ret[c["qid"]]) for c in claims])
+        rows = [{"cid": c["cid"], "score": max(v), "ok": True, "revision": rev} for c, v in zip(claims, per)]
+    elif args.tag == "llm":
+        base = os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434")
+
+        async def run():
+            res = []
+            async with httpx.AsyncClient(timeout=600) as cl:
+                for c in claims:
+                    r = await cl.post(f"{base}/api/chat", json=bl.llm_payload(c["text"], [text[i] for i in ret[c["qid"]]], GEN_MODEL))
+                    sc = bl.parse_llm_json(r.json().get("message", {}).get("content", ""))
+                    res.append({"cid": c["cid"], "score": sc if sc is not None else 0.0, "ok": sc is not None})
+            return res
+
+        rows = asyncio.run(run())
+    else:
+        raise SystemExit("--tag must be lex|emb|nli|llm")
+    write_jsonl(out, rows)
+    log_attempt(P, "baselines", tag=args.tag, split=args.split, claims=len(rows), failed=sum(not r["ok"] for r in rows))
+    print(f"{len(rows)} {args.tag} scores")
+
+
+def cmd_stage1_freeze_config(P: Paths, args) -> None:
+    """stage1-tune 결과를 사전등록 stage1 블록으로 동결한다(홀드아웃 데이터 생성이 열린다). 덮어쓰기 금지.
+
+    MDE가 0.10을 넘으면 홀드아웃 질문 수를 10개로 늘렸거나 탐색적 평가로 낮춘 경우에만 동결한다(spec 6절).
+    """
+    pre = json.loads(P.prereg.read_text())
+    if pre.get("stage1"):
+        raise SystemExit("stage1 block already frozen")
+    tune = json.loads((P.ev / "results/stage1-tune.json").read_text())
+    m = tune.get("mde")
+    if m is None or (m > 0.10 and tune.get("holdout_questions_per_company") == 6 and not tune.get("exploratory")):
+        raise SystemExit(f"MDE {m} > 0.10 needs more holdout questions or an explicit exploratory flag")
+    pre["stage1"] = tune
+    pre["version"] = max(2, pre.get("version", 1))
+    P.prereg.write_text(json.dumps(pre, ensure_ascii=False, indent=2) + "\n")
+    log_attempt(P, "stage1-freeze-config")
+    print("stage1 frozen")
+
+
+COMMANDS.update({"claim-embed": cmd_claim_embed, "baselines": cmd_baselines,
+                 "stage1-freeze-config": cmd_stage1_freeze_config})
+
+
+BASELINES = ("lex", "emb", "nli", "llm")
+
+
+def delta_stat(b_star: str):
+    """같은 표본에서 AUC(SYS) − AUC(B*). 한 종류뿐이면 None."""
+    from lab.evidence.metrics import auc
+
+    def stat(rows):
+        a = auc([r["y"] for r in rows], [r["sys"] for r in rows])
+        b = auc([r["y"] for r in rows], [r[b_star] for r in rows])
+        return None if a is None or b is None else a - b
+    return stat
+
+
+def score_rows(P: Paths, split_name: str, tau_s: float, tau_c: float, natural_only: bool = True,
+               claims: list[dict] | None = None) -> list[dict]:
+    """판정 가능한 주장마다 SYS·JEV·기준선 점수와 라벨을 모은다."""
+    from app.services.evidence.judge import Judgement, sys_decision
+    from app.services.evidence.numbers import number_check, parse
+
+    cluster = {c["corp_code"]: c["cluster"] for c in load_split(P)["companies"]}
+    text = _passage_text(P)
+    ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
+    jev = _scores(P, split_name)
+    base = {t: {r["cid"]: r["score"] for r in read_jsonl(P.priv / "baselines" / f"{t}_{split_name}.jsonl")} for t in BASELINES}
+    rows = []
+    claims = _judgeable(P, split_name) if claims is None else claims
+    if split_name == "holdout":
+        missing = [c["cid"] for c in claims if c["cid"] not in jev]
+        if missing:
+            raise SystemExit(f"{len(missing)} holdout claims lack JEV scores")
+    for c in claims:
+        if (natural_only and c["source"] != "natural") or c["cid"] not in jev:
+            continue
+        r = jev[c["cid"]]
+        ps = [text[i] for i in ret[c["qid"]]]
+        valid = [number_check(c["text"], p) for p in ps]
+        dec, idx, sys_score = sys_decision(Judgement(r["s"], r["c"], r["ok"], 0), valid, tau_s, tau_c)
+        rows.append({"cid": c["cid"], "qid": c["qid"], "cluster": cluster[c["qid"].split("-q")[0]],
+                     "label": c["label"], "y": int(c["label"] == "supported"), "sys": sys_score,
+                     "jev": max(r["s"]) if r["ok"] else 0.0, "has_number": bool(parse(c["text"])),
+                     "decision": dec, "source": c["source"], "variant": c.get("variant"),
+                     "expected": c.get("expected"), **{t: base[t].get(c["cid"]) for t in BASELINES}})
+    return rows
+
+
+def _judge_rows_for_tuning(P: Paths, split_name: str) -> list[dict]:
+    from app.services.evidence.numbers import number_check
+
+    text = _passage_text(P)
+    ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
+    jev = _scores(P, split_name)
+    return [{"s": jev[c["cid"]]["s"], "c": jev[c["cid"]]["c"], "label": c["label"],
+             "valid": [number_check(c["text"], text[i]) for i in ret[c["qid"]]]}
+            for c in _judgeable(P, split_name) if c["source"] == "natural" and c["cid"] in jev and jev[c["cid"]]["ok"]]
+
+
+def _op_point(rows: list[dict]) -> dict:
+    """지지됨 정밀도·재현율·커버리지와 반박 오탐률(정답이 반박 아님인데 반박 판정)."""
+    sup = [r for r in rows if r["decision"] == "supported"]
+    tp = sum(r["y"] for r in sup)
+    pos = sum(r["y"] for r in rows)
+    neg_c = [r for r in rows if r["label"] != "contradicted"]
+    return {"supported_precision": tp / len(sup) if sup else None, "supported_recall": tp / pos if pos else None,
+            "coverage": len(sup) / len(rows) if rows else None,
+            "contradiction_false_positive_rate": (sum(r["decision"] == "contradicted" for r in neg_c) / len(neg_c)) if neg_c else None}
+
+
+def cmd_stage1_tune(P: Paths, args) -> None:
+    """τ_c→τ_s(조정 자연), B*(조정 자연 AUC), MDE(개발 자연, 홀드아웃 군집 수), 확인 세트 운영점."""
+    from lab.evidence import thresholds as th
+    from lab.evidence.metrics import auc, mde
+
+    tune = _judge_rows_for_tuning(P, "tune")
+    tau_c = th.choose_tau_c(tune)
+    tau_s = th.choose_tau_s(tune, tau_c)
+    t_rows = score_rows(P, "tune", tau_s, tau_c)
+    miss = missing_baselines({t: [r[t] for r in t_rows] for t in BASELINES}, len(t_rows))
+    if miss:
+        raise SystemExit(f"baselines missing on tune: {miss}")
+    base_auc = {t: auc([r["y"] for r in t_rows], [r[t] for r in t_rows]) for t in BASELINES}
+    b_star = max(base_auc, key=base_auc.get)
+    dev = t_rows + score_rows(P, "check", tau_s, tau_c)
+    n_hold = len({c["cluster"] for c in load_split(P)["companies"] if c["split"] == "holdout"})
+    m = mde(dev, n_hold, delta_stat(b_star))
+    c_rows = score_rows(P, "check", tau_s, tau_c)
+    result = {"tau_c": tau_c, "tau_s": tau_s, "baseline_auc_tune": base_auc, "b_star": b_star,
+              "sys_auc_tune": auc([r["y"] for r in t_rows], [r["sys"] for r in t_rows]),
+              "mde": m, "holdout_clusters": n_hold,
+              "holdout_questions_per_company": 6 if (m is not None and m <= 0.10) else 10,
+              "exploratory": False, "check_operating_point": _op_point(c_rows),
+              "check_sys_auc": auc([r["y"] for r in c_rows], [r["sys"] for r in c_rows]),
+              "nli_revision": next((r.get("revision") for r in read_jsonl(P.priv / "baselines/nli_tune.jsonl")), None),
+              "llm_prompt": __import__("lab.evidence.baselines", fromlist=["LLM_SYSTEM"]).LLM_SYSTEM}
+    out = P.ev / "results/stage1-tune.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(result, ensure_ascii=False, indent=1) + "\n")
+    log_attempt(P, "stage1-tune", tau_c=tau_c, tau_s=tau_s, b_star=b_star, mde=m)
+    print(json.dumps({k: result[k] for k in ("tau_c", "tau_s", "b_star", "mde", "holdout_questions_per_company")}))
+
+
+def _sha_rows(rows: list[dict]) -> str:
+    return hashlib.sha256("".join(json.dumps(r, ensure_ascii=False, sort_keys=True) for r in rows).encode()).hexdigest()
+
+
+def cmd_freeze_holdout(P: Paths, args) -> None:
+    """홀드아웃 동결 묶음(spec 7절 5단계)을 쓴다(판정 봉인 해제). 덮어쓰기·미커밋 변경 금지."""
+    if P.prereg_holdout.exists():
+        raise SystemExit("prereg_holdout.json already exists")
+    if _tree_dirty(P):
+        raise SystemExit("commit app/ and lab/evidence/ changes before freezing")
+    codes = {c["corp_code"] for c in companies(P, "holdout", stage="data")}
+    if not [r for r in read_jsonl(P.jsonl("labels.jsonl")) if r["cid"].split("-q")[0] in codes]:
+        raise SystemExit("no holdout labels")
+    data = {**freeze_bundle(P),
+            "models": {"jev": "jev-1.13.0", "generator": f"{GEN_MODEL}@{GEN_DIGEST}", "embedder": "nomic-embed-text@0a109f422b47",
+                       "labelers": json.loads(P.prereg.read_text()).get("stage1", {}).get("labelers")},
+            "code_commit": _git_head(P), "frozen_at": datetime.now(timezone.utc).isoformat()}
+    P.prereg_holdout.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n")
+    log_attempt(P, "freeze-holdout", claims=len([r for r in read_jsonl(P.jsonl("claims.jsonl")) if r["cid"].split("-q")[0] in codes]))
+    print("holdout frozen")
+
+
+def _sensitivity(P: Paths, cfg: dict, b: str, rows: list[dict]) -> dict:
+    """spec 4·6절: 갈린 라벨을 각 라벨러 쪽으로 넣었을 때의 Δ, 제외율, 제외 사례 분포."""
+    from lab.evidence.metrics import cluster_bootstrap
+
+    lab = {r["cid"]: r for r in read_jsonl(P.jsonl("labels.jsonl"))}
+    disputed = [c for c in _judgeable(P, "holdout", include_disputed=True)
+                if c["label"] == "disputed" and c["source"] == "natural"]
+    out = {"disputed_natural": len(disputed),
+           "exclusion_rate": len(disputed) / (len(disputed) + len(rows)) if (disputed or rows) else None,
+           "disputed_clusters": sorted({c["qid"].split("-q")[0] for c in disputed})}
+    for lb in ("opus", "codex"):
+        def final(cid):
+            r = lab[cid]
+            return ((r.get("r2") or {}).get(lb) or r["r1"][lb])["label"]
+        extra = [dict(c, label=final(c["cid"])) for c in disputed if final(c["cid"]) != "non_claim"]
+        both = rows + score_rows(P, "holdout", cfg["tau_s"], cfg["tau_c"], claims=extra)
+        out[f"with_{lb}_labels"] = {"classes": {k: sum(e["label"] == k for e in extra) for k in ("supported", "contradicted", "no_evidence")},
+                                    "delta": cluster_bootstrap(both, delta_stat(b))}
+    return out
+
+
+def cmd_stage1_report(P: Paths, args) -> None:
+    """홀드아웃 주결과와 보조 지표를 계산한다(동결 뒤에만)."""
+    from lab.evidence.metrics import auc, cluster_bootstrap, macro_f1, verdict
+
+    cfg = json.loads(P.prereg.read_text())["stage1"]
+    companies(P, "holdout")  # 동결 확인
+    rows = score_rows(P, "holdout", cfg["tau_s"], cfg["tau_c"])
+    b = cfg["b_star"]
+    pos, neg = sum(r["y"] for r in rows), sum(1 - r["y"] for r in rows)
+    point, lo, hi = cluster_bootstrap(rows, delta_stat(b))
+    a = lambda key, rs=rows: auc([r["y"] for r in rs], [r[key] for r in rs])
+    by_cluster = {}
+    for r in rows:
+        by_cluster.setdefault(r["cluster"], []).append(r)
+    signs = [delta_stat(b)(rs) for rs in by_cluster.values()]
+    nonum = [r for r in rows if not r["has_number"]]
+    pred3 = [{"supported": "supported", "contradicted": "contradicted"}.get(r["decision"], "no_evidence") for r in rows]
+    ctrl = score_rows(P, "holdout", cfg["tau_s"], cfg["tau_c"], natural_only=False)
+    ctrl = [r for r in ctrl if r["source"] == "controlled"]
+    by_var = {}
+    for r in ctrl:
+        by_var.setdefault(r["variant"], []).append((r["decision"] == "supported") == (r["expected"] == "supported"))
+    res = {"n": len(rows), "supported": pos, "not_supported": neg, "descriptive_only": pos < 60 or neg < 60,
+           "b_star": b, "auc": {k: a(k) for k in ("sys", "jev", *BASELINES) if all(r[k] is not None for r in rows)},
+           "delta": {"point": point, "lo": lo, "hi": hi,
+                     **reported_verdict(lo, hi, pos < 60 or neg < 60, cfg.get("exploratory", False))}, "mde": cfg.get("mde"),
+           "exploratory": cfg.get("exploratory", False),
+           "jev_minus_bstar": cluster_bootstrap(rows, lambda rs: (lambda x, y: None if x is None or y is None else x - y)(
+               auc([r["y"] for r in rs], [r["jev"] for r in rs]), auc([r["y"] for r in rs], [r[b] for r in rs]))),
+           "operating_point": _op_point(rows),
+           "numberless_auc": {"sys": a("sys", nonum), b: a(b, nonum), "n": len(nonum)},
+           "macro_f1_3class": macro_f1([r["label"] if r["label"] in ("supported", "contradicted") else "no_evidence" for r in rows],
+                                       pred3, ("supported", "contradicted", "no_evidence")),
+           "cluster_delta_signs": {"positive": sum(s is not None and s > 0 for s in signs),
+                                   "negative": sum(s is not None and s < 0 for s in signs), "undefined": sum(s is None for s in signs)},
+           "controlled_accuracy_by_variant": {k: sum(v) / len(v) for k, v in by_var.items()}}
+    res["sensitivity"] = _sensitivity(P, cfg, b, rows)
+    out = P.ev / "results/stage1.json"
+    out.write_text(json.dumps(res, ensure_ascii=False, indent=1, default=str) + "\n")
+    (P.ev / "results/stage1-gates.md").write_text(
+        f"# Stage 1 주결과\n\nΔ = AUC(SYS) − AUC({b}) = {point} (95% {lo} ~ {hi}) → {res['delta']}\n\n"
+        f"n={len(rows)} (지지됨 {pos}), descriptive_only={res['descriptive_only']}\n")
+    log_attempt(P, "stage1-report", delta=point, lo=lo, hi=hi)
+    print(json.dumps(res["delta"]))
+
+
+COMMANDS.update({"stage1-tune": cmd_stage1_tune, "freeze-holdout": cmd_freeze_holdout,
+                 "stage1-report": cmd_stage1_report})
 
 
 def main(argv: list[str] | None = None) -> None:

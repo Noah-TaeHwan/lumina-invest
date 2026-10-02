@@ -1,0 +1,27 @@
+{"lid": "327f63ec0d", "label": "supported", "passage": 8, "reason": "문단8: A/S용 부품사업으로 국내외 운행 중인 모든 현대차·기아 보수용 부품 공급 책임"}
+{"lid": "b6669938fc", "label": "supported", "passage": 8, "reason": "문단8: 2025년 매출 구성 모듈·부품제조 78.2%, A/S용 부품 21.8%"}
+{"lid": "66aa39f8c9", "label": "supported", "passage": 8, "reason": "문단8: 현대모비스가 국내외 운행 현대차·기아 보수용 부품을 공급하는 A/S용 부품사업 영위"}
+{"lid": "ed2d507761", "label": "supported", "passage": 8, "reason": "문단8: 현대모비스는 자동차 모듈 및 부품제조사업과 A/S용 부품사업을 영위"}
+{"lid": "4a527cd0df", "label": "supported", "passage": 8, "reason": "문단8: 3대 핵심모듈 JIS 공급 및 제동·조향·에어백·램프·전장·전동화 부품 공급 내용 일치"}
+{"lid": "dfa8a622a9", "label": "contradicted", "passage": 8, "reason": "문단8은 A/S용 부품사업을 영위한다고 명시해 부정 주장과 반대"}
+{"lid": "86e99bd0ba", "label": "non_claim", "passage": null, "reason": "답변 도입부로 구체적 사실 주장이 없음"}
+{"lid": "3fc531014e", "label": "supported", "passage": 6, "reason": "문단6: 한국을 제외한 전세계 12개국에 글로벌 생산거점 확보"}
+{"lid": "b977a2ee8d", "label": "no_evidence", "passage": null, "reason": "LG생활건강 관련 내용은 어느 문단에도 없음"}
+{"lid": "629a562526", "label": "no_evidence", "passage": null, "reason": "반복된 차종 나열로 이루어진 모듈 설명은 어느 문단에도 근거 없음"}
+{"lid": "6594568b42", "label": "supported", "passage": 2, "reason": "문단2: 2025년 매출비중 A/S용 부품사업 21.8%"}
+{"lid": "5af52c5d8a", "label": "supported", "passage": 2, "reason": "문단2: 2025년 매출비중 자동차 모듈 및 부품제조사업 78.2%"}
+{"lid": "0fbc016299", "label": "contradicted", "passage": 2, "reason": "문단2는 2025년 모듈·부품제조사업 비중 78.2%로 74.6%와 다름"}
+{"lid": "f2837addc9", "label": "non_claim", "passage": null, "reason": "답변 도입부로 구체적 사실 주장이 없음"}
+{"lid": "8c9c509460", "label": "supported", "passage": 2, "reason": "문단2: 2025년 매출비중 모듈 및 부품제조사업 78.2%"}
+{"lid": "8cffdc7399", "label": "non_claim", "passage": null, "reason": "문단 표기 조각으로 사실 주장이 없음"}
+{"lid": "03f9c3e280", "label": "no_evidence", "passage": null, "reason": "문단6의 26,918,356백만원·18.9%는 2025년 수치이며 2021년 해외 생산실적은 문단에 없음"}
+{"lid": "e211b357b3", "label": "non_claim", "passage": null, "reason": "유형자산 시가 기재 생략이라는 보고서 작성상 절차 안내 문장"}
+{"lid": "b26ee8159c", "label": "supported", "passage": 6, "reason": "문단6: 2025년 해외 생산실적 26,918,356백만원, 전년 대비 18.9% 증가"}
+{"lid": "2fa4c165ee", "label": "non_claim", "passage": null, "reason": "표 머리글 조각으로 사실 주장이 없음"}
+{"lid": "4ada39e6da", "label": "supported", "passage": 2, "reason": "문단2: 당기말 환율 10% 상승시 법인세비용차감전순이익 133,032백만원 영향"}
+{"lid": "a80b0f3375", "label": "supported", "passage": 2, "reason": "문단2 표 행 그대로: 법인세비용차감전순이익 133,032/(133,032)/132,355/(132,355)"}
+{"lid": "9e0b5f1249", "label": "non_claim", "passage": null, "reason": "문단 표기 조각으로 사실 주장이 없음"}
+{"lid": "b8ab5d8a14", "label": "no_evidence", "passage": null, "reason": "주체가 HL만도로, 문단은 현대모비스(연결회사) 보고서라 HL만도 정보 없음"}
+{"lid": "28f7827283", "label": "non_claim", "passage": null, "reason": "질문 문장"}
+{"lid": "2281c6da56", "label": "contradicted", "passage": 3, "reason": "문단3은 장부금액 102,906백만원 유형자산을 하나은행 등에 담보 제공 중이라 명시"}
+{"lid": "da4cc7c61f", "label": "supported", "passage": 3, "reason": "문단3: 2025년말 차입금 관련 유형자산 일부(102,906백만원)를 하나은행 등에 담보 제공"}

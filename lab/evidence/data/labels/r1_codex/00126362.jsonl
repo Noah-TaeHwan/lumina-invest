@@ -1,0 +1,26 @@
+{"lid": "83a3239bc7", "label": "supported", "passage": 1, "reason": "문단 1에 1999년 11월 29일 디지털 기업 이미지 제고를 위한 삼성SDI 주식회사로의 상호 변경이 명시되어 있다."}
+{"lid": "219594508a", "label": "supported", "passage": 8, "reason": "문단 8에 전자재료 사업부문이 반도체 및 디스플레이 소재 등을 생산·판매한다고 명시되어 있다."}
+{"lid": "5904d817b3", "label": "non_claim", "passage": null, "reason": "제목과 항목 번호만 남은 문장 조각으로 사실 주장이 없다."}
+{"lid": "e734b42f8b", "label": "supported", "passage": 1, "reason": "문단 1에 법적·상업적 명칭 삼성SDI 주식회사와 영문명 SAMSUNG SDI CO., LTD.가 함께 명시되어 있다."}
+{"lid": "eb46d8f49b", "label": "supported", "passage": 1, "reason": "문단 1에 삼성-NEC 주식회사로의 설립일, 기업공개일, 한국증권선물거래소 상장일이 모두 주장과 같게 명시되어 있다."}
+{"lid": "e225116685", "label": "contradicted", "passage": 8, "reason": "문단 8은 전자재료 사업부문이 반도체 및 디스플레이 소재를 생산·판매한다고 밝혀 생산·판매하지 않는다는 주장을 반박한다."}
+{"lid": "c3e224b900", "label": "non_claim", "passage": null, "reason": "문단 번호와 제목의 일부만 있어 사실을 진술하지 않는다."}
+{"lid": "709df85012", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 LG생활건강의 화장품·생활용품 생산 및 판매에 관한 내용이 없다."}
+{"lid": "be97df6db2", "label": "supported", "passage": 8, "reason": "문단 8에 반도체 생산량 확대의 영향과 AI용 반도체 수요 확대에 따른 관련 소재 수요의 지속 성장 전망이 모두 명시되어 있다."}
+{"lid": "eb8343303b", "label": "supported", "passage": 8, "reason": "문단 8에 고해상도·고색재현 소재의 요구 증가와 모바일·IT 제품 및 TV의 OLED 채용 증가에 따른 소재 수요 성장이 함께 명시되어 있다."}
+{"lid": "6bfb91da79", "label": "supported", "passage": 8, "reason": "문단 8의 전자재료 사업부문 설명은 모바일·IT 제품과 TV의 OLED 패널 채용 증가로 OLED 소재 수요가 크게 성장한다고 밝힌다."}
+{"lid": "aed81261b6", "label": "non_claim", "passage": null, "reason": "문단 번호와 제목의 일부만 남은 조각으로 사실 주장이 없다."}
+{"lid": "b20c34439e", "label": "contradicted", "passage": 6, "reason": "문단 6의 2025년 영업손익은 적자 1조 7,224억원이며, 2조 696억원은 에너지솔루션 부문 영업이익 감소액이므로 주장한 영업이익과 다르다."}
+{"lid": "f99c1e945b", "label": "contradicted", "passage": 1, "reason": "문단 1에 한국증권선물거래소 상장일이 1979년 2월 27일로 명시되어 있어 1984년이라는 주장과 다르다."}
+{"lid": "819656f972", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 나열된 원소들이 전기차용 2차전지의 주요 원재료라는 설명이 없다."}
+{"lid": "5461acae8d", "label": "supported", "passage": 1, "reason": "문단 1에 1979년 2월 27일 한국증권선물거래소에 주식을 상장했다고 명시되어 있다."}
+{"lid": "2951667204", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 에너지솔루션 부문이 나열된 전기차용 전지·배터리·모터·전기제품 원재료를 주로 매입한다는 내용이 없다."}
+{"lid": "451a1180b1", "label": "non_claim", "passage": null, "reason": "합작투자 관련 콜옵션·풋옵션 약정을 묻는 질문이며 사실을 진술하지 않는다."}
+{"lid": "426911ba41", "label": "supported", "passage": 5, "reason": "문단 5의 연결대상회사 변동표에 SDI-GM Synergy Cells Holdings LLC.가 당기 중 신설을 사유로 신규연결되었다고 명시되어 있다."}
+{"lid": "32aacc906b", "label": "contradicted", "passage": 5, "reason": "문단 5가 명시한 당기 신설 신규연결회사는 SDI-GM Synergy Cells Holdings LLC.와 SDI-GM Synergy Cells LLC.로, 주장한 SDI-Ford 회사와 다르다."}
+{"lid": "df4c0efdb9", "label": "contradicted", "passage": 3, "reason": "문단 3에 Samsung SDI America, Inc.가 배터리 공급계약을 체결했다고 명시되어 있어 계약을 맺지 않았다는 주장을 반박한다."}
+{"lid": "df08469745", "label": "no_evidence", "passage": null, "reason": "문단 3은 2025년 3월 14일 공시를 안내하지만 이를 SDI-GM Synergy Cells Holdings LLC.의 계약과 연결하는 근거는 없다."}
+{"lid": "ea2c9aa5fb", "label": "non_claim", "passage": null, "reason": "공시한 주요 계약 내용을 이어서 소개하겠다는 안내이며 구체적인 계약 사실을 진술하지 않는다."}
+{"lid": "01a1d6e689", "label": "supported", "passage": 3, "reason": "문단 3에 종속회사 Samsung SDI America, Inc.가 배터리 공급계약을 체결했다고 명시되어 있다."}
+{"lid": "7a4a8048a8", "label": "no_evidence", "passage": null, "reason": "문단 3의 2026년 1월 30일 공시 안내는 Samsung SDI America, Inc.의 배터리 계약에 관한 것으로, SDI-GM Synergy Cells LLC.와의 연결 근거는 없다."}
+{"lid": "56353e6260", "label": "no_evidence", "passage": null, "reason": "반도체 시장 성장 전망은 문단 4에 있지만 이를 SDI-GM Synergy Cells Holdings LLC.의 내용으로 귀속시키는 근거는 없다."}

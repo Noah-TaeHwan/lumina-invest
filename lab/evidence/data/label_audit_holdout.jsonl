@@ -1,0 +1,52 @@
+{"cid": "00106641-q2-n5", "final": "no_evidence", "audited": "no_evidence", "note": "문단 8개 어디에도 대형차 정의(2,000미터)나 기아 완성차의 연대별 차급 구분이 없음"}
+{"cid": "00164779-q1-c2", "final": "no_evidence", "audited": "no_evidence", "note": "문단4의 평균가동률 100%는 당사(SK하이닉스, 문단1) 수치이며 마이크론은 어느 문단에도 없음 → 주체가 달라 반박도 아님", "expected_ok": true}
+{"cid": "00181712-q3-n4", "final": "no_evidence", "audited": "no_evidence", "note": "문단4 스피드메이트 순매출 351,487은 백만원 단위 2025년 연간값. 주장은 '만 원' 단위(100배 차이)이고 기간도 3/28까지라 같은 기간 수치가 없음"}
+{"cid": "00126380-q4-c1", "final": "supported", "audited": "supported", "note": "문단8: 2025년 DS 부문 및 SDC 등의 첨단공정 증설·전환과 인프라 투자 중심 52.7조원 시설투자", "expected_ok": true}
+{"cid": "00164788-q4-c2", "final": "no_evidence", "audited": "no_evidence", "note": "문단6의 해외 생산실적 26,918,356백만원(+18.9%)은 2025년 값. 주장 기간 2021년 수치는 어느 문단에도 없어 같은 기간 반박 불가", "expected_ok": true}
+{"cid": "01467503-q3-n3", "final": "no_evidence", "audited": "no_evidence", "note": "12개 브랜드·1,000만 원 매출 등 내용이 어느 문단에도 없음(문장 자체도 비정상)"}
+{"cid": "00164742-q3-n2", "final": "contradicted", "audited": "contradicted", "note": "문단7: 163.3만대·6.6% 감소는 2024년 산업수요이고 2025년은 168.5만대(+3.2%) → 같은 기간(2025) 다른 값"}
+{"cid": "00155319-q4-c2", "final": "no_evidence", "audited": "no_evidence", "note": "문단7 조강생산량 38,643천톤은 2025년 값(표는 2023~2025만). 2017년 수치는 없어 같은 기간 반박 불가", "expected_ok": true}
+{"cid": "00138598-q2-c1", "final": "supported", "audited": "supported", "note": "문단3: 수동소자 3대 부품 중 인덕터와 저항기를 생산 및 판매(아비코전자 명칭은 문단1·3 맥락)", "expected_ok": true}
+{"cid": "00631518-q3-n4", "final": "no_evidence", "audited": "no_evidence", "note": "문단8에 경유 매출액(백만원)은 있으나 2.10% 비율은 어느 문단에도 없음(계산값도 미제시)"}
+{"cid": "00164742-q2-n2", "final": "no_evidence", "audited": "no_evidence", "note": "문단6 가격표는 기타부문 철도차량만 있고 차종별 3년 가격 변동·가치 변동 관찰 내용은 없음"}
+{"cid": "00985686-q4-c2", "final": "contradicted", "audited": "contradicted", "note": "문단4: 부채비율 전기말 71%, 당기말 61%(97,353,309/160,910,368천원) → 당기말 54%와 불일치", "expected_ok": true}
+{"cid": "01467503-q3-c1", "final": "supported", "audited": "supported", "note": "문단6: 2023년도 카페24 호스팅 기반 자사통합몰 뉴키키 런칭. 단 '뉴키즈온' 명칭은 문단에 없고 당사=제출사로 맥락 추론", "expected_ok": true}
+{"cid": "00164779-q6-c1", "final": "supported", "audited": "supported", "note": "문단5: 연구개발비용 인건비 제78기 2,718,918백만원(SK하이닉스는 문단8 등 맥락)", "expected_ok": true}
+{"cid": "00877059-q4-n1", "final": "no_evidence", "audited": "no_evidence", "note": "문단6 생산능력 1,034는 '배치' 단위 2025년도 연간값. 주장은 '1,034만 배당'(단위 상이)·2025년 1분기 말 기준·송도 공장별이라 같은 기간·지표 수치 없음"}
+{"cid": "00488989-q4-n3", "final": "contradicted", "audited": "contradicted", "note": "문단2: SSD는 일 24시간×365일=8,760시간(연간). 주장 '8,760시간/일'은 일 24시간과 충돌(3조2교대·365일은 일치)"}
+{"cid": "01508855-q3-c2", "final": "contradicted", "audited": "contradicted", "note": "문단5: '지난 10년간' High-end 피규어 양산 기술·노하우 확보 → 15년과 불일치", "expected_ok": true}
+{"cid": "00877059-q5-c1", "final": "supported", "audited": "supported", "note": "문단8: 2019.04.26 아시아 소재 제약사와 바이오의약품 위탁생산 계약금액 105.6백만 달러", "expected_ok": true}
+{"cid": "00164788-q3-c2", "final": "contradicted", "audited": "contradicted", "note": "문단2: 2025년 매출비중 모듈 및 부품제조사업 78.2% → 74.6%와 불일치", "expected_ok": true}
+{"cid": "00258801-q1-c2", "final": "contradicted", "audited": "contradicted", "note": "문단5: 카카오톡 중심으로 커머스·모빌리티·페이·게임·뮤직·스토리 등에서 수익 창출 → 부정문과 정면 충돌", "expected_ok": true}
+{"cid": "00164742-q5-c1", "final": "supported", "audited": "supported", "note": "문단6: 현대캐피탈은 14개국에 진출해 19개 법인을 두고 해외사업 영위", "expected_ok": true}
+{"cid": "00631518-q3-n5", "final": "no_evidence", "audited": "no_evidence", "note": "문단8에 항공유 매출액(백만원)은 있으나 1.02% 비율은 어느 문단에도 없음"}
+{"cid": "00303396-q5-n2", "final": "no_evidence", "audited": "no_evidence", "note": "문단3 이자율 위험(변동금리 차입금 50,000,000천원, 1% 변동 시 110,000천원)은 있으나 '1.3배 증가'는 없음"}
+{"cid": "01467503-q3-n4", "final": "no_evidence", "audited": "no_evidence", "note": "12개 브랜드·1,000만 원 매출 등 내용이 어느 문단에도 없음(문장 자체도 비정상)"}
+{"cid": "00877059-q1-c1", "final": "supported", "audited": "supported", "note": "문단8: 2025년 6월 연구 서비스 분야 진출을 위한 '삼성 오가노이드' 사업 신규 출시", "expected_ok": true}
+{"cid": "00155319-q2-n2", "final": "supported", "audited": "supported", "note": "문단1 원문과 동일: 내화물 시장 국내 업체 중국진출 등으로 가격경쟁력 확보, 원가경쟁력 노력"}
+{"cid": "00164742-q2-n5", "final": "no_evidence", "audited": "no_evidence", "note": "2020년 2월 차종별 평균 판매가격 180만~250만원 범위는 어느 문단에도 없음"}
+{"cid": "01368637-q1-c2", "final": "contradicted", "audited": "contradicted", "note": "문단5: 연료전지용 전극 생산 장치 특허 등록일 22.05.02(출원 20.09.07) → 2014년 5월과 불일치", "expected_ok": true}
+{"cid": "00164742-q6-n1", "final": "no_evidence", "audited": "no_evidence", "note": "현대자동차 연구개발비 1,444억원(2020.3.31~2022.12.31) 관련 수치가 어느 문단에도 없음"}
+{"cid": "00488989-q5-c2", "final": "contradicted", "audited": "contradicted", "note": "문단2: 자본(B) 당기말 170,006,375,075원 → 182,006,375,075원과 불일치(전기말 159,374,278,567원은 일치)", "expected_ok": true}
+{"cid": "00877059-q2-n4", "final": "contradicted", "audited": "contradicted", "note": "문단5: 2025년 11월 인적분할로 설립된 순수지주회사는 삼성에피스홀딩스이며 승계 지분은 삼성바이오에피스 100% → 'Samsung Biologics 지분 승계'·'Samsung Electronics Holding'과 충돌"}
+{"cid": "00258801-q3-c1", "final": "supported", "audited": "supported", "note": "문단2: 2025년 국내 이커머스 거래액 272조 398억원, 전년 대비 4.9% 성장", "expected_ok": true}
+{"cid": "00106641-q6-n5", "final": "no_evidence", "audited": "no_evidence", "note": "문단2의 3/14~6/30은 2025년 개소세 70% 감면 기간이며 2022년·0.99% 비율 유지 내용은 없음"}
+{"cid": "00138598-q6-c1", "final": "supported", "audited": "supported", "note": "문단8: 별도기준 원재료비 제53기(2025년말) 99,911,613원", "expected_ok": true}
+{"cid": "00126380-q5-n5", "final": "no_evidence", "audited": "non_claim", "note": "가상의 100,000달러를 쓴 '예를 들어' 산술 예시로 회사에 대한 사실 주장이 아님(사실로 보더라도 문단 근거 없음)"}
+{"cid": "00155319-q3-n2", "final": "supported", "audited": "supported", "note": "문단1: 신길5동 지역주택조합 공사 매출액 5,089(백만원)"}
+{"cid": "00258801-q3-n2", "final": "no_evidence", "audited": "no_evidence", "note": "문단4의 1,693,750(100.0%)은 금융업 영업현황 표의 자산 합계(백만원)로 카카오 연결매출이 아니며, 플랫폼 부문 연결매출·증가율은 어느 문단에도 없음"}
+{"cid": "01508855-q6-n3", "final": "no_evidence", "audited": "no_evidence", "note": "2023년 연구개발비 2.5억원 관련 수치가 어느 문단에도 없음"}
+{"cid": "00106641-q3-c2", "final": "contradicted", "audited": "contradicted", "note": "문단3: 2025년 국내 54만 6천대로 전년비 1.1% 증가 → '늘지 않았다'와 충돌", "expected_ok": true}
+{"cid": "00164788-q6-c2", "final": "contradicted", "audited": "contradicted", "note": "문단3: 2025년말 차입금 관련 유형자산 일부(장부금액 102,906백만원)를 하나은행 등에 담보 제공 → 부정문과 충돌", "expected_ok": true}
+{"cid": "00126380-q5-n4", "final": "no_evidence", "audited": "no_evidence", "note": "문단3은 환율 5% 변동 시 당기손익 영향을 '다음과 같다'고만 하고 표 값이 없어 '5% 이상 하락' 주장을 확인할 수 없음"}
+{"cid": "00155319-q5-c1", "final": "supported", "audited": "supported", "note": "문단3: 포스코스틸리온은 수출이 매출액의 약 49%를 차지해 환변동 손익 영향 → 환관리 매우 중요", "expected_ok": true}
+{"cid": "00858124-q6-c2", "final": "contradicted", "audited": "contradicted", "note": "문단3: 2025년(제17기) 합계 4,654,419천원(매출액 대비 6.94%, =4,654,419/67,038,479) → 8.27%와 불일치", "expected_ok": true}
+{"cid": "00181712-q2-c2", "final": "no_evidence", "audited": "no_evidence", "note": "문단4 사업부문 별도 영업수익 2조 7,467억원은 2025년 값. 2021년 수치는 어느 문단에도 없어 같은 기간 반박 불가", "expected_ok": true}
+{"cid": "00126362-q4-n1", "final": "no_evidence", "audited": "no_evidence", "note": "에너지솔루션 부문의 원재료 매입 품목·비중·매입처가 어느 문단에도 없음"}
+{"cid": "01508855-q2-c1", "final": "supported", "audited": "supported", "note": "문단5: 3D 모델링을 이용한 기믹 제작 방식, 실질적인 모터 가동 피규어 제작", "expected_ok": true}
+{"cid": "01467503-q5-c2", "final": "contradicted", "audited": "contradicted", "note": "문단2: 특정 판매채널 의존도 축소를 위해 '2022년도부터' 네이버 자사브랜드 스토어 육성 → 2019년과 불일치", "expected_ok": true}
+{"cid": "01368637-q2-n2", "final": "no_evidence", "audited": "no_evidence", "note": "'배터리 제조'라는 주력 장비에 대한 설명이 어느 문단에도 없음"}
+{"cid": "00106641-q6-n2", "final": "no_evidence", "audited": "no_evidence", "note": "2020년 연구개발비 1,434억원·매출액 1,444억원·0.99% 비율이 어느 문단에도 없음"}
+{"cid": "00488989-q5-c1", "final": "supported", "audited": "supported", "note": "문단2: 자본(B) 당기말 170,006,375,075원, 전기말 159,374,278,567원 → 증가", "expected_ok": true}
+{"cid": "00106641-q5-c2", "final": "disputed", "audited": "contradicted", "note": "문단4: 법적 허용 기준 대비 '30% 미만' 자체관리 기준 → 45%와 값 불일치. 30% 미만이면 45% 미만도 성립한다는 함의 해석이 disputed의 원인으로 보이나 숫자 대조 규칙상 반박", "expected_ok": true}
+{"cid": "00858124-q4-c1", "final": "no_evidence", "audited": "no_evidence", "note": "문단 8개 어디에도 원재료 매입·UPS·슈나이더일렉트릭코리아·59.05%가 없음(근거 문단이 검색되지 않음)", "expected_ok": false}

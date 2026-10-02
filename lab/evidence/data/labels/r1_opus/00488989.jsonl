@@ -1,0 +1,31 @@
+{"lid": "bbc01c27d5", "label": "no_evidence", "passage": null, "reason": "메모리모듈·SSD를 '주력'으로 한다거나 분업 구조상 역할을 말하는 문단이 이 질문의 8개 문단에 없음"}
+{"lid": "511975cd90", "label": "supported", "passage": 7, "reason": "문단 7: 2004년 4월 한양이엔지(주) 메모리모듈 제조 사업부문 인적분할로 설립"}
+{"lid": "9b675bdfb3", "label": "contradicted", "passage": 7, "reason": "문단 7은 인적분할 시점을 2004년 4월로 기재, 주장은 2009년 4월"}
+{"lid": "512bbcbbbb", "label": "non_claim", "passage": null, "reason": "섹션 제목 조각으로 사실 주장 아님"}
+{"lid": "9af5ed9c79", "label": "contradicted", "passage": 7, "reason": "문단 7은 공급 주요 제품을 VoIP-TA·기업용 IP 전화기·AGW로 기재, 주장은 CCTV 녹화기(DVR)로 바꿈"}
+{"lid": "a1548d121e", "label": "non_claim", "passage": null, "reason": "회사명 표기 조각으로 사실 주장 아님"}
+{"lid": "b853911cdf", "label": "supported", "passage": 1, "reason": "문단 1 원문과 동일"}
+{"lid": "cb27db373b", "label": "supported", "passage": 7, "reason": "문단 7: VoIP-TA·기업용 IP 전화기를 국내 주요 통신사업자와 케이블TV 사업자에 공급"}
+{"lid": "6a19ade61e", "label": "supported", "passage": 1, "reason": "문단 1: 담당조직 IP통신 연구개발, 연구소장 1인 외 9인(총 10인)"}
+{"lid": "119aad4a4e", "label": "non_claim", "passage": null, "reason": "문단 번호 조각으로 사실 주장 아님"}
+{"lid": "a21dd2f0a9", "label": "non_claim", "passage": null, "reason": "질문 문장"}
+{"lid": "b5b45f6f08", "label": "supported", "passage": 1, "reason": "문단 1 원문과 동일"}
+{"lid": "2b9f7c71d2", "label": "supported", "passage": 1, "reason": "문단 1 원문과 동일"}
+{"lid": "a95bf3a9d6", "label": "non_claim", "passage": null, "reason": "문단 번호 조각으로 사실 주장 아님"}
+{"lid": "5d45bc2c0f", "label": "supported", "passage": 2, "reason": "문단 2: 2025년 매출 6,510억원 중 메모리모듈 4,256억원(65.5%)으로 최대"}
+{"lid": "e420058472", "label": "contradicted", "passage": 2, "reason": "문단 2상 메모리모듈 65.5%가 최대 비중인데 주장은 가장 큰 몫이 아니라고 부정"}
+{"lid": "160a57f2cc", "label": "supported", "passage": 1, "reason": "문단 1 원문과 동일"}
+{"lid": "2dcbdfc833", "label": "no_evidence", "passage": null, "reason": "농심·라면에 관한 문단 없음"}
+{"lid": "de3e601e71", "label": "non_claim", "passage": null, "reason": "'다음과 같습니다' 도입 문장"}
+{"lid": "c3a996e94e", "label": "no_evidence", "passage": null, "reason": "생산능력·가동률이 지속적으로 향상됐다는 내용은 문단에 없음"}
+{"lid": "b6fa643959", "label": "contradicted", "passage": 2, "reason": "문단 2는 일 24시간×365일=연 8,760시간, 주장은 8,760시간/일"}
+{"lid": "d15f5c98b4", "label": "supported", "passage": 2, "reason": "문단 2: 메모리모듈·SSD 생산 사업소가 한양디지텍VINA(베트남)"}
+{"lid": "0edf346e0e", "label": "contradicted", "passage": 2, "reason": "문단 2는 SSD도 일 24시간×365일=연 8,760시간, 주장은 8,760시간/일"}
+{"lid": "1226acc484", "label": "no_evidence", "passage": null, "reason": "환율 민감도를 다루는 문단 없음"}
+{"lid": "1a20b1e2bd", "label": "contradicted", "passage": 2, "reason": "문단 2의 당기말 자본은 170,006,375,075원, 주장은 182,006,375,075원"}
+{"lid": "2b2e8f3cfc", "label": "supported", "passage": 2, "reason": "문단 2: 자본 당기말 170,006,375,075원, 전기말 159,374,278,567원"}
+{"lid": "f71db62992", "label": "non_claim", "passage": null, "reason": "제목 조각으로 사실 주장 아님"}
+{"lid": "911f552d47", "label": "contradicted", "passage": 3, "reason": "문단 3상 연구개발 조직은 총 10인, 주장은 당기말 1,000·전기말 1,200,000"}
+{"lid": "7bf2311fc7", "label": "contradicted", "passage": 3, "reason": "문단 3상 연구개발비는 제22기 778·제21기 677백만원, 주장은 1,000,000·1,200,000"}
+{"lid": "3276fe5601", "label": "no_evidence", "passage": null, "reason": "2022~2023년 연구개발 조직 규모 표에 관한 문단 없음"}
+{"lid": "a5c1550529", "label": "non_claim", "passage": null, "reason": "문단 번호 조각으로 사실 주장 아님"}

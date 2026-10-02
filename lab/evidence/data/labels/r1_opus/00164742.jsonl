@@ -1,0 +1,33 @@
+{"lid": "b5daa68686", "label": "contradicted", "passage": 8, "reason": "문단 8은 인도네시아 금융법인 캡티브 영업 출범을 2025년 9월로 기재(2018년 아님)"}
+{"lid": "76a85614f6", "label": "non_claim", "passage": null, "reason": "문단 표기 조각으로 사실 주장 아님"}
+{"lid": "3ba0620762", "label": "non_claim", "passage": null, "reason": "회사명 머리표로 사실 주장 아님"}
+{"lid": "34f9efc616", "label": "supported", "passage": 1, "reason": "문단 1: 연결실체는 주로 환율과 이자율 변동으로 인한 금융위험에 노출"}
+{"lid": "8758815b90", "label": "supported", "passage": 1, "reason": "문단 1에 부채비율 자본관리지표와 전기와 동일한 정책이 기재"}
+{"lid": "d3183ce593", "label": "supported", "passage": 8, "reason": "문단 8: 2025년 9월 인도네시아 금융법인 캡티브 영업활동 출범"}
+{"lid": "983f971491", "label": "supported", "passage": 1, "reason": "문단 1: 주주이익 극대화·자본비용 절감을 위해 최적 자본구조 유지"}
+{"lid": "7dd1c9311e", "label": "non_claim", "passage": null, "reason": "질문 문장으로 사실 주장 아님"}
+{"lid": "1937472738", "label": "no_evidence", "passage": null, "reason": "2020년 2월 차종별 평균 판매가격 범위는 어느 문단에도 없음"}
+{"lid": "41c7dae900", "label": "no_evidence", "passage": null, "reason": "2020년 1월 차종별 평균 판매가격 범위는 어느 문단에도 없음"}
+{"lid": "c6f7ce7723", "label": "no_evidence", "passage": null, "reason": "2020년 1월 가격 변동과 차종 가치 변동 관찰에 관한 근거 문단 없음"}
+{"lid": "0b028542dc", "label": "no_evidence", "passage": null, "reason": "최근 3년 가격 변동으로 차종 가치 변동을 관찰한다는 근거 문단 없음"}
+{"lid": "43cc9aeaf0", "label": "no_evidence", "passage": null, "reason": "문단 6의 해외 가격 산정 방식은 차량부문에 관한 것이며 선박부문 근거 없음"}
+{"lid": "4654807108", "label": "supported", "passage": 6, "reason": "문단 6: 차량부문 해외 가격은 미국·독일·호주 대표 시장 판매가격에 환율 적용한 단순 평균"}
+{"lid": "d2d06374a0", "label": "contradicted", "passage": 1, "reason": "문단 1은 2025년 전년비 1.1% 증가한 71.3만대를 판매했다고 기재"}
+{"lid": "6c55f3f06b", "label": "non_claim", "passage": null, "reason": "질문 문장으로 사실 주장 아님"}
+{"lid": "3c871b412c", "label": "no_evidence", "passage": null, "reason": "문단 7의 168.5만대·3.2%는 국내 산업수요이며 수출 수치는 어느 문단에도 없음"}
+{"lid": "066baa8fcb", "label": "contradicted", "passage": 7, "reason": "문단 7에서 163.3만대·6.6% 감소는 2024년 값이고 2025년은 168.5만대·3.2% 증가"}
+{"lid": "ea5aefe38e", "label": "supported", "passage": 1, "reason": "문단 1: 2025년 전년비 1.1% 증가한 71.3만대 판매"}
+{"lid": "a7dd4234d6", "label": "no_evidence", "passage": null, "reason": "LG에너지솔루션 배터리 공급에 관한 내용은 어느 문단에도 없음"}
+{"lid": "c32a9228da", "label": "no_evidence", "passage": null, "reason": "공장 가동률은 어느 문단에도 없음(1.1%는 문단 3의 판매 증가율)"}
+{"lid": "32f3a553c3", "label": "supported", "passage": 2, "reason": "문단 2: 2025년 중국시장에서 전년대비 2.0% 증가한 12.8만대 판매"}
+{"lid": "b47241467a", "label": "no_evidence", "passage": null, "reason": "문단 1은 환율·이자율 변동을 금융위험으로 기재하며 최적 자본구조 유지에 도움이 된다는 근거 없음"}
+{"lid": "bfbd989537", "label": "supported", "passage": 1, "reason": "문단 1에 부채비율 자본관리지표와 전기와 동일한 정책이 기재"}
+{"lid": "315de98900", "label": "supported", "passage": 1, "reason": "문단 1: 연결실체는 주로 환율과 이자율 변동으로 인한 금융위험에 노출"}
+{"lid": "ac0b4467f2", "label": "non_claim", "passage": null, "reason": "소제목으로 사실 주장 아님"}
+{"lid": "129a30a0ab", "label": "supported", "passage": 6, "reason": "문단 6: 현대캐피탈은 14개국에 진출해 19개 법인 운영"}
+{"lid": "dc4ca613a8", "label": "contradicted", "passage": 6, "reason": "문단 6은 진출국을 14개국으로 기재(17개국 아님)"}
+{"lid": "071002cd20", "label": "non_claim", "passage": null, "reason": "질문을 그대로 옮긴 문장으로 사실 주장 아님"}
+{"lid": "a76bca2263", "label": "contradicted", "passage": 5, "reason": "문단 5는 현대카드 Boutique 출시를 2025년으로 기재(2022년 아님)"}
+{"lid": "19e0be6ea1", "label": "no_evidence", "passage": null, "reason": "해당 기간 연구개발비 1,444억원 증가에 관한 문단 없음"}
+{"lid": "efbb537e3f", "label": "supported", "passage": 5, "reason": "문단 5: 2025년 프리미엄과 매스 시장 사이 빈 공간을 채우는 현대카드 Boutique 출시"}
+{"lid": "872516abf2", "label": "no_evidence", "passage": null, "reason": "매출 대비 연구개발비 비중 1.3배 증가에 관한 문단 없음"}

@@ -15,3 +15,27 @@
 {"at": "2026-10-02T10:06:38.267774+00:00", "event": "judge", "tag": "repeat3", "split": "check", "claims": 50, "failed": 0, "used_tokens": 4119562}
 {"at": "2026-10-02T10:06:57.308186+00:00", "event": "stage0-report", "go": true}
 {"at": "2026-10-02T10:07:35.258302+00:00", "event": "stage0-report", "go": true}
+{"at": "2026-10-02T10:27:03.217189+00:00", "event": "baselines", "tag": "lex", "split": "tune", "claims": 227, "failed": 0}
+{"at": "2026-10-02T10:27:03.927972+00:00", "event": "baselines", "tag": "emb", "split": "tune", "claims": 227, "failed": 0}
+{"at": "2026-10-02T10:27:28.279688+00:00", "event": "baselines", "tag": "lex", "split": "check", "claims": 231, "failed": 0}
+{"at": "2026-10-02T10:27:28.880755+00:00", "event": "baselines", "tag": "emb", "split": "check", "claims": 231, "failed": 0}
+{"at": "2026-10-02T10:32:19.721884+00:00", "event": "baselines", "tag": "llm", "split": "tune", "claims": 227, "failed": 160}
+{"at": "2026-10-02T10:37:24.189621+00:00", "event": "baselines", "tag": "llm", "split": "check", "claims": 231, "failed": 130}
+{"at": "2026-10-02T10:40:14.730666+00:00", "event": "baselines", "tag": "nli", "split": "tune", "claims": 227, "failed": 0}
+{"at": "2026-10-02T10:44:28.047944+00:00", "event": "baselines", "tag": "lex", "split": "tune", "claims": 227, "failed": 0}
+{"at": "2026-10-02T10:47:01.545033+00:00", "event": "baselines", "tag": "llm", "split": "tune", "claims": 227, "failed": 0}
+{"at": "2026-10-02T10:47:02.054926+00:00", "event": "baselines", "tag": "lex", "split": "check", "claims": 231, "failed": 0}
+{"at": "2026-10-02T10:49:35.764029+00:00", "event": "baselines", "tag": "llm", "split": "check", "claims": 231, "failed": 0}
+{"at": "2026-10-02T10:57:27.494403+00:00", "event": "baselines", "tag": "nli", "split": "check", "claims": 231, "failed": 0}
+{"at": "2026-10-02T10:57:42.587951+00:00", "event": "stage1-tune", "tau_c": 0.35, "tau_s": 0.5, "b_star": "lex", "mde": 0.08344842644488189}
+{"at": "2026-10-02T10:58:13.342533+00:00", "event": "stage1-freeze-config"}
+{"at": "2026-10-02T11:16:26.181073+00:00", "event": "controlled-check", "accepted": 115, "rejected": 5}
+{"at": "2026-10-02T11:58:33.544369+00:00", "event": "labels-merge", "split": "holdout", "labeled": 560, "disputed": 11, "kappa_binary_r1": 0.9736}
+{"at": "2026-10-02T12:03:29.158651+00:00", "event": "label-audit", "split": "holdout", "sampled_numeric": 50, "controlled_mismatch_checked": 2, "final_vs_audit_mismatch": 2, "mismatch_note": "00126380-q5-n5 no_evidence vs non_claim (binary same); 00106641-q5-c2 disputed(excluded) vs contradicted", "controlled_expected_fixed": ["00858124-q4-c1"]}
+{"at": "2026-10-02T12:03:29.900918+00:00", "event": "freeze-holdout", "claims": 560}
+{"at": "2026-10-02T12:05:41.646444+00:00", "event": "judge", "tag": "holdout", "split": "holdout", "claims": 465, "failed": 0, "used_tokens": 6208231}
+{"at": "2026-10-02T12:06:23.806820+00:00", "event": "baselines", "tag": "lex", "split": "holdout", "claims": 465, "failed": 0}
+{"at": "2026-10-02T12:06:24.960204+00:00", "event": "baselines", "tag": "emb", "split": "holdout", "claims": 465, "failed": 0}
+{"at": "2026-10-02T12:23:05.590793+00:00", "event": "baselines", "tag": "nli", "split": "holdout", "claims": 465, "failed": 0}
+{"at": "2026-10-02T12:29:39.248809+00:00", "event": "baselines", "tag": "llm", "split": "holdout", "claims": 465, "failed": 0}
+{"at": "2026-10-02T12:30:19.671127+00:00", "event": "stage1-report", "delta": -0.004734848484848508, "lo": -0.04100625260215296, "hi": 0.02412143615348906}

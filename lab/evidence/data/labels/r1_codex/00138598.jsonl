@@ -1,0 +1,28 @@
+{"lid": "6625ce1216", "label": "supported", "passage": 5, "reason": "문단 5는 증평 소재 부 연구소의 설립시기를 2023.05.08로 명시한다."}
+{"lid": "901d0a69c2", "label": "no_evidence", "passage": null, "reason": "전자제품 사업부의 존재와 아비코전자의 전자제품 생산·판매를 명시한 문단이 없다."}
+{"lid": "905499946c", "label": "non_claim", "passage": null, "reason": "다음에 제시할 사업부 목록을 소개하는 안내 문장으로 구체적인 사실 단위가 없다."}
+{"lid": "fe68e5eaeb", "label": "no_evidence", "passage": null, "reason": "아비코전자가 사업보고서를 읽고 질문에 답하는 리서치 보조라는 근거가 없다."}
+{"lid": "a346105a0f", "label": "contradicted", "passage": 5, "reason": "문단 5의 증평 부 연구소 설립시기는 2023.05.08로, 주장한 2019년 5월과 다르다."}
+{"lid": "f35de57e84", "label": "no_evidence", "passage": null, "reason": "전기제품 사업부의 존재와 전기제품 생산·판매는 제시된 문단에 없다."}
+{"lid": "794dd290f5", "label": "no_evidence", "passage": null, "reason": "해당 사업부가 전기제품 개발·생산·판매·서비스를 수행한다는 근거가 없다."}
+{"lid": "932045ce1e", "label": "non_claim", "passage": null, "reason": "뒤따를 주요 제품 목록을 소개하는 안내 문장이다."}
+{"lid": "76952cf2f1", "label": "supported", "passage": 5, "reason": "문단 5는 정보통신 성장과 디지털화·소형화·멀티미디어화·고기능화에 따른 디지털부품 중심 변화 및 전자부품의 소형화·칩화를 모두 설명한다."}
+{"lid": "c93293920b", "label": "contradicted", "passage": 3, "reason": "문단 3의 생산·판매 품목은 인덕터와 저항기로, 주장한 커패시터와 저항기와 다르다."}
+{"lid": "1faa3f9cdf", "label": "supported", "passage": 5, "reason": "문단 5는 인덕터와 저항기를 전자제품의 필수 범용부품이며 변화 속에서도 꾸준히 판매되는 부품이라고 설명한다."}
+{"lid": "4f4d17f1f8", "label": "supported", "passage": 5, "reason": "문단 5는 수동부품시장의 세계적 분포, 중국을 포함한 아시아로의 확대 및 R&D·영업·판매의 높은 부가가치와 고수익성을 모두 명시한다."}
+{"lid": "24afc831ff", "label": "supported", "passage": 5, "reason": "문단 5는 엔저에 따른 일본 기업 경쟁력 강화와 질적 성장으로 전환 중인 중국 기업의 글로벌 경쟁력 확보 노력을 명시한다."}
+{"lid": "096d247331", "label": "supported", "passage": 3, "reason": "문단 3은 회사가 수동소자 3대 부품 중 인덕터와 저항기를 생산·판매한다고 명시한다."}
+{"lid": "a4cfdf8069", "label": "no_evidence", "passage": null, "reason": "문단 1의 62,015는 아비코전자 회사별 매출이며 단위는 백만원이다. 연결 매출과 PCB 부문의 연결 매출 비중은 제시되지 않는다."}
+{"lid": "bdb971b4ca", "label": "contradicted", "passage": 2, "reason": "문단 2는 주요 고객이 자동차 부품제조업체이며 자동차용 PCB를 납품한다고 명시한다."}
+{"lid": "9879b7d2a8", "label": "supported", "passage": 2, "reason": "문단 2는 아비코테크의 주요 고객이 자동차 부품제조업체이며 자동차에 사용되는 PCB를 납품한다고 명시한다."}
+{"lid": "2ed3705ce8", "label": "no_evidence", "passage": null, "reason": "생산라인별 가동률은 제시되지 않는다. 문단 3의 1.64%는 2023년 매출액 대비 연구개발비 비율로 다른 지표이다."}
+{"lid": "3848d8039f", "label": "supported", "passage": 3, "reason": "문단 3의 별도 기준 연구개발비/매출액 비율은 제53기(2025년말) 1.30%이다."}
+{"lid": "1b7ceb04df", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 SK텔레콤이나 그 이동통신 서비스에 관한 내용이 없다."}
+{"lid": "c5c51dedda", "label": "supported", "passage": 1, "reason": "문단 1은 대형·범용부품 핵심재료와 원천기술의 일본 의존, 고부가가치 소재 국산화 진행 및 저부가가치 원재료 외 대부분 소재의 일본 수입을 모두 설명한다."}
+{"lid": "704cb2d4cc", "label": "supported", "passage": 1, "reason": "문단 1은 중국 및 신흥국 기업들의 저가 수동부품 생산으로 경쟁이 더 심화됐다고 명시하며, 한layer라는 오기는 사실 내용을 바꾸지 않는다."}
+{"lid": "b910273041", "label": "supported", "passage": 1, "reason": "문단 1은 디지털화에 따른 소형화·고밀도화·수명주기 단축과 기술·품질·가격·환경친화적 개발·유통망 판매 능력의 경쟁 중요성을 모두 설명한다."}
+{"lid": "e5eb85377e", "label": "non_claim", "passage": null, "reason": "회사명을 표시하는 메타데이터 표제로 구체적인 사실을 서술하지 않는다."}
+{"lid": "777c039a7e", "label": "non_claim", "passage": null, "reason": "문단 번호와 잘린 절 번호만 있는 형식 조각으로 사실 주장이 아니다."}
+{"lid": "1da692e56f", "label": "supported", "passage": 8, "reason": "문단 8의 별도 기준 연구개발 원재료비는 제53기(2025년말) 99,911,613원이다."}
+{"lid": "6a8448469a", "label": "no_evidence", "passage": null, "reason": "문단 8의 금액은 연도별 연구개발 원재료비이며 총 연구개발비나 매출액 대비 비율이 아니다. 1:3.2라는 비율과 증가도 제시되지 않는다."}
+{"lid": "d7c5d1dcf6", "label": "no_evidence", "passage": null, "reason": "문단 8은 2025·2024·2023년 원재료비만 제시하므로 2021년의 금액은 확인할 수 없다."}

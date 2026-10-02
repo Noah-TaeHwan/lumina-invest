@@ -1,0 +1,27 @@
+{"lid": "444e45c9eb", "label": "no_evidence", "passage": null, "reason": "문단8은 당사를 EMS서비스 회사라 하나 '주력'·'인터넷 및 전자제품' 풀이는 문단에 없음"}
+{"lid": "13d2f56da0", "label": "no_evidence", "passage": null, "reason": "문단8은 EMS에 요구되는 경쟁력 일반을 말할 뿐 한국컴퓨터가 이를 갖췄다고 하지 않음"}
+{"lid": "a92ec9bd6d", "label": "no_evidence", "passage": null, "reason": "회사가 제조를 위탁한다는 내용은 없음(문단8은 생산을 수탁하는 EMS 설명)"}
+{"lid": "f17bb257f9", "label": "no_evidence", "passage": null, "reason": "문단8에서 경영 신조류로 자리잡은 주체는 EMS 도입이지 한국컴퓨터가 아님"}
+{"lid": "48469fb896", "label": "no_evidence", "passage": null, "reason": "대덕전자에 관한 내용은 문단에 없음"}
+{"lid": "aa4a8f1705", "label": "no_evidence", "passage": null, "reason": "제품 목록(모바일 기기·컴퓨터 등)에 관한 문단 없음"}
+{"lid": "30f680af96", "label": "supported", "passage": 7, "reason": "문단7: 보고기간종료일 현재 변동금리부 차입금 50,000,000천원"}
+{"lid": "cd06afe597", "label": "no_evidence", "passage": null, "reason": "회사가 주로 전자제품을 생산·판매한다는 문단 없음"}
+{"lid": "4dec7c14b3", "label": "non_claim", "passage": null, "reason": "목록 도입 문장으로 사실 내용 없음"}
+{"lid": "5859867ca9", "label": "supported", "passage": 4, "reason": "문단4: 해외사업장 순자산은 외화환산 위험에 노출"}
+{"lid": "ecb85eae32", "label": "non_claim", "passage": null, "reason": "목록 도입 문장으로 사실 내용 없음"}
+{"lid": "890843fd90", "label": "no_evidence", "passage": null, "reason": "연도별 제품 매출액은 문단에 없음"}
+{"lid": "d1f5ce7482", "label": "contradicted", "passage": 4, "reason": "문단4는 해외사업장 순자산이 외화환산 위험에 노출되어 있다고 함"}
+{"lid": "596f053565", "label": "supported", "passage": 8, "reason": "문단8: Total제조System을 갖춰 SET업계 Out Sourcing 확대정책에 가장 적합한 EMS서비스 회사"}
+{"lid": "a760ef9085", "label": "no_evidence", "passage": null, "reason": "LG이노텍에 관한 내용은 문단에 없음"}
+{"lid": "9dee29f5c8", "label": "no_evidence", "passage": null, "reason": "사업장별 생산능력·가동률 문단 없음"}
+{"lid": "b48830165a", "label": "contradicted", "passage": 3, "reason": "문단3: 금리 1% 변동 시 세후이익 110,000천원 변동(275,000천원 아님)"}
+{"lid": "f8c592905e", "label": "no_evidence", "passage": null, "reason": "문단1은 부채총계만 제시, 부채비율과 1.3배 증가는 문단에 없음"}
+{"lid": "15f032eb58", "label": "no_evidence", "passage": null, "reason": "이자율 위험의 1.3배 증가는 문단에 없음"}
+{"lid": "9742001aba", "label": "supported", "passage": 3, "reason": "문단3: 금리 1% 변동 시 세후이익 110,000천원 감소 또는 증가"}
+{"lid": "9964969a13", "label": "no_evidence", "passage": null, "reason": "문단3의 36,176,151천원은 유동성 관리용 현금성자산 투자이며 제조원가절감 투자는 문단에 없음"}
+{"lid": "2e4c7ab038", "label": "no_evidence", "passage": null, "reason": "회사가 50,000,000천원 규모로 EMS 사업을 확대한다는 문단 없음"}
+{"lid": "de0c702f2b", "label": "supported", "passage": 5, "reason": "문단5: 부채총계 당기말 132,581,968천원, 전기말 31,692,086천원"}
+{"lid": "b3cbe6ff5a", "label": "no_evidence", "passage": null, "reason": "20,735천원은 120일 초과 연체 매출채권이며 제조원가절감 내용은 문단에 없음"}
+{"lid": "6b980ca4bb", "label": "non_claim", "passage": null, "reason": "목록 도입 문장으로 사실 내용 없음"}
+{"lid": "c6d35fae3e", "label": "no_evidence", "passage": null, "reason": "문단5는 연도 없이 당기말만 제시, 2018년 말 수치는 문단에 없음"}
+{"lid": "c716e6fafe", "label": "no_evidence", "passage": null, "reason": "110,000천원은 이자율 민감도이며 제조원가절감 내용은 문단에 없음"}

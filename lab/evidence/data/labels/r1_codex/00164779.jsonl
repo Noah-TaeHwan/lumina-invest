@@ -1,0 +1,18 @@
+{"lid": "bdf12c3c42", "label": "no_evidence", "passage": null, "reason": "반도체 생산은 언급되지만 생산기지와 연구개발법인의 운영 및 개수는 제시된 문단에 없다."}
+{"lid": "2ea12bfd2d", "label": "supported", "passage": 4, "reason": "문단 4는 2025년 누적 생산설비 평균가동률을 100%로 명시한다."}
+{"lid": "03040771ab", "label": "no_evidence", "passage": null, "reason": "제시된 가동률은 SK하이닉스의 수치이며 마이크론의 2025년 가동률 근거는 없다."}
+{"lid": "f9b793b16c", "label": "supported", "passage": 4, "reason": "문단 4는 2025년 3월 28일 영업양수도 최종 종결과 같은 날짜의 합병등종료보고서 공시를 명시한다."}
+{"lid": "db74e561ef", "label": "supported", "passage": 4, "reason": "문단 4는 2025년 3월 28일 영업양수도 최종 종결과 같은 날짜의 합병등종료보고서 공시를 명시한다."}
+{"lid": "38a8c9fff6", "label": "supported", "passage": 5, "reason": "문단 5는 탄소감축인증센터의 절차에 따라 HBM과 eSSD 제품의 탄소감축성과 크레디트를 인증받았다고 명시한다."}
+{"lid": "62c0ba61da", "label": "supported", "passage": 4, "reason": "문단 4는 SK하이닉스의 2025년 3월 28일 영업양수도 최종 종결과 같은 날짜의 합병등종료보고서 공시를 명시한다."}
+{"lid": "7cc2d9362f", "label": "contradicted", "passage": 5, "reason": "문단 5는 HBM과 eSSD 제품의 탄소감축성과 크레디트를 인증받았다고 명시하여 인증받지 못했다는 주장과 반대다."}
+{"lid": "3afedae028", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 네이버의 검색 포털 운영이나 광고 매출에 관한 근거가 없다."}
+{"lid": "659a2c1d3f", "label": "supported", "passage": 2, "reason": "문단 2는 2025년 누적 반도체 부문 생산실적을 41,216,512백만원으로 명시한다."}
+{"lid": "45f50d2463", "label": "no_evidence", "passage": null, "reason": "709,330백만 달러는 총수출액이고 22.2%는 반도체 수출 증감률로, SK하이닉스의 연결 매출액과 증가율 근거가 없다."}
+{"lid": "b5294a08b6", "label": "supported", "passage": 5, "reason": "문단 5는 2025년 12월 31일 기준 지식재산권 보유량을 총 21,859건으로 명시한다."}
+{"lid": "37df0162fd", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 2025년 생산공정에 투입한 웨이퍼의 매입액 1,000억원을 뒷받침하는 정보가 없다."}
+{"lid": "87e1b600bf", "label": "contradicted", "passage": 5, "reason": "문단 5는 2025년 말 지식재산권 보유량을 21,859건으로 명시하여 23,417건이라는 주장과 다르다."}
+{"lid": "daacb2c418", "label": "non_claim", "passage": null, "reason": "환율 상승에 따른 순이익 변동 예상치를 소개하는 문장으로 구체적인 변동액이나 방향을 주장하지 않는다."}
+{"lid": "0da01f34cf", "label": "supported", "passage": 5, "reason": "문단 5의 연구개발비용 표는 제78기 인건비를 2,718,918백만원으로 명시한다."}
+{"lid": "71be366c49", "label": "no_evidence", "passage": null, "reason": "연구개발 인건비 표의 주체는 SK하이닉스이며 마이크론의 제78기 인건비 근거는 없다."}
+{"lid": "dc80ce9bdb", "label": "no_evidence", "passage": null, "reason": "114,739백만원은 연구개발비용 중 원재료비이며 연구개발비용 총액과 매출액 대비 100%라는 비율은 제시되지 않는다."}

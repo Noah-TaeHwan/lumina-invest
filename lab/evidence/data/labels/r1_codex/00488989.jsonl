@@ -1,0 +1,31 @@
+{"lid": "bbc01c27d5", "label": "supported", "passage": 5, "reason": "문단 5는 메모리모듈·SSD 사업의 판매전략, 매출 비중 65.5%·31.7% 및 고객 주문에 따른 생산을 제시한다."}
+{"lid": "511975cd90", "label": "supported", "passage": 7, "reason": "문단 7은 한양이엔지의 메모리모듈 제조 사업부문이 2004년 4월 인적분할되어 설립되었다고 명시한다."}
+{"lid": "9b675bdfb3", "label": "contradicted", "passage": 7, "reason": "문단 7의 인적분할 설립 시점은 2004년 4월이며, 주장에 적힌 2009년 4월과 다르다."}
+{"lid": "512bbcbbbb", "label": "non_claim", "passage": null, "reason": "절 제목과 항목 기호의 단편으로, 판정할 사실 주장이 없다."}
+{"lid": "9af5ed9c79", "label": "no_evidence", "passage": null, "reason": "문단 7은 기업용 IP 전화기와 공급 대상은 설명하지만, CCTV 녹화기(DVR) 납품은 어느 문단에도 없다."}
+{"lid": "a1548d121e", "label": "non_claim", "passage": null, "reason": "회사명을 표시한 머리말로, 별도의 사실을 주장하는 문장이 아니다."}
+{"lid": "b853911cdf", "label": "supported", "passage": 1, "reason": "문단 1은 보고서 작성기준일 현재 재무상태에 중요한 영향을 미치는 중요 계약이 없다고 명시한다."}
+{"lid": "cb27db373b", "label": "supported", "passage": 7, "reason": "문단 7은 VoIP-TA와 기업용 IP 전화기를 주요 제품으로 열거하고 국내 주요 통신사업자·케이블TV 사업자 공급을 명시한다."}
+{"lid": "6a19ade61e", "label": "supported", "passage": 1, "reason": "문단 1은 IP통신 연구개발 조직과 연구소장 1인 외 9인, 총 10인의 연구인원을 모두 명시한다."}
+{"lid": "119aad4a4e", "label": "non_claim", "passage": null, "reason": "문단 번호와 끊어진 절 번호만 있어 사실 주장이 없다."}
+{"lid": "a21dd2f0a9", "label": "non_claim", "passage": null, "reason": "연결 매출과 부문별 구성을 묻는 질문이다."}
+{"lid": "b5b45f6f08", "label": "supported", "passage": 1, "reason": "문단 1은 2025년 상반기 수요 둔화와 3분기 이후 서버·스토리지 시장 회복에 따른 생산·실적 개선 추세를 명시한다."}
+{"lid": "2b9f7c71d2", "label": "supported", "passage": 1, "reason": "문단 1은 DDR5 서버용 DRAM Module의 안정적 수요와 2025년 하반기 이후 SSD 생산가동률·매출 개선 전망을 함께 제시한다."}
+{"lid": "a95bf3a9d6", "label": "non_claim", "passage": null, "reason": "문단 번호와 끊어진 절 번호만 있어 사실 주장이 없다."}
+{"lid": "5d45bc2c0f", "label": "supported", "passage": 2, "reason": "문단 2는 2025년 연결 매출 6,510억원과 메모리모듈 4,256억원·65.5%를 제시하며, 해당 비중은 다른 부문보다 크다."}
+{"lid": "e420058472", "label": "contradicted", "passage": 2, "reason": "문단 2에서 메모리모듈의 비중 65.5%는 SSD 31.7%, IP통신 1.3%, 기타 1.5%보다 커서 가장 큰 몫이라는 사실을 부정한 주장과 상충한다."}
+{"lid": "160a57f2cc", "label": "supported", "passage": 1, "reason": "문단 1은 반도체 수요의 견조한 유지 전망과 이에 대응한 생산능력 확보·제품 경쟁력 강화 집중을 모두 명시한다."}
+{"lid": "2dcbdfc833", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 농심이나 신라면의 국내 자체 공장 생산에 관한 내용이 없다."}
+{"lid": "de3e601e71", "label": "non_claim", "passage": null, "reason": "생산능력과 가동률을 뒤에서 제시하겠다는 안내로, 구체적인 사실을 주장하지 않는다."}
+{"lid": "c3a996e94e", "label": "no_evidence", "passage": null, "reason": "3조 2교대 운영은 문단 2에 있지만, 두 제품 모두의 생산능력·가동률이 그 운영으로 지속 향상되었다는 근거는 없다."}
+{"lid": "b6fa643959", "label": "contradicted", "passage": 2, "reason": "문단 2의 메모리모듈 운영시간은 일 24시간, 연 8,760시간이며, 주장에 적힌 일 8,760시간과 다르다."}
+{"lid": "d15f5c98b4", "label": "supported", "passage": 2, "reason": "문단 2는 한양디지텍VINA를 베트남 사업소로 표시하고 메모리모듈·SSD 양쪽의 생산실적과 운영을 제시한다."}
+{"lid": "0edf346e0e", "label": "contradicted", "passage": 2, "reason": "문단 2의 SSD 운영시간은 일 24시간, 연 8,760시간이며, 주장에 적힌 일 8,760시간과 다르다."}
+{"lid": "1226acc484", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 원화 환율 변동에 따른 법인세차감전순이익·자본의 민감도를 확인할 근거가 없다."}
+{"lid": "1a20b1e2bd", "label": "contradicted", "passage": 2, "reason": "문단 2의 당기말 자본은 170,006,375,075원으로, 주장에 적힌 182,006,375,075원과 다르다."}
+{"lid": "2b2e8f3cfc", "label": "supported", "passage": 2, "reason": "문단 2는 자본의 당기말 170,006,375,075원과 전기말 159,374,278,567원을 제시하며 당기말 금액이 더 크다."}
+{"lid": "f71db62992", "label": "non_claim", "passage": null, "reason": "연구개발 조직 규모·연간 연구개발비라는 제목과 항목 기호만 있어 사실 주장이 없다."}
+{"lid": "911f552d47", "label": "no_evidence", "passage": null, "reason": "문단 3은 연구인원 10인을 제시할 뿐, 단위 사로 표시한 연구개발조직의 당기말 1,000·전기말 1,200,000 수치는 제시하지 않는다."}
+{"lid": "7bf2311fc7", "label": "no_evidence", "passage": null, "reason": "문단 3의 연구개발비 표는 백만원 단위이고 제22기 778·제21기 677이며, 단위 사로 표시한 주장 수치는 확인할 수 없다."}
+{"lid": "3276fe5601", "label": "no_evidence", "passage": null, "reason": "어느 문단에도 연구개발 조직 규모 표를 2022년 1월 1일~2023년 12월 31일의 연구개발 수행 규모로 정의한 내용이 없다."}
+{"lid": "a5c1550529", "label": "non_claim", "passage": null, "reason": "문단 번호와 끊어진 절 번호만 있어 사실 주장이 없다."}

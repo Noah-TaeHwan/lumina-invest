@@ -1,0 +1,27 @@
+{"lid": "444e45c9eb", "label": "no_evidence", "passage": null, "reason": "문단 8은 회사의 EMS 서비스를 설명하지만 인터넷 사업 및 종속회사의 주력사업까지 확인해 주지는 않는다."}
+{"lid": "13d2f56da0", "label": "no_evidence", "passage": null, "reason": "문단 8은 EMS 사업에 요구되는 요소기술력을 설명하지만 한국컴퓨터가 이를 확보했다는 사실까지 명시하지 않는다."}
+{"lid": "a92ec9bd6d", "label": "no_evidence", "passage": null, "reason": "문단 8은 회사가 생산 전반을 수탁하는 EMS 서비스 회사라고 설명하며 회사가 제조를 위탁해 경쟁력을 갖춘다는 주장은 확인되지 않는다."}
+{"lid": "f17bb257f9", "label": "no_evidence", "passage": null, "reason": "문단 8에서 제조업의 경영 신조류로 자리 잡는 것은 EMS 도입이며 한국컴퓨터 자체에 대한 서술은 없다."}
+{"lid": "48469fb896", "label": "no_evidence", "passage": null, "reason": "문단 7의 차입금 50,000,000천원은 한국컴퓨터 연결회사에 관한 수치이며 대덕전자에 대한 근거는 없다."}
+{"lid": "aa4a8f1705", "label": "no_evidence", "passage": null, "reason": "문단 4의 스마트폰과 컴퓨터는 EMS 산업의 일반적 제품 예시이며 한국컴퓨터의 생산·판매 제품 목록은 제시되지 않는다."}
+{"lid": "30f680af96", "label": "supported", "passage": 7, "reason": "문단 7은 보고기간종료일 현재 연결회사의 변동금리부 차입금을 50,000,000천원으로 명시한다."}
+{"lid": "cd06afe597", "label": "no_evidence", "passage": null, "reason": "제시된 문단은 EMS 산업 일반을 설명할 뿐 한국컴퓨터의 주력 생산·판매 제품이 전자제품이라고 확인하지 않는다."}
+{"lid": "4dec7c14b3", "label": "non_claim", "passage": null, "reason": "제품 용도를 이어서 소개한다는 안내이며 구체적인 용도에 대한 사실 주장은 없다."}
+{"lid": "5859867ca9", "label": "supported", "passage": 4, "reason": "문단 4는 해외사업장에 일정한 투자가 있으며 그 순자산이 외화환산 위험에 노출되어 있다고 명시한다."}
+{"lid": "ecb85eae32", "label": "non_claim", "passage": null, "reason": "매출액과 비중을 이어서 제시한다는 안내이며 구체적인 수치 주장은 없다."}
+{"lid": "890843fd90", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 2015~2022년의 매출액이나 연도별 1,234,567천원이라는 수치가 없다."}
+{"lid": "d1f5ce7482", "label": "contradicted", "passage": 4, "reason": "문단 4는 해외사업장 순자산이 외화환산 위험에 노출되어 있다고 명시하여 노출되지 않는다는 주장을 반박한다."}
+{"lid": "596f053565", "label": "supported", "passage": 8, "reason": "문단 8은 당사가 Total제조System을 갖추고 SET업계의 Out Sourcing 확대정책에 가장 적합한 EMS 서비스 회사라고 설명한다."}
+{"lid": "a760ef9085", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 LG이노텍이나 스마트폰용 카메라 모듈의 생산·공급에 관한 내용이 없다."}
+{"lid": "9dee29f5c8", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 국내·베트남 사업장의 생산능력과 가동률 또는 두 사업장의 수준 비교가 없다."}
+{"lid": "b48830165a", "label": "contradicted", "passage": 3, "reason": "문단 3은 금리 1% 상승·하락에 따른 세후이익 변동을 110,000천원으로 명시하여 275,000천원이라는 주장과 다르다."}
+{"lid": "f8c592905e", "label": "no_evidence", "passage": null, "reason": "문단 1에는 부채총계만 제시되며 당기·전기 부채비율이나 부채비율이 1.3배 증가했다는 수치는 없다."}
+{"lid": "15f032eb58", "label": "no_evidence", "passage": null, "reason": "문단 3은 당기 이자율 민감도를 제시하지만 전기 대비 이자율 위험의 1.3배 증가나 그 원인을 설명하지 않는다."}
+{"lid": "9742001aba", "label": "supported", "passage": 3, "reason": "문단 3은 다른 변수가 일정할 때 원화 변동금리 차입금의 금리 1% 상승·하락에 따라 세후이익이 110,000천원 감소·증가한다고 명시한다."}
+{"lid": "9964969a13", "label": "no_evidence", "passage": null, "reason": "문단 3의 36,176,151천원과 전기말 47,824,583천원은 유동성 관리를 위한 현금성자산이며 제조원가 절감 투자액이나 매출 대비 투입액은 확인되지 않는다."}
+{"lid": "2e4c7ab038", "label": "no_evidence", "passage": null, "reason": "문단 6의 50,000,000천원은 변동금리부 차입금이며 생산설비 부담 감소액이나 EMS 확대 투입액을 나타내지 않는다."}
+{"lid": "de0c702f2b", "label": "supported", "passage": 5, "reason": "문단 5는 부채총계를 당기말 132,581,968천원, 전기말 31,692,086천원으로 제시하여 큰 증가를 확인해 준다."}
+{"lid": "b3cbe6ff5a", "label": "no_evidence", "passage": null, "reason": "문단 2의 20,735천원은 120일 초과 연체 매출채권 장부금액이며 물류 단순화에 따른 제조원가 변동액은 제시되지 않는다."}
+{"lid": "6b980ca4bb", "label": "non_claim", "passage": null, "reason": "주요 계약의 목적과 규모를 이어서 소개한다는 안내이며 구체적인 계약 사실은 주장하지 않는다."}
+{"lid": "c6d35fae3e", "label": "no_evidence", "passage": null, "reason": "문단 5는 해당 부채총계를 당기말과 전기말 수치로 제시하지만 당기말이 2018년 말이라는 근거는 없다."}
+{"lid": "c716e6fafe", "label": "no_evidence", "passage": null, "reason": "문단 6의 110,000천원은 금리 1% 변동에 따른 세후이익 민감도이며 고임금 탈피나 제조원가 절감의 매출 대비 변동액은 아니다."}

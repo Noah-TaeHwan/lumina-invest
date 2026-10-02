@@ -1,0 +1,26 @@
+{"lid": "f970fd3bba", "label": "non_claim", "passage": null, "reason": "회사명 머리표로 사실 주장이 아님"}
+{"lid": "cc2d6f7f1a", "label": "supported", "passage": 1, "reason": "문단 1에 동일 문장이 있음"}
+{"lid": "cbc90e7517", "label": "contradicted", "passage": 2, "reason": "문단 2는 로봇모션제어 부문 2025년 누적매출을 약 356억원(53.1%)으로 적어 412억원과 다름"}
+{"lid": "4f51ad4938", "label": "non_claim", "passage": null, "reason": "문단 표지 조각으로 사실 주장이 아님"}
+{"lid": "522ae320b8", "label": "supported", "passage": 2, "reason": "문단 2: 2025년 누적매출 로봇모션제어 부문 약 356억원(53.1%)"}
+{"lid": "6b84710bec", "label": "supported", "passage": 1, "reason": "문단 1의 태양광 발전 장점 문장과 일치"}
+{"lid": "f27cd2838e", "label": "supported", "passage": 1, "reason": "문단 1에 동일 문장이 있음"}
+{"lid": "e2b6e94988", "label": "non_claim", "passage": null, "reason": "문단 표지 조각으로 사실 주장이 아님"}
+{"lid": "d2aae75fba", "label": "supported", "passage": 1, "reason": "문단 1에 상위모션 제어기 시장과 드라이브 시장 구분이 그대로 있음"}
+{"lid": "ab495bc9c5", "label": "supported", "passage": 2, "reason": "문단 2: 2016년 국책 과제로 독일·일본에 이어 세계 3번째 22비트급 광학식 엔코더 개발"}
+{"lid": "6a7a6e37ad", "label": "contradicted", "passage": 2, "reason": "문단 2는 개발 연도를 2016년으로 적어 2011년과 다름"}
+{"lid": "e8af52045c", "label": "supported", "passage": 1, "reason": "문단 1: 국내 시장 경쟁대상은 주로 일본계 미쓰비시 및 야스카와 등"}
+{"lid": "65ac0fee47", "label": "non_claim", "passage": null, "reason": "회사명 머리표로 사실 주장이 아님"}
+{"lid": "4419690c17", "label": "supported", "passage": 1, "reason": "문단 1의 경쟁사 나열(파나소닉, 옴론 등)과 일치하는 문장 조각"}
+{"lid": "7c2c0fca27", "label": "supported", "passage": 6, "reason": "문단 6: 2025년 기말 기준 매출의 약 54%가 로봇모션제어기 제품"}
+{"lid": "c1ebb08f53", "label": "contradicted", "passage": 6, "reason": "문단 6은 약 54%의 출처를 로봇모션제어기 제품으로 적어 산업용 감속기와 다름"}
+{"lid": "7acb7fecec", "label": "supported", "passage": 6, "reason": "문장의 사실 내용(매출 약 54%가 로봇모션제어기 제품에서 발생)이 문단 6과 일치"}
+{"lid": "fdadbf4a88", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단 8개에 원재료·상품 매입액 품목별 자료가 없음"}
+{"lid": "5148492954", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단 8개에 UPS 매입액 비율 자료가 없음"}
+{"lid": "667f67eb25", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단 8개에 UPS 매입액 비율 자료가 없음"}
+{"lid": "5b19b50486", "label": "no_evidence", "passage": null, "reason": "현대자동차에 대한 내용은 문단에 없음"}
+{"lid": "3c51aa5195", "label": "no_evidence", "passage": null, "reason": "문단에 환율 변동 민감도 수치가 없음"}
+{"lid": "f3f123c07a", "label": "supported", "passage": 2, "reason": "문단 2: 22bit 분해능(360°를 약 400만개로 구분) 광학식 절대치 엔코더 자체 개발·상용화"}
+{"lid": "75e54b4032", "label": "supported", "passage": 3, "reason": "문단 3: 2025년(제17기) 합계 4,654,419천원(6.94%)"}
+{"lid": "b9dd677291", "label": "contradicted", "passage": 3, "reason": "문단 3의 단위는 천원으로 4,654,419백만원과 1,000배 다름"}
+{"lid": "28490cfb47", "label": "contradicted", "passage": 3, "reason": "문단 3은 매출액 대비 비율을 6.94%로 적어 8.27%와 다름"}

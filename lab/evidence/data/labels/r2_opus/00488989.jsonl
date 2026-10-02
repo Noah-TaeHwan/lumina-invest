@@ -1,0 +1,4 @@
+{"lid": "bbc01c27d5", "label": "supported", "passage": 5, "reason": "문단 5는 메모리모듈사업(65.5%)과 SSD사업(31.7%)을 주된 사업으로 제시하며, 나머지 부분은 동어반복이다."}
+{"lid": "9af5ed9c79", "label": "no_evidence", "passage": null, "reason": "문단 7은 VoIP-TA·기업용 IP 전화기·AGW 공급을 말하지만 CCTV 녹화기(DVR)는 어느 문단에도 없다."}
+{"lid": "911f552d47", "label": "no_evidence", "passage": null, "reason": "문단 3은 연구인원 10인만 제시하며 '단위 사'의 당기말 1,000·전기말 1,200,000은 환산·대조할 수 없다."}
+{"lid": "7bf2311fc7", "label": "no_evidence", "passage": null, "reason": "문단 3의 연구개발비는 백만원 단위 778·677이며 '단위 사'의 1,000,000·1,200,000은 환산·대조할 수 없다."}

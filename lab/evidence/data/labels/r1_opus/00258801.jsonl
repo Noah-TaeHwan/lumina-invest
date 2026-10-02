@@ -1,0 +1,31 @@
+{"lid": "650bf47d36", "label": "supported", "passage": 1, "reason": "문단 1에 동일 문장"}
+{"lid": "41a96b7bdf", "label": "supported", "passage": 1, "reason": "문단 1에 동일 문장"}
+{"lid": "10d7bd757d", "label": "contradicted", "passage": 5, "reason": "문단 5는 카카오톡 중심으로 커머스·모빌리티·페이·게임·뮤직·스토리에서 수익 창출한다고 기술"}
+{"lid": "12e3ab1ea6", "label": "non_claim", "passage": null, "reason": "의미 없는 조각"}
+{"lid": "985d0996b0", "label": "supported", "passage": 5, "reason": "문단 5: 국내 1위 메신저 카카오톡 중심으로 여러 영역에서 수익 창출"}
+{"lid": "e7d983479b", "label": "non_claim", "passage": null, "reason": "라벨 조각"}
+{"lid": "035244d362", "label": "supported", "passage": 1, "reason": "문단 1에 동일 문장"}
+{"lid": "b5f3365bd6", "label": "no_evidence", "passage": null, "reason": "현대자동차에 대한 문단 없음"}
+{"lid": "fff77a605b", "label": "supported", "passage": 1, "reason": "문단 1: 디스플레이 광고는 성과형 광고 중심, 성과형은 비딩으로 가격 결정"}
+{"lid": "1384888758", "label": "supported", "passage": 1, "reason": "문단 1의 톡비즈(광고)·포털비즈 가격 결정 문장과 동일"}
+{"lid": "3f516d45d6", "label": "no_evidence", "passage": 2, "reason": "문단 2는 카카오톡(당사)이 비즈니스 메시지·선물하기 모델을 발전시켰다고 기술, 톡비즈를 주체로 한 근거 없음"}
+{"lid": "e90af493e5", "label": "supported", "passage": 1, "reason": "문단 1: 디스플레이 광고는 성과형 중심, 성과형은 비딩으로 가격 결정"}
+{"lid": "5108cfe0a7", "label": "supported", "passage": 2, "reason": "문단 2에 동일 문장"}
+{"lid": "a765764a30", "label": "non_claim", "passage": null, "reason": "질문형 도입 문장"}
+{"lid": "744aa21553", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에 콘텐츠 부문 매출 비중 정보 없음"}
+{"lid": "d1494254c1", "label": "no_evidence", "passage": null, "reason": "문단 4의 1,127,604백만원은 금융업 자산 합계로 카카오 연결 매출이 아님"}
+{"lid": "76fa280fe4", "label": "contradicted", "passage": 2, "reason": "문단 2: 2025년 이커머스 거래액 272조 398억원, 증가율 4.9%(주장 5.6%)"}
+{"lid": "367fe7ad7e", "label": "non_claim", "passage": null, "reason": "목록 도입 문장"}
+{"lid": "2051aec14c", "label": "no_evidence", "passage": null, "reason": "문단 4의 1,693,750백만원은 금융업 자산 합계로 카카오 연결 매출이 아님"}
+{"lid": "5875b66592", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에 플랫폼 부문 매출 비중 정보 없음"}
+{"lid": "1d89423189", "label": "supported", "passage": 2, "reason": "문단 2: 2025년 이커머스 거래액 272조 398억원, 전년 대비 4.9% 성장"}
+{"lid": "57456079e1", "label": "supported", "passage": 4, "reason": "문단 4: 2025년 3월 카카오 데이터센터 안산 최초 인증 획득"}
+{"lid": "bc4c24cae4", "label": "no_evidence", "passage": null, "reason": "데이터센터 투자 규모·기간에 대한 문단 없음"}
+{"lid": "df2df738ec", "label": "contradicted", "passage": 4, "reason": "문단 4는 데이터센터 안산 최초 인증을 2025년 3월로 기술, 주장은 2019년 3월"}
+{"lid": "3bd06881ae", "label": "non_claim", "passage": null, "reason": "반복된 무의미 문자열"}
+{"lid": "c5e65c18f9", "label": "non_claim", "passage": null, "reason": "질문 반복"}
+{"lid": "04921e7ec7", "label": "supported", "passage": 3, "reason": "문단 3: Kanana는 데이터와 LLM 등 생성형 AI 기술 연구 및 신규 서비스 개발"}
+{"lid": "ebea43caa3", "label": "contradicted", "passage": 3, "reason": "문단 3은 연구개발 조직을 CPO·Tech·Kanana·AI Studios·개인정보 5가지로 열거하고 해당 역할을 Kanana에 귀속, 카카오브레인은 없음"}
+{"lid": "de1b0545af", "label": "supported", "passage": 4, "reason": "문단 4: 플랫폼 비중 47.0%→49.5%→53.3%(전전기→당기)"}
+{"lid": "f43d29b54c", "label": "contradicted", "passage": 4, "reason": "문단 4는 플랫폼 비중이 47.0%→49.5%→53.3%로 증가했음을 보여 줌"}
+{"lid": "4bc709a2c2", "label": "non_claim", "passage": null, "reason": "질문 반복"}

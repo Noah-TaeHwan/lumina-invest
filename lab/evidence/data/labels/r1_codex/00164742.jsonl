@@ -1,0 +1,33 @@
+{"lid": "b5daa68686", "label": "contradicted", "passage": 8, "reason": "문단 8은 인도네시아 금융법인의 캡티브 영업 개시를 2025년 9월로 명시하여 2018년 9월과 다르다."}
+{"lid": "76a85614f6", "label": "non_claim", "passage": null, "reason": "문단 번호와 잘린 항목 번호만 있는 문장 조각으로 사실 주장이 없다."}
+{"lid": "3ba0620762", "label": "non_claim", "passage": null, "reason": "회사명을 표시한 머리말로 검증할 사실을 서술하지 않는다."}
+{"lid": "34f9efc616", "label": "supported", "passage": 1, "reason": "문단 1은 연결실체가 주로 환율과 이자율 변동에 따른 금융위험에 노출된다고 명시한다."}
+{"lid": "8758815b90", "label": "supported", "passage": 1, "reason": "문단 1은 총부채를 총자본으로 나눈 부채비율의 사용과 전기와 동일한 자본위험 관리정책을 모두 명시한다."}
+{"lid": "d3183ce593", "label": "supported", "passage": 8, "reason": "문단 8은 2025년 9월 인도네시아 금융법인의 캡티브 영업활동 출범과 현지 캡티브 금융 제공을 명시한다."}
+{"lid": "983f971491", "label": "supported", "passage": 1, "reason": "문단 1은 주주이익 극대화와 자본비용 절감을 위해 최적 자본구조를 유지하도록 자본을 관리한다고 명시한다."}
+{"lid": "7dd1c9311e", "label": "non_claim", "passage": null, "reason": "평균 판매가격의 변화를 묻는 질문으로 사실을 단정하지 않는다."}
+{"lid": "1937472738", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 2020년 2월 차종별 평균 판매가격이나 180만~250만원의 가격 범위가 없다."}
+{"lid": "41c7dae900", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 2020년 1월 차종별 평균 판매가격이나 120만~180만원의 가격 범위가 없다."}
+{"lid": "c6f7ce7723", "label": "no_evidence", "passage": null, "reason": "제시된 문단은 2020년 1월 판매가격 변동을 통한 주변 환경과 차종 가치의 변화 관찰을 뒷받침하지 않는다."}
+{"lid": "0b028542dc", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 최근 3년간 평균 판매가격 변동으로 주변 환경에 따른 차종 가치 변화를 관찰했다는 근거가 없다."}
+{"lid": "43cc9aeaf0", "label": "no_evidence", "passage": null, "reason": "문단 6의 해외 가격 산정 설명은 차량부문에 관한 것으로 선박부문의 해외 가격에 대한 근거는 없다."}
+{"lid": "4654807108", "label": "supported", "passage": 6, "reason": "문단 6은 차량부문 해외 가격을 미국·독일·호주 대표 시장의 판매가격에 환율을 적용한 단순 평균가격으로 설명한다."}
+{"lid": "d2d06374a0", "label": "contradicted", "passage": 1, "reason": "문단 1은 당사가 2025년에 전년비 1.1% 증가한 71.3만 대를 판매했다고 명시하여 판매하지 못했다는 주장과 반대다."}
+{"lid": "6c55f3f06b", "label": "non_claim", "passage": null, "reason": "2025년 내수와 수출 및 전년 대비 변화를 묻는 질문이다."}
+{"lid": "3c871b412c", "label": "no_evidence", "passage": null, "reason": "문단 7의 168.5만 대와 3.2% 증가는 2025년 국내 산업수요이며 현대자동차 수출 실적은 제시되지 않는다."}
+{"lid": "066baa8fcb", "label": "no_evidence", "passage": null, "reason": "문단 7의 163.3만 대와 6.6% 감소는 2024년 국내 산업수요로 2025년 현대자동차 내수 실적을 뒷받침하지 않는다."}
+{"lid": "ea5aefe38e", "label": "supported", "passage": 1, "reason": "문단 1은 당사의 2025년 판매가 전년비 1.1% 증가한 71.3만 대였다고 명시한다."}
+{"lid": "a7dd4234d6", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 LG에너지솔루션의 전기차용 리튬이온 배터리 생산이나 완성차 업체 공급에 대한 설명이 없다."}
+{"lid": "c32a9228da", "label": "no_evidence", "passage": null, "reason": "문단 3의 1.1%는 2025년 판매량의 전년 대비 증가율이며 가동률이나 그 향상 수치는 제시되지 않는다."}
+{"lid": "32f3a553c3", "label": "supported", "passage": 2, "reason": "문단 2는 현대차의 2025년 중국시장 판매가 전년대비 2.0% 증가한 12.8만 대라고 명시한다."}
+{"lid": "b47241467a", "label": "no_evidence", "passage": null, "reason": "문단 1은 최적 자본구조 유지 목적과 환율·이자율 변동 위험을 설명하지만 그 변동이 자본구조 유지에 도움이 된다고 말하지 않는다."}
+{"lid": "bfbd989537", "label": "supported", "passage": 1, "reason": "문단 1은 총부채를 총자본으로 나눈 부채비율의 사용과 전기와 동일한 자본위험 관리정책을 모두 명시한다."}
+{"lid": "315de98900", "label": "supported", "passage": 1, "reason": "문단 1은 연결실체가 주로 환율과 이자율 변동에 따른 금융위험에 노출된다고 명시한다."}
+{"lid": "ac0b4467f2", "label": "non_claim", "passage": null, "reason": "위험 관리라는 주제를 표시한 제목으로 사실을 서술하지 않는다."}
+{"lid": "129a30a0ab", "label": "supported", "passage": 6, "reason": "문단 6은 현대캐피탈이 14개국에 진출해 19개 법인을 두고 해외사업을 영위한다고 명시한다."}
+{"lid": "dc4ca613a8", "label": "contradicted", "passage": 6, "reason": "문단 6은 현대캐피탈의 진출 국가 수를 14개국으로 명시하여 17개국과 다르다."}
+{"lid": "071002cd20", "label": "no_evidence", "passage": null, "reason": "문단 1은 환율·이자율 위험 관리를 설명하지만 주요 통화 환율 변동이 세전이익에 미치는 영향은 제시된 문단에 없다."}
+{"lid": "a76bca2263", "label": "contradicted", "passage": 5, "reason": "문단 5는 두 연회비 시장 사이의 빈 공간을 채우는 현대카드 Boutique 출시를 2025년으로 명시하여 2022년과 다르다."}
+{"lid": "19e0be6ea1", "label": "no_evidence", "passage": null, "reason": "이 질문의 8개 문단에는 2020~2022년 현대자동차 연결 연구개발비나 1444억원으로의 증가가 제시되지 않는다."}
+{"lid": "efbb537e3f", "label": "supported", "passage": 5, "reason": "문단 5는 현대카드가 2025년 프리미엄 시장과 저연회비 매스 시장 사이의 공백을 채우는 현대카드 Boutique를 출시했다고 명시한다."}
+{"lid": "872516abf2", "label": "no_evidence", "passage": null, "reason": "이 질문의 8개 문단에는 2020~2022년 연구개발비의 매출 대비 비중이나 1.3배 증가에 대한 근거가 없다."}

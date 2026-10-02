@@ -1,0 +1,91 @@
+{
+ "n": 228,
+ "supported": 96,
+ "not_supported": 132,
+ "descriptive_only": false,
+ "b_star": "lex",
+ "auc": {
+  "sys": 0.9788904671717171,
+  "jev": 0.976010101010101,
+  "lex": 0.9836253156565656,
+  "emb": 0.7303503787878788,
+  "nli": 0.5628551136363635,
+  "llm": 0.5375236742424242
+ },
+ "delta": {
+  "point": -0.004734848484848508,
+  "lo": -0.04100625260215296,
+  "hi": 0.02412143615348906,
+  "statistical": "inconclusive",
+  "practically_equivalent": true
+ },
+ "mde": 0.08344842644488189,
+ "exploratory": false,
+ "jev_minus_bstar": [
+  -0.007615214646464641,
+  -0.04475579785129498,
+  0.022024122601045654
+ ],
+ "operating_point": {
+  "supported_precision": 0.8067226890756303,
+  "supported_recall": 1.0,
+  "coverage": 0.5219298245614035,
+  "contradiction_false_positive_rate": 0.013761467889908258
+ },
+ "numberless_auc": {
+  "sys": 0.9681088314005352,
+  "lex": 0.9812667261373774,
+  "n": 97
+ },
+ "macro_f1_3class": 0.752156211321738,
+ "cluster_delta_signs": {
+  "positive": 2,
+  "negative": 3,
+  "undefined": 1
+ },
+ "controlled_accuracy_by_variant": {
+  "의역": 0.9652173913043478,
+  "기간 바꾸기": 1.0,
+  "주체 교체": 0.45,
+  "부정": 1.0,
+  "다른 기업 사실": 1.0,
+  "숫자 변경": 1.0
+ },
+ "sensitivity": {
+  "disputed_natural": 7,
+  "exclusion_rate": 0.029787234042553193,
+  "disputed_clusters": [
+   "00164788",
+   "00488989",
+   "00858124",
+   "00877059",
+   "00985686",
+   "01368637",
+   "01467503"
+  ],
+  "with_opus_labels": {
+   "classes": {
+    "supported": 3,
+    "contradicted": 1,
+    "no_evidence": 2
+   },
+   "delta": [
+    -0.0021698466142909822,
+    -0.03843540840993926,
+    0.0252597215356731
+   ]
+  },
+  "with_codex_labels": {
+   "classes": {
+    "supported": 0,
+    "contradicted": 0,
+    "no_evidence": 4
+   },
+   "delta": [
+    -0.004174325980392024,
+    -0.04004098019607755,
+    0.022555590405981613
+   ]
+  }
+ }
+}
