@@ -43,6 +43,18 @@ def is_finance(induty_code: str) -> bool:
     return str(induty_code).startswith(FINANCE_KSIC)
 
 
+def mention_edges(names: dict[str, str], texts: dict[str, str]) -> list[tuple[str, str, str]]:
+    """(a, b, b의 이름): a 본문에 b 이름이 나오는 쌍. 군집 병합 근거로 원장에 남긴다."""
+    codes = sorted(names)
+    return [(a, b, names[b]) for a in codes for b in codes if a != b and names[b] in texts.get(a, "")]
+
+
+def check_split_sizes(counts: dict[str, int], holdout_min: int = 15) -> None:
+    """조정·확인 세트가 비거나 홀드아웃이 하한보다 작으면 멈춘다(군집이 한 덩어리로 뭉친 경우)."""
+    if counts.get("tune", 0) == 0 or counts.get("check", 0) == 0 or counts.get("holdout", 0) < holdout_min:
+        raise SystemExit(f"split sizes unusable: {counts}")
+
+
 def clusters(names: dict[str, str], texts: dict[str, str], groups: list[list[str]]) -> list[list[str]]:
     """시드 그룹과 본문 교차 언급(한쪽 본문에 다른 쪽 이름)으로 묶은 연결 요소."""
     parent = {c: c for c in names}
@@ -60,10 +72,8 @@ def clusters(names: dict[str, str], texts: dict[str, str], groups: list[list[str
         for other in g[1:]:
             union(g[0], other)
     codes = sorted(names)
-    for a in codes:
-        for b in codes:
-            if a != b and names[b] in texts.get(a, ""):
-                union(a, b)
+    for a, b, _ in mention_edges(names, texts):
+        union(a, b)
     comp: dict[str, list[str]] = {}
     for c in codes:
         comp.setdefault(find(c), []).append(c)

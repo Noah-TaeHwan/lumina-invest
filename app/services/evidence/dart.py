@@ -107,13 +107,21 @@ def company_info(client: httpx.Client, key: str, corp_code: str) -> dict:
 
 
 def download_document(client: httpx.Client, key: str, rcept_no: str, dest_dir: Path, ledger: Path) -> Path:
-    """공시 원문 XML을 저장하고 원장에 SHA-256을 남긴다. 이미 있으면 다시 받지 않는다."""
+    """공시 원문 XML을 임시 파일에 쓴 뒤 바꿔 넣고 원장에 SHA-256을 남긴다.
+
+    이미 있는 파일은 원장의 마지막 해시와 같을 때만 재사용한다(중간에 끊긴 파일은 다시 받는다).
+    """
     path = Path(dest_dir) / f"{rcept_no}.xml"
-    if path.exists():
-        return path
+    if path.exists() and Path(ledger).exists():
+        recs = [json.loads(x) for x in Path(ledger).read_text().splitlines() if x.strip()]
+        known = [r["sha256"] for r in recs if r["rcept_no"] == rcept_no]
+        if known and known[-1] == hashlib.sha256(path.read_bytes()).hexdigest():
+            return path
     data = _zip_member(_get(client, "document.xml", {"crtfc_key": key, "rcept_no": rcept_no}).content)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(data)
+    tmp = path.with_suffix(".xml.part")
+    tmp.write_bytes(data)
+    os.replace(tmp, path)
     Path(ledger).parent.mkdir(parents=True, exist_ok=True)
     with Path(ledger).open("a") as f:
         f.write(json.dumps({"rcept_no": rcept_no, "sha256": hashlib.sha256(data).hexdigest(), "bytes": len(data),

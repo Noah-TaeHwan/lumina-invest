@@ -62,11 +62,22 @@ def load_split(P: Paths) -> dict:
     return json.loads(P.split_json.read_text())
 
 
+SPLITS = ("tune", "check", "dev", "holdout", "all")
+
+
+def holdout_frozen(P: Paths) -> bool:
+    """동결 파일이 있고 분할·주장 해시를 담고 있어야 홀드아웃 봉인이 풀린다."""
+    if not P.prereg_holdout.exists():
+        return False
+    data = json.loads(P.prereg_holdout.read_text() or "{}")
+    return bool(data.get("split_sha256")) and bool(data.get("claims_sha256"))
+
+
 def companies(P: Paths, split_name: str) -> list[dict]:
-    """분할 이름에 속한 회사 목록. 홀드아웃은 동결 파일이 생기기 전까지 거부한다."""
-    if split_name == "holdout" and not P.prereg_holdout.exists():
-        raise SystemExit("holdout is frozen until prereg_holdout.json")
+    """분할 이름에 속한 회사 목록. 홀드아웃이 포함되면(holdout·all) 동결 전까지 거부한다."""
     names = {"dev": {"tune", "check"}, "all": {"tune", "check", "holdout"}}.get(split_name, {split_name})
+    if "holdout" in names and not holdout_frozen(P):
+        raise SystemExit("holdout is frozen until prereg_holdout.json")
     return [c for c in load_split(P)["companies"] if c["split"] in names]
 
 
@@ -75,6 +86,54 @@ def passages_by_corp(P: Paths) -> dict[str, list[dict]]:
     out: dict[str, list[dict]] = {}
     for r in read_jsonl(P.priv / "passages.jsonl"):
         out.setdefault(r["corp_code"], []).append(r)
+    return out
+
+
+def _sha(text: str) -> str:
+    return hashlib.sha256(text.encode()).hexdigest()
+
+
+def load_vectors(P: Paths) -> dict[str, list[float]]:
+    """현재 문단 본문 해시와 맞는 벡터만 돌려준다(본문이 바뀐 문단의 낡은 벡터는 버린다)."""
+    current = {r["id"]: _sha(r["text"]) for r in read_jsonl(P.priv / "passages.jsonl")}
+    out: dict[str, list[float]] = {}
+    for r in read_jsonl(P.priv / "passage_vecs.jsonl"):
+        if current.get(r["id"]) == r.get("sha256"):
+            out[r["id"]] = r["vec"]
+    return out
+
+
+def retrieval_targets(questions: list[dict], answered: set[str]) -> list[dict]:
+    """답변이 이미 동결된 질문은 검색을 다시 하지 않는다."""
+    return [q for q in questions if q["qid"] not in answered]
+
+
+def model_digest(tags: list[dict], model: str, expected: str) -> str:
+    """Ollama /api/tags에서 모델 digest 앞 12자리를 찾아 사전등록 값과 대조한다."""
+    digest = next((m["digest"][:12] for m in tags if m["name"] == model), None)
+    if digest != expected:
+        raise SystemExit(f"{model} digest {digest} != registered {expected}")
+    return digest
+
+
+def latency_rows(calls: list[dict]) -> tuple[list[dict], list[dict]]:
+    """첫 시도 기록을 관문용(묶음·반복)과 단건(single)으로 나눈다."""
+    first = [r for r in calls if r["attempt"] == 1]
+    return [r for r in first if r["tag"] != "single"], [r for r in first if r["tag"] == "single"]
+
+
+def session_stats(rows: list[dict]) -> list[dict]:
+    """세션별 요청 수·실패 수·지연 p50/p95·입력 토큰 p50."""
+    from lab.evidence.metrics import percentile
+
+    out = []
+    for times in sessions([r["called_at"] for r in rows]):
+        ts = set(times)
+        rs = [r for r in rows if datetime.fromisoformat(r["called_at"]).isoformat() in ts]
+        lat = [r["latency_ms"] for r in rs]
+        out.append({"start": times[0], "n": len(rs), "failures": sum(not r["ok"] for r in rs),
+                    "p50_ms": percentile(lat, 50), "p95_ms": percentile(lat, 95),
+                    "tokens_p50": percentile([r["input_tokens"] for r in rs], 50)})
     return out
 
 
@@ -147,13 +206,15 @@ def cmd_split(P: Paths, args) -> None:
     index = {code: i for i, members in enumerate(cl) for code in members}
     for c in chosen:
         c.update(cluster=index[c["corp_code"]], split=label[c["corp_code"]])
+    write_jsonl(P.jsonl("draw_ledger.jsonl"), ledger)
+    counts = {s: sum(c["split"] == s for c in chosen) for s in ("tune", "check", "holdout")}
+    write_jsonl(P.jsonl("mention_edges.jsonl"), [{"from": a, "to": b, "name": n} for a, b, n in sp.mention_edges(names, texts)])
+    log_attempt(P, "split", companies=len(chosen), clusters=len(cl), random=sum(c["source"] == "random" for c in chosen), **counts)
+    sp.check_split_sizes(counts)
     P.split_json.parent.mkdir(parents=True, exist_ok=True)
     P.split_json.write_text(json.dumps({"seed": sp.SEED, "corpcode_sha256": hashlib.sha256(raw).hexdigest(),
                                         "companies": sorted(chosen, key=lambda c: c["corp_code"]),
                                         "clusters": cl}, ensure_ascii=False, indent=1) + "\n")
-    write_jsonl(P.jsonl("draw_ledger.jsonl"), ledger)
-    counts = {s: sum(c["split"] == s for c in chosen) for s in ("tune", "check", "holdout")}
-    log_attempt(P, "split", companies=len(chosen), clusters=len(cl), **counts)
     print(json.dumps(counts))
 
 
@@ -176,6 +237,7 @@ CATEGORIES = ["사업 개요", "주요 제품·서비스", "매출 구성·수�
 VARIANTS = ["숫자 변경", "기간 바꾸기", "주체 교체", "부정", "다른 기업 사실"]
 K = 8
 GEN_MODEL = "llama3.2:1b"
+GEN_DIGEST = "baf6a787fdff"
 EMBED_MODEL = "nomic-embed-text"
 
 
@@ -206,10 +268,28 @@ def variant_for(i: int) -> str:
     return VARIANTS[i % len(VARIANTS)]
 
 
-def check_controlled(row: dict, passages: list[str], names: tuple[str, ...]) -> tuple[bool, str]:
-    """통제 변형이 참 문장과 다르고, 새로 넣은 숫자·회사명이 문단 8개에 없는지 본다."""
+def assigned_variant(qid: str, all_qids: list[str]) -> str:
+    """전체 질문을 qid 순으로 정렬한 순번으로 변형 유형을 배정한다(분할 선택과 무관)."""
+    return variant_for(sorted(all_qids).index(qid))
+
+
+def unique_by_qid(rows: list[dict]) -> list[dict]:
+    """같은 qid가 두 번 나오면 ValueError."""
+    seen: set[str] = set()
+    for r in rows:
+        if r["qid"] in seen:
+            raise ValueError(f"duplicate qid {r['qid']}")
+        seen.add(r["qid"])
+    return rows
+
+
+def check_controlled(row: dict, passages: list[str], names: tuple[str, ...],
+                     expected_type: str | None = None) -> tuple[bool, str]:
+    """배정 유형과 같고, 참 문장과 다르며, 새로 넣은 숫자·회사명이 문단 8개에 없는지 본다."""
     from app.services.evidence.claims import new_values_absent
 
+    if expected_type is not None and row["variant_type"] != expected_type:
+        return False, "variant type mismatch"
     if row["variant_text"].strip() == row["true_text"].strip():
         return False, "variant equals true text"
     if not new_values_absent(row["variant_text"], row["true_text"], passages, names):
@@ -259,7 +339,7 @@ def cmd_embed(P: Paths, args) -> None:
     from app.services.evidence.retrieve import DOC_PREFIX
 
     out = P.priv / "passage_vecs.jsonl"
-    done = {r["id"] for r in read_jsonl(out)}
+    done = set(load_vectors(P))
     llm = _ollama()
 
     async def run():
@@ -269,7 +349,7 @@ def cmd_embed(P: Paths, args) -> None:
                 for p in rows:
                     if p["id"] not in done:
                         vec = await llm.embed(EMBED_MODEL, DOC_PREFIX + p["text"])
-                        f.write(json.dumps({"id": p["id"], "vec": vec}) + "\n")
+                        f.write(json.dumps({"id": p["id"], "sha256": _sha(p["text"]), "vec": vec}) + "\n")
 
     asyncio.run(run())
     print("ok")
@@ -281,10 +361,14 @@ def cmd_retrieve(P: Paths, args) -> None:
 
     from app.services.evidence.retrieve import QUERY_PREFIX, top_k
 
-    vecs = {r["id"]: r["vec"] for r in read_jsonl(P.priv / "passage_vecs.jsonl")}
+    vecs = load_vectors(P)
     pbc = passages_by_corp(P)
+    missing = [p["id"] for c in companies(P, args.split) for p in pbc[c["corp_code"]] if p["id"] not in vecs]
+    if missing:
+        raise SystemExit(f"{len(missing)} passages lack current vectors; run embed")
     codes = {c["corp_code"] for c in companies(P, args.split)}
-    qs = [q for q in read_jsonl(P.jsonl("questions.jsonl")) if q["corp_code"] in codes]
+    answered = {a["qid"] for a in read_jsonl(P.jsonl("answers.jsonl"))}
+    qs = retrieval_targets([q for q in read_jsonl(P.jsonl("questions.jsonl")) if q["corp_code"] in codes], answered)
     llm = _ollama()
     keep = [r for r in read_jsonl(P.jsonl("retrieval.jsonl")) if r["qid"] not in {q["qid"] for q in qs}]
 
@@ -315,7 +399,7 @@ def cmd_generate(P: Paths, args) -> None:
 
     llm = _ollama()
     tags = httpx.get(f"{llm._base}/api/tags", timeout=30).json()["models"]
-    digest = next(m["digest"][:12] for m in tags if m["name"] == GEN_MODEL)
+    digest = model_digest(tags, GEN_MODEL, GEN_DIGEST)
     text = _passage_text(P)
     names = _corp_names(P)
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
@@ -354,14 +438,16 @@ def cmd_controlled_packets(P: Paths, args) -> None:
     text = _passage_text(P)
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
     codes = [c["corp_code"] for c in companies(P, args.split)]
-    qs = [q for q in read_jsonl(P.jsonl("questions.jsonl")) if q["corp_code"] in codes]
+    all_q = read_jsonl(P.jsonl("questions.jsonl"))
+    all_qids = [q["qid"] for q in all_q]
+    qs = [q for q in all_q if q["corp_code"] in codes]
     for corp in codes:
         parts = []
-        for i, q in enumerate(qs):
+        for q in qs:
             if q["corp_code"] != corp:
                 continue
             ps = "\n".join(f"[문단 {j}] {text[pid]}" for j, pid in enumerate(ret[q["qid"]], 1))
-            parts.append(f"## {q['qid']} — 변형 유형: {variant_for(i)}\n질문: {q['question']}\n{ps}\n")
+            parts.append(f"## {q['qid']} — 변형 유형: {assigned_variant(q['qid'], all_qids)}\n질문: {q['question']}\n{ps}\n")
         out = P.priv / "packets/controlled" / f"{corp}.md"
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(f"{guide}\n\n# 출력 파일: lab/evidence/data/controlled/{corp}.jsonl\n\n" + "\n".join(parts))
@@ -374,10 +460,12 @@ def cmd_controlled_check(P: Paths, args) -> None:
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
     names = tuple(_corp_names(P).values())
     codes = {c["corp_code"] for c in companies(P, args.split)}
+    all_qids = [q["qid"] for q in read_jsonl(P.jsonl("questions.jsonl"))]
     rows, rejected = [], []
     for corp in sorted(codes):
-        for r in read_jsonl(P.data / "controlled" / f"{corp}.jsonl"):
-            ok, why = check_controlled(r, [text[i] for i in ret[r["qid"]]], names)
+        for r in unique_by_qid(read_jsonl(P.data / "controlled" / f"{corp}.jsonl")):
+            ok, why = check_controlled(r, [text[i] for i in ret[r["qid"]]], names,
+                                       expected_type=assigned_variant(r["qid"], all_qids))
             if not ok:
                 rejected.append({"qid": r["qid"], "reason": why})
                 continue
@@ -413,6 +501,22 @@ def disagreements(r1: dict) -> list[str]:
     return sorted(c for c in a.keys() & b.keys() if a[c]["label"] != b[c]["label"])
 
 
+def missing_labels(r1: dict, cids: list[str]) -> dict[str, list[str]]:
+    """라벨러별로 라벨이 없는 cid."""
+    return {lb: sorted(set(cids) - set(r1.get(lb, {}))) for lb in ("opus", "codex")}
+
+
+def kappa_ci(rows: list[dict]) -> tuple:
+    """rows(cluster, qid, a, b)의 이진 κ와 2단 군집 부트스트랩 95% 구간. 한 종류뿐이면 None."""
+    from lab.evidence.metrics import cluster_bootstrap, kappa
+
+    def stat(rs):
+        a, b = [r["a"] for r in rs], [r["b"] for r in rs]
+        return None if len(set(a + b)) < 2 else kappa(a, b)
+
+    return cluster_bootstrap(rows, stat)
+
+
 def merge_labels(r1: dict, r2: dict) -> list[dict]:
     """1차 일치는 그대로, 불일치는 2차(조정 라운드) 일치로, 그래도 다르면 disputed."""
     out = []
@@ -436,6 +540,10 @@ def _read_labels(P: Paths, rnd: int, labeler: str, codes: set[str], cids: dict[s
         for r in read_jsonl(P.data / "labels" / f"r{rnd}_{labeler}" / f"{corp}.jsonl"):
             if r["label"] not in LABELS:
                 raise ValueError(f"bad label {r['label']} ({labeler} r{rnd} {corp})")
+            if r["lid"] not in cids:
+                raise ValueError(f"unknown lid {r['lid']} ({labeler} r{rnd} {corp})")
+            if cids[r["lid"]] in out:
+                raise ValueError(f"duplicate lid {r['lid']} ({labeler} r{rnd} {corp})")
             out[cids[r["lid"]]] = {"label": r["label"], "passage": r.get("passage"), "reason": r.get("reason", "")}
     return out
 
@@ -472,6 +580,8 @@ def cmd_label_packets(P: Paths, args) -> None:
                     line += f"\n  (다른 라벨러: {o['label']}, 문단 {o['passage']}, 이유: {o['reason']})"
                 lines.append(line)
             parts.append(f"## 질문: {qtext[qid]}\n{ps}\n\n주장:\n" + "\n".join(lines) + "\n")
+        if not parts:
+            continue
         out = P.priv / "packets/labels" / f"r{args.round}_{args.labeler}" / f"{corp}.md"
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(f"{guide}\n\n# 출력 파일: lab/evidence/data/labels/r{args.round}_{args.labeler}/{corp}.jsonl\n\n"
@@ -487,6 +597,9 @@ def cmd_labels_merge(P: Paths, args) -> None:
     claims = [c for c in read_jsonl(P.jsonl("claims.jsonl")) if c["qid"].split("-q")[0] in codes]
     cids = {lid(c["cid"]): c["cid"] for c in claims}
     r1 = {lb: _read_labels(P, 1, lb, codes, cids) for lb in ("opus", "codex")}
+    miss = missing_labels(r1, list(cids.values()))
+    if any(miss.values()):
+        raise SystemExit(f"round-1 labels missing: { {k: len(v) for k, v in miss.items()} }")
     r2 = {lb: _read_labels(P, 2, lb, codes, cids) for lb in ("opus", "codex")}
     rows = merge_labels(r1, r2)
     keep = [r for r in read_jsonl(P.jsonl("labels.jsonl")) if r["cid"].split("-q")[0] not in codes]
@@ -595,8 +708,10 @@ def cmd_stage0_report(P: Paths, args) -> None:
     nat = [l for cid, l in labels.items() if claims[cid]["source"] == "natural"
            and cid.split("-q")[0] in dev_codes]
     both = [l for l in nat if "non_claim" not in (l["r1"]["opus"]["label"], l["r1"]["codex"]["label"])]
-    k = kappa([l["r1"]["opus"]["label"] == "supported" for l in both],
-              [l["r1"]["codex"]["label"] == "supported" for l in both])
+    k_rows = [{"cluster": cluster[l["cid"].split("-q")[0]], "qid": l["cid"].rsplit("-", 1)[0],
+               "a": l["r1"]["opus"]["label"] == "supported", "b": l["r1"]["codex"]["label"] == "supported"} for l in both]
+    k, k_lo, k_hi = kappa_ci(k_rows)
+    k = k if k is not None else 0.0
     ctrl = [(l, claims[cid]) for cid, l in labels.items() if claims[cid]["source"] == "controlled"
             and cid.split("-q")[0] in dev_codes]
     agree = [(l["r1"][lb]["label"] == "supported") == (c["expected"] == "supported") for l, c in ctrl
@@ -625,7 +740,7 @@ def cmd_stage0_report(P: Paths, args) -> None:
 
     rep_cids = [cid for cid in reps[0] if all(cid in r and r[cid]["ok"] for r in reps)]
     repeat_agree = (sum(len({sig(r[cid]) for r in reps}) == 1 for cid in rep_cids) / len(rep_cids)) if rep_cids else 0.0
-    first = [r for r in read_jsonl(P.calls) if r["attempt"] == 1]
+    first, single_first = latency_rows(read_jsonl(P.calls))
     lat = [r["latency_ms"] for r in first]
     fails = sum(not r["ok"] for r in first)
     sess = sessions([r["called_at"] for r in first])
@@ -635,7 +750,12 @@ def cmd_stage0_report(P: Paths, args) -> None:
     summary = {"gates": gates, "check_rows": len(rows), "check_supported": sum(r["y"] for r in rows),
                "latency_ms": {q: percentile(lat, q) for q in (50, 95, 99)} if lat else {},
                "first_requests": len(first), "input_tokens": sum(r["input_tokens"] for r in read_jsonl(P.calls)),
-               "session_sizes": [len(s) for s in sess], "disputed": sum(l["label"] == "disputed" for l in nat)}
+               "session_sizes": [len(s) for s in sess], "disputed": sum(l["label"] == "disputed" for l in nat),
+               "sessions": session_stats(first) if first else [],
+               "single_requests": {"n": len(single_first), "failures": sum(not r["ok"] for r in single_first)},
+               "kappa_ci": [k_lo, k_hi], "kappa_pairs": len(both), "kappa_non_claim_excluded": len(nat) - len(both),
+               "batch_pairs": len(pairs), "repeat_claims": len(rep_cids),
+               "controlled_pairs": len(agree)}
     out = P.ev / "results/stage0.json"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(summary, ensure_ascii=False, indent=1, default=str) + "\n")
@@ -663,7 +783,7 @@ def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(prog="lab.evidence")
     ap.add_argument("--root", type=Path, default=ROOT)
     ap.add_argument("cmd", choices=sorted(COMMANDS))
-    ap.add_argument("--split", default="dev")
+    ap.add_argument("--split", default="dev", choices=SPLITS)
     ap.add_argument("--labeler", choices=["opus", "codex"])
     ap.add_argument("--round", type=int, default=1)
     ap.add_argument("--tag", default="")

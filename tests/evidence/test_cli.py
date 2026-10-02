@@ -21,7 +21,7 @@ def test_holdout_refused_before_freeze(tmp_path):
     assert [c["corp_code"] for c in cli.companies(P, "dev")] == ["a", "b"]
     with pytest.raises(SystemExit, match="frozen"):
         cli.companies(P, "holdout")
-    P.prereg_holdout.write_text("{}")
+    P.prereg_holdout.write_text(json.dumps({"split_sha256": "x", "claims_sha256": "y"}))
     assert [c["corp_code"] for c in cli.companies(P, "holdout")] == ["c"]
 
 

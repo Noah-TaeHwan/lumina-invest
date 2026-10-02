@@ -48,7 +48,13 @@ def _title(block: str) -> str:
     return _text(m.group(1)) if m else ""
 
 
+_ROMAN = {"Ⅰ": "I", "Ⅱ": "II", "Ⅲ": "III", "Ⅳ": "IV"}
+
+
 def _key(title: str) -> str:
+    """제목 비교 키: 공백을 지우고 유니코드 로마 숫자를 ASCII로 바꾼다."""
+    for u, a in _ROMAN.items():
+        title = title.replace(u, a)
     return title.replace(" ", "")
 
 
@@ -69,13 +75,16 @@ def sections(xml: str) -> dict[str, str]:
 
 
 def blocks(section_xml: str) -> list[tuple[str, str]]:
-    """절 안의 제목·문단·표 행을 문서 순서대로 펼친다. 표 행에는 제목·단위·열 머리글을 붙인다."""
+    """절 안의 제목·문단·표 행을 문서 순서대로 펼친다. 표 행에는 제목·캡션·단위·열 머리글을 붙인다.
+
+    한 행짜리 표는 캡션·단위 줄로 보고 다음 데이터 표에만 붙인다(데이터 표 하나가 쓰면 비운다).
+    """
     out: list[tuple[str, str]] = []
-    heading, unit = "", ""
+    heading, unit, caption = "", "", ""
     for m in _BLOCK.finditer(section_xml):
         t, p, tb = m.groups()
         if t is not None:
-            heading, unit = _text(t), ""
+            heading, unit, caption = _text(t), "", ""
             out.append(("title", heading))
             continue
         if p is not None:
@@ -92,18 +101,21 @@ def blocks(section_xml: str) -> list[tuple[str, str]]:
         rows = [r for r in rows if any(r)]
         if not rows:
             continue
-        if len(rows) == 1 and len(rows[0]) == 1:
-            u = _UNIT.search(rows[0][0])
-            if u:
-                unit = u.group(1).strip()
+        if len(rows) == 1:
+            cells = [c for c in rows[0] if c]
+            units = [_UNIT.search(c) for c in cells]
+            if any(units):
+                unit = next(u for u in units if u).group(1).strip()
+                caption = " ".join(c for c, u in zip(cells, units) if not u)
             else:
-                out.append(("para", rows[0][0]))
+                out.append(("para", " | ".join(cells)))
             continue
         header = rows[0]
-        prefix = f"[{heading} 표" + (f", 단위 {unit}" if unit else "") + "] "
+        prefix = f"[{heading} 표" + (f", {caption}" if caption else "") + (f", 단위 {unit}" if unit else "") + "] "
         for r in rows[1:]:
             cells = [f"{h}: {c}" if h else c for h, c in zip(header, r)] if len(r) == len(header) else r
             out.append(("row", prefix + " | ".join(cells)))
+        unit, caption = "", ""
     return out
 
 

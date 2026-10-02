@@ -96,7 +96,7 @@ class JevClient:
             for line in self._log.read_text().splitlines():
                 rec = json.loads(line)
                 self.used_tokens += rec["input_tokens"]
-                if rec["ok"]:
+                if rec["ok"] and (rec.get("use_cache", True) or rec["key"] not in self._cache):
                     self._cache[rec["key"]] = rec["answers"]
 
     def _write(self, rec: dict) -> None:
@@ -132,6 +132,7 @@ class JevClient:
                          "latency_ms": round(latency, 1), "input_tokens": tokens, "error": error,
                          "use_cache": use_cache, "called_at": datetime.now(timezone.utc).isoformat()})
             if error is None:
-                self._cache[key] = answers
+                if use_cache or key not in self._cache:
+                    self._cache[key] = answers
                 return JevResult(key, True, answers, latency, tokens, attempt, None)
         return JevResult(key, False, None, latency, 0, 2, error)
