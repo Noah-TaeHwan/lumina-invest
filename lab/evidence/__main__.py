@@ -119,6 +119,16 @@ def _code_sha(P: Paths) -> str:
     return h.hexdigest()
 
 
+def _git_head(P: Paths) -> str:
+    """현재 커밋 해시. git이 없는 환경(앱 이미지)에서는 빈 문자열."""
+    import subprocess
+
+    try:
+        return subprocess.run(["git", "-C", str(P.root), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+    except FileNotFoundError:
+        return ""
+
+
 def _tree_dirty(P: Paths) -> bool:
     """코드·평가 데이터에 커밋되지 않은 변경이 있으면 True."""
     import subprocess
@@ -1106,13 +1116,10 @@ def cmd_freeze_holdout(P: Paths, args) -> None:
     codes = {c["corp_code"] for c in companies(P, "holdout", stage="data")}
     if not [r for r in read_jsonl(P.jsonl("labels.jsonl")) if r["cid"].split("-q")[0] in codes]:
         raise SystemExit("no holdout labels")
-    import subprocess
-
     data = {**freeze_bundle(P),
             "models": {"jev": "jev-1.13.0", "generator": f"{GEN_MODEL}@{GEN_DIGEST}", "embedder": "nomic-embed-text@0a109f422b47",
                        "labelers": json.loads(P.prereg.read_text()).get("stage1", {}).get("labelers")},
-            "code_commit": subprocess.run(["git", "-C", str(P.root), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip(),
-            "frozen_at": datetime.now(timezone.utc).isoformat()}
+            "code_commit": _git_head(P), "frozen_at": datetime.now(timezone.utc).isoformat()}
     P.prereg_holdout.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n")
     log_attempt(P, "freeze-holdout", claims=len([r for r in read_jsonl(P.jsonl("claims.jsonl")) if r["cid"].split("-q")[0] in codes]))
     print("holdout frozen")
