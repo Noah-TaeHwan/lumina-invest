@@ -71,13 +71,14 @@ class PassageStore:
                                             vectors_config=qm.VectorParams(size=dim, distance=qm.Distance.COSINE))
         await self.client.create_payload_index(self.collection, "corp_code", qm.PayloadSchemaType.KEYWORD)
 
-    async def _scroll(self, flt: qm.Filter | None) -> list[dict]:
+    async def _scroll(self, flt: qm.Filter | None, fields: Sequence[str] | bool = True) -> list[dict]:
         if not await self.exists():
             return []
         out, offset = [], None
         while True:
             points, offset = await self.client.scroll(self.collection, scroll_filter=flt, limit=_SCROLL_PAGE,
-                                                      offset=offset, with_payload=True, with_vectors=False)
+                                                      offset=offset, with_payload=fields if fields is True else list(fields),
+                                                      with_vectors=False)
             out += [p.payload for p in points]
             if offset is None:
                 return out
@@ -126,7 +127,7 @@ class PassageStore:
     async def companies(self) -> list[dict]:
         """적재된 회사 목록(corp_code 순): 회사명·종목코드·접수번호·문단 수."""
         out: dict[str, dict] = {}
-        for p in await self._scroll(None):
+        for p in await self._scroll(None, ("corp_code", "corp_name", "stock_code", "rcept_no")):
             c = out.setdefault(p["corp_code"], {"corp_code": p["corp_code"], "corp_name": p.get("corp_name", ""),
                                                 "stock_code": p.get("stock_code", ""), "rcept_no": p["rcept_no"],
                                                 "passages": 0})
