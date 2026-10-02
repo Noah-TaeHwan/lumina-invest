@@ -73,12 +73,26 @@ def holdout_frozen(P: Paths) -> bool:
     return bool(data.get("split_sha256")) and bool(data.get("claims_sha256"))
 
 
-def companies(P: Paths, split_name: str) -> list[dict]:
-    """분할 이름에 속한 회사 목록. 홀드아웃이 포함되면(holdout·all) 동결 전까지 거부한다."""
+def holdout_data_open(P: Paths) -> bool:
+    """사전등록에 stage1 블록(임계값·B*·MDE·프롬프트)이 있어야 홀드아웃 데이터를 만들 수 있다."""
+    return P.prereg.exists() and bool(json.loads(P.prereg.read_text()).get("stage1"))
+
+
+def companies(P: Paths, split_name: str, stage: str = "judge") -> list[dict]:
+    """분할의 회사 목록. 홀드아웃은 데이터 생성(stage1 사전등록 뒤)과 판정(동결 뒤) 두 단계로 연다."""
     names = {"dev": {"tune", "check"}, "all": {"tune", "check", "holdout"}}.get(split_name, {split_name})
-    if "holdout" in names and not holdout_frozen(P):
-        raise SystemExit("holdout is frozen until prereg_holdout.json")
+    if "holdout" in names:
+        if stage == "data" and not holdout_data_open(P):
+            raise SystemExit("holdout data is sealed until prereg.json has a stage1 block")
+        if stage != "data" and not holdout_frozen(P):
+            raise SystemExit("holdout is frozen until prereg_holdout.json")
     return [c for c in load_split(P)["companies"] if c["split"] in names]
+
+
+def once(path: Path, split_name: str) -> None:
+    """홀드아웃 산출물은 한 번만 만든다."""
+    if split_name == "holdout" and Path(path).exists():
+        raise SystemExit(f"holdout output already exists: {path}")
 
 
 def passages_by_corp(P: Paths) -> dict[str, list[dict]]:
@@ -305,7 +319,7 @@ def cmd_question_packets(P: Paths, args) -> None:
     """회사마다 지시문 + 지정 절 문단 전체를 담은 질문 작성 꾸러미를 비공개 폴더에 쓴다."""
     guide = (P.ev / "prompts/question_writer.md").read_text()
     pbc = passages_by_corp(P)
-    for c in companies(P, args.split):
+    for c in companies(P, args.split, stage="data"):
         body = "\n".join(f"[{p['id']}] {p['text']}" for p in pbc[c["corp_code"]])
         out = P.priv / "packets/questions" / f"{c['corp_code']}.md"
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -317,9 +331,9 @@ def cmd_question_packets(P: Paths, args) -> None:
 def cmd_questions_merge(P: Paths, args) -> None:
     """회사별 질문 파일을 검증·병합해 questions.jsonl을 쓴다(다른 분할의 기존 행은 보존)."""
     keep = [r for r in read_jsonl(P.jsonl("questions.jsonl")) if r["split"] not in
-            {c["split"] for c in companies(P, args.split)}]
+            {c["split"] for c in companies(P, args.split, stage="data")}]
     rows = []
-    for c in companies(P, args.split):
+    for c in companies(P, args.split, stage="data"):
         rows += merge_questions(read_jsonl(P.data / "questions" / f"{c['corp_code']}.jsonl"), c["corp_code"], c["split"])
     write_jsonl(P.jsonl("questions.jsonl"), sorted(keep + rows, key=lambda r: r["qid"]))
     print(f"{len(rows)} questions")
@@ -346,7 +360,7 @@ def cmd_embed(P: Paths, args) -> None:
         out.parent.mkdir(parents=True, exist_ok=True)
         with out.open("a") as f:
             pbc = passages_by_corp(P)
-            for c in companies(P, args.split):
+            for c in companies(P, args.split, stage="data"):
                 for p in pbc.get(c["corp_code"], []):
                     if p["id"] not in done:
                         vec = await llm.embed(EMBED_MODEL, DOC_PREFIX + p["text"])
@@ -364,10 +378,10 @@ def cmd_retrieve(P: Paths, args) -> None:
 
     vecs = load_vectors(P)
     pbc = passages_by_corp(P)
-    missing = [p["id"] for c in companies(P, args.split) for p in pbc[c["corp_code"]] if p["id"] not in vecs]
+    missing = [p["id"] for c in companies(P, args.split, stage="data") for p in pbc[c["corp_code"]] if p["id"] not in vecs]
     if missing:
         raise SystemExit(f"{len(missing)} passages lack current vectors; run embed")
-    codes = {c["corp_code"] for c in companies(P, args.split)}
+    codes = {c["corp_code"] for c in companies(P, args.split, stage="data")}
     answered = {a["qid"] for a in read_jsonl(P.jsonl("answers.jsonl"))}
     qs = retrieval_targets([q for q in read_jsonl(P.jsonl("questions.jsonl")) if q["corp_code"] in codes], answered)
     llm = _ollama()
@@ -404,7 +418,7 @@ def cmd_generate(P: Paths, args) -> None:
     text = _passage_text(P)
     names = _corp_names(P)
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
-    codes = {c["corp_code"] for c in companies(P, args.split)}
+    codes = {c["corp_code"] for c in companies(P, args.split, stage="data")}
     existing = read_jsonl(P.jsonl("answers.jsonl"))
     done = {a["qid"] for a in existing}
     todo = [q for q in read_jsonl(P.jsonl("questions.jsonl")) if q["corp_code"] in codes and q["qid"] not in done]
@@ -424,7 +438,7 @@ def cmd_generate(P: Paths, args) -> None:
 
 def cmd_claims(P: Paths, args) -> None:
     """분할의 답변에서 자연 주장을 만든다(통제 주장 행은 보존)."""
-    codes = {c["corp_code"] for c in companies(P, args.split)}
+    codes = {c["corp_code"] for c in companies(P, args.split, stage="data")}
     answers = [a for a in read_jsonl(P.jsonl("answers.jsonl")) if a["qid"].split("-q")[0] in codes]
     keep = [c for c in read_jsonl(P.jsonl("claims.jsonl"))
             if c["source"] == "controlled" or c["qid"].split("-q")[0] not in codes]
@@ -438,7 +452,7 @@ def cmd_controlled_packets(P: Paths, args) -> None:
     guide = (P.ev / "prompts/controlled_writer.md").read_text()
     text = _passage_text(P)
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
-    codes = [c["corp_code"] for c in companies(P, args.split)]
+    codes = [c["corp_code"] for c in companies(P, args.split, stage="data")]
     all_q = read_jsonl(P.jsonl("questions.jsonl"))
     all_qids = [q["qid"] for q in all_q]
     qs = [q for q in all_q if q["corp_code"] in codes]
@@ -460,7 +474,7 @@ def cmd_controlled_check(P: Paths, args) -> None:
     text = _passage_text(P)
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
     names = tuple(_corp_names(P).values())
-    codes = {c["corp_code"] for c in companies(P, args.split)}
+    codes = {c["corp_code"] for c in companies(P, args.split, stage="data")}
     all_qids = [q["qid"] for q in read_jsonl(P.jsonl("questions.jsonl"))]
     rows, rejected = [], []
     for corp in sorted(codes):
@@ -557,7 +571,7 @@ def cmd_label_packets(P: Paths, args) -> None:
     text = _passage_text(P)
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
     qtext = {q["qid"]: q["question"] for q in read_jsonl(P.jsonl("questions.jsonl"))}
-    codes = {c["corp_code"] for c in companies(P, args.split)}
+    codes = {c["corp_code"] for c in companies(P, args.split, stage="data")}
     claims = [c for c in read_jsonl(P.jsonl("claims.jsonl")) if c["qid"].split("-q")[0] in codes]
     only, other = None, {}
     if args.round == 2:
@@ -594,7 +608,7 @@ def cmd_labels_merge(P: Paths, args) -> None:
     """1·2차 라벨을 병합해 labels.jsonl을 쓰고 1차 κ(이진, 비주장 제외)를 출력한다."""
     from lab.evidence.metrics import kappa
 
-    codes = {c["corp_code"] for c in companies(P, args.split)}
+    codes = {c["corp_code"] for c in companies(P, args.split, stage="data")}
     claims = [c for c in read_jsonl(P.jsonl("claims.jsonl")) if c["qid"].split("-q")[0] in codes]
     cids = {lid(c["cid"]): c["cid"] for c in claims}
     r1 = {lb: _read_labels(P, 1, lb, codes, cids) for lb in ("opus", "codex")}
@@ -652,6 +666,7 @@ def cmd_judge(P: Paths, args) -> None:
         raise SystemExit("prereg.json must be committed before JEV calls")
     if not args.tag:
         raise SystemExit("--tag is required")
+    once(P.priv / "scores" / f"{args.tag}.jsonl", args.split)
     claims = _judgeable(P, args.split)
     if args.limit:
         keep = set(subset([c["cid"] for c in claims if c["source"] == "natural"], args.limit))
@@ -777,6 +792,100 @@ def cmd_stage0_report(P: Paths, args) -> None:
 
 
 COMMANDS.update({"judge": cmd_judge, "stage0-report": cmd_stage0_report})
+
+
+def _claims_for(P: Paths, split_name: str, stage: str = "judge") -> list[dict]:
+    codes = {c["corp_code"] for c in companies(P, split_name, stage=stage)}
+    return [c for c in read_jsonl(P.jsonl("claims.jsonl")) if c["qid"].split("-q")[0] in codes]
+
+
+def cmd_claim_embed(P: Paths, args) -> None:
+    """주장을 QUERY 접두어로 임베딩한다(cid+본문 해시가 같으면 건너뜀). 호스트 Ollama."""
+    import asyncio
+
+    from app.services.evidence.retrieve import QUERY_PREFIX
+
+    out = P.priv / "claim_vecs.jsonl"
+    done = {(r["cid"], r["sha256"]) for r in read_jsonl(out)}
+    todo = [c for c in _claims_for(P, args.split) if (c["cid"], _sha(c["text"])) not in done]
+    llm = _ollama()
+
+    async def run():
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with out.open("a") as f:
+            for c in todo:
+                f.write(json.dumps({"cid": c["cid"], "sha256": _sha(c["text"]),
+                                    "vec": await llm.embed(EMBED_MODEL, QUERY_PREFIX + c["text"])}) + "\n")
+
+    asyncio.run(run())
+    print(f"{len(todo)} claim vectors")
+
+
+def nli_revision() -> str:
+    from huggingface_hub import HfApi
+
+    from lab.evidence.baselines import NLI_MODEL
+    return HfApi().model_info(NLI_MODEL).sha
+
+
+def cmd_baselines(P: Paths, args) -> None:
+    """기준선 하나를 분할 주장에 실행한다. 홀드아웃은 한 번만."""
+    import asyncio
+
+    from lab.evidence import baselines as bl
+
+    out = P.priv / "baselines" / f"{args.tag}_{args.split}.jsonl"
+    once(out, args.split)
+    lab = {r["cid"]: r["label"] for r in read_jsonl(P.jsonl("labels.jsonl"))}
+    claims = [c for c in _claims_for(P, args.split) if lab.get(c["cid"]) not in (None, "disputed", "non_claim")]
+    text = _passage_text(P)
+    ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
+    rows: list[dict] = []
+    if args.tag == "lex":
+        rows = [{"cid": c["cid"], "score": bl.lex_score(c["text"], [text[i] for i in ret[c["qid"]]]), "ok": True} for c in claims]
+    elif args.tag == "emb":
+        pv = load_vectors(P)
+        cv = {r["cid"]: r["vec"] for r in read_jsonl(P.priv / "claim_vecs.jsonl")}
+        rows = [{"cid": c["cid"], "score": bl.emb_score(cv[c["cid"]], [pv[i] for i in ret[c["qid"]]]), "ok": True} for c in claims]
+    elif args.tag == "nli":
+        rev = nli_revision()
+        pairs = [(text[i], c["text"]) for c in claims for i in ret[c["qid"]]]
+        probs = bl.nli_entailment(pairs, rev)
+        rows = [{"cid": c["cid"], "score": max(probs[k * K:(k + 1) * K]), "ok": True, "revision": rev}
+                for k, c in enumerate(claims)]
+    elif args.tag == "llm":
+        llm = _ollama()
+
+        async def run():
+            res = []
+            for c in claims:
+                txt = await llm.chat(GEN_MODEL, bl.llm_messages(c["text"], [text[i] for i in ret[c["qid"]]]), bl.LLM_OPTIONS)
+                sc = bl.parse_llm_score(txt)
+                res.append({"cid": c["cid"], "score": sc if sc is not None else 0.0, "ok": sc is not None})
+            return res
+
+        rows = asyncio.run(run())
+    else:
+        raise SystemExit("--tag must be lex|emb|nli|llm")
+    write_jsonl(out, rows)
+    log_attempt(P, "baselines", tag=args.tag, split=args.split, claims=len(rows), failed=sum(not r["ok"] for r in rows))
+    print(f"{len(rows)} {args.tag} scores")
+
+
+def cmd_stage1_freeze_config(P: Paths, args) -> None:
+    """stage1-tune 결과를 사전등록 stage1 블록으로 동결한다(홀드아웃 데이터 생성이 열린다). 덮어쓰기 금지."""
+    pre = json.loads(P.prereg.read_text())
+    if pre.get("stage1"):
+        raise SystemExit("stage1 block already frozen")
+    pre["stage1"] = json.loads((P.ev / "results/stage1-tune.json").read_text())
+    pre["version"] = max(2, pre.get("version", 1))
+    P.prereg.write_text(json.dumps(pre, ensure_ascii=False, indent=2) + "\n")
+    log_attempt(P, "stage1-freeze-config")
+    print("stage1 frozen")
+
+
+COMMANDS.update({"claim-embed": cmd_claim_embed, "baselines": cmd_baselines,
+                 "stage1-freeze-config": cmd_stage1_freeze_config})
 
 
 def main(argv: list[str] | None = None) -> None:
