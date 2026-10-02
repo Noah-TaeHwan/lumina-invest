@@ -14,6 +14,7 @@
 - AI가 만든 라벨·문서는 AI가 만들었다고 밝힌다.
 
 ## 어디서 무엇을 하나
+- 실제 실행 스택은 compose.portfolio.yml(Celery 워커 없음). 실행 환경 전제는 PORTFOLIO_LOCAL.md를 먼저 확인한다.
 - `lab/data/`(DART 원문·문단·벡터·JEV 호출 기록)는 gitignore라 클론에 없다. TypeSafe·OpenDART 키와 Ollama도 로컬에만 있다.
 - 그래서 JEV 실호출, DART 수집, Ollama 생성·임베딩, 평가 재실행은 로컬에서만 한다. 클라우드 세션은 설치·호출을 시도하지 말고 코드·문서·단위 테스트까지만 한다.
 - 근거 판정 단위 테스트(외부 호출 없음):
