@@ -172,7 +172,231 @@ def cmd_passages(P: Paths, args) -> None:
     print(f"{len(rows)} passages")
 
 
-COMMANDS = {"split": cmd_split, "passages": cmd_passages}
+CATEGORIES = ["사업 개요", "주요 제품·서비스", "매출 구성·수치", "원재료·생산설비", "위험·파생", "연구개발·주요계약"]
+VARIANTS = ["숫자 변경", "기간 바꾸기", "주체 교체", "부정", "다른 기업 사실"]
+K = 8
+GEN_MODEL = "llama3.2:1b"
+EMBED_MODEL = "nomic-embed-text"
+
+
+def merge_questions(rows: list[dict], corp_code: str, split: str) -> list[dict]:
+    """작성자 출력 6줄을 범주 순서로 정렬해 qid를 붙인다. 범주가 정확히 하나씩이 아니면 ValueError."""
+    cats = [r["category"] for r in rows]
+    if sorted(cats) != sorted(CATEGORIES):
+        raise ValueError(f"{corp_code}: categories {cats}")
+    by_cat = {r["category"]: r["question"].strip() for r in rows}
+    return [{"qid": f"{corp_code}-q{i}", "corp_code": corp_code, "category": cat, "question": by_cat[cat],
+             "split": split} for i, cat in enumerate(CATEGORIES, 1)]
+
+
+def natural_claims(answer_rows: list[dict]) -> list[dict]:
+    """답변마다 앞 5문장을 자연 주장으로 만든다."""
+    from app.services.evidence.claims import split_sentences
+
+    out = []
+    for a in answer_rows:
+        for i, s in enumerate(split_sentences(a["answer"])[:5], 1):
+            out.append({"cid": f"{a['qid']}-n{i}", "qid": a["qid"], "source": "natural", "text": s,
+                        "variant": None, "expected": None})
+    return out
+
+
+def variant_for(i: int) -> str:
+    """질문 순번 i(0부터)에 순환 배정하는 변형 유형."""
+    return VARIANTS[i % len(VARIANTS)]
+
+
+def check_controlled(row: dict, passages: list[str], names: tuple[str, ...]) -> tuple[bool, str]:
+    """통제 변형이 참 문장과 다르고, 새로 넣은 숫자·회사명이 문단 8개에 없는지 본다."""
+    from app.services.evidence.claims import new_values_absent
+
+    if row["variant_text"].strip() == row["true_text"].strip():
+        return False, "variant equals true text"
+    if not new_values_absent(row["variant_text"], row["true_text"], passages, names):
+        return False, "new value present in passages"
+    return True, "ok"
+
+
+def _corp_names(P: Paths) -> dict[str, str]:
+    return {c["corp_code"]: c["corp_name"] for c in load_split(P)["companies"]}
+
+
+def cmd_question_packets(P: Paths, args) -> None:
+    """회사마다 지시문 + 지정 절 문단 전체를 담은 질문 작성 꾸러미를 비공개 폴더에 쓴다."""
+    guide = (P.ev / "prompts/question_writer.md").read_text()
+    pbc = passages_by_corp(P)
+    for c in companies(P, args.split):
+        body = "\n".join(f"[{p['id']}] {p['text']}" for p in pbc[c["corp_code"]])
+        out = P.priv / "packets/questions" / f"{c['corp_code']}.md"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(f"{guide}\n\n# 회사: {c['corp_name']} ({c['corp_code']})\n"
+                       f"# 출력 파일: lab/evidence/data/questions/{c['corp_code']}.jsonl\n\n{body}\n")
+    print("ok")
+
+
+def cmd_questions_merge(P: Paths, args) -> None:
+    """회사별 질문 파일을 검증·병합해 questions.jsonl을 쓴다(다른 분할의 기존 행은 보존)."""
+    keep = [r for r in read_jsonl(P.jsonl("questions.jsonl")) if r["split"] not in
+            {c["split"] for c in companies(P, args.split)}]
+    rows = []
+    for c in companies(P, args.split):
+        rows += merge_questions(read_jsonl(P.data / "questions" / f"{c['corp_code']}.jsonl"), c["corp_code"], c["split"])
+    write_jsonl(P.jsonl("questions.jsonl"), sorted(keep + rows, key=lambda r: r["qid"]))
+    print(f"{len(rows)} questions")
+
+
+def _ollama():
+    import os
+
+    from app.lib.ollama import OllamaClient
+    return OllamaClient(os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434"), 600.0)
+
+
+def cmd_embed(P: Paths, args) -> None:
+    """모든 문단을 임베딩해 비공개 파일에 캐시한다(이미 있는 ID는 건너뜀). 컨테이너에서 실행."""
+    import asyncio
+
+    from app.services.evidence.retrieve import DOC_PREFIX
+
+    out = P.priv / "passage_vecs.jsonl"
+    done = {r["id"] for r in read_jsonl(out)}
+    llm = _ollama()
+
+    async def run():
+        out.parent.mkdir(parents=True, exist_ok=True)
+        with out.open("a") as f:
+            for rows in passages_by_corp(P).values():
+                for p in rows:
+                    if p["id"] not in done:
+                        vec = await llm.embed(EMBED_MODEL, DOC_PREFIX + p["text"])
+                        f.write(json.dumps({"id": p["id"], "vec": vec}) + "\n")
+
+    asyncio.run(run())
+    print("ok")
+
+
+def cmd_retrieve(P: Paths, args) -> None:
+    """분할의 질문마다 같은 회사 문단 중 상위 K개를 고른다. 컨테이너에서 실행."""
+    import asyncio
+
+    from app.services.evidence.retrieve import QUERY_PREFIX, top_k
+
+    vecs = {r["id"]: r["vec"] for r in read_jsonl(P.priv / "passage_vecs.jsonl")}
+    pbc = passages_by_corp(P)
+    codes = {c["corp_code"] for c in companies(P, args.split)}
+    qs = [q for q in read_jsonl(P.jsonl("questions.jsonl")) if q["corp_code"] in codes]
+    llm = _ollama()
+    keep = [r for r in read_jsonl(P.jsonl("retrieval.jsonl")) if r["qid"] not in {q["qid"] for q in qs}]
+
+    async def run():
+        rows = []
+        for q in qs:
+            ids = [p["id"] for p in pbc[q["corp_code"]]]
+            qv = await llm.embed(EMBED_MODEL, QUERY_PREFIX + q["question"])
+            rows.append({"qid": q["qid"], "passage_ids": [ids[i] for i in top_k(qv, [vecs[i] for i in ids], K)]})
+        return rows
+
+    rows = asyncio.run(run())
+    write_jsonl(P.jsonl("retrieval.jsonl"), sorted(keep + rows, key=lambda r: r["qid"]))
+    print(f"{len(rows)} retrievals")
+
+
+def _passage_text(P: Paths) -> dict[str, str]:
+    return {r["id"]: r["text"] for r in read_jsonl(P.priv / "passages.jsonl")}
+
+
+def cmd_generate(P: Paths, args) -> None:
+    """질문마다 검색 문단 8개로 답변을 한 번 생성해 동결한다(이미 있는 qid는 건너뜀). 컨테이너에서 실행."""
+    import asyncio
+
+    import httpx
+
+    from app.services.evidence.generate import PROMPT_SHA, generate_answer
+
+    llm = _ollama()
+    tags = httpx.get(f"{llm._base}/api/tags", timeout=30).json()["models"]
+    digest = next(m["digest"][:12] for m in tags if m["name"] == GEN_MODEL)
+    text = _passage_text(P)
+    names = _corp_names(P)
+    ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
+    codes = {c["corp_code"] for c in companies(P, args.split)}
+    existing = read_jsonl(P.jsonl("answers.jsonl"))
+    done = {a["qid"] for a in existing}
+    todo = [q for q in read_jsonl(P.jsonl("questions.jsonl")) if q["corp_code"] in codes and q["qid"] not in done]
+
+    async def run():
+        out = []
+        for q in todo:
+            ans = await generate_answer(llm, GEN_MODEL, names[q["corp_code"]], q["question"],
+                                        [text[i] for i in ret[q["qid"]]])
+            out.append({"qid": q["qid"], "model": GEN_MODEL, "digest": digest, "prompt_sha": PROMPT_SHA,
+                        "answer": ans})
+            write_jsonl(P.jsonl("answers.jsonl"), sorted(existing + out, key=lambda r: r["qid"]))
+        return out
+
+    print(f"{len(asyncio.run(run()))} answers")
+
+
+def cmd_claims(P: Paths, args) -> None:
+    """분할의 답변에서 자연 주장을 만든다(통제 주장 행은 보존)."""
+    codes = {c["corp_code"] for c in companies(P, args.split)}
+    answers = [a for a in read_jsonl(P.jsonl("answers.jsonl")) if a["qid"].split("-q")[0] in codes]
+    keep = [c for c in read_jsonl(P.jsonl("claims.jsonl"))
+            if c["source"] == "controlled" or c["qid"].split("-q")[0] not in codes]
+    rows = natural_claims(answers)
+    write_jsonl(P.jsonl("claims.jsonl"), sorted(keep + rows, key=lambda r: r["cid"]))
+    print(f"{len(rows)} natural claims")
+
+
+def cmd_controlled_packets(P: Paths, args) -> None:
+    """회사마다 질문·검색 문단 8개·배정 변형 유형을 담은 통제 주장 작성 꾸러미를 쓴다."""
+    guide = (P.ev / "prompts/controlled_writer.md").read_text()
+    text = _passage_text(P)
+    ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
+    codes = [c["corp_code"] for c in companies(P, args.split)]
+    qs = [q for q in read_jsonl(P.jsonl("questions.jsonl")) if q["corp_code"] in codes]
+    for corp in codes:
+        parts = []
+        for i, q in enumerate(qs):
+            if q["corp_code"] != corp:
+                continue
+            ps = "\n".join(f"[문단 {j}] {text[pid]}" for j, pid in enumerate(ret[q["qid"]], 1))
+            parts.append(f"## {q['qid']} — 변형 유형: {variant_for(i)}\n질문: {q['question']}\n{ps}\n")
+        out = P.priv / "packets/controlled" / f"{corp}.md"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(f"{guide}\n\n# 출력 파일: lab/evidence/data/controlled/{corp}.jsonl\n\n" + "\n".join(parts))
+    print("ok")
+
+
+def cmd_controlled_check(P: Paths, args) -> None:
+    """통제 주장 작성 결과를 검사해 claims.jsonl에 c1(의역, 기대 지지됨)·c2(변형, 기대 지지 안 됨)로 넣는다."""
+    text = _passage_text(P)
+    ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
+    names = tuple(_corp_names(P).values())
+    codes = {c["corp_code"] for c in companies(P, args.split)}
+    rows, rejected = [], []
+    for corp in sorted(codes):
+        for r in read_jsonl(P.data / "controlled" / f"{corp}.jsonl"):
+            ok, why = check_controlled(r, [text[i] for i in ret[r["qid"]]], names)
+            if not ok:
+                rejected.append({"qid": r["qid"], "reason": why})
+                continue
+            rows.append({"cid": f"{r['qid']}-c1", "qid": r["qid"], "source": "controlled", "text": r["true_text"],
+                         "variant": "의역", "expected": "supported"})
+            rows.append({"cid": f"{r['qid']}-c2", "qid": r["qid"], "source": "controlled", "text": r["variant_text"],
+                         "variant": r["variant_type"], "expected": "not_supported"})
+    keep = [c for c in read_jsonl(P.jsonl("claims.jsonl"))
+            if not (c["source"] == "controlled" and c["qid"].split("-q")[0] in codes)]
+    write_jsonl(P.jsonl("claims.jsonl"), sorted(keep + rows, key=lambda r: r["cid"]))
+    write_jsonl(P.jsonl("controlled_rejected.jsonl"), rejected)
+    log_attempt(P, "controlled-check", accepted=len(rows) // 2, rejected=len(rejected))
+    print(f"{len(rows) // 2} accepted, {len(rejected)} rejected")
+
+
+COMMANDS = {"split": cmd_split, "passages": cmd_passages, "question-packets": cmd_question_packets,
+            "questions-merge": cmd_questions_merge, "embed": cmd_embed, "retrieve": cmd_retrieve,
+            "generate": cmd_generate, "claims": cmd_claims, "controlled-packets": cmd_controlled_packets,
+            "controlled-check": cmd_controlled_check}
 
 
 def main(argv: list[str] | None = None) -> None:
