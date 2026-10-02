@@ -888,6 +888,176 @@ COMMANDS.update({"claim-embed": cmd_claim_embed, "baselines": cmd_baselines,
                  "stage1-freeze-config": cmd_stage1_freeze_config})
 
 
+BASELINES = ("lex", "emb", "nli", "llm")
+
+
+def delta_stat(b_star: str):
+    """같은 표본에서 AUC(SYS) − AUC(B*). 한 종류뿐이면 None."""
+    from lab.evidence.metrics import auc
+
+    def stat(rows):
+        a = auc([r["y"] for r in rows], [r["sys"] for r in rows])
+        b = auc([r["y"] for r in rows], [r[b_star] for r in rows])
+        return None if a is None or b is None else a - b
+    return stat
+
+
+def score_rows(P: Paths, split_name: str, tau_s: float, tau_c: float, natural_only: bool = True) -> list[dict]:
+    """판정 가능한 주장마다 SYS·JEV·기준선 점수와 라벨을 모은다."""
+    from app.services.evidence.judge import Judgement, sys_decision
+    from app.services.evidence.numbers import number_check, parse
+
+    cluster = {c["corp_code"]: c["cluster"] for c in load_split(P)["companies"]}
+    text = _passage_text(P)
+    ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
+    jev = _scores(P, split_name)
+    base = {t: {r["cid"]: r["score"] for r in read_jsonl(P.priv / "baselines" / f"{t}_{split_name}.jsonl")} for t in BASELINES}
+    rows = []
+    for c in _judgeable(P, split_name):
+        if (natural_only and c["source"] != "natural") or c["cid"] not in jev:
+            continue
+        r = jev[c["cid"]]
+        ps = [text[i] for i in ret[c["qid"]]]
+        valid = [number_check(c["text"], p) for p in ps]
+        dec, idx, sys_score = sys_decision(Judgement(r["s"], r["c"], r["ok"], 0), valid, tau_s, tau_c)
+        rows.append({"cid": c["cid"], "qid": c["qid"], "cluster": cluster[c["qid"].split("-q")[0]],
+                     "label": c["label"], "y": int(c["label"] == "supported"), "sys": sys_score,
+                     "jev": max(r["s"]) if r["ok"] else 0.0, "has_number": bool(parse(c["text"])),
+                     "decision": dec, "source": c["source"], "variant": c.get("variant"),
+                     "expected": c.get("expected"), **{t: base[t].get(c["cid"]) for t in BASELINES}})
+    return rows
+
+
+def _judge_rows_for_tuning(P: Paths, split_name: str) -> list[dict]:
+    from app.services.evidence.numbers import number_check
+
+    text = _passage_text(P)
+    ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
+    jev = _scores(P, split_name)
+    return [{"s": jev[c["cid"]]["s"], "c": jev[c["cid"]]["c"], "label": c["label"],
+             "valid": [number_check(c["text"], text[i]) for i in ret[c["qid"]]]}
+            for c in _judgeable(P, split_name) if c["source"] == "natural" and c["cid"] in jev and jev[c["cid"]]["ok"]]
+
+
+def _op_point(rows: list[dict]) -> dict:
+    """지지됨 정밀도·재현율·커버리지와 반박 오탐률(정답이 반박 아님인데 반박 판정)."""
+    sup = [r for r in rows if r["decision"] == "supported"]
+    tp = sum(r["y"] for r in sup)
+    pos = sum(r["y"] for r in rows)
+    neg_c = [r for r in rows if r["label"] != "contradicted"]
+    return {"supported_precision": tp / len(sup) if sup else None, "supported_recall": tp / pos if pos else None,
+            "coverage": len(sup) / len(rows) if rows else None,
+            "contradiction_false_positive_rate": (sum(r["decision"] == "contradicted" for r in neg_c) / len(neg_c)) if neg_c else None}
+
+
+def cmd_stage1_tune(P: Paths, args) -> None:
+    """τ_c→τ_s(조정 자연), B*(조정 자연 AUC), MDE(개발 자연, 홀드아웃 군집 수), 확인 세트 운영점."""
+    from lab.evidence import thresholds as th
+    from lab.evidence.metrics import auc, mde
+
+    tune = _judge_rows_for_tuning(P, "tune")
+    tau_c = th.choose_tau_c(tune)
+    tau_s = th.choose_tau_s(tune, tau_c)
+    t_rows = score_rows(P, "tune", tau_s, tau_c)
+    base_auc = {t: auc([r["y"] for r in t_rows], [r[t] for r in t_rows]) for t in BASELINES
+                if all(r[t] is not None for r in t_rows)}
+    b_star = max(base_auc, key=base_auc.get)
+    dev = t_rows + score_rows(P, "check", tau_s, tau_c)
+    n_hold = len({c["cluster"] for c in load_split(P)["companies"] if c["split"] == "holdout"})
+    m = mde(dev, n_hold, delta_stat(b_star))
+    c_rows = score_rows(P, "check", tau_s, tau_c)
+    result = {"tau_c": tau_c, "tau_s": tau_s, "baseline_auc_tune": base_auc, "b_star": b_star,
+              "sys_auc_tune": auc([r["y"] for r in t_rows], [r["sys"] for r in t_rows]),
+              "mde": m, "holdout_clusters": n_hold,
+              "holdout_questions_per_company": 6 if (m is not None and m <= 0.10) else 10,
+              "exploratory": False, "check_operating_point": _op_point(c_rows),
+              "check_sys_auc": auc([r["y"] for r in c_rows], [r["sys"] for r in c_rows]),
+              "nli_revision": next((r.get("revision") for r in read_jsonl(P.priv / "baselines/nli_tune.jsonl")), None),
+              "llm_prompt": __import__("lab.evidence.baselines", fromlist=["LLM_SYSTEM"]).LLM_SYSTEM}
+    out = P.ev / "results/stage1-tune.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(result, ensure_ascii=False, indent=1) + "\n")
+    log_attempt(P, "stage1-tune", tau_c=tau_c, tau_s=tau_s, b_star=b_star, mde=m)
+    print(json.dumps({k: result[k] for k in ("tau_c", "tau_s", "b_star", "mde", "holdout_questions_per_company")}))
+
+
+def _sha_rows(rows: list[dict]) -> str:
+    return hashlib.sha256("".join(json.dumps(r, ensure_ascii=False, sort_keys=True) for r in rows).encode()).hexdigest()
+
+
+def cmd_freeze_holdout(P: Paths, args) -> None:
+    """홀드아웃 데이터 해시를 동결한다(판정 봉인 해제). 덮어쓰기 금지."""
+    import subprocess
+
+    if P.prereg_holdout.exists():
+        raise SystemExit("prereg_holdout.json already exists")
+    codes = {c["corp_code"] for c in companies(P, "holdout", stage="data")}
+    pick = lambda name, key: [r for r in read_jsonl(P.jsonl(name)) if r[key].split("-q")[0] in codes]
+    labels = pick("labels.jsonl", "cid")
+    if not labels:
+        raise SystemExit("no holdout labels")
+    data = {"split_sha256": hashlib.sha256(P.split_json.read_bytes()).hexdigest(),
+            "questions_sha256": _sha_rows(pick("questions.jsonl", "qid")),
+            "retrieval_sha256": _sha_rows(pick("retrieval.jsonl", "qid")),
+            "answers_sha256": _sha_rows(pick("answers.jsonl", "qid")),
+            "claims_sha256": _sha_rows(pick("claims.jsonl", "cid")),
+            "labels_sha256": _sha_rows(labels),
+            "prereg_sha256": hashlib.sha256(P.prereg.read_bytes()).hexdigest(),
+            "code_commit": subprocess.run(["git", "-C", str(P.root), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip(),
+            "frozen_at": datetime.now(timezone.utc).isoformat()}
+    P.prereg_holdout.write_text(json.dumps(data, indent=1) + "\n")
+    log_attempt(P, "freeze-holdout", claims=len(pick("claims.jsonl", "cid")))
+    print("holdout frozen")
+
+
+def cmd_stage1_report(P: Paths, args) -> None:
+    """홀드아웃 주결과와 보조 지표를 계산한다(동결 뒤에만)."""
+    from lab.evidence.metrics import auc, cluster_bootstrap, macro_f1, verdict
+
+    cfg = json.loads(P.prereg.read_text())["stage1"]
+    companies(P, "holdout")  # 동결 확인
+    rows = score_rows(P, "holdout", cfg["tau_s"], cfg["tau_c"])
+    b = cfg["b_star"]
+    pos, neg = sum(r["y"] for r in rows), sum(1 - r["y"] for r in rows)
+    point, lo, hi = cluster_bootstrap(rows, delta_stat(b))
+    a = lambda key, rs=rows: auc([r["y"] for r in rs], [r[key] for r in rs])
+    by_cluster = {}
+    for r in rows:
+        by_cluster.setdefault(r["cluster"], []).append(r)
+    signs = [delta_stat(b)(rs) for rs in by_cluster.values()]
+    nonum = [r for r in rows if not r["has_number"]]
+    pred3 = [{"supported": "supported", "contradicted": "contradicted"}.get(r["decision"], "no_evidence") for r in rows]
+    ctrl = score_rows(P, "holdout", cfg["tau_s"], cfg["tau_c"], natural_only=False)
+    ctrl = [r for r in ctrl if r["source"] == "controlled"]
+    by_var = {}
+    for r in ctrl:
+        by_var.setdefault(r["variant"], []).append((r["decision"] == "supported") == (r["expected"] == "supported"))
+    res = {"n": len(rows), "supported": pos, "not_supported": neg, "descriptive_only": pos < 60 or neg < 60,
+           "b_star": b, "auc": {k: a(k) for k in ("sys", "jev", *BASELINES) if all(r[k] is not None for r in rows)},
+           "delta": {"point": point, "lo": lo, "hi": hi, **verdict(lo, hi)}, "mde": cfg.get("mde"),
+           "exploratory": cfg.get("exploratory", False),
+           "jev_minus_bstar": cluster_bootstrap(rows, lambda rs: (lambda x, y: None if x is None or y is None else x - y)(
+               auc([r["y"] for r in rs], [r["jev"] for r in rs]), auc([r["y"] for r in rs], [r[b] for r in rs]))),
+           "operating_point": _op_point(rows),
+           "numberless_auc": {"sys": a("sys", nonum), b: a(b, nonum), "n": len(nonum)},
+           "macro_f1_3class": macro_f1([r["label"] if r["label"] in ("supported", "contradicted") else "no_evidence" for r in rows],
+                                       pred3, ("supported", "contradicted", "no_evidence")),
+           "cluster_delta_signs": {"positive": sum(s is not None and s > 0 for s in signs),
+                                   "negative": sum(s is not None and s < 0 for s in signs), "undefined": sum(s is None for s in signs)},
+           "controlled_accuracy_by_variant": {k: sum(v) / len(v) for k, v in by_var.items()}}
+    out = P.ev / "results/stage1.json"
+    out.write_text(json.dumps(res, ensure_ascii=False, indent=1, default=str) + "\n")
+    (P.ev / "results/stage1-gates.md").write_text(
+        f"# Stage 1 주결과\n\nΔ = AUC(SYS) − AUC({b}) = {point} (95% {lo} ~ {hi}) → {res['delta']}\n\n"
+        f"n={len(rows)} (지지됨 {pos}), descriptive_only={res['descriptive_only']}\n")
+    log_attempt(P, "stage1-report", delta=point, lo=lo, hi=hi)
+    print(json.dumps(res["delta"]))
+
+
+COMMANDS.update({"stage1-tune": cmd_stage1_tune, "freeze-holdout": cmd_freeze_holdout,
+                 "stage1-report": cmd_stage1_report})
+
+
 def main(argv: list[str] | None = None) -> None:
     """명령 분기."""
     ap = argparse.ArgumentParser(prog="lab.evidence")
