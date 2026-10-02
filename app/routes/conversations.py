@@ -27,6 +27,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.postgres import get_pg_session
 from app.models import Chat, Conversation
+from app.services.evidence.records import latest_runs_for_chats
 from app.lib.jwt_auth import get_current_user_any
 from app.lib.user_state import (
     clear_active_conversation,
@@ -72,7 +73,7 @@ def _serialize(conv: Conversation) -> dict:
     }
 
 
-def _serialize_message(msg: Chat) -> dict:
+def _serialize_message(msg: Chat, latest_evidence_run: Optional[dict] = None) -> dict:
     return {
         "id": str(msg.id),
         "user_id": str(msg.user_id),
@@ -83,7 +84,14 @@ def _serialize_message(msg: Chat) -> dict:
         "steps": msg.steps,
         "citations": msg.citations,
         "created_at": msg.created_at.isoformat(),
+        # 근거 모드 메시지의 최신 판정 실행 요약(id, status, 문장 상태별 개수). 판정이 없으면 None
+        "latest_evidence_run": latest_evidence_run,
     }
+
+
+async def _serialize_messages(db: AsyncSession, msgs: list[Chat]) -> list[dict]:
+    latest = await latest_runs_for_chats(db, [m.id for m in msgs])
+    return [_serialize_message(m, latest.get(m.id)) for m in msgs]
 
 
 async def _assert_owner(db: AsyncSession, cid: str, user_id: str) -> Conversation:
@@ -179,7 +187,7 @@ async def get_conversation(
         .offset(msg_offset)
         .limit(msg_limit)
     )
-    messages = [_serialize_message(m) for m in result.scalars().all()]
+    messages = await _serialize_messages(db, list(result.scalars().all()))
 
     msg_total = await db.scalar(
         select(func.count()).select_from(Chat).where(Chat.conversation_id == conv.id, Chat.user_id == _oid(user["id"]))
@@ -251,7 +259,7 @@ async def list_messages(
         .offset(offset)
         .limit(limit)
     )
-    messages = [_serialize_message(m) for m in result.scalars().all()]
+    messages = await _serialize_messages(db, list(result.scalars().all()))
     total = await db.scalar(
         select(func.count()).select_from(Chat).where(Chat.conversation_id == conv.id, Chat.user_id == _oid(user["id"]))
     )

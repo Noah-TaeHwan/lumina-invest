@@ -23,6 +23,7 @@ from app.models.rebalance import RebalancePlan, CashflowEvent, RebalanceRun
 from app.models.tradingview import WebhookSignal, StrategyComparison
 from app.models.formula import FormulaIndicator, FormulaIndicatorVersion, FormulaIndicatorResult
 from app.models.chat import Conversation, Chat
+from app.models.evidence import EvidenceRun, EvidenceClaim
 from app.models.misc import (
     AuditEvent,
     NotificationSettings,
@@ -67,6 +68,8 @@ __all__ = [
     "FormulaIndicatorResult",
     "Conversation",
     "Chat",
+    "EvidenceRun",
+    "EvidenceClaim",
     "AuditEvent",
     "NotificationSettings",
     "NotificationLog",

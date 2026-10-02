@@ -14,6 +14,7 @@ from app.config import settings
 from app.database.neo4j import connect_neo4j, close_neo4j, ensure_graph_schema
 from app.lib.redis_cache import connect_redis, close_redis
 from app.routes import auth, health, chat, stocks, library, admin, system, quant, ml, macro, documents, notification, graph, conversations, tasks, ingest, paper, openapi, lean
+from app.services.evidence.background import fail_stale_runs_on_startup as fail_stale_evidence_runs
 from app.services.graph_service import seed_graph
 from app.services.sync_scheduler import start_sync_scheduler, stop_sync_scheduler
 
@@ -44,6 +45,11 @@ async def lifespan(app: FastAPI):
         await connect_postgres()
     except Exception as e:
         print(f"[WARN] PostgreSQL 연결 실패 (인증 비활성): {e}")
+    try:
+        # 근거 판정은 앱 프로세스 안 작업이라 재시작하면 진행 중 실행이 사라진다 → failed(stale). 자동 재실행 없음
+        await fail_stale_evidence_runs()
+    except Exception as e:
+        print(f"[WARN] 근거 판정 stale 정리 실패: {e}")
     try:
         await connect_neo4j()
         await ensure_graph_schema()
@@ -102,6 +108,9 @@ app.include_router(tradingview_routes.router)
 # 자유 산식 커스텀 지표 (DSL · 버전 · 결과 저장)
 from app.routes import formula as formula_routes  # noqa: E402
 app.include_router(formula_routes.router)
+# 공시 근거 모드 채팅 + 판정 기록 (EVIDENCE_CHAT_ENABLED=false면 404)
+from app.routes import evidence as evidence_routes  # noqa: E402
+app.include_router(evidence_routes.router)
 
 # 정적 파일 (프론트엔드)
 _public = os.path.join(os.path.dirname(__file__), "..", "public")

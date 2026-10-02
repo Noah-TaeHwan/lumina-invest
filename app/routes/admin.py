@@ -9,6 +9,7 @@ from app.models import (
     CrawledDoc, FundProduct, Order, PersonalCbStat, Portfolio,
 )
 from app.services.audit import audit
+from app.services.evidence.stats import MAX_DAYS as EVIDENCE_MAX_DAYS, evidence_stats
 
 router = APIRouter(prefix="/api/admin")
 
@@ -75,3 +76,13 @@ async def audit_log(
         "created_at": ev.created_at.isoformat(),
     } for ev in result.scalars().all()]
     return {"events": events, "count": len(events)}
+
+
+@router.get("/evidence/stats")
+async def evidence_judgement_stats(
+    days: int = Query(7, ge=1, le=EVIDENCE_MAX_DAYS, description="최근 며칠(최대 30일)"),
+    user=Depends(_require_admin),
+    db: AsyncSession = Depends(get_pg_session),
+):
+    """근거 판정 지표(spec 7.5절, 관리자 전용). 판정 기록 표에서 계산한다."""
+    return await evidence_stats(db, days)
