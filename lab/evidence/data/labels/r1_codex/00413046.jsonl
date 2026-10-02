@@ -1,0 +1,29 @@
+{"lid":"8ab5f45232","label":"supported","passage":7,"reason":"문단 7이 바이오시밀러 11개 제품의 글로벌 품목 허가와 유럽·미국을 포함한 세계 각국 판매를 함께 명시한다."}
+{"lid":"0397dcc5a3","label":"supported","passage":7,"reason":"문단 7이 현재까지 바이오시밀러 11개 제품의 글로벌 품목 허가를 획득했다고 명시한다."}
+{"lid":"7c2fcf4760","label":"contradicted","passage":7,"reason":"문단 7은 바이오시밀러 11개 제품의 글로벌 품목 허가를 획득했다고 하므로 미확보 주장을 반박한다."}
+{"lid":"9af38d7ede","label":"no_evidence","passage":null,"reason":"제시된 문단에는 현대자동차의 미국 앨라배마 공장이나 자동차 생산에 관한 사실이 없다."}
+{"lid":"f5f4644c36","label":"non_claim","passage":null,"reason":"유럽·미국 시장점유율을 묻는 질문이며 사실을 단정하지 않는다."}
+{"lid":"45fa9d1c2f","label":"supported","passage":1,"reason":"문단 1이 유럽 시장의 직접판매 전환을 2020년 램시마부터 시작했다고 명시한다."}
+{"lid":"c167e1193b","label":"non_claim","passage":null,"reason":"문단·절 번호 표시가 끊긴 조각이며 판단할 사실 주장이 없다."}
+{"lid":"8bf20f27f9","label":"contradicted","passage":7,"reason":"문단 7이 동일한 2025년 말 부채총계/자본총계 비율을 28.71%로 제시하여 주장한 34.52%와 다르다."}
+{"lid":"8cdcd21031","label":"non_claim","passage":null,"reason":"문단·절 번호 표시가 끊긴 조각이며 판단할 사실 주장이 없다."}
+{"lid":"a008a5d2e9","label":"supported","passage":7,"reason":"문단 7이 2025년 말 부채총계/자본총계 비율을 28.71%로 명시한다."}
+{"lid":"8d3172d115","label":"no_evidence","passage":null,"reason":"문단 3은 매출채권의 두 연도 금액만 제시하며, 다른 계정과 차입금 수치까지 나열된 매출채권 행 전체를 지지하는 단일 문단은 없다."}
+{"lid":"ae7ccecdd7","label":"no_evidence","passage":null,"reason":"매출채권의 2025년 금액은 문단 3에 있으나, 나머지 수치를 모두 같은 매출채권 행으로 뒷받침하는 단일 문단은 없다."}
+{"lid":"ec89a4714f","label":"non_claim","passage":null,"reason":"문단·절 번호 표시가 끊긴 조각이며 판단할 사실 주장이 없다."}
+{"lid":"1639a2eaa0","label":"no_evidence","passage":null,"reason":"문단 4의 매출액 4조 1,625억 원은 2025년 수치이며, 2019년 매출액은 제시되지 않는다."}
+{"lid":"00bb46e469","label":"no_evidence","passage":null,"reason":"질문 표시와 달리 생산능력을 단정하는 문장이며, 연간 램시마 1,000만 개 생산능력은 문단에 없다."}
+{"lid":"22c4b3a228","label":"supported","passage":4,"reason":"문단 4가 2025년 매출액을 4조 1,625억 원으로 명시한다."}
+{"lid":"0a55a1c4e7","label":"supported","passage":1,"reason":"문단 1이 환율변동위험의 대부분은 기능통화와 다른 통화로 거래되는 구매대금 등에서 발생한다고 명시한다."}
+{"lid":"c9c63bf541","label":"supported","passage":1,"reason":"문단 1이 연결기업은 정상적인 거래에서 발생하는 환율변동위험에 노출되어 있다고 명시한다."}
+{"lid":"7d6b2a683a","label":"non_claim","passage":null,"reason":"환율 변화가 세전이익에 미치는 영향을 묻는 질문이며 사실을 단정하지 않는다."}
+{"lid":"39f4b1e8f1","label":"no_evidence","passage":null,"reason":"문단은 환율변동위험과 재무성과에 대한 잠재적 불리한 효과를 설명하지만, 세전이익의 상승·하락을 뒷받침하는 내용은 없다."}
+{"lid":"90815b442e","label":"supported","passage":1,"reason":"문단 1이 셀트리온 연결기업의 주요 외환위험 노출 통화를 USD와 EUR 등으로 명시한다."}
+{"lid":"7a1b0de388","label":"supported","passage":1,"reason":"문단 1이 외환위험에 노출된 주요 통화는 USD와 EUR 등이라고 명시한다."}
+{"lid":"c7f8105812","label":"no_evidence","passage":null,"reason":"문단 1은 셀트리온 연결기업을 설명하며, 유한양행 연결기업의 외환위험 노출 통화는 제시되지 않는다."}
+{"lid":"2832053b65","label":"no_evidence","passage":null,"reason":"제시된 문단에는 2025년 연구개발비용이나 해당 비용이 연구개발비용의 1/3이라는 근거가 없다."}
+{"lid":"0db3d10304","label":"supported","passage":6,"reason":"문단 6이 2014년 9월 온실가스 배출권거래제 할당대상업체로 지정되었다고 명시한다."}
+{"lid":"037cf607c3","label":"no_evidence","passage":null,"reason":"문단 2의 1,844,595,921천원은 2025년 말 차입금의 6개월 이하 현금흐름이며, 연구개발비용은 제시되지 않는다."}
+{"lid":"e382be7c01","label":"contradicted","passage":6,"reason":"문단 6은 2014년 9월 온실가스 배출권거래제 할당대상업체로 지정되었다고 하므로 미지정 주장을 반박한다."}
+{"lid":"9df0319f2b","label":"no_evidence","passage":null,"reason":"문단에는 해당 비용이나 2025년 매출액 대비 1/3이라는 비율이 제시되지 않는다."}
+{"lid":"f80f63dee8","label":"no_evidence","passage":null,"reason":"문단 2의 1,520,437,157천원은 차입금의 6개월 초과~1년 이하 현금흐름이며, 연구개발비용의 매출액 대비 비율은 제시되지 않는다."}

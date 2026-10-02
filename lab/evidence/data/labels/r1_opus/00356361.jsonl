@@ -1,0 +1,31 @@
+{"lid": "08fa340d13", "label": "supported", "passage": 6, "reason": "문단 6: 석유화학 사업부문 매출 비중 38.2%"}
+{"lid": "6747099452", "label": "contradicted", "passage": 6, "reason": "문단 6은 석유화학 비중을 38.2%로 적어 41.3%와 다름"}
+{"lid": "2d52c41246", "label": "supported", "passage": 6, "reason": "문단 6이 석유화학·첨단소재·생명과학·공통 및 기타부문을 사업부문으로 나열"}
+{"lid": "a5ba91c3d6", "label": "supported", "passage": 5, "reason": "문단 5: 인간 성장호르몬제 '유트로핀' 생산·판매"}
+{"lid": "bad7f07cca", "label": "supported", "passage": 5, "reason": "문단 5: 관절염주사제 '시노비안' 생산·판매"}
+{"lid": "952c1b8e54", "label": "non_claim", "passage": null, "reason": "목록을 여는 도입 문장으로 사실 주장 아님"}
+{"lid": "bf37cade5a", "label": "contradicted", "passage": 5, "reason": "문단 5는 라이선스 아웃에 따른 매출 증대 시점을 2025년으로 적어 2023년과 다름"}
+{"lid": "a5580a75d2", "label": "supported", "passage": 5, "reason": "문단 5: 당뇨신약 '제미글로' 생산·판매"}
+{"lid": "2af83ed435", "label": "supported", "passage": 5, "reason": "문단 5의 류머티스 관절염 치료제 '유셉트'를 가리키며 이름 끝 글자만 잘림"}
+{"lid": "f186540240", "label": "supported", "passage": 5, "reason": "문단 5: 2025년 세계 최초 개발 경구용 희귀비만치료제 라이선스 아웃으로 매출 증대·수익성 개선"}
+{"lid": "b7705399fd", "label": "supported", "passage": 1, "reason": "문단 1: 첨단소재 사업부문 비중 5.7%"}
+{"lid": "a8b9a15870", "label": "supported", "passage": 1, "reason": "문단 1: 석유화학 사업부문 비중 38.2%"}
+{"lid": "0ada8a3958", "label": "contradicted", "passage": 1, "reason": "문단 1은 2025년 매출을 약 45조 9,322억원으로 적음(26,560억원은 문단 2의 투자액 합계)"}
+{"lid": "9091dffe82", "label": "contradicted", "passage": 1, "reason": "문단 1의 부문 구성에서 5.7%는 첨단소재 부문이고 반도체소재 부문은 없음"}
+{"lid": "8f5aacd3af", "label": "no_evidence", "passage": null, "reason": "LG에너지솔루션 매출액은 문단에 없음(문단 1은 비중 51.5%, 10.5조원은 문단 2의 투자액)"}
+{"lid": "da40bc9cfb", "label": "non_claim", "passage": null, "reason": "목록을 여는 도입 문장으로 사실 주장 아님"}
+{"lid": "4fcc0debdf", "label": "supported", "passage": 1, "reason": "문단 1: 첨단소재 사업부문 비중 5.7%"}
+{"lid": "c105a29355", "label": "supported", "passage": 2, "reason": "문단 2에 같은 생명과학 사업부문 내수·수출 전략 문장이 있음"}
+{"lid": "ad0dcf4e79", "label": "non_claim", "passage": null, "reason": "잘린 단어 조각으로 사실 주장이 아님"}
+{"lid": "003f4c8cf6", "label": "supported", "passage": 2, "reason": "문단 2: 범용제품 외 고부가 제품 확대와 신제품 개발로 사업구조 고도화하는 판매전략"}
+{"lid": "fe62bf1efc", "label": "contradicted", "passage": 2, "reason": "문단 2는 해당 판매전략을 강화하고 있다고 적어 부정과 충돌"}
+{"lid": "0327fd5081", "label": "supported", "passage": 3, "reason": "문단 3에 같은 LG에너지솔루션 연구개발 문장이 있음"}
+{"lid": "2e43d9ede9", "label": "no_evidence", "passage": null, "reason": "석유화학 주요 원재료에 대한 문단이 없고 문단 2의 판매전략을 원재료로 잘못 엮음"}
+{"lid": "adf57a7c53", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 환율 위험 관리 파생상품 계약 내용이 없음(CDO는 문단 2에서 LG에너지솔루션 R&D 조직명)"}
+{"lid": "2717bb2001", "label": "no_evidence", "passage": null, "reason": "현대자동차 울산 공장에 대한 문단이 없음"}
+{"lid": "0c53396592", "label": "supported", "passage": 6, "reason": "문단 6: 미국·독일·일본 위성 Lab으로 글로벌 R&D 네트워크 구축"}
+{"lid": "b154cf45fb", "label": "no_evidence", "passage": null, "reason": "CDO의 환율 관련 기능에 대한 문단이 없음"}
+{"lid": "3e515e29df", "label": "no_evidence", "passage": null, "reason": "CDO를 환율 보증 계약으로 설명하는 문단이 없음"}
+{"lid": "060723dbfc", "label": "no_evidence", "passage": null, "reason": "연구개발비용 금액·증감이 문단에 없음"}
+{"lid": "db5c9906f2", "label": "supported", "passage": 6, "reason": "문단 6: 2025년말 기준 약 45조 9,322억원 매출"}
+{"lid": "95b163b258", "label": "contradicted", "passage": 6, "reason": "문단 6은 매출을 약 45조 9,322억원으로 적어 52조 7,140억원과 다름"}

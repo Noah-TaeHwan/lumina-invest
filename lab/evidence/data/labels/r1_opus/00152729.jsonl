@@ -1,0 +1,36 @@
+{"lid": "59c6e8a439", "label": "supported", "passage": 6, "reason": "문단 6에 주력 제품군의 핵심 가치와 모바일·자동차·디지털 가전 활용이 그대로 있음"}
+{"lid": "3c60aea50e", "label": "supported", "passage": 6, "reason": "문단 6에 전자부품 제조 업체, 한중일 네트워크 기반 글로벌 기업 성장 서술이 있음"}
+{"lid": "1890877c7b", "label": "supported", "passage": 6, "reason": "문단 6이 주력 제품이 모바일·자동차·디지털 가전 등 IT 제품의 핵심 부품으로 활용된다고 함"}
+{"lid": "b2f10212ed", "label": "contradicted", "passage": 6, "reason": "문단 6은 핵심 부품으로 활용된다고 하여 부정 진술과 반대"}
+{"lid": "81b88a3dae", "label": "supported", "passage": 1, "reason": "문단 1 가격변동추이 표에 PKG 제40기 142, 제41기 148, 제42기 159원"}
+{"lid": "a1a1529be3", "label": "no_evidence", "passage": null, "reason": "SK하이닉스에 관한 문단이 없음"}
+{"lid": "3c0189e014", "label": "supported", "passage": 1, "reason": "문단 1 표에 PKG 매출 104,391백만원, 78.68%가 그대로 있음"}
+{"lid": "4eb932bec9", "label": "non_claim", "passage": null, "reason": "목차 제목 조각으로 사실 주장이 아님"}
+{"lid": "766ee4f7eb", "label": "non_claim", "passage": null, "reason": "표 머리글 조각으로 사실 주장이 아님"}
+{"lid": "cf4f91b080", "label": "non_claim", "passage": null, "reason": "표를 소개하는 안내 문장"}
+{"lid": "cef6592340", "label": "non_claim", "passage": null, "reason": "문단 번호·목차 조각"}
+{"lid": "a868fb6830", "label": "supported", "passage": 5, "reason": "문단 5에 부채비율 당기말 7.12%, 전기말 9.02%"}
+{"lid": "bbae9dbaf8", "label": "non_claim", "passage": null, "reason": "질문 문장"}
+{"lid": "9d5f923481", "label": "contradicted", "passage": 5, "reason": "문단 5의 당기말 부채비율은 7.12%로 6.48%와 다름"}
+{"lid": "f17f7df1c2", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 수출·내수 매출 수치가 없음"}
+{"lid": "c6aa5e2085", "label": "no_evidence", "passage": null, "reason": "Tokyo Electron이나 일본 매입처에 관한 문단이 없음"}
+{"lid": "0d7fea4f7a", "label": "supported", "passage": 4, "reason": "문단 4가 Discrete 반도체·광센서·LED 등 전자부품 제조 업체라고 함"}
+{"lid": "34a828da9a", "label": "supported", "passage": 2, "reason": "문단 2에 유가증권시장 상장일 1996년 10월 16일"}
+{"lid": "46e7f93837", "label": "supported", "passage": 4, "reason": "문단 4가 광센서를 개발·제조한다고 함"}
+{"lid": "1f1c1d17a9", "label": "non_claim", "passage": null, "reason": "목록을 예고하는 안내 문장"}
+{"lid": "20d9406f6a", "label": "contradicted", "passage": 2, "reason": "문단 2의 상장일은 1996년 10월 16일로 1999년과 다름"}
+{"lid": "79a8744f7f", "label": "non_claim", "passage": null, "reason": "목록을 예고하는 안내 문장"}
+{"lid": "3415ead28b", "label": "non_claim", "passage": null, "reason": "문단 번호·목차 조각"}
+{"lid": "a4833b9906", "label": "no_evidence", "passage": null, "reason": "문단은 한빛전자를 다루지 않아 주체가 맞는 근거가 없음"}
+{"lid": "fb420df0d4", "label": "supported", "passage": 1, "reason": "문단 1에 이자율위험을 정기적으로 측정한다는 문장이 그대로 있음"}
+{"lid": "53a83b7871", "label": "non_claim", "passage": null, "reason": "표를 소개하는 안내 문장"}
+{"lid": "ae75e7be5b", "label": "non_claim", "passage": null, "reason": "문단 번호·목차 조각"}
+{"lid": "6dd50de7d3", "label": "supported", "passage": 3, "reason": "문단 3 당기말 합계 10% 상승시 4,704,127천원(약 47억 원) 이익"}
+{"lid": "6f4c99170f", "label": "non_claim", "passage": null, "reason": "목차 제목 조각"}
+{"lid": "67adc9403a", "label": "supported", "passage": 5, "reason": "문단 5에 연구개발비/매출액 비율 제42기 3.73%, 제41기 3.67%"}
+{"lid": "b0517e146b", "label": "supported", "passage": 6, "reason": "문단 6에 산출기준이 기간별 단순 산술평균가격이라고 그대로 있음"}
+{"lid": "248e486ac4", "label": "non_claim", "passage": null, "reason": "문단 번호·목차 조각"}
+{"lid": "8fbaf747f0", "label": "supported", "passage": 6, "reason": "문단 6에 WAFER 공급시장 경쟁·독과점 없음 서술이 그대로 있음"}
+{"lid": "d2bfbc13c6", "label": "contradicted", "passage": 5, "reason": "문단 5에서 3.67%에서 3.73%로 높아져 부정 진술과 반대"}
+{"lid": "e46ef9ed1f", "label": "non_claim", "passage": null, "reason": "회사의 판단(의견) 진술"}
+{"lid": "fbbda3346c", "label": "supported", "passage": 6, "reason": "문단 6에 매입단가 산출기준과 가격변동원인이 그대로 있음"}

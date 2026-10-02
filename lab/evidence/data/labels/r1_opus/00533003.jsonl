@@ -1,0 +1,30 @@
+{"lid": "ac964f1d5b", "label": "no_evidence", "passage": null, "reason": "농심에 관한 문단이 없음"}
+{"lid": "f222239c79", "label": "no_evidence", "passage": null, "reason": "내수·수출 비중 수치가 문단에 없음(문단 3의 70%는 유지보수 단납기 비율)"}
+{"lid": "cbd8f7aa32", "label": "supported", "passage": 6, "reason": "45개국 대리점을 통해 해외 고객사에 자사 제품 공급"}
+{"lid": "f63733b2e1", "label": "no_evidence", "passage": null, "reason": "주된 전방산업이 항공이라는 서술 없음(문단 8은 항공·방산을 향후 성장동력으로만 언급)"}
+{"lid": "41cc7bfd0f", "label": "contradicted", "passage": 6, "reason": "제35기 연구개발비/매출액 비율은 1.28%"}
+{"lid": "214fc5e853", "label": "supported", "passage": 6, "reason": "제35기 연구개발비/매출액 비율 1.28%"}
+{"lid": "44b6209e89", "label": "contradicted", "passage": 4, "reason": "목적사업은 관이음쇠·밸브 생산·판매이며, 차입금 등은 제품이 아니라 금융부채(문단 1)"}
+{"lid": "cf797b4e82", "label": "non_claim", "passage": null, "reason": "술어 없이 잘린 조각 문장"}
+{"lid": "bbbd8e7457", "label": "supported", "passage": 1, "reason": "위험 노출 및 위험관리 목적·경영진 검토 문장 그대로"}
+{"lid": "fb3ccfef34", "label": "supported", "passage": 1, "reason": "주요 금융부채·금융자산 구성 문장 그대로"}
+{"lid": "8d48a024d0", "label": "non_claim", "passage": null, "reason": "문단 표기 조각"}
+{"lid": "3d2ea8a006", "label": "supported", "passage": 7, "reason": "2025년 국내시장 27,102백만원, 증감율 11.80%"}
+{"lid": "1f7cfc827d", "label": "no_evidence", "passage": null, "reason": "문단은 2025·2024년만 제시, 2021년 수치 없음"}
+{"lid": "4996c739c6", "label": "supported", "passage": 7, "reason": "2025년 국내시장 27,102백만원"}
+{"lid": "7bd2e2de3b", "label": "contradicted", "passage": 7, "reason": "공시대상 사업은 관이음쇠 및 밸브 생산·판매"}
+{"lid": "db50409ac6", "label": "no_evidence", "passage": null, "reason": "원재료 재질별 매입 비중 정보 없음"}
+{"lid": "579f1fe6d3", "label": "supported", "passage": 7, "reason": "목적사업은 관이음쇠 및 밸브의 생산, 판매 활동만 공시대상"}
+{"lid": "7175337c91", "label": "supported", "passage": 2, "reason": "시장위험(이자율·환율), 신용, 유동성위험 노출 서술"}
+{"lid": "f2308e27de", "label": "non_claim", "passage": null, "reason": "문단 표기와 한 글자 조각"}
+{"lid": "4ad89eb3cb", "label": "contradicted", "passage": 5, "reason": "해외영업·원자재 수입으로 USD·EUR 환위험에 노출되어 있음"}
+{"lid": "c5175ac2b1", "label": "no_evidence", "passage": null, "reason": "이자율위험 정의(문단 2)와 관리방식(문단 5)을 합쳐야 함, 한 문단으로 지지 안 됨"}
+{"lid": "82392d482e", "label": "supported", "passage": 5, "reason": "해외영업·원자재 수입으로 USD·EUR 환위험 노출"}
+{"lid": "74a3f333e8", "label": "contradicted", "passage": 4, "reason": "자금 조달 실패 위험은 환율위험이 아니라 유동성위험의 정의"}
+{"lid": "ca3316c353", "label": "non_claim", "passage": null, "reason": "소제목"}
+{"lid": "91aa8d297d", "label": "supported", "passage": 1, "reason": "직전 3사업년도간 신용등급 평가 사실 없음"}
+{"lid": "4bb1d1a9e7", "label": "supported", "passage": 2, "reason": "주요 금융부채·금융자산 구성 문장 그대로"}
+{"lid": "740b997d81", "label": "supported", "passage": 3, "reason": "자체 기술연구소에서 신제품·신규장비 개발, 프로젝트연구 일괄 수행"}
+{"lid": "72556d3d4b", "label": "non_claim", "passage": null, "reason": "문단 표기 조각"}
+{"lid": "0e104dd607", "label": "no_evidence", "passage": null, "reason": "LG화학에 관한 문단이 없음"}
+{"lid": "46868601dd", "label": "supported", "passage": 1, "reason": "코스닥 상장, 2010년 11월 12일, 특례상장 해당없음"}

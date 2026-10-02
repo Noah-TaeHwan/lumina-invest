@@ -1,0 +1,27 @@
+{"lid": "c6103316c1", "label": "no_evidence", "passage": null, "reason": "문단 2는 부동산 서비스 전 영역을 아우르는 전문 인력을 보유한다고 할 뿐, 회사 사업을 부동산 서비스 전 영역으로 구성한다는 사실은 없음"}
+{"lid": "681ff44327", "label": "supported", "passage": 5, "reason": "시큐리티 사업은 크게 물리보안과 디지털보안 분야로 구분된다고 명시"}
+{"lid": "85cec7a3a1", "label": "no_evidence", "passage": null, "reason": "삼성전자 사업부문에 관한 문단 없음"}
+{"lid": "6a46984ae5", "label": "contradicted", "passage": 8, "reason": "문단 8은 60여 년간 축적된 노하우라고 하여 45년과 다름"}
+{"lid": "f38986a9fb", "label": "supported", "passage": 8, "reason": "부동산 서비스 분야 60여 년간 축적된 노하우 보유"}
+{"lid": "36be3bac9f", "label": "non_claim", "passage": null, "reason": "문단 표시 조각으로 사실 주장이 아님"}
+{"lid": "da3be329ce", "label": "non_claim", "passage": null, "reason": "목록을 예고하는 도입 문장으로 구체적 사실 주장이 아님"}
+{"lid": "5bba6ba9c1", "label": "no_evidence", "passage": null, "reason": "문단 5의 보안SI 342,202백만원은 2025년(제49기) 값이며 2021년 수치는 문단에 없음"}
+{"lid": "4da36c9718", "label": "supported", "passage": 5, "reason": "기준일 2025.12.31 표에서 제49기 보안SI 342,202백만원 = 약 3,422억원"}
+{"lid": "eaf42ff88c", "label": "contradicted", "passage": 5, "reason": "문단 5 표가 2025년 매출을 통합보안·보안SI·기타 등 사업부문·품목별로 나눠 제시함"}
+{"lid": "0728fc04a7", "label": "supported", "passage": 4, "reason": "주요 부동산 표에 수원사옥 주용도 관제센터 등으로 기재"}
+{"lid": "0f33ce193e", "label": "contradicted", "passage": 4, "reason": "주요 부동산 표에서 관제센터 용도 사업장은 수원사옥이며 광주사옥은 없음(문단 7도 관제센터를 수원·대구로 기재)"}
+{"lid": "d34ab26e51", "label": "contradicted", "passage": 4, "reason": "서비스 제공을 위해 경보기기·경보설비·차량 등 유형자산과 사무실 등 부동산을 보유한다고 하며 주택이 아님"}
+{"lid": "747df11269", "label": "supported", "passage": 7, "reason": "상장주식 등 가격 30% 증감 시 당기 총포괄손익 영향 2,911,413,927원 = 약 29억원"}
+{"lid": "733107a7c8", "label": "no_evidence", "passage": null, "reason": "문단 7은 총포괄손익에 대한 영향액만 제시하며 2,866,824,761원은 전기 영향액이고 당기 총포괄손익 수준은 문단에 없음"}
+{"lid": "4406e542c7", "label": "non_claim", "passage": null, "reason": "표를 예고하는 도입 문장"}
+{"lid": "3a95895239", "label": "no_evidence", "passage": null, "reason": "문단 7의 2,911,413,927원은 총포괄손익 영향액이며 총포괄손익이 그 금액이 된다는 수준값은 문단에 없음"}
+{"lid": "17943e7393", "label": "contradicted", "passage": 7, "reason": "30% 증감 시 당기 총포괄손익 영향이 2,911,413,927원으로 분석되어 움직이지 않는다는 주장과 반대"}
+{"lid": "6d29bc0914", "label": "non_claim", "passage": null, "reason": "내용 없이 다음 설명을 예고하는 머리말"}
+{"lid": "4042569bea", "label": "non_claim", "passage": null, "reason": "내용 없이 다음 설명을 예고하는 머리말"}
+{"lid": "d197593895", "label": "no_evidence", "passage": null, "reason": "문단 1은 신용위험이 연결회사 차원에서 관리된다고 할 뿐 보안 서비스 관리에 관한 내용 없음"}
+{"lid": "20e656bfa1", "label": "supported", "passage": 1, "reason": "문단 1 문장과 동일"}
+{"lid": "95d8acf323", "label": "supported", "passage": 1, "reason": "문단 1 문장과 동일"}
+{"lid": "ccdb637aed", "label": "supported", "passage": 1, "reason": "문단 1 문장과 동일"}
+{"lid": "1c2d517c9b", "label": "non_claim", "passage": null, "reason": "목록을 예고하는 도입 문장으로 구체적 계약 내용이 없음"}
+{"lid": "ac3a275bf1", "label": "supported", "passage": 2, "reason": "시스템 보안 서비스가 주거·상업 시설의 침입·도난·화재를 감지하고 관제센터 모니터링과 긴급출동으로 대응"}
+{"lid": "9d6bb2c149", "label": "no_evidence", "passage": null, "reason": "현대모비스에 관한 문단 없음"}

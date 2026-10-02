@@ -1,0 +1,23 @@
+{"lid": "a311fd0943", "label": "supported", "passage": 7, "reason": "문단 7: 당사는 2차전지 배터리 제품의 검사 장비를 납품하는 회사"}
+{"lid": "162db0385e", "label": "no_evidence", "passage": null, "reason": "'다양한 기술·다양한 방식' 공급이라는 모호한 서술을 직접 지지하는 문단 없음"}
+{"lid": "ed2f30beb1", "label": "contradicted", "passage": 7, "reason": "문단 7은 2차전지 배터리 검사 장비를 납품한다고 명시"}
+{"lid": "7de409de84", "label": "supported", "passage": 4, "reason": "문단 4: 매출비중이 가장 높은 것은 2차전지 배터리 공정별 머신비전검사장비"}
+{"lid": "26314a6615", "label": "no_evidence", "passage": null, "reason": "농심에 관한 문단 없음"}
+{"lid": "e1e52a6f2b", "label": "supported", "passage": 8, "reason": "문단 8에 동일 문장 존재"}
+{"lid": "a620903ce5", "label": "non_claim", "passage": null, "reason": "질문을 되받는 도입 문장으로 사실 주장 아님"}
+{"lid": "ec1b79e53f", "label": "supported", "passage": 8, "reason": "문단 8에 동일 문장 존재"}
+{"lid": "34fb391726", "label": "supported", "passage": 8, "reason": "문단 8: 2차전지 검사 장비는 제품의 용도에 맞는 다양한 검사 기능을 필요로 함"}
+{"lid": "a2c38d30d9", "label": "supported", "passage": 4, "reason": "문단 4: 리튬이온 폭발 위험성 때문에 전문 기술력 없이는 영위할 수 없고 진입장벽이 높음"}
+{"lid": "07b96c5afa", "label": "supported", "passage": 2, "reason": "문단 2: 용역 setup 대응 2025년 21,371, 2024년 15,011(백만원)"}
+{"lid": "d0fea83e31", "label": "contradicted", "passage": 2, "reason": "문단 2의 매출 단위는 백만원(예: 제품 27,465백만원)인데 만 달러로 제시해 값이 다름"}
+{"lid": "d16a8ca20c", "label": "contradicted", "passage": 2, "reason": "문단 2: 2025년 용역 매출은 21,371백만원이지 23,950백만원 아님"}
+{"lid": "cf82cfd668", "label": "contradicted", "passage": 8, "reason": "문단 8: 믹싱 사업부 신설은 2026년 2월"}
+{"lid": "43f00c77f5", "label": "no_evidence", "passage": null, "reason": "원재료 매입 최대 품목을 2차전지라고 하는 문단 없음(문단 6은 PLC·공압·광학자재만 일부 제시)"}
+{"lid": "0eb5fb7d55", "label": "supported", "passage": 8, "reason": "문단 8: 2026년 2월 믹싱 사업부 신설·믹싱 장비사업 시작"}
+{"lid": "3bfca840e3", "label": "no_evidence", "passage": null, "reason": "2차전지 매입처에 관한 문단 없음, 연구원 경력을 잘못 끌어온 문장"}
+{"lid": "a82928e8c8", "label": "no_evidence", "passage": null, "reason": "파크시스템스에 관한 문단 없음(문단 8은 엔시스의 기술)"}
+{"lid": "04d3ebba40", "label": "supported", "passage": 8, "reason": "문단 8: 2D 광학계로 3D 효과를 내는 2.5D 알고리즘 영상처리 기술"}
+{"lid": "1d68279b6a", "label": "no_evidence", "passage": null, "reason": "문단 5는 CAD 민감도만 보여 주고 미국 달러 영향이나 최대 통화 비교는 없음"}
+{"lid": "a13e0cd49f", "label": "non_claim", "passage": null, "reason": "질문 문장"}
+{"lid": "a5261e183a", "label": "contradicted", "passage": 5, "reason": "문단 5: 705→1,167→3,018백만원으로 해마다 증가"}
+{"lid": "77c609c824", "label": "supported", "passage": 5, "reason": "문단 5: 2023년 705, 2024년 1,167, 2025년 3,018백만원으로 해마다 증가"}

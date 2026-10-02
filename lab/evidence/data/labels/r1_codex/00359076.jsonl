@@ -1,0 +1,26 @@
+{"lid": "5195eba94a", "label": "non_claim", "passage": null, "reason": "사업영역 설명을 시작하는 안내 문장으로 구체적인 사실을 주장하지 않는다."}
+{"lid": "8d43cd7001", "label": "supported", "passage": 7, "reason": "문단 7은 여러 시스템의 연동과 개발이 필요한 복합 프로젝트여서 제품별 전체시장 점유율 산정이 어렵다고 명시한다."}
+{"lid": "a129efada9", "label": "supported", "passage": 8, "reason": "문단 8은 브리지텍의 영업활동을 콜센터, 통신 및 서비스로 구분하고 각 사업의 공급 업무를 설명한다."}
+{"lid": "d0d5bcafec", "label": "contradicted", "passage": 2, "reason": "문단 2는 자체 기술로 개발한 IPRON Cloud의 출시 연도를 2018년이 아닌 2021년으로 명시한다."}
+{"lid": "799e7b9371", "label": "supported", "passage": 8, "reason": "문단 8은 통신사업부문이 IP기반 유무선 멀티미디어 서비스 솔루션을 공급한다고 설명한다."}
+{"lid": "84a5946c3c", "label": "no_evidence", "passage": null, "reason": "서비스 사업이 콜센터와 통신의 일부라는 종속 관계는 제시된 문단에 없다."}
+{"lid": "5ea2ae5f6e", "label": "supported", "passage": 2, "reason": "문단 2는 순수 자체 기술력으로 개발한 IPRON Cloud를 2021년에 출시했다고 명시한다."}
+{"lid": "197afcccd7", "label": "supported", "passage": 5, "reason": "문단 5는 Catch Bot이 기존 IPCC 솔루션과 연동하여 음성 AI 상담사 역할을 담당한다고 명시한다."}
+{"lid": "e74101bea7", "label": "no_evidence", "passage": null, "reason": "음성인식과 자연어 이해는 문단 3, 가상 상담사는 문단 2에 나오지만 모든 요소를 지지하는 단일 문단은 없다."}
+{"lid": "1bb15f4b65", "label": "no_evidence", "passage": null, "reason": "문단 5는 Catch Bot의 기능을 설명하며 VoiceMate라는 제품과 그 IPCC 연동 기능은 제시되지 않았다."}
+{"lid": "68d93feece", "label": "supported", "passage": 3, "reason": "문단 3은 AICC가 STT, TTS, NLU 등 AI 언어 처리 기술을 종합하여 고객 응대 업무에 적용한 서비스라고 설명한다."}
+{"lid": "4e592cde6b", "label": "contradicted", "passage": 7, "reason": "문단 7은 2025년 말 콜센터 인프라 및 소프트웨어 매출 35,067,101천원의 비중을 70.6%로 명시하여 부정 표현을 반박한다."}
+{"lid": "284766a980", "label": "supported", "passage": 7, "reason": "문단 7은 2025년 말 콜센터 인프라 및 소프트웨어 매출이 35,067,101천원이고 매출비중이 70.6%라고 명시한다."}
+{"lid": "f47487b290", "label": "no_evidence", "passage": null, "reason": "문단 1의 36,603,589는 수주상황 합계이며 2025년 전체 매출액이 36,603,589원이라는 근거는 없다."}
+{"lid": "11437308f6", "label": "supported", "passage": 8, "reason": "문단 8은 콜센터 및 통신 소프트웨어 개발·공급 회사로 생산라인에 따른 제조 설비가 필요하지 않다고 명시한다."}
+{"lid": "5e47f86165", "label": "supported", "passage": 8, "reason": "문단 8은 특수관계인과 거래한 사실이 없다고 명시한다."}
+{"lid": "090442db49", "label": "no_evidence", "passage": null, "reason": "제시된 문단은 브리지텍에 관한 것으로 현대제철의 원재료에 관한 근거가 없다."}
+{"lid": "fd22316a7e", "label": "supported", "passage": 8, "reason": "문단 8은 주요 원재료가 서버 및 하드웨어이고 프로젝트마다 투입이 달라 가격변동 측정치를 구할 수 없다고 명시한다."}
+{"lid": "3208649e17", "label": "supported", "passage": 8, "reason": "문단 8은 제품매출 원재료가 서버 및 하드웨어를 주로 구성한다고 명시한다."}
+{"lid": "8094573401", "label": "supported", "passage": 8, "reason": "문단 8은 생산설비 사항이 해당 없고 개발용 서버는 생산능력을 측정할 기계장치가 아니어서 생산능력을 산정할 수 없다고 명시한다."}
+{"lid": "87d3b70d03", "label": "non_claim", "passage": null, "reason": "시장위험 노출과 파생상품 거래 여부를 묻는 질문으로 사실을 단정하지 않는다."}
+{"lid": "90702c69b1", "label": "supported", "passage": 2, "reason": "문단 2는 세금계산서 발행 후 평균적으로 약 60일 이내에 매출대금을 회수한다고 명시한다."}
+{"lid": "d8cb6f3476", "label": "contradicted", "passage": 2, "reason": "문단 2는 평균 회수기간을 약 90일이 아닌 약 60일 이내로 명시한다."}
+{"lid": "fe5f595b36", "label": "no_evidence", "passage": null, "reason": "문단 2의 연구개발비와 8.70%는 2025년 수치이며 2019년 연구개발비와 매출액 대비 비율은 제시되지 않았다."}
+{"lid": "ab8513b307", "label": "supported", "passage": 2, "reason": "문단 2의 2025년 연구개발비 4,322,343천원은 약 43억 2천만 원에 해당하며 매출액 대비 비율도 8.70%로 명시된다."}
+{"lid": "88f1421dbd", "label": "contradicted", "passage": 2, "reason": "문단 2는 2025년 연구개발비용을 4,322,343천원, 매출액 대비 비율을 8.70%로 명시하여 주장한 27.7% 비율을 반박한다."}

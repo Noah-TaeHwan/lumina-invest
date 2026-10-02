@@ -1,0 +1,26 @@
+{"lid": "b2495c9814", "label": "no_evidence", "passage": null, "reason": "문단 4는 40.8% 부문을 메디케어사업이라 하며 헬스케어솔루션사업 부문은 어느 문단에도 없음"}
+{"lid": "8354db5760", "label": "supported", "passage": 4, "reason": "문단 4: 메디케어사업, 체외진단의료기기 및 기타 의료용기기 제조·판매, 2025년 매출비중 40.8"}
+{"lid": "c16296c910", "label": "no_evidence", "passage": null, "reason": "HLB생명과학 R&D가 의료기기 사업부문으로 구성되거나 의료기기 제조·판매가 주사업이라는 문단 없음(문단 1은 연구개발 조직으로만 서술)"}
+{"lid": "b85ec46a68", "label": "supported", "passage": 3, "reason": "문단 3: 의료기기 품목허가 신청(2025.08.01)"}
+{"lid": "5796c543d2", "label": "no_evidence", "passage": null, "reason": "의료기기사업 부문이 세포치료제를 생산한다는 내용 없음; 문단 8은 세포치료제가 임상 2b상 진행 중이라고만 함"}
+{"lid": "9cc4b63dad", "label": "no_evidence", "passage": null, "reason": "제품 특성·2b상은 문단 8에 있으나 해당 사업부가 이 제품을 생산한다는 근거 없음"}
+{"lid": "30eaf09698", "label": "non_claim", "passage": null, "reason": "완결되지 않은 문장 조각"}
+{"lid": "5ee0ec1d75", "label": "no_evidence", "passage": null, "reason": "간기능 유지 특성은 문단 8에 있으나 사업부의 생산 및 환자 치료 제공은 근거 없음"}
+{"lid": "f187b3c79a", "label": "contradicted", "passage": 3, "reason": "문단 3은 2025.08.01 품목허가를 신청했다고 명시"}
+{"lid": "924ada5ab3", "label": "no_evidence", "passage": null, "reason": "의료기기 사업부가 세포치료제로 의료기기 사업을 한다는 문단 없음"}
+{"lid": "71895cd7fb", "label": "supported", "passage": 5, "reason": "문단 5: 합계 2025년 45,752, 2024년 32,771(백만원)"}
+{"lid": "868a30a390", "label": "no_evidence", "passage": null, "reason": "삼성전자 관련 문단 없음"}
+{"lid": "92e9be07ae", "label": "contradicted", "passage": 5, "reason": "문단 5는 45,752 백만원(달러 아님)이며 32,771 대비 100% 증가가 아님"}
+{"lid": "4935cb8863", "label": "non_claim", "passage": null, "reason": "문단 표기 조각으로 사실 주장 아님"}
+{"lid": "64dfedea50", "label": "contradicted", "passage": 5, "reason": "문단 5는 전기 대비 39.6% 증가라고 명시"}
+{"lid": "d5a767528f", "label": "supported", "passage": 5, "reason": "문단 5: 당기 연결 매출 45,752백만원, 전기 대비 39.6% 증가"}
+{"lid": "37e9b3c086", "label": "no_evidence", "passage": null, "reason": "문단 3은 당좌차월·은행차입금·사채로 연속성·유연성 조화를 유지한다고 하며 매입채무 사용은 없음; 문단 1과 합쳐도 같은 사실 아님"}
+{"lid": "fe049d0611", "label": "non_claim", "passage": null, "reason": "문단 표기 조각으로 사실 주장 아님"}
+{"lid": "47a540f42e", "label": "non_claim", "passage": null, "reason": "회사명 표기뿐인 조각"}
+{"lid": "d5aaa308d9", "label": "supported", "passage": 1, "reason": "문단 1: 연결회사는 현금, 예금, 단기예치금, 매출채권, 기타채권, 매도가능금융자산 등을 보유"}
+{"lid": "ecb33c5f71", "label": "supported", "passage": 8, "reason": "문단 8: 2023년 주사기 및 주사침류 생산액 7,523억원, 2022년 대비 11.4% 감소"}
+{"lid": "00d3226ccf", "label": "no_evidence", "passage": null, "reason": "변동금리 차입금 규모나 금리 민감도 수치가 문단에 없음"}
+{"lid": "7c514e37db", "label": "no_evidence", "passage": null, "reason": "문단 8의 7,523억원·11.4% 감소는 2023년 값이며 2018년 생산액은 문단에 없음"}
+{"lid": "fe4eb98d26", "label": "contradicted", "passage": 5, "reason": "문단 5는 캄렐리주맙을 항서제약 제품이라 하며 베이진이 아님"}
+{"lid": "ae40088797", "label": "non_claim", "passage": null, "reason": "질문 문장"}
+{"lid": "4a2dae7494", "label": "supported", "passage": 5, "reason": "문단 5: 항서제약 캄렐리주맙 병용 간암 1차, 25년 3월 2차 CRL 수령 후 답변 준비 중"}

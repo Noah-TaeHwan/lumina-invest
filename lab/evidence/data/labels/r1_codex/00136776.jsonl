@@ -1,0 +1,31 @@
+{"lid":"28d28fb313","label":"contradicted","passage":4,"reason":"문단 4는 2016년 7월 임시주주총회에서 추가한 사업을 건강기능식품이 아닌 화장품 제조·판매업으로 명시한다."}
+{"lid":"2ad0f8dbd2","label":"supported","passage":4,"reason":"문단 4에 2016년 7월 8일 임시주주총회를 통해 화장품 제조·판매업을 사업목적에 추가했다고 명시되어 있다."}
+{"lid":"37fe4c1933","label":"no_evidence","passage":null,"reason":"문단 4는 사업목적 추가 날짜와 현재 제품 사업을 지지하지만 회사명이 차AI헬스케어라는 사실은 제시된 문단에서 확인되지 않는다."}
+{"lid":"558fda894c","label":"supported","passage":5,"reason":"문단 5는 제조 공장 양도 이후 OEM 형태로 제품을 생산하고 있다고 명시한다."}
+{"lid":"b3cedfda60","label":"no_evidence","passage":null,"reason":"제시된 문단에는 2020~2022년 공식 쇼핑몰 판매가격이나 150만원에서 250만원으로의 변동이 없다."}
+{"lid":"782bcd3aa2","label":"contradicted","passage":5,"reason":"문단 5는 현재 OEM 형태로 제품을 생산한다고 명시하여 OEM으로 생산하지 않는다는 주장을 반박한다."}
+{"lid":"5b15259590","label":"non_claim","passage":null,"reason":"회사 표지와 이름만 나열한 문장 조각으로 사실을 서술하지 않는다."}
+{"lid":"4269168082","label":"non_claim","passage":null,"reason":"구체적인 가격이나 변동 내용을 제시하지 않고 뒤따를 가격 설명을 안내하는 도입문이다."}
+{"lid":"26250fe438","label":"no_evidence","passage":null,"reason":"제시된 문단에는 차AI헬스케어가 회사의 주력 제품이라는 내용이 없다."}
+{"lid":"1f276d3b69","label":"no_evidence","passage":null,"reason":"제시된 문단에는 2023년 공식 쇼핑몰 판매가격이나 200만원에서 300만원으로의 변동이 없다."}
+{"lid":"2e8a8aac8d","label":"no_evidence","passage":null,"reason":"문단 6의 2,163,597천원과 2,027,179천원은 당기말·전기말 외화 매출채권이며 수출·내수 매출액이나 주장한 감소액의 근거가 아니다."}
+{"lid":"b921d1b04c","label":"no_evidence","passage":null,"reason":"제시된 문단에는 농심의 가공식품 생산이나 국내외 판매에 관한 내용이 없다."}
+{"lid":"7eb2a2c09e","label":"no_evidence","passage":null,"reason":"문단 6의 2,296,171천원은 당기말 화폐성외화자산 합계이며 당기 연결 매출액은 제시되어 있지 않다."}
+{"lid":"704bd9d69e","label":"supported","passage":2,"reason":"문단 2는 국내판매 채널 다양화와 해외 판매 시장 개척을 통해 매출과 손익을 개선하려는 계획을 명시한다."}
+{"lid":"97b419c02f","label":"supported","passage":1,"reason":"문단 1에 위험 정보와 연결실체의 목표·정책·위험 평가 및 관리 절차·자본관리를 공시한다는 내용이 모두 명시되어 있다."}
+{"lid":"5e8261e421","label":"no_evidence","passage":null,"reason":"이 질문에 제시된 8개 문단에는 2025년 말 원재료 매입 구성이나 부재료 비중 98.38%가 없다."}
+{"lid":"918d4947bc","label":"non_claim","passage":null,"reason":"회사 표지와 이름만 제시한 문장 조각으로 사실을 서술하지 않는다."}
+{"lid":"7b6d3c74b0","label":"supported","passage":1,"reason":"문단 1에 추가적인 계량적 정보가 재무제표 전반에 공시되어 있다고 명시되어 있다."}
+{"lid":"4abb5718b5","label":"non_claim","passage":null,"reason":"문단 번호와 잘린 제목 표지만 있는 조각으로 사실 주장이 없다."}
+{"lid":"db338ae82b","label":"supported","passage":1,"reason":"제목 조각 뒤의 사실 주장은 연결실체가 신용위험·유동성위험·시장위험에 노출되어 있다는 문단 1의 내용과 일치한다."}
+{"lid":"7872a89f89","label":"no_evidence","passage":null,"reason":"이 질문에 제시된 8개 문단에는 2025년 말 원재료 매입 구성이나 부재료 비중 87.25%를 지지하거나 반박할 수치가 없다."}
+{"lid":"fccba83a43","label":"no_evidence","passage":null,"reason":"문단 8은 2024년 시장 규모만 제시하며 기간이 다른 2013년 시장 규모는 지지하거나 반박하지 않는다."}
+{"lid":"385f8cd583","label":"supported","passage":8,"reason":"문단 8은 글로벌 화장품 시장이 2024년 기준 약 5,000억 달러 규모라고 명시한다."}
+{"lid":"97ba994cef","label":"non_claim","passage":null,"reason":"손익 영향에 관한 정보를 알 수 없다는 답변 유보 문장으로 구체적인 평가손익 사실을 주장하지 않는다."}
+{"lid":"47d9ef35b4","label":"supported","passage":4,"reason":"문단 4는 화장품 사업부문에서 스킨케어·메이크업·퍼스널케어 제품의 개발·제조·판매를 주요 사업으로 영위한다고 명시한다."}
+{"lid":"c480344e68","label":"supported","passage":1,"reason":"문단 1에 위험 정보와 연결실체의 목표·정책·위험 평가 및 관리 절차·자본관리를 공시한다는 내용이 모두 명시되어 있다."}
+{"lid":"8038d8e957","label":"supported","passage":1,"reason":"문단 1은 추가적인 계량적 정보가 재무제표 전반에 공시되어 있다고 명시한다."}
+{"lid":"d46eb5b26a","label":"non_claim","passage":null,"reason":"문단 번호와 잘린 제목 표지만 있는 조각으로 사실 주장이 없다."}
+{"lid":"4ca6f751d0","label":"non_claim","passage":null,"reason":"회사 표지와 이름만 나열한 문장 조각으로 사실을 서술하지 않는다."}
+{"lid":"0b57b61140","label":"supported","passage":1,"reason":"제목 조각 뒤의 사실 주장은 연결실체가 신용위험·유동성위험·시장위험에 노출되어 있다는 문단 1의 내용과 일치한다."}
+{"lid":"59a28ff511","label":"contradicted","passage":4,"reason":"문단 4는 해당 제품의 개발·제조·판매를 화장품 사업부문의 주요 사업으로 명시하여 의약품 사업부문이라는 주장과 다르다."}

@@ -1,0 +1,26 @@
+{"lid": "a1a49467c4", "label": "contradicted", "passage": 3, "reason": "문단 3은 사업부문을 육계·육가공유통·종계및부화 3개로 제시하나 주장은 육계부문을 뺀 2개로 나뉜다고 함"}
+{"lid": "821732081f", "label": "supported", "passage": 3, "reason": "문단 3 표: 종계및부화부문(육계·종계 사육 및 부화) 담당 회사는 농업회사법인 (주)한국원종"}
+{"lid": "f96f148da8", "label": "contradicted", "passage": 3, "reason": "문단 3 표상 종계및부화부문 담당은 (주)한국원종이며 (주)대한종계가 아님"}
+{"lid": "ba17b5d548", "label": "no_evidence", "passage": null, "reason": "잘린 문장으로 판매가격에 관한 사실은 어느 문단에도 없음"}
+{"lid": "5e3fe1dc43", "label": "supported", "passage": 5, "reason": "문단 5 표: 닭가슴살 육포용 조성물 및 육포 제조방법 특허, 권리자 체리부로, 등록일 2018.04.13"}
+{"lid": "c2e1f0653c", "label": "supported", "passage": 7, "reason": "문단 7: 계육제품의 생산 및 판매사업을 주요사업으로 함"}
+{"lid": "befd86b7e7", "label": "supported", "passage": 1, "reason": "문단 1에 동일 문장이 있음"}
+{"lid": "ef2da0ad47", "label": "contradicted", "passage": 5, "reason": "문단 5 표에 등록일 2018.04.13로 등록 사실이 기재됨"}
+{"lid": "35140c7c8b", "label": "no_evidence", "passage": null, "reason": "제품별 판매가격 추이는 어느 문단에도 없음"}
+{"lid": "e0e0b65e38", "label": "supported", "passage": 1, "reason": "문단 1: 체리푸드(구. 동양종합식품) 인수 후 이 법인을 통해 원료육 이용 육가공 제품 생산·유통 사업을 활발히 전개 중"}
+{"lid": "80d0fe46f7", "label": "non_claim", "passage": null, "reason": "질문 문장"}
+{"lid": "4d043a6724", "label": "supported", "passage": 4, "reason": "문단 4: 익산, 옥천 사료공장에서 특화된 육계전문사료 생산"}
+{"lid": "7836aa15bd", "label": "no_evidence", "passage": null, "reason": "삼성전자 반도체 공장에 관한 내용은 문단에 없음"}
+{"lid": "f0d2209711", "label": "supported", "passage": 7, "reason": "문단 7 표: 단기금융상품 제35기 640,000천원, 제34기 148,746천원으로 증가"}
+{"lid": "77cd128de3", "label": "no_evidence", "passage": null, "reason": "병아리 매입 비중 10%는 어느 문단에도 없음"}
+{"lid": "06517fa508", "label": "no_evidence", "passage": null, "reason": "사료 비중 20%는 어느 문단에도 없음"}
+{"lid": "4af35c4d21", "label": "contradicted", "passage": 7, "reason": "문단 7 표상 제35기 단기금융상품은 640,000천원이며 720,000천원이 아님"}
+{"lid": "00ebd5b3c8", "label": "non_claim", "passage": null, "reason": "뒤 내용을 안내하는 도입 문장으로 사실 주장 아님"}
+{"lid": "1454be443a", "label": "no_evidence", "passage": null, "reason": "육가공제품 가동률은 어느 문단에도 없음"}
+{"lid": "51986a4ca1", "label": "no_evidence", "passage": null, "reason": "육가공제품 70% 수치는 어느 문단에도 없음"}
+{"lid": "a4c7be72e9", "label": "contradicted", "passage": 7, "reason": "문단 7은 모범사업자 지정 시점을 2014년 7월로 기재, 2011년 7월이 아님"}
+{"lid": "a0517ca59a", "label": "no_evidence", "passage": null, "reason": "유동성위험 대응·환율 10% 변동 영향은 제시된 문단에 없음"}
+{"lid": "ce883f7ced", "label": "supported", "passage": 7, "reason": "문단 7: 농가협의회 운영 활성화 등 노력으로 2014년 7월 농림축산식품부로부터 육계계열화사업 모범사업자 지정"}
+{"lid": "8fd6029210", "label": "no_evidence", "passage": null, "reason": "연구개발비 대 매출액 비율은 어느 문단에도 없음"}
+{"lid": "00fb0c65e2", "label": "supported", "passage": 7, "reason": "문단 7: 네델란드 헤치텍사의 부화기를 도입해 국내 최고 수준의 부화율 달성"}
+{"lid": "fd0f5e9181", "label": "contradicted", "passage": 7, "reason": "문단 7상 부화기 도입처는 헤치텍사이며 페터심사가 아님"}

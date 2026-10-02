@@ -1,0 +1,34 @@
+{"lid": "930be9ba23", "label": "contradicted", "passage": 8, "reason": "문단 8은 해당 정보시스템 구축을 무역 사업이 아니라 IT 어플리케이션 사업의 업무로 설명한다."}
+{"lid": "805bfe8b5b", "label": "non_claim", "passage": null, "reason": "뒤에 나올 부문 목록을 소개하는 문장으로, 구체적인 부문이나 업무에 관한 사실 주장이 없다."}
+{"lid": "9f0fea9164", "label": "supported", "passage": 8, "reason": "문단 8에 상표권 관리, 브랜드 가치 제고, 홍보, 계열사 커뮤니케이션과 디자인 관리 업무가 모두 명시되어 있다."}
+{"lid": "7dcd469a35", "label": "supported", "passage": 2, "reason": "문단 2는 상사부문이 무역사업부, 전자사업부, 투자사업부의 세 사업부로 구성된다고 명시한다."}
+{"lid": "abe8fc0a35", "label": "contradicted", "passage": 2, "reason": "문단 2에 명시된 사업부 수는 네 개가 아니라 세 개다."}
+{"lid": "86ca752d8d", "label": "supported", "passage": 8, "reason": "문단 8은 IT 인프라 사업의 전산 인프라·네트워크 구축과 운영, 유지보수 및 서버·스토리지·데이터베이스 관리를 설명한다."}
+{"lid": "bd8ea6bfca", "label": "contradicted", "passage": 8, "reason": "문단 8은 열거한 상품의 수출입 무역을 제조 사업이 아니라 상사 부문의 업무로 설명한다."}
+{"lid": "5065f0995f", "label": "no_evidence", "passage": null, "reason": "인프라 업무는 문단 7에, 고객 발주 프로젝트별 서비스 방식은 문단 5에 있어 한 문단이 모든 사실 단위를 지지하지 않는다."}
+{"lid": "5987c46cf4", "label": "supported", "passage": 4, "reason": "문단 4의 KRG 전망은 2026년 시장 규모 30.2조원과 전년 대비 성장률 4.3%를 모두 명시한다."}
+{"lid": "caf8682324", "label": "no_evidence", "passage": null, "reason": "문단 5는 IT사업부문 전체의 프로젝트별 서비스를 설명하고 문단 7은 어플리케이션 사업을 설명하므로 하나의 문단으로 전부 지지되지 않는다."}
+{"lid": "31f121d7e0", "label": "no_evidence", "passage": null, "reason": "문단 7은 고객 정보시스템의 운영을 설명하지만 그 시스템을 고객이 직접 구축했다는 사실은 제시하지 않는다."}
+{"lid": "1ce3c62081", "label": "supported", "passage": 7, "reason": "문단 7은 어플리케이션 사업의 정보시스템 구축·기획·운영과 인프라 사업의 전산 인프라·네트워크 서비스를 구분한다."}
+{"lid": "04c6eab098", "label": "no_evidence", "passage": null, "reason": "문단 4의 수치와 성장률은 2026년 전망이며, 2028년 전망은 제시된 문단에 없다."}
+{"lid": "8a169ef310", "label": "non_claim", "passage": null, "reason": "문단 번호와 잘린 제목뿐이며 사실을 진술하지 않는다."}
+{"lid": "426018c3c8", "label": "supported", "passage": 1, "reason": "문단 1에 금융 계열사 사업경험을 기반으로 유사 대외사업을 확대하여 금융분야가 강점으로 자리매김했다는 내용이 있다."}
+{"lid": "0e1271f423", "label": "supported", "passage": 1, "reason": "문단 1은 IT 아웃소싱 역량 고도화, 서비스 품질 제고 및 계열사 경험을 바탕으로 한 대외사업 확대 노력을 모두 설명한다."}
+{"lid": "08ad57425c", "label": "non_claim", "passage": null, "reason": "문단 번호와 잘린 제목뿐이며 사실을 진술하지 않는다."}
+{"lid": "1fdd563669", "label": "contradicted", "passage": 1, "reason": "문단 1은 상사부문을 무역·전자·투자의 세 사업부로 명시하므로 물류사업부라는 구성은 일치하지 않는다."}
+{"lid": "8e0c75cbcf", "label": "supported", "passage": 4, "reason": "문단 4에 전자사업부의 정보보안 솔루션 중심 소프트웨어·하드웨어 공급, 구축 및 유지보수 업무가 명시되어 있다."}
+{"lid": "41aec1e3e2", "label": "supported", "passage": 2, "reason": "문단 2는 계약상대방의 계약상 의무 불이행으로 연결실체에 재무손실이 발생할 위험을 신용위험으로 정의한다."}
+{"lid": "f3a3761da9", "label": "supported", "passage": 1, "reason": "문단 1은 세 사업부의 구성과 각 사업영역을 기반으로 한 안정적 수익 창출 및 중장기 성장 기반 확보 추진을 모두 명시한다."}
+{"lid": "fc8b01ab04", "label": "supported", "passage": 1, "reason": "문단 1에 IT 아웃소싱 역량 고도화, 품질 제고 및 계열사 서비스 경험을 활용한 대외사업 확대 노력이 모두 있다."}
+{"lid": "3fe7d4570b", "label": "contradicted", "passage": 2, "reason": "문단 2는 일정 수준 이상 신용도를 갖춘 거래처와 거래하는 정책을 운영한다고 명시하므로 정책이 없다는 주장과 반대다."}
+{"lid": "225e8a560f", "label": "supported", "passage": 1, "reason": "문단 1에 무역사업부의 화학·철강 중심 수출입·중개무역과 범세계적 시장 공략을 통한 안정적 거래처 확보가 모두 명시되어 있다."}
+{"lid": "4ce1ae1702", "label": "non_claim", "passage": null, "reason": "문단 번호와 잘린 제목뿐이며 사실을 진술하지 않는다."}
+{"lid": "0a7e95492a", "label": "supported", "passage": 1, "reason": "문단 1은 금융 계열사 대상 사업경험을 바탕으로 유사 대외사업을 확대하여 금융분야가 강점으로 자리매김했다고 설명한다."}
+{"lid": "045958f6db", "label": "supported", "passage": 2, "reason": "문단 2는 거래처를 평가하여 신용도가 일정 수준 이상인 거래처와 거래하는 정책을 운영한다고 명시한다."}
+{"lid": "8d3b501e80", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 현대자동차의 완성차 생산이나 판매에 관한 내용이 없다."}
+{"lid": "baf8f77ba4", "label": "supported", "passage": 1, "reason": "문단 1은 유동자금과 파생상품을 우수한 신용등급의 금융기관과 거래하므로 금융기관의 신용위험이 제한적이라고 설명한다."}
+{"lid": "94c883fdd7", "label": "no_evidence", "passage": null, "reason": "문단 1에는 만기구조 대응과 경영진의 상환 가능 판단이 있으나 환율·금리 및 신용위험을 줄이기 위한 조치라는 목적은 뒷받침되지 않는다."}
+{"lid": "41c024b162", "label": "no_evidence", "passage": null, "reason": "문단 8에는 브랜드 상표사용 계약과 사용료 수취가 있지만 계약의 시작일·종료일과 5년이라는 기간은 없다."}
+{"lid": "cb95ce39e9", "label": "supported", "passage": 7, "reason": "문단 7은 유가증권시장 상장일자를 1993년 1월 6일로 명시한다."}
+{"lid": "f8ecab1f0a", "label": "non_claim", "passage": null, "reason": "문단 번호와 잘린 제목뿐이며 사실을 진술하지 않는다."}
+{"lid": "2c680036a2", "label": "contradicted", "passage": 7, "reason": "문단 7의 상장일은 1993년 1월 28일이 아니라 1993년 1월 6일이다."}

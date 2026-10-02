@@ -1,0 +1,26 @@
+{"lid": "b2495c9814", "label": "no_evidence", "passage": null, "reason": "문단 4는 메디케어사업의 제품과 매출비중을 제시하며, 헬스케어솔루션사업 부문에 대한 사실은 제시하지 않는다."}
+{"lid": "8354db5760", "label": "supported", "passage": 4, "reason": "문단 4에 메디케어사업의 체외진단의료기기 및 기타 의료용기기 제조·판매와 2025년 매출비중 40.8%가 명시되어 있다."}
+{"lid": "c16296c910", "label": "no_evidence", "passage": null, "reason": "HLB생명과학 R&D의 연구개발조직과 업무는 기재되지만, 의료기기사업 부문에 속하고 의료기기 제조·판매를 주사업으로 한다는 사실은 제시되지 않는다."}
+{"lid": "b85ec46a68", "label": "supported", "passage": 3, "reason": "문단 3의 의료기기 진행경과에 품목허가 신청일이 2025년 8월 1일로 명시되어 있다."}
+{"lid": "5796c543d2", "label": "no_evidence", "passage": null, "reason": "문단 8은 바이오 신약의 임상 2b상 진행을 설명하지만, 의료기기사업부가 해당 사업을 영위하고 제품을 생산한다는 사실은 제시하지 않는다."}
+{"lid": "9cc4b63dad", "label": "no_evidence", "passage": null, "reason": "문단 8에 임상 2b상과 미세캡슐·접촉 표면적 특성은 기재되지만, 해당 제품을 의료기기사업부가 생산한다는 사실은 없다."}
+{"lid": "30eaf09698", "label": "non_claim", "passage": null, "reason": "이 사업부는이라는 미완성 구절로, 판정할 사실 주장이 없다."}
+{"lid": "5ee0ec1d75", "label": "no_evidence", "passage": null, "reason": "문단 8의 간기능 유지 특성만으로 의료기기사업부의 제품 생산이나 환자에게 더 좋은 치료를 제공한다는 효과까지 지지할 수 없다."}
+{"lid": "f187b3c79a", "label": "contradicted", "passage": 3, "reason": "문단 3에 2025년 8월 1일 품목허가를 신청했다고 명시되어 있어 신청하지 않았다는 주장과 반대이다."}
+{"lid": "924ada5ab3", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 HLB생명과학의 의료기기사업부가 바이오 신약·세포치료제 사업을 영위한다는 근거가 없다."}
+{"lid": "71895cd7fb", "label": "supported", "passage": 5, "reason": "문단 5의 매출 합계는 2025년 45,752백만원, 2024년 32,771백만원으로 전년보다 큰 값이다."}
+{"lid": "868a30a390", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 삼성전자의 D램·낸드플래시 생산 및 판매에 대한 내용이 없다."}
+{"lid": "92e9be07ae", "label": "contradicted", "passage": 5, "reason": "문단 5의 45,752는 백만원 단위이므로 백만 달러라는 주장과 다르며, 표의 100은 매출비중이다."}
+{"lid": "4935cb8863", "label": "non_claim", "passage": null, "reason": "문단 번호와 절 제목의 미완성 표기로, 사실 주장이 없다."}
+{"lid": "64dfedea50", "label": "contradicted", "passage": 5, "reason": "문단 5는 같은 당기 연결 매출의 전기 대비 증가율을 39.6%로 명시하므로 27.3%와 다르다."}
+{"lid": "d5a767528f", "label": "supported", "passage": 5, "reason": "문단 5에 당기 연결 매출 45,752백만원과 전기 대비 39.6% 증가가 함께 명시되어 있다."}
+{"lid": "37e9b3c086", "label": "no_evidence", "passage": null, "reason": "문단 1은 차입금·매입채무의 구성과 조달 목적을, 문단 3은 연속성·유연성과 당좌차월·은행차입금·사채를 설명하며 한 문단이 주장 전체를 지지하지 않는다."}
+{"lid": "fe049d0611", "label": "non_claim", "passage": null, "reason": "문단 번호와 절 제목의 미완성 표기로, 사실 주장이 없다."}
+{"lid": "47a540f42e", "label": "non_claim", "passage": null, "reason": "회사명만 표시한 표제로, 회사에 관한 사실을 서술하지 않는다."}
+{"lid": "d5aaa308d9", "label": "supported", "passage": 1, "reason": "문단 1에 연결회사가 영업활동에서 발생하는 현금·예금·단기예치금·매출채권·기타채권·매도가능금융자산 등을 보유한다고 명시되어 있다."}
+{"lid": "ecb33c5f71", "label": "supported", "passage": 8, "reason": "문단 8에 2023년 국내 주사기 및 주사침류 생산액 7,523억원과 2022년 대비 11.4% 감소가 명시되어 있다."}
+{"lid": "00d3226ccf", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 변동금리 차입금 규모나 금리 변동의 당기순손익 영향이 없으며, 사업의 개요도 매출만 설명한다."}
+{"lid": "7c514e37db", "label": "no_evidence", "passage": null, "reason": "문단 8의 생산액 7,523억원과 11.4% 감소는 2023년 통계이며, 2018년 생산액과 전년 대비 증감률은 제시되지 않는다."}
+{"lid": "fe4eb98d26", "label": "contradicted", "passage": 5, "reason": "문단 5는 같은 간암 1차 병용요법의 캄렐리주맙을 항서제약의 약물로 명시하므로 베이진의 약물이라는 주장과 다르다."}
+{"lid": "ae40088797", "label": "non_claim", "passage": null, "reason": "미국 FDA 신약 허가 절차의 진행 단계를 묻는 질문이다."}
+{"lid": "4a2dae7494", "label": "supported", "passage": 5, "reason": "문단 5에 항서제약 캄렐리주맙 병용 간암 1차 치료제의 2025년 3월 2차 CRL 수령과 답변 준비 중이라는 상태가 함께 명시되어 있다."}

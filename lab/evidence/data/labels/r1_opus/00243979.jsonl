@@ -1,0 +1,24 @@
+{"lid": "7057602050", "label": "supported", "passage": 8, "reason": "문단 8 첫 문장과 동일"}
+{"lid": "a52819a35e", "label": "supported", "passage": 8, "reason": "주력은 물류장비, 반도체·웹툰은 종속기업 운영으로 문단 8과 일치"}
+{"lid": "6f5cced740", "label": "contradicted", "passage": 8, "reason": "문단 8은 물류장비사업이 주력이라고 함"}
+{"lid": "3c87e22310", "label": "no_evidence", "passage": null, "reason": "삼성전자 HBM 개발은 문단에 없음"}
+{"lid": "89935c643e", "label": "supported", "passage": 2, "reason": "전동지게차 수소연료전지 적용 연구, 연료전지 전동지게차 개발로 경쟁력 제고"}
+{"lid": "efde728803", "label": "no_evidence", "passage": null, "reason": "문단 4는 물류부문 업종을 산업용 트럭 및 적재기 제조업으로 적을 뿐 부문 내 제품군별 매출 비중은 없음"}
+{"lid": "d06d0d25dd", "label": "non_claim", "passage": null, "reason": "회사명 표식 조각으로 사실 주장 아님"}
+{"lid": "24499c6467", "label": "supported", "passage": 1, "reason": "문단 1의 MZ세대 소비층 문장과 동일"}
+{"lid": "9fe3e9744a", "label": "non_claim", "passage": null, "reason": "문단 머리표 조각"}
+{"lid": "63ddf97e0e", "label": "supported", "passage": 1, "reason": "문단 1에 웹툰 산업은 경기변동 민감도가 낮다고 명시"}
+{"lid": "6ce9273c4d", "label": "supported", "passage": 1, "reason": "문단 1의 AI·데이터 기술 문장과 동일"}
+{"lid": "fe10328ec9", "label": "contradicted", "passage": 7, "reason": "문단 7은 투믹스가 2015년 설립이라고 함"}
+{"lid": "7d00d5de53", "label": "non_claim", "passage": null, "reason": "질문 문장"}
+{"lid": "e3626a15f4", "label": "supported", "passage": 7, "reason": "문단 7에 2015년 설립된 웹툰 플랫폼으로 명시"}
+{"lid": "c29ca13f9f", "label": "non_claim", "passage": null, "reason": "연차재무제표를 참고하라는 면책·절차 안내"}
+{"lid": "f46d50d0c1", "label": "non_claim", "passage": null, "reason": "내용 없는 도입 문장"}
+{"lid": "a2f04310d1", "label": "no_evidence", "passage": null, "reason": "문단 4는 위험관리부서를 말하며 내부감사팀은 언급 없음"}
+{"lid": "397164500c", "label": "supported", "passage": 4, "reason": "문단 4의 금융위험 노출 문장과 동일"}
+{"lid": "2f04cef594", "label": "supported", "passage": 4, "reason": "문단 4에 위험관리부서 및 기타 정책에 전기말 이후 중요한 변동 없다고 명시"}
+{"lid": "eceb630b70", "label": "contradicted", "passage": 4, "reason": "문단 4는 정책과 금융부채 미할인 현금흐름 모두 중요한 변동이 없다고 함"}
+{"lid": "4bf1552893", "label": "contradicted", "passage": 1, "reason": "문단 1에 제45기 연구개발비/매출액 비율 1.44로 기재"}
+{"lid": "955b9b15a2", "label": "contradicted", "passage": 1, "reason": "문단 1 단위는 천원이라 313,973천원(약 31,397만원)이며 313,973만원이 아님"}
+{"lid": "db99e35b13", "label": "contradicted", "passage": 1, "reason": "문단 1은 연구개발비/매출액 비율을 1.44로 기재, 0.45 아님"}
+{"lid": "50d775de4a", "label": "supported", "passage": 1, "reason": "문단 1에 제45기 비율 1.44로 기재"}

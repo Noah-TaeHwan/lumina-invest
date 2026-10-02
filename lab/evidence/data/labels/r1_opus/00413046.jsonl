@@ -1,0 +1,29 @@
+{"lid": "8ab5f45232", "label": "supported", "passage": 7, "reason": "11개 바이오시밀러 글로벌 품목 허가와 유럽·미국 포함 전 세계 판매를 문단 7이 모두 서술"}
+{"lid": "0397dcc5a3", "label": "supported", "passage": 7, "reason": "현재까지 11개 바이오시밀러 글로벌 품목 허가 획득을 문단 7이 서술"}
+{"lid": "7c2fcf4760", "label": "contradicted", "passage": 7, "reason": "문단 7은 11개 바이오시밀러 글로벌 품목 허가를 획득했다고 서술"}
+{"lid": "9af38d7ede", "label": "no_evidence", "passage": null, "reason": "현대자동차 앨라배마 공장에 관한 문단 없음"}
+{"lid": "f5f4644c36", "label": "non_claim", "passage": null, "reason": "질문 문장"}
+{"lid": "45fa9d1c2f", "label": "supported", "passage": 1, "reason": "문단 1: 유럽 시장은 2020년 램시마를 시작으로 직접판매 전환"}
+{"lid": "c167e1193b", "label": "non_claim", "passage": null, "reason": "문단 표기 조각으로 사실 주장이 아님"}
+{"lid": "8bf20f27f9", "label": "contradicted", "passage": 7, "reason": "문단 7의 2025.12.31 부채비율(D/E)은 28.71%로 34.52%와 다름"}
+{"lid": "8cdcd21031", "label": "non_claim", "passage": null, "reason": "문단 표기 조각으로 사실 주장이 아님"}
+{"lid": "a008a5d2e9", "label": "supported", "passage": 7, "reason": "문단 7: 2025.12.31 부채비율(D/E) 28.71%"}
+{"lid": "8d3172d115", "label": "no_evidence", "passage": null, "reason": "매출채권 행에 여러 항목·문단(기타수취채권, 계약자산, 매입채무, 총차입금 등)의 숫자를 섞어 놓아 한 문단으로 지지되지 않음"}
+{"lid": "ae7ccecdd7", "label": "no_evidence", "passage": null, "reason": "매출채권 행에 여러 항목·문단의 숫자를 섞어 놓아 한 문단으로 지지되지 않음"}
+{"lid": "ec89a4714f", "label": "non_claim", "passage": null, "reason": "문단 표기 조각으로 사실 주장이 아님"}
+{"lid": "1639a2eaa0", "label": "no_evidence", "passage": null, "reason": "문단은 2025년 매출 4조 1,625억 원만 서술하고 2019년 매출은 언급 없음"}
+{"lid": "00bb46e469", "label": "no_evidence", "passage": null, "reason": "국내 공장 배치 기준 생산능력에 관한 문단 없음"}
+{"lid": "22c4b3a228", "label": "supported", "passage": 4, "reason": "문단 4: 2025년 기준 매출액 4조 1,625억 원"}
+{"lid": "0a55a1c4e7", "label": "supported", "passage": 1, "reason": "문단 1에 동일 문장 존재"}
+{"lid": "c9c63bf541", "label": "supported", "passage": 1, "reason": "문단 1: 정상적인 거래로부터 기인하는 환율변동위험에 노출"}
+{"lid": "7d6b2a683a", "label": "non_claim", "passage": null, "reason": "질문 문장"}
+{"lid": "39f4b1e8f1", "label": "no_evidence", "passage": null, "reason": "환율변동이 세전이익에 미치는 영향은 문단에 없음"}
+{"lid": "90815b442e", "label": "supported", "passage": 1, "reason": "문단 1: 외환위험 노출 주요 통화는 USD, EUR 등"}
+{"lid": "7a1b0de388", "label": "supported", "passage": 1, "reason": "문단 1에 동일 문장 존재"}
+{"lid": "c7f8105812", "label": "no_evidence", "passage": null, "reason": "유한양행에 관한 문단 없음"}
+{"lid": "2832053b65", "label": "no_evidence", "passage": null, "reason": "연구개발비용에 관한 문단 없음"}
+{"lid": "0db3d10304", "label": "supported", "passage": 6, "reason": "문단 6: 2014년 9월 온실가스 배출권거래제 할당대상업체로 지정"}
+{"lid": "037cf607c3", "label": "no_evidence", "passage": null, "reason": "1,844,595,921천원은 문단 2의 차입금 6개월 이하 금액이며 연구개발비용 서술 없음"}
+{"lid": "e382be7c01", "label": "contradicted", "passage": 6, "reason": "문단 6은 2014년 9월 할당대상업체로 지정되었다고 서술"}
+{"lid": "9df0319f2b", "label": "no_evidence", "passage": null, "reason": "연구개발비용이나 매출액 대비 비율에 관한 문단 없음"}
+{"lid": "f80f63dee8", "label": "no_evidence", "passage": null, "reason": "매출액 대비 연구개발비 비율 서술 없음(1,520,437,157천원은 차입금 만기 구간 금액)"}

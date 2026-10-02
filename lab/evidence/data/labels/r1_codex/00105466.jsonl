@@ -1,0 +1,21 @@
+{"lid": "4b95b97684", "label": "supported", "passage": 1, "reason": "문단 1에 1989년 1월 27일 금강종합건설 설립과 2001년 코스닥 상장 및 매매 개시가 모두 명시되어 있다."}
+{"lid": "047a44bce0", "label": "supported", "passage": 1, "reason": "문단 1에 2005년 3월 주주총회 의결을 통한 케이씨씨건설로의 회사명 변경이 명시되어 있다."}
+{"lid": "e83e89c21e", "label": "contradicted", "passage": 1, "reason": "문단 1은 코스닥 상장과 매매 개시 시점을 2001년 8월로 명시하여 2003년 8월이라는 주장과 다르다."}
+{"lid": "0317bf96a9", "label": "no_evidence", "passage": null, "reason": "공동주택 공사명은 나오지만 아파트 및 주상복합 브랜드를 보유한다는 사실은 제시되지 않는다."}
+{"lid": "4f62b6d33a", "label": "supported", "passage": 1, "reason": "문단 1에 2001년 8월 상장되어 코스닥시장에서 매매가 개시되었다고 명시되어 있다."}
+{"lid": "8e54e36d88", "label": "supported", "passage": 3, "reason": "문단 3은 KCC건설이 진천 광혜원 물류센터 등의 창고시설 공사를 민간 공사로 수행한다고 명시한다."}
+{"lid": "588b24ce22", "label": "no_evidence", "passage": null, "reason": "진천 광혜원 물류센터 공사는 KCC건설의 사업으로 제시되며 태영건설의 수행 여부에 관한 근거는 없다."}
+{"lid": "beaa128565", "label": "non_claim", "passage": null, "reason": "매출 금액과 비중을 이어서 제시하겠다는 안내 문장으로 구체적인 사실을 주장하지 않는다."}
+{"lid": "3d72114c2a", "label": "no_evidence", "passage": null, "reason": "주장한 연도별 KCC건설 건축부문 매출은 제시되지 않으며 문단 5의 주택수주 전망은 주체와 지표가 다르다."}
+{"lid": "121588a97b", "label": "contradicted", "passage": 4, "reason": "문단 4는 남부내륙철도 4-1공구 등의 공공 공사를 꾸준히 수행한다고 명시하여 수행하지 않는다는 주장과 반대이다."}
+{"lid": "3640a90d68", "label": "supported", "passage": 4, "reason": "문단 4에 남부내륙철도 4-1공구 등의 공공 공사를 꾸준히 수행한다고 명시되어 있다."}
+{"lid": "d683ee81fb", "label": "no_evidence", "passage": null, "reason": "문단 2의 103,905천원은 파생상품평가손실이며 원재료 매입액이라는 근거는 없다."}
+{"lid": "d39e772d3e", "label": "no_evidence", "passage": null, "reason": "아라베스크는 자본보장약정의 체결주체로 등장하지만 가장 많이 매입한 원재료라는 근거는 없다."}
+{"lid": "02dd8138b2", "label": "contradicted", "passage": 5, "reason": "문단 5는 해당 기간의 옵션계약 주체를 Macquarie와 KCC건설·롯데건설, 풋옵션 행사자를 Macquarie로 명시하여 주장한 행사 주체와 다르다."}
+{"lid": "67fb4630c2", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 현대건설의 힐스테이트 브랜드나 주택사업에 관한 정보가 없다."}
+{"lid": "ee91219beb", "label": "supported", "passage": 2, "reason": "문단 2에 이행약정지분 중 1,818,864주를 주당 10,622원의 풋옵션 행사에 따라 인수하고자 한다고 명시되어 있다."}
+{"lid": "24f893ca04", "label": "non_claim", "passage": null, "reason": "풋옵션 행사 정보를 이어서 제시한다는 안내 문장으로 구체적인 사실을 주장하지 않는다."}
+{"lid": "924c5635bc", "label": "supported", "passage": 2, "reason": "문단 2에 옵션 공정가치 변동으로 인식한 파생상품평가손실이 103,905천원이라고 명시되어 있다."}
+{"lid": "6cffa393c2", "label": "no_evidence", "passage": null, "reason": "연구사업과 계약에 관한 내용은 있으나 연구개발 전담조직 운영과 주요계약 때문에 연구개발을 한다는 인과관계는 제시되지 않는다."}
+{"lid": "51ad1db985", "label": "non_claim", "passage": null, "reason": "한국어 3~5문장으로 답하겠다는 응답 절차 안내이다."}
+{"lid": "9c5c03fd70", "label": "contradicted", "passage": 2, "reason": "문단 2는 동일한 파생상품평가손실을 103,905천원으로 명시하여 187,240천원이라는 주장과 다르다."}

@@ -1,0 +1,36 @@
+{"lid": "59c6e8a439", "label": "supported", "passage": 6, "reason": "문단 6이 주력 제품군, 고성능·저전력·경박단소의 가치, IT 제품의 핵심 부품 용도와 혁신 기여를 모두 명시한다."}
+{"lid": "3c60aea50e", "label": "supported", "passage": 6, "reason": "문단 6이 전자부품 제조, Discrete 반도체·광센서·LED 시장과 한국·중국·일본 네트워크 기반의 글로벌 성장을 명시한다."}
+{"lid": "1890877c7b", "label": "supported", "passage": 6, "reason": "문단 6이 세 주력 제품군을 모바일 기기·자동차·디지털 가전 등 IT 제품의 핵심 부품으로 활용한다고 명시한다."}
+{"lid": "b2f10212ed", "label": "contradicted", "passage": 6, "reason": "문단 6은 해당 주력 제품들이 모바일 기기·자동차·디지털 가전의 핵심 부품으로 활용된다고 하여 부정 주장을 반박한다."}
+{"lid": "81b88a3dae", "label": "supported", "passage": 1, "reason": "문단 1의 PKG 가격 추이는 제40기 142원, 제41기 148원, 제42기 159원으로 각 기에 상승한다."}
+{"lid": "a1a1529be3", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 SK하이닉스의 주력 제품이나 D램·낸드플래시 생산에 관한 내용이 없다."}
+{"lid": "3c0189e014", "label": "supported", "passage": 1, "reason": "문단 1의 제품 매출 표가 PKG의 용도·상표 및 매출액 104,391백만원, 비율 78.68%를 명시한다."}
+{"lid": "4eb932bec9", "label": "non_claim", "passage": null, "reason": "절 제목과 항목 기호만 있으며 사실을 서술하지 않는다."}
+{"lid": "766ee4f7eb", "label": "non_claim", "passage": null, "reason": "표의 단위와 매출액·비율 열 제목만 있으며 구체적인 사실이나 수치가 없다."}
+{"lid": "cf4f91b080", "label": "non_claim", "passage": null, "reason": "연간 제품 매출 내역을 이어서 제시하겠다는 안내이며 실제 내역을 주장하지 않는다."}
+{"lid": "cef6592340", "label": "non_claim", "passage": null, "reason": "문단 표시와 잘린 절 번호뿐이며 사실 주장이 없다."}
+{"lid": "a868fb6830", "label": "supported", "passage": 5, "reason": "문단 5의 부채비율은 당기말 7.12%, 전기말 9.02%로 당기말이 더 낮다."}
+{"lid": "bbae9dbaf8", "label": "non_claim", "passage": null, "reason": "수출·내수 매출과 전년 대비 변화를 묻는 질문이다."}
+{"lid": "9d5f923481", "label": "contradicted", "passage": 5, "reason": "문단 5의 당기말 부채비율은 7.12%로 주장한 6.48%와 다르다."}
+{"lid": "f17f7df1c2", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 수출·내수 매출액이나 전년 비교 금액 1,000억원·1,200억원이 없다."}
+{"lid": "c6aa5e2085", "label": "no_evidence", "passage": null, "reason": "Tokyo Electron Corporation 또는 일본 광센서 제조업체를 매입한다는 내용이 제시된 문단에 없다."}
+{"lid": "0d7fea4f7a", "label": "supported", "passage": 4, "reason": "문단 4가 광전자를 Discrete 반도체·광센서·LED 등의 전자부품 제조 업체로 설명한다."}
+{"lid": "34a828da9a", "label": "supported", "passage": 2, "reason": "문단 2가 유가증권시장 상장일을 1996년 10월 16일로 명시한다."}
+{"lid": "46e7f93837", "label": "supported", "passage": 4, "reason": "문단 4가 광센서를 개발·제조한다고 명시한다."}
+{"lid": "1f1c1d17a9", "label": "non_claim", "passage": null, "reason": "광센서 매입처를 이어서 제시하겠다는 안내이며 특정 매입처를 주장하지 않는다."}
+{"lid": "20d9406f6a", "label": "contradicted", "passage": 2, "reason": "문단 2의 유가증권시장 상장일은 1996년 10월 16일로 주장한 1999년과 다르다."}
+{"lid": "79a8744f7f", "label": "non_claim", "passage": null, "reason": "원재료 매입 구성을 이어서 제시하겠다는 안내이며 실제 구성을 서술하지 않는다."}
+{"lid": "3415ead28b", "label": "non_claim", "passage": null, "reason": "문단 표시와 잘린 절 번호뿐이며 사실 주장이 없다."}
+{"lid": "a4833b9906", "label": "no_evidence", "passage": null, "reason": "제시된 문단은 광전자의 자료이며 한빛전자의 환율 민감도 측정 결과를 제시하지 않는다."}
+{"lid": "fb420df0d4", "label": "supported", "passage": 1, "reason": "문단 1이 연결실체가 이자율 변동에 따른 이자율위험을 내부적으로 정기 측정한다고 명시한다."}
+{"lid": "53a83b7871", "label": "non_claim", "passage": null, "reason": "이자율 1% 변동의 영향을 이어서 제시하겠다는 표 안내이며 구체적인 영향값을 주장하지 않는다."}
+{"lid": "ae75e7be5b", "label": "non_claim", "passage": null, "reason": "문단 표시와 잘린 절 번호뿐이며 사실 주장이 없다."}
+{"lid": "6dd50de7d3", "label": "no_evidence", "passage": null, "reason": "당기말 10% 상승 합계 4,704,127천원은 문단 3, 환율 변동의 손익 영향이라는 설명은 문단 6에 있어 한 문단만으로 전체 주장을 지지하지 못한다."}
+{"lid": "6f4c99170f", "label": "non_claim", "passage": null, "reason": "절 제목과 항목 기호만 있으며 사실을 서술하지 않는다."}
+{"lid": "67adc9403a", "label": "supported", "passage": 5, "reason": "문단 5의 연구개발비 대 매출액 비율은 제42기 3.73%, 제41기 3.67%로 제42기가 더 높다."}
+{"lid": "b0517e146b", "label": "supported", "passage": 6, "reason": "문단 6이 원재료 가격의 산출기준을 기간별 단순 산술평균가격이라고 명시한다."}
+{"lid": "248e486ac4", "label": "non_claim", "passage": null, "reason": "문단 표시와 잘린 절 번호뿐이며 사실 주장이 없다."}
+{"lid": "8fbaf747f0", "label": "supported", "passage": 6, "reason": "문단 6이 WAFER의 국내·해외 업체 생산과 공급시장 경쟁 및 단일 업체의 독과점 부재를 모두 명시한다."}
+{"lid": "d2bfbc13c6", "label": "contradicted", "passage": 5, "reason": "문단 5의 제42기 비율 3.73%는 제41기 3.67%보다 높아 높아지지 않았다는 주장을 반박한다."}
+{"lid": "e46ef9ed1f", "label": "non_claim", "passage": null, "reason": "원재료 매입의 안정성에 대한 판단·의견을 표현한 문장이다."}
+{"lid": "fbbda3346c", "label": "supported", "passage": 6, "reason": "문단 6이 총매입액을 총매입수량으로 나누는 기준, 외화매입의 원화 환산, 가격대별 매입수량 변화의 평균단가 영향을 모두 명시한다."}

@@ -1,0 +1,30 @@
+{"lid": "ac964f1d5b", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 농심의 제품이나 판매 대상에 관한 내용이 없다."}
+{"lid": "f222239c79", "label": "no_evidence", "passage": null, "reason": "내수·수출 매출 비중은 제시되지 않았고, 문단 3의 70%는 유지보수 물량의 단납기 수주 비중이다."}
+{"lid": "cbd8f7aa32", "label": "supported", "passage": 6, "reason": "문단 6은 45개국 대리점을 통해 해외 고객사에 당사 제품을 공급한다고 명시한다."}
+{"lid": "f63733b2e1", "label": "no_evidence", "passage": null, "reason": "문단 8은 항공·방산 부품 사업의 전망을 설명하지만 계장용 피팅·밸브의 주된 용도가 항공 산업이라고 밝히지 않는다."}
+{"lid": "41cc7bfd0f", "label": "contradicted", "passage": 6, "reason": "문단 6의 제35기 매출액 대비 연구개발비 비율은 1.28%로, 주장한 2.45%와 다르다."}
+{"lid": "214fc5e853", "label": "supported", "passage": 6, "reason": "문단 6은 제35기 연구개발비의 매출액 대비 비율을 1.28%로 제시한다."}
+{"lid": "44b6209e89", "label": "contradicted", "passage": 4, "reason": "문단 4는 생산·판매 공시대상 사업을 관이음쇠와 밸브로 한정하여 차입금·채무를 주요 제품이라고 한 주장과 어긋난다."}
+{"lid": "cf797b4e82", "label": "non_claim", "passage": null, "reason": "위험 항목을 나열하다 끊겨 서술 내용이 완성되지 않은 문장 조각이다."}
+{"lid": "bbbd8e7457", "label": "supported", "passage": 1, "reason": "문단 1에 금융상품 운용에 따른 위험 노출, 위험관리 목적과 경영진의 절차·정책 검토가 모두 제시되어 있다."}
+{"lid": "fb3ccfef34", "label": "supported", "passage": 1, "reason": "문단 1은 주요 금융부채의 구성과 열거한 금융자산의 보유를 모두 명시한다."}
+{"lid": "8d48a024d0", "label": "non_claim", "passage": null, "reason": "문단 번호와 절 번호만 남은 표기 조각으로 사실 주장이 없다."}
+{"lid": "3d2ea8a006", "label": "supported", "passage": 7, "reason": "문단 7은 2025년 국내시장 매출 27,102백만원과 전년 대비 증가율 11.80%를 함께 제시한다."}
+{"lid": "1f7cfc827d", "label": "no_evidence", "passage": null, "reason": "문단 7의 27,102백만원은 2025년 수치이며, 2021년 국내시장 매출은 제시되지 않았다."}
+{"lid": "4996c739c6", "label": "supported", "passage": 7, "reason": "문단 7에 2025년 국내시장 매출이 27,102백만원으로 명시되어 있다."}
+{"lid": "7bd2e2de3b", "label": "contradicted", "passage": 7, "reason": "문단 7은 공시대상 사업을 관이음쇠와 밸브의 생산·판매로 한정하여 산업용 펌프라는 주장과 다르다."}
+{"lid": "db50409ac6", "label": "no_evidence", "passage": null, "reason": "질문 표기가 붙어 있지만 사실을 단정하는 문장이며, 원재료 재질별 매입 비중은 제시되지 않았다."}
+{"lid": "579f1fe6d3", "label": "supported", "passage": 7, "reason": "문단 7은 관이음쇠와 밸브의 생산·판매 활동만 공시대상으로 삼는다고 명시한다."}
+{"lid": "7175337c91", "label": "supported", "passage": 2, "reason": "문단 2는 회사의 시장·유동성위험 노출을 명시하고 시장위험을 이자율·환율 변동 위험으로 설명한다."}
+{"lid": "f2308e27de", "label": "non_claim", "passage": null, "reason": "문단 표기 뒤에 환이라는 글자만 남아 판단할 사실 명제가 없다."}
+{"lid": "4ad89eb3cb", "label": "contradicted", "passage": 5, "reason": "문단 5는 해외 영업과 원자재 수입으로 USD·EUR 등의 환위험에 노출된다고 명시한다."}
+{"lid": "c5175ac2b1", "label": "no_evidence", "passage": null, "reason": "이자율위험 정의는 문단 2, 관리 조치는 문단 5에 나뉘어 있고 reports라는 주체의 행동은 제시되지 않았다."}
+{"lid": "82392d482e", "label": "supported", "passage": 5, "reason": "문단 5는 해외 영업과 원자재 수입에 따른 USD·EUR 등의 환위험 노출을 명시한다."}
+{"lid": "74a3f333e8", "label": "contradicted", "passage": 4, "reason": "문단 4는 약정 이행 자금의 조달 실패 위험을 유동성위험으로 정의하므로 이를 환율위험이라고 한 주장은 정의를 바꾼 것이다."}
+{"lid": "ca3316c353", "label": "non_claim", "passage": null, "reason": "주권상장과 특례상장에 관한 항목 제목일 뿐 구체적인 사실을 주장하지 않는다."}
+{"lid": "91aa8d297d", "label": "supported", "passage": 1, "reason": "문단 1은 제출일 직전 3사업년도간 회사채·기업어음 등 차입조달 목적의 신용등급 평가 사실이 없다고 명시한다."}
+{"lid": "4bb1d1a9e7", "label": "supported", "passage": 2, "reason": "문단 2에 주요 금융부채의 구성과 열거한 금융자산 보유가 모두 명시되어 있다."}
+{"lid": "740b997d81", "label": "supported", "passage": 3, "reason": "문단 3은 자체 기술연구소에서 신제품·신규 장비 개발과 프로젝트 연구를 일괄 수행한다고 밝힌다."}
+{"lid": "72556d3d4b", "label": "non_claim", "passage": null, "reason": "문단 번호와 절 번호만 남은 표기 조각으로 사실 주장이 없다."}
+{"lid": "0e104dd607", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 LG화학의 제품이나 국내외 고객사 판매에 관한 내용이 없다."}
+{"lid": "46868601dd", "label": "supported", "passage": 1, "reason": "문단 1은 코스닥시장 상장, 상장일 2010년 11월 12일과 특례상장 해당사항 없음을 모두 제시한다."}

@@ -1,0 +1,21 @@
+{"lid": "4b95b97684", "label": "supported", "passage": 1, "reason": "문단1에 1989년 1월 27일 금강종합건설㈜ 설립, 2001년 8월 코스닥 매매 개시가 있다"}
+{"lid": "047a44bce0", "label": "supported", "passage": 1, "reason": "문단1에 2005년 3월 주총 의결로 ㈜케이씨씨건설로 사명 변경이 있다"}
+{"lid": "e83e89c21e", "label": "contradicted", "passage": 1, "reason": "문단1은 상장 시점을 2001년 8월로 적어 2003년 8월과 다르다"}
+{"lid": "0317bf96a9", "label": "no_evidence", "passage": null, "reason": "공동주택 현장명(오퍼스 한강 스위첸)만 있고 아파트·주상복합 브랜드 보유를 말하는 문단은 없다"}
+{"lid": "4f62b6d33a", "label": "supported", "passage": 1, "reason": "문단1에 2001년 8월 상장되어 코스닥시장 매매 개시가 있다"}
+{"lid": "8e54e36d88", "label": "supported", "passage": 3, "reason": "문단3에 창고시설(진천 광혜원 물류센터) 등 민간 공사를 영위한다고 있다"}
+{"lid": "588b24ce22", "label": "no_evidence", "passage": null, "reason": "문단은 당사(KCC건설) 사업만 다루며 태영건설에 대한 내용은 없다"}
+{"lid": "beaa128565", "label": "non_claim", "passage": null, "reason": "답변 도입 안내 문장으로 사실 주장이 아니다"}
+{"lid": "3d72114c2a", "label": "no_evidence", "passage": null, "reason": "건축부문 연도별 매출 금액을 담은 문단이 없다"}
+{"lid": "121588a97b", "label": "contradicted", "passage": 4, "reason": "문단4는 남부내륙철도 4-1공구 등 공공 공사를 꾸준히 수행한다고 적어 반대된다"}
+{"lid": "3640a90d68", "label": "supported", "passage": 4, "reason": "문단4에 남부내륙철도(김천~거제) 4-1공구 등 공공 공사를 꾸준히 수행한다고 있다"}
+{"lid": "d683ee81fb", "label": "no_evidence", "passage": null, "reason": "103,905천원은 문단2에서 파생상품평가손실이며 원재료 매입액을 말하는 문단은 없다"}
+{"lid": "d39e772d3e", "label": "no_evidence", "passage": null, "reason": "원재료 매입 내역을 담은 문단이 없고 아라베스크(유)는 옵션 계약 상대방이다"}
+{"lid": "02dd8138b2", "label": "contradicted", "passage": 5, "reason": "문단5는 2010.9.17~2013.7.5 건의 체결주체를 Macquarie와 건설출자자(KCC건설·롯데건설)로, 풋옵션 행사자를 Macquarie로 적어 아라베스크(유)와 KCC건설의 행사라는 주장과 다르다"}
+{"lid": "67fb4630c2", "label": "no_evidence", "passage": null, "reason": "현대건설·힐스테이트에 대한 문단이 없다"}
+{"lid": "ee91219beb", "label": "supported", "passage": 2, "reason": "문단2에 이행약정지분 중 1,818,864주를 행사가 주당 10,622원 풋옵션 행사에 따라 인수한다고 있다"}
+{"lid": "24f893ca04", "label": "non_claim", "passage": null, "reason": "뒤 내용을 소개하는 안내 문장으로 사실 주장이 아니다"}
+{"lid": "924c5635bc", "label": "supported", "passage": 2, "reason": "문단2에 옵션 공정가치 변동분으로 인식한 파생상품평가손실 103,905천원이 있다"}
+{"lid": "6cffa393c2", "label": "no_evidence", "passage": null, "reason": "연구개발 전담조직이나 경영상 주요계약을 말하는 문단이 없다(문단3은 연구사업 영위만 언급)"}
+{"lid": "51ad1db985", "label": "non_claim", "passage": null, "reason": "답변 형식 안내 문장으로 사실 주장이 아니다"}
+{"lid": "9c5c03fd70", "label": "contradicted", "passage": 2, "reason": "문단2는 파생상품평가손실을 103,905천원으로 적어 187,240천원과 다르다"}

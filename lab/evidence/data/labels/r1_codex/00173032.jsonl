@@ -1,0 +1,22 @@
+{"lid": "0f2867e7ff", "label": "contradicted", "passage": 6, "reason": "문단 6은 섬유판 강마루 시장 확대 시점을 2021년부터로 명시하여 2016년이라는 주장과 다르다."}
+{"lid": "e369b6bc8f", "label": "supported", "passage": 3, "reason": "문단 3은 소재사업, 화학사업, 하우징사업의 세 부문으로 구성된다고 명시한다."}
+{"lid": "f54524e9b7", "label": "supported", "passage": 6, "reason": "문단 6은 2021년부터 섬유판 강마루 시장이 확대되는 추세라고 명시한다."}
+{"lid": "de96609bee", "label": "supported", "passage": 5, "reason": "문단 5의 해외 베트남 남부 행에 2025년 판매 비율 23.5%가 제시되어 있다."}
+{"lid": "d76a765710", "label": "no_evidence", "passage": null, "reason": "23.5%는 베트남 남부의 판매 비율이며 인도네시아 사업의 판매 비율은 제시되지 않았다."}
+{"lid": "8e7862b59d", "label": "contradicted", "passage": 5, "reason": "문단 5에서 MDF의 판매 비율은 13.2%이고 베트남 남부는 23.5%여서 MDF가 가장 크다는 주장과 배치된다."}
+{"lid": "710d1f8894", "label": "no_evidence", "passage": null, "reason": "100.0은 비율 표의 합계이며 2025년 연결 기준 매출액이 100.0이라는 근거는 없다."}
+{"lid": "2f93b96f7e", "label": "supported", "passage": 8, "reason": "문단 8은 베트남 북부 종속법인이 2022년부터 MDF와 마루를 본격적으로 생산 중이라고 명시한다."}
+{"lid": "b33e699d6b", "label": "supported", "passage": 7, "reason": "문단 7의 시장점유율 표에 유니드비티플러스의 2025년 비율 31.6%가 제시되어 있다."}
+{"lid": "c29a2544f6", "label": "non_claim", "passage": null, "reason": "뒤에 나올 사업부문별 매출 내역을 소개하는 안내 문장이다."}
+{"lid": "e97e960376", "label": "supported", "passage": 4, "reason": "문단 4의 MDF 행에 주요상표 동화에코보드와 2025년 판매 비율 13.2%가 함께 제시되어 있다."}
+{"lid": "ad0a048b83", "label": "supported", "passage": 5, "reason": "문단 5의 표에 한솔홈데코의 2025년 비율 42.2%가 제시되어 있다."}
+{"lid": "00de20cb7f", "label": "contradicted", "passage": 8, "reason": "문단 8은 베트남 북부 종속법인이 2022년부터 MDF와 마루를 본격적으로 생산 중이라고 명시한다."}
+{"lid": "67184ee643", "label": "supported", "passage": 2, "reason": "문단 2의 국내 생산실적 표에 2025년 MDF 생산량 365,598㎥가 제시되어 있다."}
+{"lid": "6d5f89e3be", "label": "non_claim", "passage": null, "reason": "국내 MDF와 PB 공장의 평균 가동률을 묻는 질문이다."}
+{"lid": "26a4cde4c2", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 현대자동차의 국내 승용차 생산에 관한 정보가 없다."}
+{"lid": "ab718952dd", "label": "contradicted", "passage": 2, "reason": "문단 2는 제품 매출의 평균 신용공여기간이 60일이라고 명시하여 45일이라는 주장과 다르다."}
+{"lid": "cc2cf5b06b", "label": "contradicted", "passage": 7, "reason": "문단 7은 이자율과 외화위험 관리를 위한 파생상품계약을 체결하고 있지 않다고 명시한다."}
+{"lid": "fd01a52d73", "label": "supported", "passage": 2, "reason": "문단 2는 제품 매출의 평균 신용공여기간이 60일이라고 명시한다."}
+{"lid": "a1e697b53c", "label": "no_evidence", "passage": null, "reason": "29.9%와 32.6%는 시장점유율 수치이며 화학사업군 연구개발비 총액이나 매출액 대비 비율은 제시되지 않았다."}
+{"lid": "9f34cf8d49", "label": "contradicted", "passage": 5, "reason": "문단 5는 동화일렉트로라이트 인수 시점을 2019년 8월로 명시하여 2016년 8월이라는 주장과 다르다."}
+{"lid": "fcc515db68", "label": "supported", "passage": 5, "reason": "문단 5는 2019년 8월 전해액 생산기업 동화일렉트로라이트를 인수했고 옛 이름은 파낙스이텍이라고 명시한다."}
