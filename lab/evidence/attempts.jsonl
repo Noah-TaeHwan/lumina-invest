@@ -5,3 +5,8 @@
 {"at": "2026-10-02T08:14:21.229881+00:00", "event": "generator-runtime-change", "what": "generation moved to host Ollama (Metal); options += num_ctx 8192, num_predict 300", "why": "Docker CPU generation 3-10 min/answer, ReadTimeout at 600s after 2/120; num_ctx raised so longest 8-passage prompts fit (observed ~3.1k tokens, n_ctx 4096, no truncation)", "discarded": "2 answers made with old options archived privately"}
 {"at": "2026-10-02T08:53:16.765606+00:00", "event": "generator-fallback-check", "tune_natural": 164, "non_claim_share_r1": {"opus": 0.311, "codex": 0.311}, "threshold": 0.5, "decision": "keep llama3.2:1b"}
 {"at": "2026-10-02T08:59:50.996644+00:00", "event": "labels-merge", "split": "dev", "labeled": 551, "disputed": 10, "kappa_binary_r1": 0.9741}
+{"at": "2026-10-02T09:01:17.666470+00:00", "event": "judge", "tag": "tune", "split": "tune", "claims": 227, "failed": 0, "used_tokens": 1017665}
+{"at": "2026-10-02T09:01:39.694495+00:00", "event": "question-tuning", "decision": "no wording change", "tune_natural_auc": 0.98, "note": "prereg question kept; check split not viewed"}
+{"at": "2026-10-02T09:02:34.797837+00:00", "event": "judge", "tag": "check", "split": "check", "claims": 231, "failed": 0, "used_tokens": 2075152}
+{"at": "2026-10-02T09:04:35.627521+00:00", "event": "judge", "tag": "single", "split": "check", "claims": 50, "failed": 0, "used_tokens": 3435232}
+{"at": "2026-10-02T09:06:53.871803+00:00", "event": "label-audit", "sampled_numeric": 50, "controlled_mismatch_checked": 3, "final_vs_audit_mismatch": 1, "mismatch_note": "00152729-q5-c1 final=disputed(excluded), audit=no_evidence", "controlled_expected_fixed": ["00136776-q4-c1", "00152729-q5-c1", "00556712-q1-c2"]}
