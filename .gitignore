@@ -27,6 +27,7 @@ data/12*/
 data/1*/
 data/app.db
 data/vectors-cache.json
+data/evidence_passages/
 
 # OS
 .DS_Store
