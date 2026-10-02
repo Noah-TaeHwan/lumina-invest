@@ -24,5 +24,5 @@ def test_generate_answer_uses_fixed_options():
             return "  답변입니다.  "
 
     out = asyncio.run(generate.generate_answer(LLM(), "llama3.2:1b", "삼성전자", "Q", ["P"]))
-    assert out == "답변입니다." and seen["options"] == {"temperature": 0, "seed": 20261002}
+    assert out == "답변입니다." and seen["options"] == {"temperature": 0, "seed": 20261002, "num_ctx": 8192, "num_predict": 300}
     assert len(generate.PROMPT_SHA) == 64

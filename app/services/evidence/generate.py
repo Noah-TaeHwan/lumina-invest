@@ -7,7 +7,7 @@ import json
 
 SYSTEM = ("당신은 상장사 사업보고서를 읽고 질문에 답하는 리서치 보조입니다. "
           "아래 [문단]에 적힌 내용만 근거로 한국어 3~5문장으로 답하세요. 문단에 없는 내용은 추측하지 마세요.")
-OPTIONS = {"temperature": 0, "seed": 20261002}
+OPTIONS = {"temperature": 0, "seed": 20261002, "num_ctx": 8192, "num_predict": 300}
 PROMPT_SHA = hashlib.sha256((SYSTEM + json.dumps(OPTIONS, sort_keys=True)).encode()).hexdigest()
 
 
