@@ -2,7 +2,7 @@
 
 기업 지표 조회와 AI 채팅을 출발점으로 발전시키는 **투자 리서치 포트폴리오**입니다.
 
-**현재 단계: 초기 개발 · 로컬 기본 동작 확인 · JEV 판정력 실험 1차 완료(결과: 판정력 없음)**
+**현재 단계: 초기 개발 · 로컬 기본 동작 확인 · JEV 실험 2건 완료(가격 판단: 판정력 없음 / 공시 근거 판정: 판정력 확인, 최고 기준선과 실용적 동등)**
 
 [edumgt/lumina-invest](https://github.com/edumgt/lumina-invest)의 교육용 코드에서 출발했습니다. 원본 기반을 유지하면서 자료 확인, AI의 설명, 사용자의 판단 기록을 연결하는 경험을 개발합니다.
 
@@ -50,6 +50,37 @@ TypeSafe의 판단 모델 JEV(`jev-1.13.0`)를 매매 진입 판단에 붙였을
 
 리포트: [판정력](docs/lab/stage1-predict-report.md) · [실현 가능성 Stage 0 v3](docs/lab/stage0-v3-report.md) · [Stage 0 v2(1분봉)](docs/lab/stage0-report.md)
 
+## 근거 판정 엔진 — AI 답변 문장마다 공시 근거 확인
+
+AI 답변의 문장마다 DART 사업보고서 문단이 그 문장을 뒷받침하는지(지지·반박·근거 없음) 판정해, 지지된 문장에만 출처를 붙이는 엔진입니다. 의미 판정은 JEV(`jev-1.13.0`)가, 숫자 일치는 코드가 맡습니다. 제품 코드는 `app/services/evidence/`, 평가는 `lab/evidence/`에 있습니다. 채팅 화면 연결은 다음 단계입니다.
+
+**설계**
+
+- 코퍼스: 상장사 40개사(보일러플레이트 시드 15 + 무작위 25)의 2025.12 사업보고서 "회사의 개요·사업의 내용", 문단 5,281개
+- 분할: 같은 그룹·교차 언급 회사를 한 군집으로 묶어 조정 10 · 확인 10 · 홀드아웃 20개사
+- 주장: 로컬 `llama3.2:1b`가 검색 문단 8개를 보고 쓴 답변 문장(자연 주장)과 의역·변형 문장(통제 주장, 진단용)
+- 정답: Claude·Codex가 독립적으로 붙이고 조정한 **AI 참조 라벨**(사람 감사 없음, 숫자 주장 표본 감사)
+- 사전등록·동결: [prereg.json](lab/evidence/prereg.json), 홀드아웃은 [동결 파일](lab/evidence/prereg_holdout.json) 커밋 뒤 한 번만 실행
+
+**결과**
+
+| 단계 | 판정기 | AUC |
+|---|---|---:|
+| Stage 0(확인 세트 117건) | JEV | 0.925 (95% 0.850~0.987) |
+| Stage 1(홀드아웃 228건) | SYS = JEV + 숫자 대조 | 0.979 |
+| | 어휘 겹침(최고 기준선) | 0.984 |
+| | 임베딩 유사도 | 0.730 |
+| | 다국어 NLI | 0.563 |
+| | 로컬 LLM | 0.538 |
+
+- 주결과 Δ = AUC(SYS) − AUC(어휘 겹침) = −0.005(95% −0.041~+0.024): **우월성 미확인, 실용적으로 동등**
+- JEV는 NLI·로컬 LLM·임베딩을 크게 앞섰고 판정 실패는 0건이었습니다. 1B 생성기가 문단을 거의 그대로 옮겨 써서 단순 어휘 겹침도 강했던 것으로 해석합니다
+- 진단(주결과 아님): 의역한 참 문장과 주체만 바꾼 거짓 문장을 가를 때 JEV 0.998, 어휘 겹침 0.639
+
+**한계:** 정답이 AI 참조 라벨입니다. 한국 상장사 40개사·사업보고서 두 절, 검색 문단 8개 기준 판정이며, 소형 생성기의 문체가 결과에 영향을 줬을 수 있습니다.
+
+리포트: [Stage 1 홀드아웃](docs/lab/evidence-stage1-report.md) · [Stage 0 실현 가능성](docs/lab/evidence-stage0-report.md) · [설계](docs/superpowers/specs/2026-10-02-evidence-assistant-design.md)
+
 ## 원본 기반과 개인 작업
 
 | 구분 | 범위 | 상태 |
@@ -60,7 +91,8 @@ TypeSafe의 판단 모델 JEV(`jev-1.13.0`)를 매매 진입 판단에 붙였을
 | 개인 작업 — 소개 | 제품 중심 README, 원본 교육 자료 보존, 로컬 재현 절차 가이드(새 clone 실행은 미확인) | [PR #2로 main 반영](https://github.com/Noah-TaeHwan/lumina-invest/pull/2), 교차 검수 후 문구 보완 |
 | 개인 작업 — 확인 | 회원가입·로그인, 종목 조회·지표 표시, 시드 그래프, 채팅 응답·저장 | 2026-10-01 로컬 확인 |
 | 개인 작업 — JEV Gate Lab | 데이터 로더·익명 특징·돌파 규칙·JEV 게이트·사전등록·판정력 통계·CLI와 테스트 | [PR #4](https://github.com/Noah-TaeHwan/lumina-invest/pull/4)·[#5](https://github.com/Noah-TaeHwan/lumina-invest/pull/5)·[#6](https://github.com/Noah-TaeHwan/lumina-invest/pull/6)·[#7](https://github.com/Noah-TaeHwan/lumina-invest/pull/7), 독립 리뷰 반영 |
-| 다음 개발 | 영속 관심종목, 자료 출처·시점, AI 근거 링크, 기업별 판단 노트 | 계획 |
+| 개인 작업 — 근거 판정 엔진 | DART 수집·문단 분해·숫자 대조·JEV 판정기·기준선 4종·군집 분할·AI 참조 라벨·홀드아웃 2단 봉인·CLI와 테스트 | [PR #9](https://github.com/Noah-TaeHwan/lumina-invest/pull/9)·[#10](https://github.com/Noah-TaeHwan/lumina-invest/pull/10)·[#11](https://github.com/Noah-TaeHwan/lumina-invest/pull/11)·[#12](https://github.com/Noah-TaeHwan/lumina-invest/pull/12), 독립 리뷰 반영 |
+| 다음 개발 | 채팅 화면에 문장별 근거 배지 연결, 영속 관심종목, 자료 출처·시점, 기업별 판단 노트 | 계획 |
 
 기능을 추가할 때 이 표에 개인 변경과 확인 근거를 함께 갱신합니다.
 
@@ -144,17 +176,20 @@ Docker Compose v2와 이미지·모델 다운로드가 가능한 네트워크가
 - [ ] AI 응답 지연 원인 개선 및 실제 사용자 요청으로 확인
 - [ ] 기업 자료의 출처·조회 시각 표시
 - [ ] 관심종목과 기업별 판단 노트 저장
-- [ ] AI 답변에 근거 링크 전달·표시
+- [ ] AI 답변에 근거 링크 전달·표시(판정 엔진 완료, 채팅 연결 예정)
 - [ ] 위 기능을 연결한 대표 리서치 흐름과 검증 근거 준비
 
 ## 상세 자료
 
 - [로컬 실행 가이드](PORTFOLIO_LOCAL.md)
 - [JEV Gate Lab 설계](docs/superpowers/specs/2026-10-01-jev-gate-lab-design.md) · [판정력 리포트](docs/lab/stage1-predict-report.md)
+- [근거 판정 엔진 설계](docs/superpowers/specs/2026-10-02-evidence-assistant-design.md) · [Stage 1 리포트](docs/lab/evidence-stage1-report.md)
 - [원본 교육 자료·Mock 화면·개념 설명 보존본](docs/upstream/readme.md)
 - [AWS 목표 설계](aws.md) · [온프레미스 목표 설계](onprem.md) · [데이터 파이프라인 목표 설계](pipeline.md)
 
 목표 설계와 교육 자료는 원본 프로젝트에서 제공한 문서이며 개인 운영·배포 완료를 증명하지 않습니다.
+
+JEV는 TypeSafe AI의 모델입니다. 이 저장소는 공개 API를 사용한 개인 실험이며 TypeSafe AI와 제휴·보증 관계가 없습니다. 측정 수치는 이 저장소의 조건에서 얻은 결과입니다.
 기존 904줄 README의 내용은 출처와 기준 commit을 붙여 보존했습니다. 상대 링크·코드 블록 경계·줄 끝 공백 표현을 교정했으며, 의도된 줄바꿈은 유지했습니다.
 
 ## 원작 출처와 이용 조건
