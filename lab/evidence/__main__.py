@@ -502,6 +502,162 @@ def cmd_labels_merge(P: Paths, args) -> None:
 COMMANDS.update({"label-packets": cmd_label_packets, "labels-merge": cmd_labels_merge})
 
 
+TOKEN_CAP = 20_000_000
+
+
+def subset(cids: list[str], n: int) -> list[str]:
+    """sha256 순으로 정렬한 앞 n개(결정적 표본)."""
+    return sorted(cids, key=lambda c: hashlib.sha256(c.encode()).hexdigest())[:n]
+
+
+def sessions(times: list[str], gap_hours: float = 1.0) -> list[list[str]]:
+    """호출 시각을 gap_hours 이상 간격에서 세션으로 나눈다."""
+    ts = sorted(datetime.fromisoformat(t) for t in times)
+    out: list[list[str]] = []
+    for t in ts:
+        if not out or (t - datetime.fromisoformat(out[-1][-1])).total_seconds() >= gap_hours * 3600:
+            out.append([])
+        out[-1].append(t.isoformat())
+    return out
+
+
+def _judgeable(P: Paths, split_name: str) -> list[dict]:
+    """분할의 주장 중 최종 라벨이 disputed·non_claim이 아닌 것(라벨 포함)."""
+    codes = {c["corp_code"] for c in companies(P, split_name)}
+    lab = {r["cid"]: r["label"] for r in read_jsonl(P.jsonl("labels.jsonl"))}
+    return [dict(c, label=lab[c["cid"]]) for c in read_jsonl(P.jsonl("claims.jsonl"))
+            if c["qid"].split("-q")[0] in codes and lab.get(c["cid"]) not in (None, "disputed", "non_claim")]
+
+
+def cmd_judge(P: Paths, args) -> None:
+    """JEV 판정을 실행해 비공개 점수 파일에 쓴다. 사전등록 파일이 없으면 거부."""
+    from app.lib.jev import JevClient
+    from app.services.evidence.judge import judge_claim
+
+    if not P.prereg.exists():
+        raise SystemExit("prereg.json must be committed before JEV calls")
+    if not args.tag:
+        raise SystemExit("--tag is required")
+    claims = _judgeable(P, args.split)
+    if args.limit:
+        keep = set(subset([c["cid"] for c in claims if c["source"] == "natural"], args.limit))
+        claims = [c for c in claims if c["cid"] in keep]
+    text = _passage_text(P)
+    ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
+    names = _corp_names(P)
+    client = JevClient(P.calls, TOKEN_CAP)
+    out = []
+    for c in claims:
+        j = judge_claim(client, names[c["qid"].split("-q")[0]], c["text"], [text[i] for i in ret[c["qid"]]],
+                        use_cache=not args.no_cache, tag=args.tag, single=args.single)
+        out.append({"cid": c["cid"], "s": j.s, "c": j.c, "ok": j.ok, "requests": j.requests})
+    write_jsonl(P.priv / "scores" / f"{args.tag}.jsonl", out)
+    log_attempt(P, "judge", tag=args.tag, split=args.split, claims=len(out), failed=sum(not r["ok"] for r in out),
+                used_tokens=client.used_tokens)
+    print(f"{len(out)} judged, used tokens {client.used_tokens}")
+
+
+def stage0_gates(*, corpus, kappa, controlled_agree, auc, batch_agree, p95_ms, fail, n_sessions, repeat_agree) -> dict:
+    """spec 7절 Stage 0 관문 판정."""
+    from lab.evidence.metrics import cp_upper
+
+    upper = cp_upper(*fail)
+    g = {
+        "corpus": {"value": corpus, "pass": corpus[0] >= 38},
+        "kappa": {"value": kappa, "pass": kappa >= 0.6},
+        "controlled": {"value": controlled_agree, "pass": controlled_agree >= 0.85},
+        "h_ko": {"value": auc, "pass": auc[0] is not None and auc[0] >= 0.70 and auc[1] is not None and auc[1] > 0.5},
+        "batching": {"value": batch_agree, "pass": batch_agree >= 0.90},
+        "latency_fail": {"value": {"p95_ms": p95_ms, "first_requests": fail[1], "fail_upper": upper,
+                                   "sessions": n_sessions},
+                         "pass": fail[1] >= 300 and n_sessions >= 2 and p95_ms <= 1500 and upper <= 0.02},
+        "repeat": {"value": repeat_agree, "pass": repeat_agree >= 0.90},
+    }
+    g["go"] = all(v["pass"] for v in g.values())
+    return g
+
+
+def _scores(P: Paths, tag: str) -> dict[str, dict]:
+    return {r["cid"]: r for r in read_jsonl(P.priv / "scores" / f"{tag}.jsonl")}
+
+
+def cmd_stage0_report(P: Paths, args) -> None:
+    """Stage 0 관문을 계산해 집계 JSON과 리포트를 쓴다(달러 금액은 쓰지 않는다)."""
+    from app.services.evidence.judge import Judgement, passage_labels
+    from lab.evidence.metrics import auc, cluster_bootstrap, kappa, percentile
+
+    split = load_split(P)
+    cluster = {c["corp_code"]: c["cluster"] for c in split["companies"]}
+    n_ok = sum(1 for c in split["companies"] if (P.priv / "docs" / f"{c['rcept_no']}.xml").exists())
+    labels = {r["cid"]: r for r in read_jsonl(P.jsonl("labels.jsonl"))}
+    claims = {c["cid"]: c for c in read_jsonl(P.jsonl("claims.jsonl"))}
+    dev_codes = {c["corp_code"] for c in companies(P, "dev")}
+    nat = [l for cid, l in labels.items() if claims[cid]["source"] == "natural"
+           and cid.split("-q")[0] in dev_codes]
+    both = [l for l in nat if "non_claim" not in (l["r1"]["opus"]["label"], l["r1"]["codex"]["label"])]
+    k = kappa([l["r1"]["opus"]["label"] == "supported" for l in both],
+              [l["r1"]["codex"]["label"] == "supported" for l in both])
+    ctrl = [(l, claims[cid]) for cid, l in labels.items() if claims[cid]["source"] == "controlled"
+            and cid.split("-q")[0] in dev_codes]
+    agree = [(l["r1"][lb]["label"] == "supported") == (c["expected"] == "supported") for l, c in ctrl
+             for lb in ("opus", "codex")]
+    controlled_agree = sum(agree) / len(agree) if agree else 0.0
+    chk = _scores(P, "check")
+    rows = []
+    for c in _judgeable(P, "check"):
+        if c["source"] == "natural" and c["cid"] in chk:
+            r = chk[c["cid"]]
+            rows.append({"cluster": cluster[c["qid"].split("-q")[0]], "qid": c["qid"],
+                         "y": int(c["label"] == "supported"), "score": max(r["s"]) if r["ok"] else 0.0})
+    stat = lambda rs: auc([r["y"] for r in rs], [r["score"] for r in rs])
+    auc_ci = cluster_bootstrap(rows, stat)
+    single, batched = _scores(P, "single"), chk
+    pairs = [(a, b) for cid in single for a, b in zip(passage_labels(Judgement(single[cid]["s"], single[cid]["c"], True, 0)),
+                                                       passage_labels(Judgement(batched[cid]["s"], batched[cid]["c"], True, 0)))
+             if single[cid]["ok"] and batched[cid]["ok"]]
+    batch_agree = sum(a == b for a, b in pairs) / len(pairs) if pairs else 0.0
+    reps = [_scores(P, f"repeat{i}") for i in (1, 2, 3)]
+
+    def sig(r):
+        j = Judgement(r["s"], r["c"], r["ok"], 0)
+        top = max(range(len(j.s)), key=lambda i: j.s[i])
+        return (top, passage_labels(j)[top])
+
+    rep_cids = [cid for cid in reps[0] if all(cid in r and r[cid]["ok"] for r in reps)]
+    repeat_agree = (sum(len({sig(r[cid]) for r in reps}) == 1 for cid in rep_cids) / len(rep_cids)) if rep_cids else 0.0
+    first = [r for r in read_jsonl(P.calls) if r["attempt"] == 1]
+    lat = [r["latency_ms"] for r in first]
+    fails = sum(not r["ok"] for r in first)
+    sess = sessions([r["called_at"] for r in first])
+    gates = stage0_gates(corpus=(n_ok, len(split["companies"])), kappa=k, controlled_agree=controlled_agree,
+                         auc=auc_ci, batch_agree=batch_agree, p95_ms=percentile(lat, 95) if lat else 1e9,
+                         fail=(fails, len(first)), n_sessions=len(sess), repeat_agree=repeat_agree)
+    summary = {"gates": gates, "check_rows": len(rows), "check_supported": sum(r["y"] for r in rows),
+               "latency_ms": {q: percentile(lat, q) for q in (50, 95, 99)} if lat else {},
+               "first_requests": len(first), "input_tokens": sum(r["input_tokens"] for r in read_jsonl(P.calls)),
+               "session_sizes": [len(s) for s in sess], "disputed": sum(l["label"] == "disputed" for l in nat)}
+    out = P.ev / "results/stage0.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(summary, ensure_ascii=False, indent=1, default=str) + "\n")
+    report = P.root / "docs/lab/evidence-stage0-report.md"
+    report.parent.mkdir(parents=True, exist_ok=True)
+    lines = ["# 근거 판정 엔진 Stage 0 리포트", "",
+             "> 정답 라벨은 사람이 아니라 AI(Claude Opus·Codex)가 만든 **AI 참조 라벨**이다. 결과는 AI 참조 라벨과의 일치 성능이다.", "",
+             f"**판정: {'GO' if gates['go'] else 'NO-GO'}**", "", "| 기준 | 값 | 통과 |", "|---|---|---|"]
+    for name, g in gates.items():
+        if name != "go":
+            lines.append(f"| {name} | {json.dumps(g['value'], ensure_ascii=False, default=str)} | {'예' if g['pass'] else '아니오'} |")
+    lines += ["", f"- 확인 세트 자연 주장 {summary['check_rows']}건(지지됨 {summary['check_supported']}건)",
+              f"- JEV 첫 요청 {summary['first_requests']}회, 입력 토큰 {summary['input_tokens']:,}개, 세션 크기 {summary['session_sizes']}",
+              f"- 라벨 조정 후에도 갈린 개발 자연 주장 {summary['disputed']}건(주결과에서 제외)"]
+    report.write_text("\n".join(lines) + "\n")
+    log_attempt(P, "stage0-report", go=gates["go"])
+    print("GO" if gates["go"] else "NO-GO")
+
+
+COMMANDS.update({"judge": cmd_judge, "stage0-report": cmd_stage0_report})
+
+
 def main(argv: list[str] | None = None) -> None:
     """명령 분기."""
     ap = argparse.ArgumentParser(prog="lab.evidence")
