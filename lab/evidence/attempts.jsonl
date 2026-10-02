@@ -22,3 +22,10 @@
 {"at": "2026-10-02T10:32:19.721884+00:00", "event": "baselines", "tag": "llm", "split": "tune", "claims": 227, "failed": 160}
 {"at": "2026-10-02T10:37:24.189621+00:00", "event": "baselines", "tag": "llm", "split": "check", "claims": 231, "failed": 130}
 {"at": "2026-10-02T10:40:14.730666+00:00", "event": "baselines", "tag": "nli", "split": "tune", "claims": 227, "failed": 0}
+{"at": "2026-10-02T10:44:28.047944+00:00", "event": "baselines", "tag": "lex", "split": "tune", "claims": 227, "failed": 0}
+{"at": "2026-10-02T10:47:01.545033+00:00", "event": "baselines", "tag": "llm", "split": "tune", "claims": 227, "failed": 0}
+{"at": "2026-10-02T10:47:02.054926+00:00", "event": "baselines", "tag": "lex", "split": "check", "claims": 231, "failed": 0}
+{"at": "2026-10-02T10:49:35.764029+00:00", "event": "baselines", "tag": "llm", "split": "check", "claims": 231, "failed": 0}
+{"at": "2026-10-02T10:57:27.494403+00:00", "event": "baselines", "tag": "nli", "split": "check", "claims": 231, "failed": 0}
+{"at": "2026-10-02T10:57:42.587951+00:00", "event": "stage1-tune", "tau_c": 0.35, "tau_s": 0.5, "b_star": "lex", "mde": 0.08344842644488189}
+{"at": "2026-10-02T10:58:13.342533+00:00", "event": "stage1-freeze-config"}

@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "spec": "docs/superpowers/specs/2026-10-02-evidence-assistant-design.md (4판 + 2절 군집 규칙 개정 2026-10-02)",
   "seed": 20261002,
   "split_sha256": "a93cd93b85b65c1d1d6adeca9311e9f99fd8c6bc0011f6ef2991397d1872ba66",
@@ -78,5 +78,39 @@
     "seed": 20261002
   },
   "token_cap": 20000000,
-  "stop": "any gate fails -> NO-GO, publish the report, move to module B if h_ko fails"
+  "stop": "any gate fails -> NO-GO, publish the report, move to module B if h_ko fails",
+  "stage1": {
+    "tau_c": 0.35,
+    "tau_s": 0.5,
+    "baseline_auc_tune": {
+      "lex": 0.9529900863447394,
+      "emb": 0.7086664534697794,
+      "nli": 0.5929005436520627,
+      "llm": 0.5588423409018228
+    },
+    "b_star": "lex",
+    "sys_auc_tune": 0.971378317876559,
+    "mde": 0.08344842644488189,
+    "holdout_clusters": 12,
+    "holdout_questions_per_company": 6,
+    "exploratory": false,
+    "check_operating_point": {
+      "supported_precision": 0.796875,
+      "supported_recall": 0.9807692307692307,
+      "coverage": 0.5470085470085471,
+      "contradiction_false_positive_rate": 0.05825242718446602
+    },
+    "check_sys_auc": 0.923224852071006,
+    "nli_revision": "b5113eb38ab63efdd7f280f8c144ea8b13f978ce",
+    "llm_prompt": "당신은 근거 판정자입니다. [문단]들 중 하나가 [주장]의 모든 사실을 그대로 뒷받침하는 정도를 0~100 사이 정수 하나로만 답하세요. 뒷받침하지 않거나 어긋나면 0에 가깝게 답하세요.",
+    "labelers": {
+      "opus": "claude-opus-5-5 (Claude Code subagent)",
+      "codex": "codex-cli 0.159.3→0.160.0, model gpt-6.1-sol, run with -c mcp_servers={}"
+    },
+    "notes": [
+      "B*=lex because generator answers copy passage wording; SYS tune AUC 0.971 vs lex 0.953",
+      "tau_s=0.50 by prereg rule (smallest with tune precision>=0.90); Stage 0 showed repeat flips near 0.5 — product threshold decided separately in A-2",
+      "MDE 0.083 <= 0.10: holdout keeps 6 questions per company"
+    ]
+  }
 }
