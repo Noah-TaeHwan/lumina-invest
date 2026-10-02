@@ -16,7 +16,8 @@ def _split(tmp_path):
     return P
 
 
-def test_holdout_refused_before_freeze(tmp_path):
+def test_holdout_refused_before_freeze(tmp_path, monkeypatch):
+    monkeypatch.setattr(cli, "verify_freeze", lambda P: None)  # 해시 재검증은 test_stage1_fixes에서
     P = _split(tmp_path)
     assert [c["corp_code"] for c in cli.companies(P, "dev")] == ["a", "b"]
     with pytest.raises(SystemExit, match="frozen"):

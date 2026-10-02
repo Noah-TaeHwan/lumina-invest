@@ -24,7 +24,8 @@ COMPS = [{"corp_code": "a", "corp_name": "A", "split": "tune", "cluster": 0, "rc
 
 
 # Critical 1 — all 분할과 빈 동결 파일로 홀드아웃 봉인을 우회할 수 없다
-def test_all_split_and_empty_freeze_file_do_not_unseal_holdout(tmp_path):
+def test_all_split_and_empty_freeze_file_do_not_unseal_holdout(tmp_path, monkeypatch):
+    monkeypatch.setattr(cli, "verify_freeze", lambda P: None)  # 해시 재검증은 test_stage1_fixes에서
     P = _root(tmp_path, COMPS)
     with pytest.raises(SystemExit, match="frozen"):
         cli.companies(P, "all")

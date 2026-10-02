@@ -15,3 +15,10 @@
 {"at": "2026-10-02T10:06:38.267774+00:00", "event": "judge", "tag": "repeat3", "split": "check", "claims": 50, "failed": 0, "used_tokens": 4119562}
 {"at": "2026-10-02T10:06:57.308186+00:00", "event": "stage0-report", "go": true}
 {"at": "2026-10-02T10:07:35.258302+00:00", "event": "stage0-report", "go": true}
+{"at": "2026-10-02T10:27:03.217189+00:00", "event": "baselines", "tag": "lex", "split": "tune", "claims": 227, "failed": 0}
+{"at": "2026-10-02T10:27:03.927972+00:00", "event": "baselines", "tag": "emb", "split": "tune", "claims": 227, "failed": 0}
+{"at": "2026-10-02T10:27:28.279688+00:00", "event": "baselines", "tag": "lex", "split": "check", "claims": 231, "failed": 0}
+{"at": "2026-10-02T10:27:28.880755+00:00", "event": "baselines", "tag": "emb", "split": "check", "claims": 231, "failed": 0}
+{"at": "2026-10-02T10:32:19.721884+00:00", "event": "baselines", "tag": "llm", "split": "tune", "claims": 227, "failed": 160}
+{"at": "2026-10-02T10:37:24.189621+00:00", "event": "baselines", "tag": "llm", "split": "check", "claims": 231, "failed": 130}
+{"at": "2026-10-02T10:40:14.730666+00:00", "event": "baselines", "tag": "nli", "split": "tune", "claims": 227, "failed": 0}

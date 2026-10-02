@@ -28,18 +28,19 @@ def test_two_stage_holdout_seal(tmp_path):
 
 
 def test_holdout_run_once(tmp_path):
+    P = _P(tmp_path)
     out = tmp_path / "x.jsonl"
-    cli.once(out, "holdout")
+    cli.once(P, out, "holdout", "judge", "holdout")
     out.write_text("{}\n")
     with pytest.raises(SystemExit, match="already"):
-        cli.once(out, "holdout")
-    cli.once(out, "tune")
+        cli.once(P, out, "holdout", "judge", "holdout")
+    cli.once(P, out, "tune", "judge", "tune")
 
 
 def test_freeze_config_refuses_overwrite(tmp_path):
     P = _P(tmp_path)
     (P.ev / "results").mkdir(parents=True)
-    (P.ev / "results/stage1-tune.json").write_text(json.dumps({"tau_s": 0.7, "tau_c": 0.6, "b_star": "nli"}))
+    (P.ev / "results/stage1-tune.json").write_text(json.dumps({"tau_s": 0.7, "tau_c": 0.6, "b_star": "nli", "mde": 0.05}))
     cli.cmd_stage1_freeze_config(P, None)
     assert json.loads(P.prereg.read_text())["stage1"]["b_star"] == "nli"
     with pytest.raises(SystemExit, match="already"):

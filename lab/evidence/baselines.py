@@ -43,11 +43,32 @@ def llm_messages(claim: str, passages: list[str]) -> list[dict]:
 
 
 def parse_llm_score(text: str) -> float | None:
-    """첫 정수(0~100)를 0~1로. 없거나 범위 밖이면 None."""
-    m = re.search(r"\d+", text)
-    if not m or int(m.group()) > 100:
+    """마지막 정수(0~100)를 0~1로. 없거나 범위 밖이면 None('100점 중 85' → 0.85)."""
+    nums = re.findall(r"\d+", text)
+    if not nums or int(nums[-1]) > 100:
         return None
-    return int(m.group()) / 100
+    return int(nums[-1]) / 100
+
+
+LLM_SCHEMA = {"type": "object", "properties": {"score": {"type": "integer", "minimum": 0, "maximum": 100}},
+              "required": ["score"]}
+
+
+def llm_payload(claim: str, passages: list[str], model: str = "llama3.2:1b") -> dict:
+    """Ollama /api/chat 요청. 1B 모델이 지시를 무시하고 문단을 이어 쓰므로 JSON 스키마로 출력 형식을 강제한다."""
+    return {"model": model, "messages": llm_messages(claim, passages), "stream": False,
+            "options": {**LLM_OPTIONS, "num_predict": 32}, "format": LLM_SCHEMA}
+
+
+def parse_llm_json(text: str) -> float | None:
+    """{"score": 0~100} 응답을 0~1로. 형식이 틀리거나 범위 밖이면 None."""
+    import json
+
+    try:
+        v = json.loads(text)["score"]
+    except (ValueError, KeyError, TypeError):
+        return None
+    return v / 100 if isinstance(v, int) and 0 <= v <= 100 else None
 
 
 def nli_entailment(pairs: list[tuple[str, str]], revision: str) -> list[float]:
