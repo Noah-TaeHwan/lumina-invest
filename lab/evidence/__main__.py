@@ -230,13 +230,18 @@ def model_digest(tags: list[dict], model: str, expected: str) -> str:
     return digest
 
 
-STAGE0_TAGS = {"check", "repeat1", "repeat2", "repeat3"}
+STAGE0_TAGS = {"tune", "check", "repeat1", "repeat2", "repeat3"}
 
 
 def latency_rows(calls: list[dict]) -> tuple[list[dict], list[dict]]:
-    """첫 시도 기록을 관문용(Stage 0 묶음·반복)과 단건(single)으로 나눈다. tune·holdout 등은 뺀다."""
+    """첫 시도 기록을 관문용(Stage 0 묶음·반복)과 단건(single)으로 나눈다. holdout(Stage 1) 등은 뺀다."""
     first = [r for r in calls if r["attempt"] == 1]
     return [r for r in first if r["tag"] in STAGE0_TAGS], [r for r in first if r["tag"] == "single"]
+
+
+def stage0_input_tokens(calls: list[dict]) -> int:
+    """Stage 0 호출(묶음·반복·단건, 모든 시도)의 입력 토큰 합. holdout(Stage 1) 등은 뺀다."""
+    return sum(r["input_tokens"] for r in calls if r["tag"] in STAGE0_TAGS or r["tag"] == "single")
 
 
 def session_stats(rows: list[dict]) -> list[dict]:
@@ -862,7 +867,8 @@ def cmd_stage0_report(P: Paths, args) -> None:
 
     rep_cids = [cid for cid in reps[0] if all(cid in r and r[cid]["ok"] for r in reps)]
     repeat_agree = (sum(len({sig(r[cid]) for r in reps}) == 1 for cid in rep_cids) / len(rep_cids)) if rep_cids else 0.0
-    first, single_first = latency_rows(read_jsonl(P.calls))
+    calls = read_jsonl(P.calls)
+    first, single_first = latency_rows(calls)
     lat = [r["latency_ms"] for r in first]
     fails = sum(not r["ok"] for r in first)
     sess = sessions([r["called_at"] for r in first])
@@ -871,7 +877,7 @@ def cmd_stage0_report(P: Paths, args) -> None:
                          fail=(fails, len(first)), n_sessions=len(sess), repeat_agree=repeat_agree)
     summary = {"gates": gates, "check_rows": len(rows), "check_supported": sum(r["y"] for r in rows),
                "latency_ms": {q: percentile(lat, q) for q in (50, 95, 99)} if lat else {},
-               "first_requests": len(first), "input_tokens": sum(r["input_tokens"] for r in read_jsonl(P.calls)),
+               "first_requests": len(first), "input_tokens": stage0_input_tokens(calls),
                "session_sizes": [len(s) for s in sess], "disputed": sum(l["label"] == "disputed" for l in nat),
                "sessions": session_stats(first) if first else [],
                "single_requests": {"n": len(single_first), "failures": sum(not r["ok"] for r in single_first)},
