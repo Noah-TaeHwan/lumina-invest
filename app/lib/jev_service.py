@@ -116,7 +116,7 @@ class ServiceJevClient:
         self._r = redis
         self.quota = quota
         self._api_key = api_key
-        self._client = client or httpx.AsyncClient()
+        self._client = client or httpx.AsyncClient(timeout=timeout)
         self._timeout = timeout
         self._sem = asyncio.Semaphore(max_concurrency)
         self._clock = clock
