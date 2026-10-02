@@ -5,6 +5,8 @@
   조회 화면이 판정 전에도 서버가 나눈 오프셋으로 문장을 감쌀 수 있게 하려는 것이다.
 - 판정이 끝나면 문장 행을 실행기 결과로 바꿔 쓴다.
 - stale: 앱 시작 시 pending·running 전부, 조회 시 생성 후 60초가 지난 pending·running을 failed(stale)로 바꾼다.
+- 실패 처리는 fail_runs 한 곳에서 한다: 실행을 failed(code)로, 그 실행의 pending 문장을 unjudged(reason=code)로.
+- 판정 결과 저장은 실행이 아직 running일 때만 한다(조건부 UPDATE). stale로 바뀐 실행은 되살리지 않는다.
 """
 from __future__ import annotations
 
@@ -60,8 +62,20 @@ def new_run(*, chat_id: uuid.UUID, conversation_id: uuid.UUID, user_id: uuid.UUI
     return run
 
 
-async def save_result(db: AsyncSession, run: EvidenceRun, result: RunResult) -> None:
-    """실행기 결과로 실행 행을 확정하고 문장 행을 바꿔 쓴다(커밋은 호출자)."""
+async def save_result(db: AsyncSession, run: EvidenceRun, result: RunResult) -> bool:
+    """실행이 아직 running이면 결과로 확정하고 문장 행을 바꿔 쓴다(커밋은 호출자).
+
+    그 사이 stale 등으로 failed가 됐으면 아무것도 쓰지 않고 False를 돌려준다(다시 판정 실행과 섞이지 않게).
+    """
+    at = now()
+    res = await db.execute(
+        update(EvidenceRun).where(EvidenceRun.id == run.id, EvidenceRun.status == "running")
+        .values(status=result.status, error_code=result.error_code, policy_version=result.policy_version,
+                jev_model=result.jev_model, calls=result.calls, cache_hits=result.cache_hits,
+                input_tokens=result.input_tokens, finished_at=at)
+        .returning(EvidenceRun.id))
+    if res.first() is None:
+        return False
     await db.execute(delete(EvidenceClaim).where(EvidenceClaim.run_id == run.id))
     for c in result.claims:
         db.add(EvidenceClaim(
@@ -70,32 +84,52 @@ async def save_result(db: AsyncSession, run: EvidenceRun, result: RunResult) -> 
             jev_request_key=c.jev_request_key, attempts=c.attempts, latency_ms=c.latency_ms, cached=c.cached,
             input_tokens=c.input_tokens,
         ))
-    run.status, run.error_code = result.status, result.error_code
-    run.policy_version, run.jev_model = result.policy_version, result.jev_model
-    run.calls, run.cache_hits, run.input_tokens = result.calls, result.cache_hits, result.input_tokens
-    run.finished_at = now()
+    return True
 
 
-async def mark_failed(db: AsyncSession, run_id: uuid.UUID, code: str) -> None:
-    await db.execute(update(EvidenceRun).where(EvidenceRun.id == run_id)
-                     .values(status="failed", error_code=code, finished_at=now()))
+async def fail_runs(db: AsyncSession, where: list, code: str, at: datetime | None = None) -> list[uuid.UUID]:
+    """조건에 맞는 진행 중(pending·running) 실행을 failed(code)로 바꾸고, 그 실행의 pending 문장을
+    unjudged(reason=code)로 바꾼다. 바꾼 실행 id 목록(커밋은 호출자). 실패 처리는 모두 이 함수를 거친다."""
+    at = at or now()
+    res = await db.execute(update(EvidenceRun).where(EvidenceRun.status.in_(ACTIVE), *where)
+                           .values(status="failed", error_code=code, finished_at=at).returning(EvidenceRun.id))
+    ids = [r[0] for r in res]
+    if ids:
+        await db.execute(update(EvidenceClaim)
+                         .where(EvidenceClaim.run_id.in_(ids), EvidenceClaim.status == "pending")
+                         .values(status="unjudged", reason=code))
+    return ids
+
+
+async def mark_failed(db: AsyncSession, run_id: uuid.UUID, code: str) -> bool:
+    return bool(await fail_runs(db, [EvidenceRun.id == run_id], code))
 
 
 async def fail_active_runs(db: AsyncSession) -> int:
     """앱 시작 시: 앞 프로세스가 남긴 pending·running 실행을 모두 failed(stale)로. 자동 재실행은 하지 않는다."""
-    res = await db.execute(update(EvidenceRun).where(EvidenceRun.status.in_(ACTIVE))
-                           .values(status="failed", error_code="stale", finished_at=now()))
-    return res.rowcount or 0
+    return len(await fail_runs(db, [], "stale"))
 
 
-def expire_stale(runs: list[EvidenceRun], at: datetime) -> int:
+async def expire_stale(db: AsyncSession, runs: list[EvidenceRun], at: datetime) -> int:
     """조회 시: 생성 후 60초가 지난 pending·running을 failed(stale)로 바꾼다(커밋은 호출자). 바꾼 수."""
-    n = 0
-    for run in runs:
-        if run.status in ACTIVE and run.created_at <= at - timedelta(seconds=STALE_AFTER_S):
-            run.status, run.error_code, run.finished_at = "failed", "stale", at
-            n += 1
-    return n
+    old = [r for r in runs if r.status in ACTIVE and r.created_at <= at - timedelta(seconds=STALE_AFTER_S)]
+    if not old:
+        return 0
+    ids = set(await fail_runs(db, [EvidenceRun.id.in_([r.id for r in old])], "stale", at))
+    for r in old:  # 이미 불러온 객체도 맞춰 둔다
+        if r.id in ids:
+            r.status, r.error_code, r.finished_at = "failed", "stale", at
+    return len(ids)
+
+
+async def latest_run_ids(db: AsyncSession, chat_ids: list[uuid.UUID]) -> set[uuid.UUID]:
+    """메시지마다 가장 최근 실행의 id. 다시 판정은 최신 실행에만 허용한다."""
+    if not chat_ids:
+        return set()
+    rows = await db.execute(select(EvidenceRun.id).where(EvidenceRun.chat_id.in_(chat_ids))
+                            .order_by(EvidenceRun.chat_id, EvidenceRun.created_at.desc())
+                            .distinct(EvidenceRun.chat_id))
+    return {r[0] for r in rows}
 
 
 def poll_until_s(ahead: int, policy: Policy = A2_PROVISIONAL) -> int:
@@ -141,13 +175,15 @@ def serialize_claim(c: EvidenceClaim) -> dict:
             "number_ok": c.number_ok, "cached": c.cached, "attempts": c.attempts, "latency_ms": c.latency_ms}
 
 
-def serialize_run(run: EvidenceRun, claims: list[EvidenceClaim], poll_until: int | None = None) -> dict:
-    """판정 실행 조회 응답. 진행 중이면 폴링 간격과 서버가 권하는 폴링 상한을 함께 준다."""
+def serialize_run(run: EvidenceRun, claims: list[EvidenceClaim], poll_until: int | None = None,
+                  latest: bool = True) -> dict:
+    """판정 실행 조회 응답. 진행 중이면 폴링 간격과 서버가 권하는 폴링 상한을 함께 준다.
+    latest: 이 실행이 그 메시지의 최신 실행인가(다시 판정은 최신 실행에만)."""
     active = run.status in ACTIVE
     return {
         "id": str(run.id), "chat_id": str(run.chat_id), "conversation_id": str(run.conversation_id),
         "status": run.status, "trigger": run.trigger, "error_code": run.error_code,
-        "retryable": run.status in RETRYABLE and run.error_code not in NO_RETRY_CODES,
+        "retryable": latest and run.status in RETRYABLE and run.error_code not in NO_RETRY_CODES,
         "company": run.company, "corp_code": run.corp_code, "rcept_no": run.rcept_no, "passages": run.passages,
         "policy_version": run.policy_version, "jev_model": run.jev_model, "generator_model": run.generator_model,
         "calls": run.calls, "cache_hits": run.cache_hits, "input_tokens": run.input_tokens,
@@ -175,7 +211,7 @@ async def latest_runs_for_chats(db: AsyncSession, chat_ids: list[uuid.UUID]) -> 
     runs = list(rows.scalars())
     if not runs:
         return {}
-    if expire_stale(runs, now()):
+    if await expire_stale(db, runs, now()):
         await db.commit()
     per_run: dict[uuid.UUID, dict] = {r.id: counts(()) for r in runs}
     agg = await db.execute(select(EvidenceClaim.run_id, EvidenceClaim.status, func.count())

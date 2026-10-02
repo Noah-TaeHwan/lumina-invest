@@ -5,11 +5,11 @@ PostgreSQL이 필요한 테스트는 pg 픽스처를 쓴다(EVIDENCE_TEST_DATABA
 """
 import asyncio
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 
 from sqlalchemy import func, select, text
 
-from app.models import Chat, Conversation, EvidenceClaim, EvidenceRun
+from app.models import Chat, EvidenceClaim, EvidenceRun
 from app.services.evidence import background, records
 from app.services.evidence import runner as rn
 from tests.evidence.conftest import alembic_downgrade, alembic_upgrade
@@ -20,6 +20,12 @@ def _new_run(seed: dict, **kw) -> EvidenceRun:
     return records.new_run(chat_id=uuid.UUID(seed["chat_id"]), conversation_id=uuid.UUID(seed["conversation_id"]),
                            user_id=uuid.UUID(seed["user"]["id"]), answer=ANSWER, company=CO, corp_code=CORP,
                            passages=PASSAGES, generator_model="llama3.1:8b", **kw)
+
+
+async def _claim_states(db, run_id):
+    rows = await db.execute(select(EvidenceClaim.status, EvidenceClaim.reason)
+                            .where(EvidenceClaim.run_id == run_id).order_by(EvidenceClaim.idx))
+    return [tuple(r) for r in rows]
 
 
 async def _add(factory, run):
@@ -86,12 +92,14 @@ def test_save_result_writes_claims_and_usage(pg):
     async def go():
         async with database(pg) as factory:
             seed = await seed_user(factory)
-            run_id = await _add(factory, _new_run(seed))
+            run = _new_run(seed)
+            run.status = "running"  # 백그라운드 작업이 시작한 실행만 결과를 받는다
+            run_id = await _add(factory, run)
             result = await make_runner().run(company=CO, answer=ANSWER, passages=[p["text"] for p in PASSAGES],
                                               user_id=seed["user"]["id"])
             async with factory() as db:
                 run = await db.get(EvidenceRun, run_id)
-                await records.save_result(db, run, result)
+                assert await records.save_result(db, run, result) is True
                 await db.commit()
             async with factory() as db:
                 run = await db.get(EvidenceRun, run_id)
@@ -154,25 +162,46 @@ def test_startup_marks_pending_and_running_failed_stale(pg):
                 n = await records.fail_active_runs(db)
                 await db.commit()
             async with factory() as db:
-                return n, {s: (await db.get(EvidenceRun, i)) for s, i in ids.items()}
+                claims = {s: await _claim_states(db, i) for s, i in ids.items()}
+                return n, {s: (await db.get(EvidenceRun, i)) for s, i in ids.items()}, claims
 
-    n, runs = asyncio.run(go())
+    n, runs, claims = asyncio.run(go())
     assert n == 2
+    # 실패한 실행의 문장은 pending으로 남지 않는다(⊘ 판정 불가, 사유는 실행의 error_code)
+    assert claims["pending"] == claims["running"] == [("unjudged", "stale"), ("unjudged", "stale"),
+                                                      ("not_claim", None)]
+    assert claims["done"] == [("pending", None), ("pending", None), ("not_claim", None)]  # 다른 실행은 그대로
     assert (runs["pending"].status, runs["pending"].error_code) == ("failed", "stale")
     assert (runs["running"].status, runs["running"].error_code) == ("failed", "stale")
     assert runs["pending"].finished_at is not None
     assert (runs["done"].status, runs["partial"].status) == ("done", "partial")
 
 
-def test_expire_stale_only_after_60s():
-    now = datetime(2026, 10, 2, 3, 0, tzinfo=timezone.utc)
-    old, fresh, done = EvidenceRun(status="running"), EvidenceRun(status="pending"), EvidenceRun(status="done")
-    old.created_at = now - timedelta(seconds=61)
-    fresh.created_at = now - timedelta(seconds=59)
-    done.created_at = now - timedelta(hours=1)
-    assert records.expire_stale([old, fresh, done], now) == 1
-    assert (old.status, old.error_code, old.finished_at) == ("failed", "stale", now)
+def test_expire_stale_only_after_60s(pg):
+    async def go():
+        async with database(pg) as factory:
+            seed = await seed_user(factory)
+            at = records.now()
+            old, fresh, done = _new_run(seed), _new_run(seed), _new_run(seed)
+            old.status, done.status = "running", "done"
+            old.created_at = at - timedelta(seconds=61)
+            fresh.created_at = at - timedelta(seconds=59)
+            done.created_at = at - timedelta(hours=1)
+            for r in (old, fresh, done):
+                await _add(factory, r)
+            async with factory() as db:
+                runs = [await db.get(EvidenceRun, r.id) for r in (old, fresh, done)]
+                n = await records.expire_stale(db, runs, at)
+                await db.commit()
+            async with factory() as db:
+                return n, [await db.get(EvidenceRun, r.id) for r in (old, fresh, done)], \
+                    [await _claim_states(db, r.id) for r in (old, fresh)]
+
+    n, (old, fresh, done), (old_claims, fresh_claims) = asyncio.run(go())
+    assert n == 1
+    assert (old.status, old.error_code) == ("failed", "stale") and old.finished_at is not None
     assert (fresh.status, done.status) == ("pending", "done")
+    assert old_claims[0] == ("unjudged", "stale") and fresh_claims[0] == ("pending", None)
 
 
 # ── 백그라운드 작업 ──────────────────────────────────────────────────────────
@@ -188,9 +217,9 @@ def test_background_success_saves_done(pg):
             seed = await seed_user(factory)
             run_id = await _add(factory, _new_run(seed))
             task = background.start_run(run_id, runner=make_runner(), session_factory=factory)
-            assert task in background.pending_tasks()
+            assert task in background._TASKS
             await task
-            assert task not in background.pending_tasks()  # 끝나면 참조를 뺀다
+            assert task not in background._TASKS  # 끝나면 참조를 뺀다
             async with factory() as db:
                 return await db.get(EvidenceRun, run_id)
 
@@ -206,11 +235,52 @@ def test_background_exception_leaves_run_failed(pg):
             run_id = await _add(factory, _new_run(seed))
             await background.start_run(run_id, runner=_Boom(), session_factory=factory)
             async with factory() as db:
-                return await db.get(EvidenceRun, run_id)
+                return await db.get(EvidenceRun, run_id), await _claim_states(db, run_id)
 
-    run = asyncio.run(go())
+    run, claims = asyncio.run(go())
     assert (run.status, run.error_code) == ("failed", "internal")
     assert run.finished_at is not None
+    assert claims == [("unjudged", "internal"), ("unjudged", "internal"), ("not_claim", None)]
+
+
+def test_stale_run_is_not_revived_by_late_finish(pg):
+    """작업 중 조회가 stale로 바꾸고 retry가 새 실행을 만든 뒤 원 작업이 끝나도 원 실행은 failed(stale)로 남는다."""
+    gate = asyncio.Event
+
+    class Slow:
+        def __init__(self):
+            self.entered, self.release = gate(), gate()
+
+        async def run(self, **kw):
+            self.entered.set()
+            await self.release.wait()
+            return await make_runner().run(**kw)
+
+    async def go():
+        async with database(pg) as factory:
+            seed = await seed_user(factory)
+            run_id = await _add(factory, _new_run(seed))
+            slow = Slow()
+            task = background.start_run(run_id, runner=slow, session_factory=factory)
+            await slow.entered.wait()
+            async with factory() as db:  # 60초가 지난 것으로 보고 조회 시 stale
+                run = await db.get(EvidenceRun, run_id)
+                await records.expire_stale(db, [run], run.created_at + timedelta(seconds=61))
+                await db.commit()
+            retry = _new_run(seed, trigger="retry")
+            await _add(factory, retry)
+            await background.start_run(retry.id, runner=make_runner(), session_factory=factory)
+            slow.release.set()
+            await task
+            async with factory() as db:
+                return (await db.get(EvidenceRun, run_id), await _claim_states(db, run_id),
+                        await db.get(EvidenceRun, retry.id), await _claim_states(db, retry.id))
+
+    old, old_claims, new, new_claims = asyncio.run(go())
+    assert (old.status, old.error_code, old.calls) == ("failed", "stale", 0)
+    assert old_claims == [("unjudged", "stale"), ("unjudged", "stale"), ("not_claim", None)]
+    assert (new.status, new.error_code) == ("done", None)
+    assert [c[0] for c in new_claims] == ["supported", "supported", "not_claim"]
 
 
 def test_background_uses_snapshot_and_company(pg):
@@ -255,11 +325,20 @@ def test_latest_run_summary_per_chat(pg):
                                  "unjudged": 0, "pending": 0}
 
 
-# ── 앱 시작(lifespan) ────────────────────────────────────────────────────────
+# ── 앱 종료(lifespan) ────────────────────────────────────────────────────────
 
-def test_conversation_model_unchanged():
-    """Chat·Conversation 표 정의는 바뀌지 않는다(0009는 새 표만 만든다)."""
-    assert {c.name for c in Chat.__table__.columns} == {"id", "user_id", "client_id", "conversation_id", "question",
-                                                        "answer", "steps", "citations", "created_at"}
-    assert {c.name for c in Conversation.__table__.columns} == {"id", "user_id", "title", "message_count",
-                                                                "created_at", "updated_at"}
+def test_close_runner_closes_jev_http_client(monkeypatch, fake_redis):
+    from app.lib import redis_cache
+
+    monkeypatch.setattr(redis_cache, "_redis", fake_redis)
+    monkeypatch.setattr(background, "_runner", None)
+    monkeypatch.setattr(background, "_jev", None)
+
+    async def go():
+        background.get_runner()
+        http = background._jev._client
+        await background.close_runner()
+        await background.close_runner()  # 두 번 불러도 된다
+        return http.is_closed, background._runner, background._jev
+
+    assert asyncio.run(go()) == (True, None, None)

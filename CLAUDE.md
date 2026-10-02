@@ -20,6 +20,7 @@
 - 근거 판정 단위 테스트(외부 호출 없음):
   `uv run -q --no-project --python 3.12 --with numpy==2.5.3 --with httpx==0.28.1 --with scikit-learn==1.9.1 --with scipy==1.18.1 --with pydantic-settings --with pytest --with fastapi==0.142.2 --with "sqlalchemy[asyncio]==2.1.2" --with asyncpg==0.31.0 --with alembic==1.20.0 --with "python-jose[cryptography]==3.5.0" --with redis==8.1.0 python -m pytest tests/evidence -p no:cacheprovider`
 - 저장·API 테스트(P2)는 빈 PostgreSQL이 필요하다. `EVIDENCE_TEST_DATABASE_URL=postgresql+asyncpg://…/빈DB`를 주면 마이그레이션 0001→head를 적용하고 돈다. 없으면 그 테스트만 건너뛴다(운영·compose DB를 가리키지 않는다 — 표를 비운다).
+- DB 테스트는 EVIDENCE_TEST_DATABASE_URL 없으면 스킵된다. 완료 보고에는 skip 수를 함께 적고, 클라우드에서는 docker로 postgres:16-alpine을 띄워 돌린다.
 - 버그 수정·기능은 실패하는 테스트를 먼저 쓰고(RED 출력 확인) 고친다(GREEN).
 
 ## 참고

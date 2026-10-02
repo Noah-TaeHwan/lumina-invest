@@ -118,6 +118,7 @@ class Who:
 def make_app(factory, who: Who, *, search=None, llm=None, runner=None) -> FastAPI:
     from app.database.postgres import get_pg_session
     from app.lib.jwt_auth import get_current_user_any
+    from app.lib.llm_client import get_llm_client
     from app.lib.session import get_current_user
     from app.routes import admin, conversations, evidence
 
@@ -141,7 +142,7 @@ def make_app(factory, who: Who, *, search=None, llm=None, runner=None) -> FastAP
     app.dependency_overrides[get_current_user] = current
     app.dependency_overrides[evidence.get_session_factory] = lambda: factory
     app.dependency_overrides[evidence.get_passage_search] = lambda: search
-    app.dependency_overrides[evidence.get_evidence_llm] = lambda: llm or FakeLLM()
+    app.dependency_overrides[get_llm_client] = lambda: llm or FakeLLM()
     app.dependency_overrides[evidence.get_runner] = lambda: runner or make_runner()
     return app
 
@@ -154,5 +155,5 @@ async def drain() -> None:
     """요청이 띄운 판정 작업이 끝날 때까지 기다린다."""
     from app.services.evidence import background
 
-    while background.pending_tasks():
-        await asyncio.gather(*background.pending_tasks(), return_exceptions=True)
+    while background._TASKS:
+        await asyncio.gather(*list(background._TASKS), return_exceptions=True)

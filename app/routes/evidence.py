@@ -18,7 +18,6 @@ import asyncio
 import json
 import logging
 import uuid
-from datetime import timedelta
 from typing import Awaitable, Callable, Optional
 
 import httpx
@@ -70,10 +69,6 @@ def get_passage_search() -> PassageSearch | None:
     return _passage_search
 
 
-def get_evidence_llm():
-    return get_llm_client()
-
-
 def get_runner():
     """프로세스 단일 실행기. Redis가 없으면 None — 실행을 failed(quota_unavailable)로 남긴다(spec 7.3)."""
     try:
@@ -114,7 +109,7 @@ async def _owned_run(db: AsyncSession, run_id: str, user: dict) -> EvidenceRun:
 
 
 async def _launch(db: AsyncSession, run: EvidenceRun, runner, factory) -> None:
-    if runner is None:
+    if runner is None:  # 실행·pending 문장을 판정 불가(quota_unavailable)로
         await records.mark_failed(db, run.id, "quota_unavailable")
         await db.commit()
         log.error(json.dumps({"event": "runner_unavailable", "run_id": str(run.id)}))
@@ -137,7 +132,7 @@ async def evidence_chat(
     user=Depends(get_current_user_any),
     db: AsyncSession = Depends(get_pg_session),
     search: PassageSearch | None = Depends(get_passage_search),
-    llm=Depends(get_evidence_llm),
+    llm=Depends(get_llm_client),
     runner=Depends(get_runner),
     factory=Depends(get_session_factory),
 ):
@@ -201,11 +196,12 @@ async def evidence_chat(
 @router.get("/evidence/runs/{run_id}", summary="판정 실행 조회(폴링)")
 async def get_run(run_id: str, user=Depends(get_current_user_any), db: AsyncSession = Depends(get_pg_session)):
     run = await _owned_run(db, run_id, user)
-    if records.expire_stale([run], records.now()):
+    if await records.expire_stale(db, [run], records.now()):
         await db.commit()
     claims = (await records.load_claims(db, [run.id]))[run.id]
     ahead = await records.runs_ahead(db, run) if run.status in records.ACTIVE else 0
-    return records.serialize_run(run, claims, records.poll_until_s(ahead))
+    latest = run.id in await records.latest_run_ids(db, [run.chat_id])
+    return records.serialize_run(run, claims, records.poll_until_s(ahead), latest=latest)
 
 
 @router.post("/evidence/runs/{run_id}/retry", status_code=201, summary="다시 판정(failed·partial)")
@@ -217,15 +213,13 @@ async def retry_run(
     factory=Depends(get_session_factory),
 ):
     run = await _owned_run(db, run_id, user)
-    if records.expire_stale([run], records.now()):
+    if await records.expire_stale(db, [run], records.now()):
         await db.commit()
     if run.status not in records.RETRYABLE or run.error_code in records.NO_RETRY_CODES:
         raise HTTPException(409, "이 판정은 다시 실행할 수 없습니다.")
-    busy = await db.scalar(select(EvidenceRun.id).where(
-        EvidenceRun.chat_id == run.chat_id, EvidenceRun.status.in_(records.ACTIVE),
-        EvidenceRun.created_at > records.now() - timedelta(seconds=records.STALE_AFTER_S)).limit(1))
-    if busy:
-        raise HTTPException(409, "이 답변은 이미 판정 중입니다.")
+    # 그 메시지의 최신 실행만 다시 판정한다. 진행 중인 새 실행이 있으면 그것이 최신이라 여기서 함께 걸린다
+    if run.id not in await records.latest_run_ids(db, [run.chat_id]):
+        raise HTTPException(409, "이 답변에는 더 최근 판정이 있습니다.")
     chat = await db.get(Chat, run.chat_id)
     try:
         new = records.new_run(chat_id=run.chat_id, conversation_id=run.conversation_id, user_id=run.user_id,
@@ -255,11 +249,12 @@ async def conversation_evidence(
     if not all_runs:
         stmt = stmt.order_by(EvidenceRun.chat_id, EvidenceRun.created_at.desc()).distinct(EvidenceRun.chat_id)
     runs = sorted((await db.execute(stmt)).scalars(), key=lambda r: r.created_at)
-    if records.expire_stale(runs, records.now()):
+    if await records.expire_stale(db, runs, records.now()):
         await db.commit()
     claims = await records.load_claims(db, [r.id for r in runs])
+    latest = await records.latest_run_ids(db, list({r.chat_id for r in runs}))
     out = []
     for r in runs:
         ahead = await records.runs_ahead(db, r) if r.status in records.ACTIVE else 0
-        out.append(records.serialize_run(r, claims[r.id], records.poll_until_s(ahead)))
+        out.append(records.serialize_run(r, claims[r.id], records.poll_until_s(ahead), latest=r.id in latest))
     return {"conversation_id": str(conv.id), "runs": out}

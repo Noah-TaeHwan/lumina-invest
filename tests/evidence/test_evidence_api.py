@@ -123,10 +123,19 @@ def test_login_required(enabled):
     assert asyncio.run(go()).status_code == 401
 
 
-def test_default_passage_search_is_unset():
+def test_unwired_passage_search_is_503(enabled):
+    """주입을 덮어쓰지 않은 실제 의존성: P3가 검색 함수를 연결하기 전에는 503."""
     from app.routes import evidence
 
-    assert evidence.get_passage_search() is None
+    app = make_app(_NoDb(), Who({"id": str(uuid.uuid4()), "roles": ["user"]}))
+    app.dependency_overrides.pop(evidence.get_passage_search)
+
+    async def go():
+        async with client(app) as c:
+            return await c.post("/api/evidence/chat", json={"question": "q", "company": CO, "corp_code": CORP})
+
+    r = asyncio.run(go())
+    assert (r.status_code, r.json()["detail"]) == (503, "공시 문단 저장소가 아직 준비되지 않았습니다")
 
 
 # ── 채팅 → 저장 → 판정 ───────────────────────────────────────────────────────
@@ -290,6 +299,9 @@ def test_get_run_expires_stale_and_reports_poll_window(pg, enabled):
 
     a, b, d, stored = asyncio.run(go())
     assert (a["status"], a["error_code"], a["poll_until_s"]) == ("failed", "stale", None)
+    assert [(c["status"], c["reason"]) for c in a["claims"]] == [("unjudged", "stale"), ("unjudged", "stale"),
+                                                                ("not_claim", None)]
+    assert (a["counts"]["unjudged"], a["counts"]["pending"]) == (2, 0)
     assert stored == "failed"  # 조회가 바꾼 상태를 저장한다
     assert (b["status"], b["poll_until_s"], b["poll_interval_ms"]) == ("pending", 12, 500)
     assert d["poll_until_s"] == 20  # 앞에 진행 중 실행 1건 → 최악 약 16초를 덮는 상한
@@ -340,6 +352,48 @@ def test_retry_refused_while_another_run_is_active(pg, enabled):
     assert asyncio.run(go()).status_code == 409
 
 
+def test_retry_only_latest_run_of_message(pg, enabled):
+    """옛 failed 실행은 다시 판정할 수 없다(그 메시지의 최신 실행만)."""
+    async def go():
+        async with database(pg) as factory:
+            seed = await seed_user(factory)
+            older, newer = _run_for(seed), _run_for(seed, trigger="retry")
+            older.status, newer.status = "failed", "partial"
+            newer.created_at = older.created_at + timedelta(seconds=3)
+            await _store(factory, older)
+            await _store(factory, newer)
+            app = make_app(factory, Who(seed["user"]), runner=make_runner(FakeJev()))
+            async with client(app) as c:
+                old_r = await c.post(f"/api/evidence/runs/{older.id}/retry")
+                new_r = await c.post(f"/api/evidence/runs/{newer.id}/retry")
+                await drain()
+                listed = (await c.get(f"/api/evidence/runs/{older.id}")).json()
+            return old_r, new_r, listed
+
+    old_r, new_r, listed = asyncio.run(go())
+    assert (old_r.status_code, new_r.status_code) == (409, 201)
+    assert listed["retryable"] is False  # 화면도 옛 실행에는 버튼을 숨길 수 있게
+
+
+def test_runner_unavailable_fails_run_and_claims(pg, enabled):
+    """Redis가 없어 실행기를 못 만들면 답변은 저장되고 실행·문장은 판정 불가(quota_unavailable)."""
+    from app.routes import evidence
+
+    async def go():
+        async with database(pg) as factory:
+            seed = await seed_user(factory, with_chat=False)
+            app = make_app(factory, Who(seed["user"]), search=fake_search())
+            app.dependency_overrides[evidence.get_runner] = lambda: None
+            async with client(app) as c:
+                body = (await c.post("/api/evidence/chat", json=_body(seed))).json()
+                return (await c.get(f"/api/evidence/runs/{body['run_id']}")).json()
+
+    run = asyncio.run(go())
+    assert (run["status"], run["error_code"]) == ("failed", "quota_unavailable")
+    assert [(c["status"], c["reason"]) for c in run["claims"]] == [
+        ("unjudged", "quota_unavailable"), ("unjudged", "quota_unavailable"), ("not_claim", None)]
+
+
 # ── 스레드 타임라인·메시지 요약 ──────────────────────────────────────────────
 
 def test_conversation_timeline_latest_and_all(pg, enabled):
@@ -371,18 +425,45 @@ def test_conversation_timeline_latest_and_all(pg, enabled):
             str(second.id), "done", 2, 1)
 
 
-def test_message_without_run_has_null_summary(pg, monkeypatch):
-    monkeypatch.setattr(settings, "EVIDENCE_CHAT_ENABLED", False)  # 기존 대화 API는 플래그와 무관하다
+def test_message_summary_counts_stale_claims_as_unjudged(pg, enabled):
+    async def go():
+        async with database(pg) as factory:
+            seed = await seed_user(factory)
+            old = _run_for(seed)
+            old.created_at -= timedelta(seconds=61)
+            await _store(factory, old)
+            app = make_app(factory, Who(seed["user"]))
+            async with client(app) as c:
+                return (await c.get(f"/api/conversations/{seed['conversation_id']}")).json()
+
+    s = asyncio.run(go())["messages"][0]["latest_evidence_run"]
+    assert (s["status"], s["error_code"]) == ("failed", "stale")
+    assert (s["counts"]["unjudged"], s["counts"]["pending"], s["counts"]["not_claim"]) == (2, 0, 1)
+
+
+def test_flag_off_conversation_api_does_not_touch_evidence_tables(pg, monkeypatch):
+    """0009가 적용되지 않은 환경에서도 기존 대화 API가 500이 나지 않게, 꺼져 있으면 evidence_runs를 조회하지 않는다."""
+    from app.routes import conversations
+
+    monkeypatch.setattr(settings, "EVIDENCE_CHAT_ENABLED", False)
+
+    async def boom(*a, **k):
+        raise AssertionError("evidence_runs를 조회하면 안 된다")
+    monkeypatch.setattr(conversations, "latest_runs_for_chats", boom)
 
     async def go():
         async with database(pg) as factory:
             seed = await seed_user(factory)
             app = make_app(factory, Who(seed["user"]))
             async with client(app) as c:
-                return (await c.get(f"/api/conversations/{seed['conversation_id']}")).json()
+                conv = await c.get(f"/api/conversations/{seed['conversation_id']}")
+                msgs = await c.get(f"/api/conversations/{seed['conversation_id']}/messages")
+            return conv, msgs
 
-    msg = asyncio.run(go())["messages"][0]
-    assert msg["latest_evidence_run"] is None and msg["answer"] == ANSWER
+    conv, msgs = asyncio.run(go())
+    assert (conv.status_code, msgs.status_code) == (200, 200)
+    assert conv.json()["messages"][0]["latest_evidence_run"] is None
+    assert msgs.json()["items"][0]["answer"] == ANSWER
 
 
 # ── 관리자 통계 ──────────────────────────────────────────────────────────────
@@ -414,17 +495,20 @@ def test_admin_stats_from_db(pg):
                 run = await _store(factory, _run_for(seed))
                 await background.start_run(run.id, runner=make_runner(FakeJev()), session_factory=factory)
                 ids.append(run.id)
-            limited = _run_for(b)
-            limited.status, limited.error_code = "limited", "cap_user"
-            await _store(factory, limited)
+            await _store(factory, _run_for(b))  # 앞 프로세스가 남긴 실행 → 시작 시 failed(stale)
+            async with factory() as db:
+                await records.fail_active_runs(db)
+                await db.commit()
             app = make_app(factory, Who({**a["user"], "roles": ["admin"]}))
             async with client(app) as c:
                 return (await c.get("/api/admin/evidence/stats?days=7")).json(), a, b
 
     stats, a, b = asyncio.run(go())
     assert stats["runs"] == 4
-    assert stats["status"] == {"done": 3, "limited": 1}
-    assert stats["claim_status"] == {"supported": 6, "not_claim": 4, "pending": 2}
+    assert stats["status"] == {"done": 3, "failed": 1}
+    assert stats["claim_status"] == {"supported": 6, "not_claim": 4, "unjudged": 2}  # 실패 실행의 문장은 ⊘
+    assert stats["unjudged_reasons"] == {"stale": 2}
+    assert stats["alerts"]["unjudged_over_5pct"] is True and stats["alerts"]["failed_partial_over_5pct"] is True
     assert stats["routes"] == {"jev": 6, "rule_not_claim": 4}
     assert stats["claims_per_answer"]["p50"] == 2  # 비주장 문장은 빼고 센다(spec 5.3 상한과 같은 기준)
     assert stats["calls"] == 6 and stats["input_tokens"] == 600 and stats["cache_hit_rate"] == 0.0

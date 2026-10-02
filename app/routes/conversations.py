@@ -25,6 +25,7 @@ from pydantic import BaseModel
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import settings
 from app.database.postgres import get_pg_session
 from app.models import Chat, Conversation
 from app.services.evidence.records import latest_runs_for_chats
@@ -90,7 +91,8 @@ def _serialize_message(msg: Chat, latest_evidence_run: Optional[dict] = None) ->
 
 
 async def _serialize_messages(db: AsyncSession, msgs: list[Chat]) -> list[dict]:
-    latest = await latest_runs_for_chats(db, [m.id for m in msgs])
+    # 근거 모드가 꺼져 있으면 판정 표를 조회하지 않는다(0009 미적용 환경에서도 기존 대화 API가 동작하게)
+    latest = await latest_runs_for_chats(db, [m.id for m in msgs]) if settings.EVIDENCE_CHAT_ENABLED else {}
     return [_serialize_message(m, latest.get(m.id)) for m in msgs]
 
 

@@ -133,6 +133,10 @@ class ServiceJevClient:
         except Exception:  # noqa: BLE001
             log.warning(json.dumps({"event": "cache_set_failed", "request_key": key[:12]}))
 
+    async def aclose(self) -> None:
+        """httpx 클라이언트를 닫는다(앱 종료 시)."""
+        await self._client.aclose()
+
     def _key_value(self) -> str:
         return self._api_key() if callable(self._api_key) else self._api_key
 

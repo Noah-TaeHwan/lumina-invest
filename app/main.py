@@ -14,6 +14,7 @@ from app.config import settings
 from app.database.neo4j import connect_neo4j, close_neo4j, ensure_graph_schema
 from app.lib.redis_cache import connect_redis, close_redis
 from app.routes import auth, health, chat, stocks, library, admin, system, quant, ml, macro, documents, notification, graph, conversations, tasks, ingest, paper, openapi, lean
+from app.services.evidence.background import close_runner as close_evidence_runner
 from app.services.evidence.background import fail_stale_runs_on_startup as fail_stale_evidence_runs
 from app.services.graph_service import seed_graph
 from app.services.sync_scheduler import start_sync_scheduler, stop_sync_scheduler
@@ -63,6 +64,7 @@ async def lifespan(app: FastAPI):
     yield
     # 종료
     stop_sync_scheduler()
+    await close_evidence_runner()
     await close_redis()
     await close_postgres()
     await close_neo4j()
