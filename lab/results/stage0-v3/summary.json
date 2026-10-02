@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-01T22:02:14.867291+00:00",
+  "generated_at": "2026-10-02T00:24:44.095306+00:00",
   "n_selected": 48,
   "rule": {
     "48": {
@@ -24,13 +24,13 @@
   },
   "dev_candidates": 1279,
   "calls": {
-    "calls": 300,
-    "p50_ms": 203.12752049358096,
-    "p95_ms": 251.56208927219268,
-    "p99_ms": 287.2940745577216,
+    "calls": 400,
+    "p50_ms": 208.08420798857696,
+    "p95_ms": 326.782760086644,
+    "p99_ms": 440.1366589337701,
     "failure_rate": 0.0,
     "schema_valid_rate": 1.0,
-    "mean_input_tokens": 803.2266666666667,
+    "mean_input_tokens": 803.175,
     "models": [
       "jev-1.13.0"
     ],
@@ -43,14 +43,19 @@
   },
   "projection": {
     "calls": 2234,
-    "cost_usd": 0.07536515168,
-    "hours_sequential": 0.12605191132851662
+    "cost_usd": 0.07536030390000001,
+    "hours_sequential": 0.12912781129068915
   },
   "sessions": [
     {
       "session": 1,
       "started_at": "2026-10-01T22:01:10.636544+00:00",
       "ended_at": "2026-10-01T22:01:31.110315+00:00"
+    },
+    {
+      "session": 2,
+      "started_at": "2026-10-02T00:12:25.927976+00:00",
+      "ended_at": "2026-10-02T00:12:53.015546+00:00"
     }
   ],
   "notes": [
@@ -79,6 +84,19 @@
       "failure_rate": 0.0,
       "schema_valid_rate": 1.0,
       "mean_input_tokens": 803.12,
+      "models": [
+        "jev-1.13.0"
+      ],
+      "errors": {}
+    },
+    "session-2": {
+      "calls": 100,
+      "p50_ms": 248.5450420062989,
+      "p95_ms": 428.02225974155584,
+      "p99_ms": 539.1642426032925,
+      "failure_rate": 0.0,
+      "schema_valid_rate": 1.0,
+      "mean_input_tokens": 803.02,
       "models": [
         "jev-1.13.0"
       ],
