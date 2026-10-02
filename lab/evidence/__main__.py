@@ -399,6 +399,109 @@ COMMANDS = {"split": cmd_split, "passages": cmd_passages, "question-packets": cm
             "controlled-check": cmd_controlled_check}
 
 
+LABELS = ("supported", "contradicted", "no_evidence", "non_claim")
+
+
+def lid(cid: str) -> str:
+    """라벨러에게 보이는 불투명 ID(출처·변형 유형을 숨긴다)."""
+    return hashlib.sha256(cid.encode()).hexdigest()[:10]
+
+
+def disagreements(r1: dict) -> list[str]:
+    """1차 라벨이 다른 cid(두 라벨러 모두 낸 것만)."""
+    a, b = r1["opus"], r1["codex"]
+    return sorted(c for c in a.keys() & b.keys() if a[c]["label"] != b[c]["label"])
+
+
+def merge_labels(r1: dict, r2: dict) -> list[dict]:
+    """1차 일치는 그대로, 불일치는 2차(조정 라운드) 일치로, 그래도 다르면 disputed."""
+    out = []
+    for cid in sorted(r1["opus"].keys() & r1["codex"].keys()):
+        a, b = r1["opus"][cid], r1["codex"][cid]
+        rec = {"cid": cid, "r1": {"opus": a, "codex": b}, "r2": None}
+        if a["label"] == b["label"]:
+            rec["label"] = a["label"]
+        else:
+            a2, b2 = r2.get("opus", {}).get(cid), r2.get("codex", {}).get(cid)
+            rec["r2"] = {"opus": a2, "codex": b2}
+            rec["label"] = a2["label"] if a2 and b2 and a2["label"] == b2["label"] else "disputed"
+        out.append(rec)
+    return out
+
+
+def _read_labels(P: Paths, rnd: int, labeler: str, codes: set[str], cids: dict[str, str]) -> dict:
+    """라벨러 출력(lid 기준)을 cid 기준으로 바꾼다. 허용되지 않은 라벨은 ValueError."""
+    out = {}
+    for corp in sorted(codes):
+        for r in read_jsonl(P.data / "labels" / f"r{rnd}_{labeler}" / f"{corp}.jsonl"):
+            if r["label"] not in LABELS:
+                raise ValueError(f"bad label {r['label']} ({labeler} r{rnd} {corp})")
+            out[cids[r["lid"]]] = {"label": r["label"], "passage": r.get("passage"), "reason": r.get("reason", "")}
+    return out
+
+
+def cmd_label_packets(P: Paths, args) -> None:
+    """라벨 꾸러미: 질문별 문단 8개와 주장(불투명 ID, 섞은 순서). 2차는 불일치만, 상대 라벨·이유를 함께 보인다."""
+    import random
+
+    guide = (P.ev / "prompts/labeler.md").read_text()
+    text = _passage_text(P)
+    ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
+    qtext = {q["qid"]: q["question"] for q in read_jsonl(P.jsonl("questions.jsonl"))}
+    codes = {c["corp_code"] for c in companies(P, args.split)}
+    claims = [c for c in read_jsonl(P.jsonl("claims.jsonl")) if c["qid"].split("-q")[0] in codes]
+    only, other = None, {}
+    if args.round == 2:
+        cids = {lid(c["cid"]): c["cid"] for c in claims}
+        r1 = {lb: _read_labels(P, 1, lb, codes, cids) for lb in ("opus", "codex")}
+        only = set(disagreements(r1))
+        other = r1["codex" if args.labeler == "opus" else "opus"]
+    for corp in sorted(codes):
+        parts = []
+        for qid in sorted({c["qid"] for c in claims if c["qid"].startswith(corp)}):
+            cl = [c for c in claims if c["qid"] == qid and (only is None or c["cid"] in only)]
+            if not cl:
+                continue
+            random.Random(f"{args.round}-{qid}").shuffle(cl)
+            ps = "\n".join(f"[문단 {j}] {text[pid]}" for j, pid in enumerate(ret[qid], 1))
+            lines = []
+            for c in cl:
+                line = f"- lid={lid(c['cid'])}: {c['text']}"
+                if only is not None:
+                    o = other[c["cid"]]
+                    line += f"\n  (다른 라벨러: {o['label']}, 문단 {o['passage']}, 이유: {o['reason']})"
+                lines.append(line)
+            parts.append(f"## 질문: {qtext[qid]}\n{ps}\n\n주장:\n" + "\n".join(lines) + "\n")
+        out = P.priv / "packets/labels" / f"r{args.round}_{args.labeler}" / f"{corp}.md"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(f"{guide}\n\n# 출력 파일: lab/evidence/data/labels/r{args.round}_{args.labeler}/{corp}.jsonl\n\n"
+                       + "\n".join(parts))
+    print("ok")
+
+
+def cmd_labels_merge(P: Paths, args) -> None:
+    """1·2차 라벨을 병합해 labels.jsonl을 쓰고 1차 κ(이진, 비주장 제외)를 출력한다."""
+    from lab.evidence.metrics import kappa
+
+    codes = {c["corp_code"] for c in companies(P, args.split)}
+    claims = [c for c in read_jsonl(P.jsonl("claims.jsonl")) if c["qid"].split("-q")[0] in codes]
+    cids = {lid(c["cid"]): c["cid"] for c in claims}
+    r1 = {lb: _read_labels(P, 1, lb, codes, cids) for lb in ("opus", "codex")}
+    r2 = {lb: _read_labels(P, 2, lb, codes, cids) for lb in ("opus", "codex")}
+    rows = merge_labels(r1, r2)
+    keep = [r for r in read_jsonl(P.jsonl("labels.jsonl")) if r["cid"].split("-q")[0] not in codes]
+    write_jsonl(P.jsonl("labels.jsonl"), sorted(keep + rows, key=lambda r: r["cid"]))
+    both = [c for c in r1["opus"].keys() & r1["codex"].keys()
+            if "non_claim" not in (r1["opus"][c]["label"], r1["codex"][c]["label"])]
+    k = kappa([r1["opus"][c]["label"] == "supported" for c in both], [r1["codex"][c]["label"] == "supported" for c in both])
+    log_attempt(P, "labels-merge", split=args.split, labeled=len(rows),
+                disputed=sum(r["label"] == "disputed" for r in rows), kappa_binary_r1=round(k, 4))
+    print(f"{len(rows)} labels, kappa r1 {k:.3f}")
+
+
+COMMANDS.update({"label-packets": cmd_label_packets, "labels-merge": cmd_labels_merge})
+
+
 def main(argv: list[str] | None = None) -> None:
     """명령 분기."""
     ap = argparse.ArgumentParser(prog="lab.evidence")
