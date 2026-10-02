@@ -31,3 +31,4 @@
 {"at": "2026-10-02T10:58:13.342533+00:00", "event": "stage1-freeze-config"}
 {"at": "2026-10-02T11:16:26.181073+00:00", "event": "controlled-check", "accepted": 115, "rejected": 5}
 {"at": "2026-10-02T11:58:33.544369+00:00", "event": "labels-merge", "split": "holdout", "labeled": 560, "disputed": 11, "kappa_binary_r1": 0.9736}
+{"at": "2026-10-02T12:03:29.158651+00:00", "event": "label-audit", "split": "holdout", "sampled_numeric": 50, "controlled_mismatch_checked": 2, "final_vs_audit_mismatch": 2, "mismatch_note": "00126380-q5-n5 no_evidence vs non_claim (binary same); 00106641-q5-c2 disputed(excluded) vs contradicted", "controlled_expected_fixed": ["00858124-q4-c1"]}

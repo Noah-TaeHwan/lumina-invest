@@ -850,7 +850,7 @@
 {"cid": "00858124-q3-c1", "qid": "00858124-q3", "source": "controlled", "text": "2025년 말 기준으로 회사 매출의 약 54%가 로봇모션제어기 제품에서 나왔다.", "variant": "의역", "expected": "supported"}
 {"cid": "00858124-q3-c2", "qid": "00858124-q3", "source": "controlled", "text": "2025년 말 기준으로 회사 매출의 약 54%가 산업용 감속기 제품에서 나왔다.", "variant": "주체 교체", "expected": "not_supported"}
 {"cid": "00858124-q3-n1", "qid": "00858124-q3", "source": "natural", "text": "2025년 로봇모션제어기와 에너지제어장치의 매출액은 각각 약 54%가 로봇모션제어기 제품을 통해서 발생하고 있습니다.", "variant": null, "expected": null}
-{"cid": "00858124-q4-c1", "qid": "00858124-q4", "source": "controlled", "text": "에너지제어장치 사업이 슈나이더일렉트릭코리아 등에서 조달한 UPS 품목은 전체 원재료 매입액의 59.05%를 차지했다.", "variant": "의역", "expected": "supported"}
+{"cid": "00858124-q4-c1", "qid": "00858124-q4", "source": "controlled", "text": "에너지제어장치 사업이 슈나이더일렉트릭코리아 등에서 조달한 UPS 품목은 전체 원재료 매입액의 59.05%를 차지했다.", "variant": "의역", "expected": "not_supported", "expected_note": "검색된 8개 문단에 원재료 매입·59.05% 근거 없음(감사)"}
 {"cid": "00858124-q4-c2", "qid": "00858124-q4", "source": "controlled", "text": "에너지제어장치 사업이 슈나이더일렉트릭코리아 등에서 조달한 UPS 품목은 전체 원재료 매입액의 59.05%를 차지하지 않았다.", "variant": "부정", "expected": "not_supported"}
 {"cid": "00858124-q4-n1", "qid": "00858124-q4", "source": "natural", "text": "2025년 원재료 및 상품 매입액 중 가장 큰 비중을 차지한 품목은 로봇모션제어기입니다.", "variant": null, "expected": null}
 {"cid": "00858124-q5-c1", "qid": "00858124-q5", "source": "controlled", "text": "회사는 360도를 약 400만 개로 나누는 22bit 분해능의 광학식 절대치 엔코더를 직접 개발해 상용화했다.", "variant": "의역", "expected": "supported"}
