@@ -3,3 +3,5 @@
 {"at": "2026-10-02T04:59:56.654742+00:00", "event": "rule-change", "what": "mention merge rule: any mention -> name>=3 chars and >=10 mentions", "why": "first split collapsed to one 31-company cluster (SK/DB substring noise, customer mentions); before any JEV call and before split.json"}
 {"at": "2026-10-02T06:51:16.087467+00:00", "event": "controlled-check", "accepted": 116, "rejected": 4}
 {"at": "2026-10-02T08:14:21.229881+00:00", "event": "generator-runtime-change", "what": "generation moved to host Ollama (Metal); options += num_ctx 8192, num_predict 300", "why": "Docker CPU generation 3-10 min/answer, ReadTimeout at 600s after 2/120; num_ctx raised so longest 8-passage prompts fit (observed ~3.1k tokens, n_ctx 4096, no truncation)", "discarded": "2 answers made with old options archived privately"}
+{"at": "2026-10-02T08:53:16.765606+00:00", "event": "generator-fallback-check", "tune_natural": 164, "non_claim_share_r1": {"opus": 0.311, "codex": 0.311}, "threshold": 0.5, "decision": "keep llama3.2:1b"}
+{"at": "2026-10-02T08:59:50.996644+00:00", "event": "labels-merge", "split": "dev", "labeled": 551, "disputed": 10, "kappa_binary_r1": 0.9741}
