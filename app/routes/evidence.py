@@ -5,6 +5,8 @@
   POST /api/evidence/runs/{run_id}/retry    – 다시 판정(failed·partial만), 새 실행(trigger=retry)
   GET  /api/conversations/{cid}/evidence    – 스레드의 판정 실행 타임라인(기본 메시지별 최신, all=true면 전체)
   GET  /api/evidence/companies              – 회사 선택 후보(문단이 적재된 회사만, q가 있으면 KRX 검색과 교집합)
+  GET  /api/evidence/notice                 – 외부 전송 고지를 확인했는가(spec 8절, Redis user_state)
+  POST /api/evidence/notice                 – 고지 확인 기록(처음 모드를 켤 때 화면이 부른다)
 
 - EVIDENCE_CHAT_ENABLED가 꺼져 있으면 모든 경로가 404다(로그인 여부와 무관).
 - 판정은 답변·실행 행을 커밋한 뒤 앱 프로세스 안 asyncio 작업으로 돈다. 저장에 실패하면 판정을 시작하지 않고 500.
@@ -35,7 +37,7 @@ from app.database.postgres import get_pg_session
 from app.lib.guardrails import check_guardrails
 from app.lib.jwt_auth import get_current_user_any
 from app.lib.llm_client import get_llm_client
-from app.lib.user_state import set_active_conversation
+from app.lib.user_state import get_user_state, set_active_conversation, update_user_state
 from app.models import Chat, Conversation, EvidenceRun
 from app.routes.conversations import _assert_owner
 from app.services.conversation_threads import get_or_create_conversation
@@ -50,6 +52,7 @@ KrxSearch = Callable[..., Awaitable[list[dict]]]
 KRX_SEARCH_LIMIT = 50
 GENERATE_TIMEOUT_S = 60.0  # spec 7.1: 측정 전 잠정값. P5에서 생성 지연 p95의 2배로 다시 정한다
 CITATION_FIELDS = ("passage_id", "rcept_no", "section", "idx", "sha256")
+NOTICE_VERSION = "a2-notice-v1"  # 고지 문구가 바뀌면 올린다(다시 확인을 받는다)
 
 
 def require_enabled() -> None:
@@ -240,6 +243,28 @@ async def evidence_companies(
     if not picked:  # KRX 실패·결과 없음·적재 회사가 KRX 상위 결과 밖
         picked = [c for c in loaded if q in c["corp_name"] or c["stock_code"].startswith(q)]
     return {"companies": list({c["corp_code"]: c for c in picked}.values())}
+
+
+@router.get("/evidence/notice", summary="외부 전송 고지 확인 여부")
+async def get_notice(user=Depends(get_current_user_any)):
+    # Redis를 못 읽으면 확인하지 않은 것으로 본다(고지를 한 번 더 보여 주는 쪽이 안전하다)
+    try:
+        state = await get_user_state(user["id"])
+    except Exception as exc:  # noqa: BLE001
+        log.warning(json.dumps({"event": "notice_state_read_failed", "error": type(exc).__name__}))
+        state = {}
+    return {"acknowledged": state.get("evidence_notice_ack") == NOTICE_VERSION, "version": NOTICE_VERSION}
+
+
+@router.post("/evidence/notice", summary="외부 전송 고지 확인 기록")
+async def ack_notice(user=Depends(get_current_user_any)):
+    try:
+        await update_user_state(user["id"], {"evidence_notice_ack": NOTICE_VERSION,
+                                             "evidence_notice_ack_at": records.now().isoformat()})
+    except Exception as exc:  # noqa: BLE001
+        log.error(json.dumps({"event": "notice_state_write_failed", "error": type(exc).__name__}))
+        raise HTTPException(503, "고지 확인을 저장하지 못했습니다.")
+    return {"acknowledged": True, "version": NOTICE_VERSION}
 
 
 @router.get("/evidence/runs/{run_id}", summary="판정 실행 조회(폴링)")

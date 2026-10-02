@@ -2,7 +2,7 @@
  * app.html 인라인 스크립트에서 분리됨. 엔트리는 main.js */
 import { api, getMe, setToast, escHtml, fmt, fmtPct, colorPct } from "/js/common.js";
 import { loadMarketTicker, loadSyncStatus, navigate, registerViewActivation } from "/js/core.js";
-import { loadCrawlList } from "/js/agent.js";
+import { loadCrawlList, onChatViewActivated } from "/js/agent.js";
 import { loadCompanyCompare, loadCompanyDashboard, loadCompanySector } from "/js/company.js";
 import { loadIndicatorApiSettings, loadIndicatorBacktest, loadSavedIndicators } from "/js/indicator.js";
 import { loadMacroDashboard, loadMacroIndustry } from "/js/ml.js";
@@ -51,6 +51,7 @@ function onViewActivated(view) {
   onRebalanceViewActivated(view); // 리밸런싱 엔진 (js/rebalance.js)
   onTradingViewViewActivated(view); // TradingView 연동 (js/tradingview.js)
   onFormulaViewActivated(view); // 자유 산식 지표 (js/formula.js)
+  if (view === "agent-chat") onChatViewActivated(); // 공시 근거 모드·대화 복원 (js/agent.js, js/evidence.js)
   if (view === "trading-chart") loadStockChart();
   if (view === "trading-portfolio") loadPortfolio();
   if (view === "trading-order") { loadOrderHistory(); loadBrokerStatus(); }

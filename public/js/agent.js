@@ -1,8 +1,10 @@
 /* 금융정보 Agent: AI 채팅, CB 분석, 금융상품, 뉴스/RAG, 크롤링
  * app.html 인라인 스크립트에서 분리됨. 엔트리는 main.js */
 import { api, getMe, setToast, escHtml, fmt, fmtPct, colorPct } from "/js/common.js";
+import { appendEvidenceMsg, initEvidence, isEvidenceMode, sendEvidenceChat, setConversationId, stopAllEvidence } from "/js/evidence.js";
 
 let chatHistory = [];
+let msgSeq = 0;  // 말풍선 id. 복원처럼 같은 밀리초에 연달아 그려도 겹치지 않게 카운터를 쓴다
 // ── 1. AI 채팅 ────────────────────────────────────────────────────
 function appendUserMsg(text) {
   const d = document.createElement("div");
@@ -13,7 +15,7 @@ function appendUserMsg(text) {
 }
 
 function appendAssistantMsg(answer, steps) {
-  const msgId = "m" + Date.now();
+  const msgId = `m${++msgSeq}`;
   let stepsHtml = "";
   if (steps?.length) {
     const items = steps.map((s, i) => {
@@ -31,6 +33,7 @@ function appendAssistantMsg(answer, steps) {
   const d = document.createElement("div");
   d.className = "flex justify-start";
   d.innerHTML = `<div class="max-w-[88%] px-4 py-3 text-sm leading-relaxed" style="background:var(--surf);border:1px solid var(--border);border-radius:4px 18px 18px 18px;box-shadow:0 1px 4px rgba(0,0,0,0.06);color:var(--text);">
+    <div class="ai-label">AI 생성 답변</div>
     <pre style="white-space:pre-wrap;word-break:break-word;font-family:inherit;font-size:13px;line-height:1.7;">${escHtml(answer)}</pre>${stepsHtml}
   </div>`;
   d.querySelectorAll(".steps-btn").forEach(btn => {
@@ -53,6 +56,11 @@ async function sendChat() {
   const inp = document.getElementById("chat-input");
   const q = inp.value.trim();
   if (!q) return;
+  if (isEvidenceMode()) {  // 공시 근거 모드: /api/evidence/chat (js/evidence.js)
+    const sent = await sendEvidenceChat(q, { appendUserMsg, container: document.getElementById("chat-messages"), scroll: scrollChat });
+    if (sent) inp.value = "";
+    return;
+  }
   inp.value = "";
   appendUserMsg(q);
 
@@ -83,9 +91,55 @@ document.getElementById("chat-input").addEventListener("keydown", e => {
 });
 document.getElementById("clear-chat").addEventListener("click", () => {
   chatHistory = [];
+  stopAllEvidence();
   document.getElementById("chat-messages").innerHTML = "";
   setToast("대화 초기화됨", "ok");
 });
+
+// 채팅 화면을 처음 열 때: 근거 모드 기능 확인, 활성 대화 복원(근거 모드 답변은 저장된 판정으로 배지를 다시 그린다)
+let chatViewInited = false;
+async function onChatViewActivated() {
+  if (chatViewInited) return;
+  chatViewInited = true;
+  await initEvidence();
+  try { await restoreActiveConversation(); } catch { /* 복원 실패는 빈 화면으로 둔다 */ }
+}
+
+const RESTORE_LIMIT = 50;
+async function restoreActiveConversation() {
+  const { active_conversation } = await api("/api/conversations/active");
+  if (!active_conversation) return;
+  const cid = active_conversation.id;
+  let conv = await api(`/api/conversations/${cid}?msg_limit=${RESTORE_LIMIT}`);
+  if (conv.msg_total > RESTORE_LIMIT) {  // 최근 메시지를 보인다
+    conv = await api(`/api/conversations/${cid}?msg_limit=${RESTORE_LIMIT}&msg_offset=${conv.msg_total - RESTORE_LIMIT}`);
+  }
+  const box = document.getElementById("chat-messages");
+  if (box.children.length || !conv.messages?.length) return;  // 그사이 새 질문을 했으면 덮지 않는다
+  setConversationId(cid);
+  let runs = new Map();
+  if (conv.messages.some(m => m.latest_evidence_run)) {
+    try {
+      const tl = await api(`/api/conversations/${cid}/evidence`);
+      runs = new Map((tl.runs || []).map(r => [r.chat_id, r]));
+    } catch { /* 판정 기록을 못 읽으면 답변만 보인다 */ }
+  }
+  if (box.children.length) return;
+  for (const m of conv.messages) {
+    appendUserMsg(m.question);
+    const run = m.latest_evidence_run && runs.get(m.id);
+    if (run) {
+      appendEvidenceMsg(box, m.answer, run);
+    } else {
+      appendAssistantMsg(m.answer, m.steps);
+      if (!m.latest_evidence_run) {
+        chatHistory.push({ role: "user", content: m.question }, { role: "assistant", content: m.answer });
+      }
+    }
+  }
+  chatHistory = chatHistory.slice(-20);
+  scrollChat();
+}
 
 // ── CB 분석 ───────────────────────────────────────────────────────
 async function runCbQuery(type) {
@@ -239,4 +293,4 @@ document.getElementById("admin-reset-btn").addEventListener("click", async () =>
 });
 
 
-export { loadCrawlList };
+export { loadCrawlList, onChatViewActivated };
