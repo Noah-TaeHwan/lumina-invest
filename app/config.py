@@ -46,6 +46,16 @@ class Settings(BaseSettings):
     DATA_DIR: str = "./data"
     TOP_K: int = 6
 
+    # ── 근거 판정 채팅(A-2) ──────────────────────────────────────────────────
+    # 끄면 /api/evidence/*·/api/conversations/{cid}/evidence가 404다. 문단 적재와 TypeSafe 키가 있는 로컬에서만 켠다.
+    EVIDENCE_CHAT_ENABLED: bool = False
+    # 근거 모드 답변 생성기. 앱 기본 LLM_MODEL과 분리한다(임계값이 이 생성기에 묶인다, spec 결정 4-2)
+    EVIDENCE_LLM_MODEL: str = "llama3.1:8b"
+    # 일일 JEV 한도(호출 수·입력 토큰 수, KST 자정에 풀림, spec 7.2절)
+    EVIDENCE_DAILY_USER_CALLS: int = 150
+    EVIDENCE_DAILY_USER_TOKENS: int = 750_000
+    EVIDENCE_DAILY_GLOBAL_TOKENS: int = 3_000_000
+
     NEO4J_URI: str = "bolt://localhost:7687"
     NEO4J_USER: str = "neo4j"
     NEO4J_PASSWORD: str = "finagent123"

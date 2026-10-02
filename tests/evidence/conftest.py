@@ -1,6 +1,8 @@
 # tests/evidence/conftest.py
-"""근거 판정 테스트 공용 가짜 객체: 메모리 Redis, 장애 Redis, JEV 응답 본문."""
+"""근거 판정 테스트 공용 가짜 객체: 메모리 Redis, 장애 Redis, JEV 응답 본문. 저장·API 테스트용 PostgreSQL 픽스처."""
 from __future__ import annotations
+
+from pathlib import Path
 
 import pytest
 
@@ -60,3 +62,64 @@ def down_redis():
 @pytest.fixture
 def jev_payload():
     return payload
+
+
+# ── 저장·API 테스트용 PostgreSQL(P2) ─────────────────────────────────────────
+# 기존 모델이 JSONB·gen_random_uuid()를 쓰므로 SQLite로 대신하지 않는다. 빈 PostgreSQL URL을
+# EVIDENCE_TEST_DATABASE_URL로 주면 0001→head 마이그레이션을 적용하고 테스트마다 표를 비운다.
+# 없으면 DB 테스트만 이유를 밝히고 건너뛴다.
+PG_ENV = "EVIDENCE_TEST_DATABASE_URL"
+_TABLES = "evidence_claims, evidence_runs, chats, conversations, users"
+
+
+def _alembic(url: str):
+    from alembic.config import Config
+
+    from app.config import settings
+
+    settings.DATABASE_URL = url  # alembic/env.py가 settings 값을 쓴다
+    # alembic.ini를 읽지 않는다: env.py의 fileConfig가 이미 만든 로거(app.evidence.*)를 꺼서 로그 테스트를 깨뜨린다
+    cfg = Config()
+    cfg.set_main_option("script_location", str(Path(__file__).resolve().parents[2] / "alembic"))
+    return cfg
+
+
+def alembic_upgrade(url: str, rev: str = "head") -> None:
+    from alembic import command
+
+    command.upgrade(_alembic(url), rev)
+
+
+def alembic_downgrade(url: str, rev: str) -> None:
+    from alembic import command
+
+    command.downgrade(_alembic(url), rev)
+
+
+@pytest.fixture(scope="session")
+def pg_migrated():
+    import os
+
+    url = os.environ.get(PG_ENV)
+    if not url:
+        pytest.skip(f"{PG_ENV}가 없어 PostgreSQL 저장 테스트를 건너뛴다")
+    alembic_upgrade(url)
+    return url
+
+
+@pytest.fixture
+def pg(pg_migrated):
+    """빈 표 상태의 DB URL."""
+    import asyncio
+
+    from sqlalchemy import text
+    from sqlalchemy.ext.asyncio import create_async_engine
+
+    async def wipe():
+        engine = create_async_engine(pg_migrated)
+        async with engine.begin() as conn:
+            await conn.execute(text(f"TRUNCATE {_TABLES} CASCADE"))
+        await engine.dispose()
+
+    asyncio.run(wipe())
+    return pg_migrated

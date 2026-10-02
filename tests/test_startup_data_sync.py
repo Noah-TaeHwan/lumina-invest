@@ -30,7 +30,8 @@ class StartupDataSyncTest(unittest.TestCase):
                              "settings": SimpleNamespace(RUN_MIGRATIONS_ON_STARTUP=False, STARTUP_DATA_SYNC_ENABLED=enabled),
                              "start_sync_scheduler": Mock(), "stop_sync_scheduler": Mock()}
                 for name in ("connect_redis", "connect_postgres", "connect_neo4j", "ensure_graph_schema", "seed_graph",
-                             "close_redis", "close_postgres", "close_neo4j"):
+                             "close_redis", "close_postgres", "close_neo4j", "fail_stale_evidence_runs",
+                             "close_evidence_runner"):
                     namespace[name] = AsyncMock()
                 exec(code, namespace)
 
@@ -38,10 +39,13 @@ class StartupDataSyncTest(unittest.TestCase):
                     async with namespace["lifespan"](object()):
                         self.assertEqual(namespace["start_sync_scheduler"].call_count, int(enabled))
                         namespace["stop_sync_scheduler"].assert_not_called()
+                        # 근거 판정: 앞 프로세스가 남긴 pending·running 실행을 failed(stale)로 바꾼다
+                        namespace["fail_stale_evidence_runs"].assert_awaited_once_with()
 
                 asyncio.run(run())
                 namespace["stop_sync_scheduler"].assert_called_once_with()
-                for name in ("close_redis", "close_postgres", "close_neo4j"):
+                # 근거 판정: 프로세스 단일 JEV httpx 클라이언트를 닫는다
+                for name in ("close_redis", "close_postgres", "close_neo4j", "close_evidence_runner"):
                     namespace[name].assert_awaited_once_with()
 
 
