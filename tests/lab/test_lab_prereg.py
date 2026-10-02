@@ -38,7 +38,16 @@ def test_prereg_pins_state_inputs():
 
 
 def test_prereg_pins_cost_operations_and_arms():
-    assert PREREG["version"] == 2
+    assert PREREG["version"] >= 2
     assert PREREG["jev"]["price_per_million_input_tokens"] == pytest.approx(gate.PRICE_PER_INPUT_TOKEN * 1e6)
     assert PREREG["stage0"]["max_consecutive_failures"] == cli.MAX_CONSECUTIVE_FAILURES
     assert set(PREREG["arms"]["matching"]) == {"deterministic_filter", "random_block", "logistic"}
+
+
+def test_prereg_v3_five_minute_bars_and_separate_results():
+    assert PREREG["version"] == 3
+    assert PREREG["bar_minutes"] == 5
+    assert PREREG["rule"]["n_grid"] == [48]
+    paths = cli.Paths(Path("/repo"), PREREG)
+    assert str(paths.results).endswith("lab/results/stage0-v3")
+    assert str(paths.report).endswith("docs/lab/stage0-v3-report.md")

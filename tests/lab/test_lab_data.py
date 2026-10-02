@@ -102,3 +102,25 @@ def test_load_klines_normalizes_units_and_skips_header(tmp_path):
     assert k["open_time"].tolist() == [1759276800000000, 1759276860000000]
     assert (k["t_close"] - k["open_time"]).eq(data.MINUTE_US).all()
     assert k["taker_buy_base"].tolist() == [4.0, 7.0]
+
+
+def test_resample_klines_to_5m_drops_incomplete_bars():
+    import pandas as pd
+    from tests.lab.bars import make_minute_bars
+    k = make_minute_bars(20)                      # 00:00~00:19, 5분봉 4개
+    k = k.drop(index=7).reset_index(drop=True)    # 00:05~00:09 봉에서 1분 누락
+    r = data.resample_klines(k, 5)
+    assert len(r) == 3
+    first = k.iloc[:5]
+    row = r.iloc[0]
+    assert row["open"] == first["open"].iloc[0] and row["close"] == first["close"].iloc[-1]
+    assert row["high"] == first["high"].max() and row["low"] == first["low"].min()
+    assert row["volume"] == pytest.approx(first["volume"].sum())
+    assert row["t_close"] - row["open_time"] == 5 * data.MINUTE_US
+    assert (r["open_time"] % (5 * data.MINUTE_US) == 0).all()
+
+
+def test_resample_klines_one_minute_is_identity():
+    from tests.lab.bars import make_minute_bars
+    k = make_minute_bars(10)
+    assert data.resample_klines(k, 1) is k

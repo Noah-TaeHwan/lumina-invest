@@ -1,3 +1,5 @@
 {"at": "2026-10-01T11:11:45.828300+00:00", "stage": "stage0", "verdict": "PARTIAL", "prereg_sha256": "937cabd427bc967976d2e40348ff95e036d86aa2c74e25acacac723308d855ab", "n_selected": 120, "calls": 300}
 {"at": "2026-10-01T11:28:31.745311+00:00", "stage": "stage0", "verdict": "PARTIAL", "prereg_sha256": "f82e10b261cbb9ae97f2350352aec2b3c99734abddfd8318643da540b183b552", "n_selected": 120, "calls": 300}
 {"at": "2026-10-01T15:26:43.639557+00:00", "stage": "stage0", "verdict": "GO", "prereg_sha256": "f82e10b261cbb9ae97f2350352aec2b3c99734abddfd8318643da540b183b552", "n_selected": 120, "calls": 500}
+{"at": "2026-10-01T22:02:14.867291+00:00", "stage": "stage0", "verdict": "PARTIAL", "prereg_sha256": "d10229c6759d577061a8579b8141a0a1e28f27c2c882bf0d5d82dacb9bce1e55", "n_selected": 48, "calls": 300}
+{"at": "2026-10-02T00:24:44.095306+00:00", "stage": "stage0", "verdict": "PARTIAL", "prereg_sha256": "d10229c6759d577061a8579b8141a0a1e28f27c2c882bf0d5d82dacb9bce1e55", "n_selected": 48, "calls": 400}

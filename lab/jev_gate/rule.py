@@ -1,7 +1,7 @@
 """Donchian 돌파 진입 후보와 코드 청산 규칙.
 
 진입 후보: close[t] > max(high[t-N..t-1])이고 직전 봉에서는 같은 조건이 거짓인 봉(새 돌파).
-청산: 봉 마감 종가로 손절(진입가 − 2·ATR)·익절(진입가 + 3·ATR)·시간청산(120봉)을 판정한다.
+청산: 봉 마감 종가로 손절(진입가 − 2·ATR)·익절(진입가 + 3·ATR)·시간청산(MAX_BARS봉)을 판정한다.
 ATR은 신호 봉의 ATR14로 고정한다. 손절·익절은 봉 안의 가격 경로를 보지 않는다(모든 갈래 공통 단순화).
 """
 from __future__ import annotations
@@ -13,7 +13,7 @@ from lab.jev_gate.features import STATE_FEATURES
 
 STOP_ATR = 2.0
 TAKE_ATR = 3.0
-MAX_BARS = 120
+MAX_BARS = 24  # 5분봉 24개 = 2시간(사전등록 v3)
 PREV_SIGNAL_CAP = 240
 
 
