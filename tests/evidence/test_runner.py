@@ -76,7 +76,7 @@ def _answer(n: int) -> str:
 
 def test_provisional_policy_values():
     p = rn.A2_PROVISIONAL
-    assert (p.version, p.tau_s, p.tau_c, p.theta_low, p.theta_high) == ("a2-provisional", 0.70, 0.35, None, None)
+    assert (p.version, p.tau_s, p.tau_c, p.theta_low, p.theta_high) == ("a2-provisional-2", 0.70, 0.35, None, None)
     assert (p.max_claims, p.concurrency, p.deadline_s) == (8, 3, 8.0)
 
 
@@ -119,7 +119,7 @@ def test_sys_decision_mapping_and_source():
     c0 = res.claims[0]
     assert c0.s == [0.2, 0.1, 0.9] and c0.c == [0.0, 0.0, 0.0] and c0.number_ok == [True, True, True]
     assert c0.jev_request_key and c0.attempts == 1 and isinstance(c0.lex, float)
-    assert res.calls == 3 and res.input_tokens == 300 and res.policy_version == "a2-provisional"
+    assert res.calls == 3 and res.input_tokens == 300 and res.policy_version == "a2-provisional-2"
     assert res.jev_model == jev.MODEL and res.question_sha == QUESTION_SHA
 
 

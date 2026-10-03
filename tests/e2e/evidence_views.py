@@ -284,6 +284,7 @@ async def s_pure(browser, base, ck: Checks):
         hl_ent: m.highlightNumbers("it's 39", "39", true),
         s_failed: m.summaryText({status:'failed', passages:[]}),
         s_running: m.summaryText({status:'running', passages:[]}),
+        s_prov2: m.summaryText({status:'done', policy_version:'a2-provisional-2', counts:{}, passages:[1]}),
         s_cap: m.summaryText({status:'done', policy_version:'a2-v1', counts:{supported:1}, passages:[1,2,3],
                               claims:[{status:'unjudged', reason:'claim_cap'}]}),
         emoji: (() => {
@@ -334,6 +335,7 @@ async def s_pure(browser, base, ck: Checks):
     ck.ok(res["s_cap"].startswith("AI 판정: ✅ 1 · ⚠️ 0 · ❔ 0 — 검색된 2025.12 사업보고서 문단 3개 기준")
           and "긴 답변의 뒷부분은 판정하지 않았습니다" in res["s_cap"] and "시험 기준" not in res["s_cap"],
           f"pure: 요약줄·주장 상한 문구 {res['s_cap']}")
+    ck.ok("(시험 기준)" in res["s_prov2"], f"pure: 비주장 규칙 보강 뒤 잠정 정책도 시험 기준 {res['s_prov2']}")
     ck.ok(res["retry"] == [True, False, False, False], "pure: 다시 판정은 failed·partial이면서 서버 retryable일 때만")
     ck.ok(not page.errors, f"pure: JS 오류 없음 {page.errors}")
     await ctx.close()

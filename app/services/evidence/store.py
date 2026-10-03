@@ -161,7 +161,10 @@ def ollama_embed(model: str = EMBED_MODEL) -> Embed:
 def default_store() -> PassageStore:
     from qdrant_client import AsyncQdrantClient
 
-    return PassageStore(AsyncQdrantClient(url=settings.QDRANT_URL), ollama_embed())
+    # ponytail: 서버는 compose.portfolio.yml의 qdrant v1.13.4, 클라이언트는 1.19.1이라 호출마다 "incompatible" 경고가 난다.
+    # 기존 볼륨 데이터를 지키려고 서버를 올리지 않았고, 여기서 쓰는 API는 실제 1.13.4 서버에서 로컬 확인했다.
+    # 서버를 올리면 이 인자를 지운다.
+    return PassageStore(AsyncQdrantClient(url=settings.QDRANT_URL, check_compatibility=False), ollama_embed())
 
 
 _wired: PassageStore | None = None

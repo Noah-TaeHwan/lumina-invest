@@ -349,3 +349,18 @@ def test_unwire_disconnects_and_closes(monkeypatch, unwired):
     asyncio.run(go())
     assert evidence_routes.get_passage_search() is None and store._wired is None
     assert closed == [True]
+
+
+def test_default_store_skips_qdrant_version_check(monkeypatch):
+    # 서버 v1.13.4 ↔ 클라이언트 1.19.1: 버전 검사를 끄지 않으면 호출마다 "incompatible" 경고가 난다
+    import qdrant_client
+
+    seen = {}
+
+    class FakeClient:
+        def __init__(self, **kwargs):
+            seen.update(kwargs)
+
+    monkeypatch.setattr(qdrant_client, "AsyncQdrantClient", FakeClient)
+    store.default_store()
+    assert seen.get("check_compatibility") is False

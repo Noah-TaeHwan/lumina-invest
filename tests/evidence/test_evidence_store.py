@@ -47,7 +47,7 @@ def test_preview_claims_marks_not_claim_and_pending():
 def test_new_run_snapshot_and_pending_claims():
     seed = {"chat_id": str(uuid.uuid4()), "conversation_id": str(uuid.uuid4()), "user": {"id": str(uuid.uuid4())}}
     run = _new_run(seed)
-    assert (run.status, run.trigger, run.policy_version, run.jev_model) == ("pending", "auto", "a2-provisional",
+    assert (run.status, run.trigger, run.policy_version, run.jev_model) == ("pending", "auto", "a2-provisional-2",
                                                                          "jev-1.13.0")
     assert run.rcept_no == "20260312000123" and run.company == CO and run.corp_code == CORP
     assert run.passages[0] == {k: PASSAGES[0][k] for k in ("passage_id", "section", "idx", "sha256", "text")}

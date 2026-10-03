@@ -38,6 +38,11 @@ def test_claim_spans_strip_bullets_from_offsets():
     "문단에 따르면 회사는 반도체를 만든다.",
     "네, 맞습니다.",
     "감사합니다.",
+    "삼성전자 주요 제품과 사업부문별 매출 비중은 다음과 같습니다.",
+    "주요 사업부문은 다음과 같다.",
+    "회사의 주요 제품은 아래와 같습니다.",
+    "사업부문별 구성은 아래와 같다",
+    "삼성전자의 주요 사업부문:",
 ])
 def test_not_claim_rules_hit(sentence):
     assert claims.is_not_claim(sentence)
@@ -49,6 +54,10 @@ def test_not_claim_rules_hit(sentence):
     "SK 지분 보유.",
     "회사는 메모리 반도체와 스마트폰을 만든다.",
     "영업이익은 전년보다 늘어 6조 원을 넘었다.",
+    "매출은 3조원이며 구성은 다음과 같습니다.",
+    "2025년 사업부문별 매출 비중은 다음과 같습니다.",
+    "매출 비중 1위:",
+    "다음과 같은 제품을 만든다.",
 ])
 def test_not_claim_rules_miss(sentence):
     assert not claims.is_not_claim(sentence)
@@ -61,3 +70,4 @@ def test_short_sentence_boundary_is_ten_chars():
 
 def test_not_claim_phrases_are_code_constants():
     assert "확인할 수 없" in claims.NOT_CLAIM_PHRASES and claims.NOT_CLAIM_MAX_SHORT == 10
+    assert "다음과 같습니다" in claims.NOT_CLAIM_LEAD_ENDS and claims.NOT_CLAIM_LEAD_COLON == ":"

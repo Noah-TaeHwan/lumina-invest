@@ -6,7 +6,7 @@ import { api, setToast, escHtml } from "/js/common.js";
 // ── 상수·문구 ─────────────────────────────────────────────────────
 // 근거 보고서는 2025.12 사업보고서뿐이다(spec 10절 범위). API에 기간 필드가 없어 화면 상수로 둔다
 export const REPORT_LABEL = "2025.12 사업보고서";
-const PROVISIONAL = new Set(["a2-provisional"]);  // 요약줄에 "(시험 기준)"(spec 6.4)
+const PROVISIONAL = new Set(["a2-provisional", "a2-provisional-2"]);  // 요약줄에 "(시험 기준)"(spec 6.4)
 const ACTIVE = new Set(["pending", "running"]);
 const POLL_INTERVAL_MS = 500;
 const DEFAULT_POLL_UNTIL_S = 15;  // 서버가 상한을 주지 않을 때(spec 결정 4-1)

@@ -58,6 +58,9 @@ def claim_spans(text: str) -> list[Span]:
 
 NOT_CLAIM_PHRASES = ("문단에", "제공된 정보", "확인할 수 없", "알 수 없", "언급되어 있지 않", "추가 정보가 필요")
 NOT_CLAIM_MAX_SHORT = 10
+# 목록 머리말("…는 다음과 같습니다.", "…:"). 숫자가 든 문장은 주장으로 남긴다(머리말이 값을 함께 말할 수 있다)
+NOT_CLAIM_LEAD_ENDS = ("다음과 같습니다", "다음과 같다", "아래와 같습니다", "아래와 같다")
+NOT_CLAIM_LEAD_COLON = ":"
 _PARTICLE = re.compile(r"(?:은|는|이|가|을|를|의|에|도|와|과|로|으로|에서)$")
 _PREDICATE_END = ("다", "요", "죠", "까", "니", "네")
 _TOKEN_EDGE = re.compile(r"^[^\w]+|[^\w]+$")
@@ -77,13 +80,18 @@ def _proper_noun_candidate(sentence: str) -> bool:
 
 
 def is_not_claim(sentence: str) -> bool:
-    """A-2 spec 5.2절 비주장 규칙: 물음표로 끝남, 답변 불가·자료 언급 표현, 숫자·고유명사 후보 없는 10자 미만."""
+    """A-2 spec 5.2절 비주장 규칙: 물음표로 끝남, 답변 불가·자료 언급 표현, 숫자 없는 목록 머리말,
+    숫자·고유명사 후보 없는 10자 미만."""
     s = sentence.strip()
     if s.endswith(("?", "？")):
         return True
     if any(p in s for p in NOT_CLAIM_PHRASES):
         return True
-    return len(s) < NOT_CLAIM_MAX_SHORT and not re.search(r"\d", s) and not _proper_noun_candidate(s)
+    if re.search(r"\d", s):
+        return False
+    if s.endswith((NOT_CLAIM_LEAD_COLON, "：")) or s.rstrip(".").endswith(NOT_CLAIM_LEAD_ENDS):
+        return True
+    return len(s) < NOT_CLAIM_MAX_SHORT and not _proper_noun_candidate(s)
 
 
 def numeric_tokens(text: str) -> set[str]:
