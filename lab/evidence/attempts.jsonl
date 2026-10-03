@@ -39,4 +39,4 @@
 {"at": "2026-10-02T12:23:05.590793+00:00", "event": "baselines", "tag": "nli", "split": "holdout", "claims": 465, "failed": 0}
 {"at": "2026-10-02T12:29:39.248809+00:00", "event": "baselines", "tag": "llm", "split": "holdout", "claims": 465, "failed": 0}
 {"at": "2026-10-02T12:30:19.671127+00:00", "event": "stage1-report", "delta": -0.004734848484848508, "lo": -0.04100625260215296, "hi": 0.02412143615348906}
-{"at": "2026-10-03T14:21:58.437049+00:00", "event": "prereg", "study": "a2", "file": "lab/evidence/prereg_a2.json", "sha256": "efe3da96df8d466e9d8da0f8f565097256a1f70494603131067c1ad517dab926", "code_commit": "15d20f9", "why": "A-2 사전등록(spec 6.4 1단계). A-2 데이터·DART 추첨·JEV 호출 전. 1차 필터 상단 구간 회사명 조건을 spec 6.1(주장의 회사명 후보)에 맞춘 뒤 해시를 적었다"}
+{"at": "2026-10-03T14:21:58.437049+00:00", "event": "prereg", "study": "a2", "file": "lab/evidence/prereg_a2.json", "sha256": "60fe14e7729b13f5f7d9c8ae84e466e978b1d02c237637228809cc49f59a48d2", "code_commit": "4ab5a56", "why": "A-2 사전등록(spec 6.4 1단계). A-2 데이터·DART 추첨·JEV 호출 전. 1차 필터 상단 구간 회사명 조건을 spec 6.1(주장의 회사명 후보)에 맞춘 뒤 해시를 적었다. 데이터 전 리뷰 반영으로 사전등록 수정(revisions 참고)"}
