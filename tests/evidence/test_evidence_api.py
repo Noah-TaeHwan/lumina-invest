@@ -172,7 +172,7 @@ def test_chat_saves_message_and_run_then_judges(pg, enabled):
     assert [c["passage_id"] for c in chat.citations] == [p["passage_id"] for p in PASSAGES]
     assert conv.message_count == 1
     assert run["status"] == "done" and run["chat_id"] == body["chat_id"] and run["trigger"] == "auto"
-    assert run["policy_version"] == "a2-provisional" and run["generator_model"] == settings.EVIDENCE_LLM_MODEL
+    assert run["policy_version"] == "a2-provisional-2" and run["generator_model"] == settings.EVIDENCE_LLM_MODEL
     assert run["rcept_no"] == "20260312000123" and run["corp_code"] == CORP and run["company"] == CO
     assert [c["status"] for c in run["claims"]] == ["supported", "supported", "not_claim"]
     assert run["passages"][0]["text"] == PASSAGES[0]["text"] and run["poll_until_s"] is None

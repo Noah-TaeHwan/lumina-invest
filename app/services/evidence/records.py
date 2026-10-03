@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.lib import jev
 from app.models import EvidenceClaim, EvidenceRun
 from app.services.evidence.claims import claim_spans, is_not_claim
-from app.services.evidence.runner import A2_PROVISIONAL, Policy, RunResult
+from app.services.evidence.runner import A2_PROVISIONAL, A2_PROVISIONAL_1, Policy, RunResult
 
 STALE_AFTER_S = 60
 ACTIVE = ("pending", "running")
@@ -30,7 +30,7 @@ POLL_INTERVAL_MS = 500
 POLL_MARGIN_S = 4  # 마감 뒤 취소 정리·저장 여유
 CLAIM_STATUSES = ("supported", "contradicted", "no_evidence", "not_claim", "unjudged", "pending")
 PASSAGE_FIELDS = ("passage_id", "section", "idx", "sha256", "text")
-POLICIES = {p.version: p for p in (A2_PROVISIONAL,)}  # 확신도 라벨에 쓰는 정책별 τ_s(새 정책을 넣으면 여기에도)
+POLICIES = {p.version: p for p in (A2_PROVISIONAL, A2_PROVISIONAL_1)}  # 확신도 라벨에 쓰는 정책별 τ_s(새 정책을 넣으면 여기에도)
 CONFIDENCE_BAND = 0.15  # spec 3.3: τ_s 이상 0.15 구간 안이면 "보통"
 
 

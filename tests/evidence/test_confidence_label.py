@@ -46,3 +46,8 @@ def test_serialize_run_carries_label_per_claim():
                       calls=0, cache_hits=0, input_tokens=0, created_at=records.now())
     out = records.serialize_run(run, [_claim(s=[0.9]), _claim(status="no_evidence", s=[0.2], source_idx=None)])
     assert [c["confidence"] for c in out["claims"]] == ["높음", None]
+
+
+def test_previous_provisional_runs_keep_confidence_label():
+    # 비주장 규칙 보강 전 정책("a2-provisional")으로 저장된 실행도 같은 τ_s로 라벨을 낸다
+    assert records.confidence_label(_claim(s=[0.1, 0.95], source_idx=1), "a2-provisional") == "높음"

@@ -42,8 +42,11 @@ class Policy:
     deadline_s: float = 8.0
 
 
-# 평가(P5) 전 잠정 정책: τ_s 0.70, τ_c 0.35, 1차 필터 끔(spec 6.4절)
-A2_PROVISIONAL = Policy("a2-provisional", tau_s=0.70, tau_c=0.35)
+# 평가(P5) 전 잠정 정책: τ_s 0.70, τ_c 0.35, 1차 필터 끔(spec 6.4절).
+# 비주장 규칙도 정책에 포함되므로(spec 5.2절) 규칙을 바꾸면 버전을 올린다. -2: 목록 머리말 규칙 추가.
+A2_PROVISIONAL = Policy("a2-provisional-2", tau_s=0.70, tau_c=0.35)
+# 이전 버전으로 저장된 실행의 확신도 라벨용(τ는 같고 비주장 규칙만 다르다)
+A2_PROVISIONAL_1 = Policy("a2-provisional", tau_s=0.70, tau_c=0.35)
 
 
 @dataclass
