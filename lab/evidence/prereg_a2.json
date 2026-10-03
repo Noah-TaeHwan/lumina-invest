@@ -1,0 +1,277 @@
+{
+  "version": 1,
+  "study": "a2",
+  "spec": "docs/superpowers/specs/2026-10-02-evidence-chat-a2-design.md 6절(가설·데이터·선택 규칙·사전등록·생성기 변경 절차), 7.1절(생성 지연 기록)",
+  "plan": "docs/superpowers/plans/2026-10-03-evidence-a2-eval.md",
+  "authored_by": "AI(Claude Code)가 작성한 사전등록 초안. 결정권자는 노아. 값은 2026-10-03 로컬 확인값을 그대로 썼다.",
+  "registered_at": "2026-10-03",
+  "motivation": [
+    "A-1 Stage 1: τ_s 0.50에서 홀드아웃 ✅ 정밀도 0.81(목표 0.90 미달), 주체 교체 문장이 지지 확률 0.5 근처에 몰렸다.",
+    "제품 생성기는 llama3.2:1b가 아니라 llama3.1:8b다. 로컬 스모크에서 8B는 문단을 그대로 옮기지 않고 요약·의역했다. A-1에서 어휘 겹침(B-lex)이 SYS와 실용적 동등이었던 조건(1B가 문단 문구를 복사)이 바뀌었으므로 τ_s와 1차 필터(어휘 겹침) 구간을 새 생성기 답변에서 다시 잰다.",
+    "로컬 스모크(2026-10-03): 8B 답변 1개 약 10~20초(첫 호출 모델 적재 포함 22.6초), 1B 4.8초."
+  ],
+  "hypotheses": {
+    "h_prec": "조정 세트에서 정밀도 우선으로 고른 τ_s가 새 생성기 답변에서 ✅ 정밀도 0.90 이상을 낸다. 관문: 확인 세트 ✅ 정밀도 점추정 ≥ 0.90 이고 2단 군집 부트스트랩 95% 하한 ≥ 0.80.",
+    "h_low": "lex < θ_low 주장을 JEV 없이 ❔로 둬도 지지 주장을 거의 놓치지 않는다. 관문: 하단 구간 주장 중 AI 라벨 지지됨 비율 ≤ 0.05 이고 하단 구간이 판정 가능 주장의 20% 이상.",
+    "h_high": "lex ≥ θ_high 이고 숫자 확인·회사명 조건을 통과한 주장을 JEV 없이 ✅로 둬도 정밀도가 유지된다. 관문: 상단 구간 정밀도 ≥ 0.95, 상단 구간만 적용한 전체 ✅ 정밀도 ≥ SYS 단독 ✅ 정밀도 − 0.02.",
+    "h_tier": "채택된 구간을 합친 계층형 판정이 SYS 단독과 실용적으로 동등하면서 JEV 호출을 줄인다. 관문: AUC(계층형) − AUC(SYS) 95% 구간이 [−0.05, +0.05] 안이고 JEV 호출 감소율 ≥ 30%. 채택 구간이 없으면 해당 없음(실패)."
+  },
+  "gates": {
+    "h_prec": {
+      "precision_min": 0.9,
+      "ci_lo_min": 0.8,
+      "min_predicted": 150
+    },
+    "h_low": {
+      "supported_rate_max": 0.05,
+      "share_min": 0.2
+    },
+    "h_high": {
+      "precision_min": 0.95,
+      "max_drop_vs_sys": 0.02
+    },
+    "h_tier": {
+      "auc_diff_lo_min": -0.05,
+      "auc_diff_hi_max": 0.05,
+      "call_reduction_min": 0.3
+    }
+  },
+  "gate_measure": {
+    "rows": "확인 세트 자연 주장 중 비주장 규칙 통과, 최종 AI 라벨이 disputed·non_claim이 아니고 JEV 호출이 성공한 것. JEV 실패 수는 따로 보고한다.",
+    "sys": "app.services.evidence.judge.sys_decision(τ_s, τ_c). 점수는 숫자 확인 통과 문단 지지 확률 최댓값(반박이면 0).",
+    "tier": "1차 필터 경로는 제품과 같은 함수 app.services.evidence.lexical.lex_features + tier_route. 하단(lex < θ_low)이 먼저, 상단(lex ≥ θ_high 이고 high_ok). 계층형 점수: lex_low 0.0, lex_high 1.0, 나머지 SYS 점수.",
+    "h_low_share_denominator": "판정 가능 주장(rows)",
+    "call_reduction_denominator": "확인 세트 자연 주장 중 비주장 규칙 통과 전체(라벨과 무관, 주장 상한 8 적용 뒤)",
+    "h_high_tier_precision": "θ_low 없이 상단 구간만 켠 계층형 판정의 ✅ 정밀도",
+    "h_tier_bands": "H-low·H-high를 각각 확인 세트 관문으로 판정한 뒤 통과한 구간만 합친다",
+    "min_check_predicted": "확인 세트 SYS ✅ 예측이 150개 미만이면 H-prec는 기술 통계로만 보고하고 제품은 H-prec 실패 규칙(τ_s 0.85)을 따른다. H-low·H-high·H-tier는 각자 관문으로 판정한다."
+  },
+  "expectations": {
+    "h_high": "실패 가능성이 높다고 미리 예상한다. 주체 교체 문장은 어휘가 거의 같아 겹침이 높고, A-1 진단에서 어휘 겹침은 의역 대 주체 교체 AUC 0.639였다. 그래서 상단 구간에 '주장의 회사명 후보가 근거 문단에 그대로 있을 것'(lexical.names_in_passage)을 붙여 시험한다. 그래도 실패하면 H-low만 쓴다.",
+    "h_low": "8B가 의역하므로 지지 주장의 어휘 겹침도 낮아질 수 있다. 하단 구간이 20%에 못 미치면 실패로 본다(사후에 기준을 낮추지 않는다)."
+  },
+  "draw": {
+    "seed": 20261103,
+    "rng": "random.Random(20261103)로 corp_code 오름차순 목록을 섞은 순서(split.shuffled)",
+    "random_n": 40,
+    "seed_groups": "없음(A-2는 전부 무작위)",
+    "conditions": [
+      "2025.12 사업보고서가 있음",
+      "금융업 아님(KSIC 64~66 제외)",
+      "시드 그룹 이름 접두어로 시작하지 않음(split.EXCLUDED_PREFIXES)",
+      "지정 두 절 본문 3,000자 이상"
+    ],
+    "exclude": [
+      "A-1 40개사(lab/evidence/split.json, 원장 사유 a1_company)",
+      "A-1 40개사와 교차 언급 10회 이상(어느 쪽 본문이든 상대 회사명 3자 이상이 10번 이상, split.a1_link, 원장 사유 a1_mention)"
+    ],
+    "a1_split_sha256": "a93cd93b85b65c1d1d6adeca9311e9f99fd8c6bc0011f6ef2991397d1872ba66",
+    "ledger": "lab/evidence/a2/data/draw_ledger.jsonl(접두어 제외는 A-1과 같이 원장에 남기지 않는다)"
+  },
+  "split": {
+    "unit": "교차 언급 군집(A-1 규칙: 회사명 3자 이상, 10회 이상, 연결 요소). A-2 안에서만 묶는다.",
+    "rule": "split.assign(군집, 20, seed=20261103): 섞은 군집을 앞에서부터 넣어 20개사 이하면 확인(check), 나머지는 조정(tune)",
+    "check_cap": 20,
+    "check_min": 15,
+    "file": "lab/evidence/split_a2.json(JEV 호출 전 커밋)"
+  },
+  "report": "2025.12 사업보고서, A-1과 같은 지정 두 절(passages.build_passages)",
+  "k": 8,
+  "questions": {
+    "per_company": 6,
+    "categories": [
+      "사업 개요",
+      "주요 제품·서비스",
+      "매출 구성·수치",
+      "원재료·생산설비",
+      "위험·파생",
+      "연구개발·주요계약"
+    ],
+    "writer": "AI 작성자(A-1과 같은 절차)",
+    "prompt": "lab/evidence/prompts/question_writer.md",
+    "prompt_sha256": "a5b290594089b370808a5355d1e2d831516e1b7da702a1fea5cc3b8359742f90"
+  },
+  "generator": {
+    "model": "llama3.1:8b",
+    "digest": "46e0c10c039e",
+    "pulled": "2026-10-03 로컬 Ollama pull",
+    "prompt_sha": "e3f0379c2d7937d46aca4ff7de604205fba2811fcb922a44f09d5f920b7b4e21",
+    "options": {
+      "temperature": 0,
+      "seed": 20261002,
+      "num_ctx": 8192,
+      "num_predict": 300
+    },
+    "function": "app.services.evidence.generate.generate_answer(SYSTEM·OPTIONS 그대로)",
+    "latency": "답변마다 latency_ms 기록, 프로세스 첫 답변은 cold(모델 적재)로 표시해 p50·p95에서 뺀다. 리포트에 싣고 답변 생성 타임아웃을 p95 × 2로 다시 정한다(spec 7.1)."
+  },
+  "embedder": {
+    "model": "nomic-embed-text",
+    "digest": "0a109f422b47",
+    "prefixes": [
+      "search_query: ",
+      "search_document: "
+    ]
+  },
+  "claims": {
+    "natural": "app.services.evidence.claims.claim_spans로 나눈 문장 전부. 비주장 규칙에 걸린 문장은 not_claim_rule로 표시해 남기고(라벨링 대상), 규칙을 통과한 문장은 앞 8개만(제품 주장 상한, lab.evidence.a2.natural_claims)",
+    "cap": 8,
+    "controlled": "질문당 2개(의역 참 1, 변형 1). 변형 유형 순환: 숫자 변경·기간 바꾸기·주체 교체·부정·다른 기업 사실. A-1과 같은 작성 지시문과 코드 검사",
+    "controlled_prompt_sha256": "2e6dc64f2df19910b5f287952c86d110fe8f3ae0e77f881a99710a424ef01025",
+    "not_claim_rule": {
+      "policy": "a2-provisional-2(app.services.evidence.claims.is_not_claim)",
+      "order": "물음표 → 표현 → (숫자가 있으면 주장) → 목록 머리말 → 짧은 문장",
+      "question": "물음표로 끝남",
+      "phrases": [
+        "문단에",
+        "제공된 정보",
+        "확인할 수 없",
+        "알 수 없",
+        "언급되어 있지 않",
+        "추가 정보가 필요"
+      ],
+      "lead": {
+        "ends": [
+          "다음과 같습니다",
+          "다음과 같다",
+          "아래와 같습니다",
+          "아래와 같다"
+        ],
+        "colon": [
+          ":",
+          "："
+        ],
+        "rule": "숫자가 없고 위 어구(끝 마침표 무시)나 콜론으로 끝나는 목록 머리말"
+      },
+      "short": "숫자도 고유명사 후보도 없는 10자 미만",
+      "lead_added_check": "목록 머리말 규칙 추가 전 로컬 실데이터 확인(노아 제공, 2026-10-03): AI 라벨 주장 457개 중 0개를 잘못 빼고, AI 라벨 비주장 178개 중 62개를 거른다(추가 전 33개)."
+    },
+    "not_claim_audit": "규칙에 걸린 문장 중 최종 AI 라벨이 non_claim이 아닌 비율(disputed 제외)을 확인 세트에서 보고한다. 5%를 넘으면 그 비율이 5%를 넘는 표현을 a2-v1 규칙에서 뺀다(구간·임계값 선택에는 쓰지 않는다)."
+  },
+  "labels": {
+    "name": "AI 참조 라벨",
+    "prompt": "lab/evidence/prompts/labeler.md",
+    "prompt_sha256": "40e84ce81104f5db1f076196d2405725da341f4e5338e2472bdac5c1950cdc38",
+    "labelers": {
+      "opus": "Claude Opus (Claude Code subagent)",
+      "codex": "codex exec"
+    },
+    "blind": [
+      "source",
+      "variant",
+      "judge output",
+      "lexical score"
+    ],
+    "reconcile": "독립 1차 → 불일치만 상대 라벨·이유를 보고 2차 → 그래도 다르면 disputed(주결과 제외)",
+    "kappa_stop": 0.6
+  },
+  "jev_model": "jev-1.13.0",
+  "judge_question_sha": "30b0f5e33c70a59602c31830a917ae0b5572732fa57898368e28af988cc4874e",
+  "selection": {
+    "rows": "조정 세트 자연 주장 중 비주장 규칙 통과, 최종 AI 라벨이 disputed·non_claim이 아니고 JEV 호출이 성공한 것",
+    "tau_c": 0.35,
+    "tau_s": {
+      "candidates": [
+        0.55,
+        0.6,
+        0.65,
+        0.7,
+        0.75,
+        0.8,
+        0.85,
+        0.9,
+        0.95
+      ],
+      "min_precision": 0.93,
+      "min_predicted": 30,
+      "fallback": 0.85,
+      "rule": "τ_c 0.35 고정. 후보 중 조정 세트 ✅ 예측 30개 이상이고 ✅ 정밀도 ≥ 0.93인 가장 작은 값. 없으면 0.85. τ_s ± 0.05 경계 비율을 함께 보고한다."
+    },
+    "theta": {
+      "candidates": [
+        0.05,
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3,
+        0.35,
+        0.4,
+        0.45,
+        0.5,
+        0.55,
+        0.6,
+        0.65,
+        0.7,
+        0.75,
+        0.8,
+        0.85,
+        0.9,
+        0.95
+      ],
+      "low_max_supported_rate": 0.03,
+      "high_min_precision": 0.97,
+      "high_min_claims": 30,
+      "low_rule": "하단 구간(lex < θ)이 비어 있지 않고 AI 라벨 지지됨 비율 ≤ 0.03인 후보 중 가장 큰 값. 없으면 θ_low 없음.",
+      "high_rule": "상단 구간(lex ≥ θ, 최고 점수 문단이 숫자 확인 통과, 주장의 회사명 후보가 그 문단에 그대로 있음)이 30개 이상이고 AI 라벨 정밀도 ≥ 0.97인 후보 중 가장 작은 값. 없으면 θ_high 없음.",
+      "name_condition": "lexical.name_candidates: 선택 회사명(주장에 있을 때), 라틴 대문자 토큰, 따옴표 안 이름, ㈜·(주)·주식회사 토큰, 은·는·이·가(첫 토큰은 의 포함)가 붙은 2자 이상 명사형 토큰(서술형 어간 제외). 모두 근거 문단에 그대로 있어야 한다.",
+      "stricter_than_gate": "조정 기준(0.03, 0.97)을 확인 관문(0.05, 0.95)보다 엄격하게 둬 축소 여유를 둔다."
+    },
+    "output": "lab/evidence/results/a2-tune.json(이 파일이 생겨야 확인 세트 데이터가 열린다)"
+  },
+  "mca_2_3b": "θ와 τ_s는 AI 참조 라벨로만 고른다. JEV 출력을 정답으로 삼아 θ를 맞추는 것(예: JEV가 지지한 주장을 어휘 겹침으로 재현하는 구간)은 JEV 출력을 흉내 내는 분류기를 만드는 일이므로 하지 않는다. 1차 필터는 JEV 출력으로 학습한 모델이 아니라 라벨 기준으로 구간을 정한 규칙이다. θ 선택 함수는 JEV 확률을 읽지 않는다. JEV 출력으로 어떤 모델도 학습·증류하지 않는다.",
+  "bootstrap": {
+    "levels": [
+      "cluster",
+      "question"
+    ],
+    "n": 2000,
+    "seed": 20261103
+  },
+  "token_cap": 6000000,
+  "budget": {
+    "ledger": "lab/data/evidence_a2/jev_calls.jsonl(A-1 호출 기록과 분리, 입력 토큰 합으로 상한 확인)",
+    "estimate": "캐시에 없는 주장 × 5,070(호출당 입력 토큰 p95)",
+    "tune": "조정 세트는 자연 주장만 판정한다(선택 규칙이 자연 주장만 쓴다). 호출 전에 사용량 + 추정 + 확인 세트 몫(조정 세트 자연 주장 수와 같다고 보고 예약)이 상한을 넘으면 멈춘다.",
+    "check": "확인 세트는 자연 + 통제 주장을 판정한다. 호출 전에 합이 상한을 넘으면 통제 주장을 빼고 원장에 남긴다(budget-drop-controlled). 자연 주장만으로도 넘으면 멈춘다."
+  },
+  "stop_conditions": [
+    "추첨이 40개사를 채우지 못하거나 확인 세트가 15개사 미만, 조정 세트가 0개사면 JEV 호출 전에 멈추고 새 사전등록을 한다.",
+    "Ollama 생성기 digest가 46e0c10c039e가 아니면 생성하지 않는다(generate가 거부). 태그·digest를 바꾸려면 6.5 절차대로 새 사전등록.",
+    "사전등록에 적힌 코드 해시(code_sha256)가 바뀌면 claims·judge·a2-tune·a2-report가 거부한다.",
+    "조정 세트 1차 라벨 이진 κ < 0.6이면 a2-tune을 멈추고 라벨 절차를 고친다(확인 세트를 열지 않는다).",
+    "예산: 위 budget 규칙. 판정 중 상한에 걸리면 JevClient가 멈춘다.",
+    "확인 세트 판정은 동결(prereg_a2_check.json) 뒤 --tag check로 한 번만. 다시 열지 않는다. 결과를 보고 τ_s·θ를 다시 고르지 않는다(다시 고르려면 새 데이터로 새 사전등록)."
+  ],
+  "product_mapping": {
+    "h_prec_pass": "조정 세트에서 고른 τ_s",
+    "h_prec_fail": "τ_s 0.85 고정, 리포트에 '정밀도 목표 미확인', 배지 툴팁에 '확신도 기준을 보수적으로 둔 시험 운영'",
+    "h_low_pass": "하단 구간 켬(θ_low)",
+    "h_high_pass": "상단 구간 켬(θ_high)",
+    "both_fail": "1차 필터 끔, 전부 JEV",
+    "h_tier": "보고만 한다. 위 표를 바꾸지 않는다(spec 6.4 표).",
+    "policy": "a2-v1 = {tau_s, tau_c 0.35, theta_low, theta_high}. 적용은 P6."
+  },
+  "provisional_policy": {
+    "version": "a2-provisional-2",
+    "tau_s": 0.7,
+    "tau_c": 0.35,
+    "lexical_filter": "off",
+    "note": "a2-provisional(-1)과 τ는 같고 비주장 규칙만 다르다(목록 머리말 추가)"
+  },
+  "order": [
+    "1. 이 파일 커밋(A-2 데이터·호출 전)",
+    "2. 추첨·분할 → lab/evidence/split_a2.json 커밋(JEV 호출 전)",
+    "3. 조정 세트: 문단·임베딩·질문·검색·생성·주장·통제·라벨 → judge --split tune → a2-tune → results/a2-tune.json 커밋",
+    "4. 확인 세트: 질문·검색·생성·주장·통제·라벨을 JEV 호출 전에 끝내고 freeze-holdout → prereg_a2_check.json 커밋",
+    "5. judge --split check --tag check 1회 → a2-report → results/a2-check.json, docs/lab/evidence-a2-report.md(결과가 부정이어도 공개)",
+    "변경은 lab/evidence/attempts.jsonl에 study a2 표시로 이유와 함께 덧붙인다(기존 줄은 고치지 않는다)"
+  ],
+  "code_sha256": {
+    "app/services/evidence/lexical.py": "707abc6e2996f927aebfb724d2a492344020a185a3ae34e49137cb01a12d5261",
+    "app/services/evidence/claims.py": "b273c3e5b7a27901356181dd1641abf3e8003b351f0891de699f1bd6731d65e7",
+    "app/services/evidence/numbers.py": "b440370b1e21d5e7f308406d3f6f3369f741edba15778236d2eeb68e48276f41",
+    "app/services/evidence/judge.py": "7578571f1cfeb761170d35694f4bdf06199faca18018e02f02eb64cc0a6b8a68",
+    "lab/evidence/a2.py": "78254ae57eccbc8993c12fe37587391e4e63cab6d7c59a5510683bc966a79f70"
+  }
+}
