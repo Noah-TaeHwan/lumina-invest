@@ -32,7 +32,7 @@ NOT_CLAIM_MAX_CLAIM_SHARE = 0.05
 GATES = {
     "h_prec": {"precision_min": 0.90, "ci_lo_min": 0.80, "min_predicted": 150},
     "h_low": {"supported_rate_max": 0.05, "share_min": 0.20},
-    "h_high": {"precision_min": 0.95, "max_drop_vs_sys": 0.02},
+    "h_high": {"precision_min": 0.95, "max_drop_vs_sys": 0.02, "min_band": 30},
     "h_tier": {"auc_diff_lo_min": -0.05, "auc_diff_hi_max": 0.05, "call_reduction_min": 0.30},
 }
 _EPS = 1e-12
@@ -89,7 +89,7 @@ def choose_theta_low(rows: list[dict]) -> dict:
     """spec 6.3: 하단 구간(lex < θ)의 AI 라벨 지지됨 비율이 0.03 이하인 후보 중 가장 큰 값. 빈 구간은 후보가 아니다."""
     cands = []
     for t in THETA_GRID:
-        band = [r for r in rows if tier_route(r["lex"], r.get("high_ok", False), t, None) == "lex_low"]
+        band = [r for r in rows if tier_route(r["lex"], r["high_ok"], t, None) == "lex_low"]
         sup = sum(r["y"] for r in band)
         cands.append({"theta": t, "band": len(band), "supported": sup, "rate": sup / len(band) if band else None})
     ok = [c for c in cands if c["band"] and c["rate"] <= THETA_LOW_MAX_SUPPORTED]
@@ -171,9 +171,11 @@ def check_gates(rows: list[dict], pool: list[dict], cfg: dict, n_boot: int = BOO
         band_prec = correct / len(band) if band else None
         tier_prec = precision(decide(rows, dict(cfg, theta_low=None)), "tier_decision")
         sys_prec = precision(d, "sys_decision")
-        out["h_high"] = {"status": "tested", "theta_high": th, "band": len(band), "correct": correct,
-                         "precision": band_prec, "tier_precision": tier_prec, "sys_precision": sys_prec,
-                         "pass": bool(band) and band_prec >= G["h_high"]["precision_min"]
+        # 확인 세트 상단 구간이 30개 미만이면 판정 불가 → 미채택(조정 세트 ≥ 30 규칙과 같은 하한)
+        enough = len(band) >= G["h_high"]["min_band"]
+        out["h_high"] = {"status": "tested" if enough else "insufficient", "theta_high": th, "band": len(band),
+                         "correct": correct, "precision": band_prec, "tier_precision": tier_prec, "sys_precision": sys_prec,
+                         "pass": enough and band_prec >= G["h_high"]["precision_min"]
                          and tier_prec is not None and sys_prec is not None
                          and tier_prec >= sys_prec - G["h_high"]["max_drop_vs_sys"] - _EPS}
 
@@ -223,7 +225,7 @@ def latency_summary(rows: list[dict]) -> dict:
 
 def not_claim_audit(rows: list[dict]) -> dict:
     """spec 5.2: 비주장 규칙에 걸린 문장 중 AI 라벨이 주장(non_claim 아님)인 비율. 갈린 라벨은 뺀다.
-    표현별로도 세고, 5%를 넘는 표현은 a2-v1에서 규칙에서 뺄 후보로 낸다."""
+    표현별로도 센다. 전체 비율이 5%를 넘을 때만, 표현별 비율이 5%를 넘는 표현을 a2-v1에서 뺄 후보로 낸다."""
     flagged = [r for r in rows if r.get("not_claim_rule") and r.get("label") not in (None, "disputed")]
     claim = [r for r in flagged if r["label"] != "non_claim"]
     by: dict[str, dict] = {}
@@ -232,7 +234,8 @@ def not_claim_audit(rows: list[dict]) -> dict:
         b["n"] += 1
         b["claim"] += r["label"] != "non_claim"
     share = len(claim) / len(flagged) if flagged else None
-    return {"flagged": len(flagged), "claim": len(claim), "claim_share": share,
-            "over_limit": share is not None and share > NOT_CLAIM_MAX_CLAIM_SHARE, "by_reason": by,
-            "drop_phrases": sorted(k[len("phrase:"):] for k, v in by.items()
-                                   if k.startswith("phrase:") and v["claim"] / v["n"] > NOT_CLAIM_MAX_CLAIM_SHARE)}
+    over = share is not None and share > NOT_CLAIM_MAX_CLAIM_SHARE
+    drop = sorted(k[len("phrase:"):] for k, v in by.items()
+                  if k.startswith("phrase:") and v["claim"] / v["n"] > NOT_CLAIM_MAX_CLAIM_SHARE) if over else []
+    return {"flagged": len(flagged), "claim": len(claim), "claim_share": share, "over_limit": over, "by_reason": by,
+            "drop_phrases": drop}

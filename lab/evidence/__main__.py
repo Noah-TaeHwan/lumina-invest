@@ -5,7 +5,7 @@
 controlled-check, label-packets, labels-merge, judge, stage0-report.
 컨테이너(Ollama 접근)에서 돌리는 명령: embed, retrieve, generate.
 
-`--study a2`(A-2 spec 6절)는 같은 명령을 A-2 경로(lab/evidence/a2/data, lab/data/evidence_a2, split_a2.json,
+`--study a2`(A-2 spec 6절)는 같은 명령을 A-2 경로(lab/evidence/study_a2, lab/data/evidence_a2, split_a2.json,
 prereg_a2.json)에서 돌린다. A-2의 봉인 분할은 check(확인 세트)이고, 조정·리포트는 a2-tune·a2-report다.
 원장은 같은 attempts.jsonl에 "study": "a2"로 덧붙인다.
 """
@@ -33,7 +33,7 @@ class Paths:
         self.ev = self.root / "lab/evidence"
         self.attempts = self.ev / "attempts.jsonl"
         if study == "a2":
-            self.data = self.ev / "a2/data"
+            self.data = self.ev / "study_a2"  # lab/evidence/a2.py 모듈과 이름이 겹치지 않게
             self.priv = self.root / "lab/data/evidence_a2"
             self.split_json = self.ev / "split_a2.json"
             self.prereg = self.ev / "prereg_a2.json"
@@ -343,6 +343,7 @@ def cmd_split(P: Paths, args) -> None:
     if P.calls.exists():
         raise SystemExit("split is frozen once JEV calls exist")
     if P.study == "a2":
+        verify_prereg_code(P)
         return _split_a2(P)
     key = dart.load_dart_key()
     client = httpx.Client(timeout=60)
@@ -669,6 +670,11 @@ def cmd_generate(P: Paths, args) -> None:
 
     from app.services.evidence.generate import PROMPT_SHA, generate_answer
 
+    if P.study == "a2":
+        verify_prereg_code(P)
+        registered = json.loads(P.prereg.read_text())["generator"].get("prompt_sha")
+        if registered != PROMPT_SHA:
+            raise SystemExit(f"generator prompt_sha {PROMPT_SHA} != registered {registered}")
     llm = _ollama()
     tags = httpx.get(f"{llm._base}/api/tags", timeout=30).json()["models"]
     gen_model, gen_digest = _generator(P)
@@ -877,6 +883,14 @@ def cmd_label_packets(P: Paths, args) -> None:
     print("ok")
 
 
+def r1_binary_kappa(pairs: list[tuple[str, str]]) -> float | None:
+    """1차 라벨 (opus, codex) 쌍의 이진 κ(지지됨 대 나머지, 어느 한쪽이 비주장이면 뺀다). 쌍이 없으면 None."""
+    from lab.evidence.metrics import kappa
+
+    both = [(a, b) for a, b in pairs if "non_claim" not in (a, b)]
+    return kappa([a == "supported" for a, _ in both], [b == "supported" for _, b in both]) if both else None
+
+
 def cmd_labels_merge(P: Paths, args) -> None:
     """1·2차 라벨을 병합해 labels.jsonl을 쓰고 1차 κ(이진, 비주장 제외)를 출력한다."""
     from lab.evidence.metrics import kappa
@@ -892,12 +906,10 @@ def cmd_labels_merge(P: Paths, args) -> None:
     rows = merge_labels(r1, r2)
     keep = [r for r in read_jsonl(P.jsonl("labels.jsonl")) if r["cid"].split("-q")[0] not in codes]
     write_jsonl(P.jsonl("labels.jsonl"), sorted(keep + rows, key=lambda r: r["cid"]))
-    both = [c for c in r1["opus"].keys() & r1["codex"].keys()
-            if "non_claim" not in (r1["opus"][c]["label"], r1["codex"][c]["label"])]
-    k = kappa([r1["opus"][c]["label"] == "supported" for c in both], [r1["codex"][c]["label"] == "supported" for c in both])
+    k = r1_binary_kappa([(r1["opus"][c]["label"], r1["codex"][c]["label"]) for c in r1["opus"].keys() & r1["codex"].keys()])
     log_attempt(P, "labels-merge", split=args.split, labeled=len(rows),
-                disputed=sum(r["label"] == "disputed" for r in rows), kappa_binary_r1=round(k, 4))
-    print(f"{len(rows)} labels, kappa r1 {k:.3f}")
+                disputed=sum(r["label"] == "disputed" for r in rows), kappa_binary_r1=None if k is None else round(k, 4))
+    print(f"{len(rows)} labels, kappa r1 {'n/a' if k is None else f'{k:.3f}'}")
 
 
 COMMANDS.update({"label-packets": cmd_label_packets, "labels-merge": cmd_labels_merge})
@@ -1455,12 +1467,20 @@ def _a2_inputs(P: Paths):
 
 
 def a2_rows(P: Paths, split_name: str, source: str = "natural") -> tuple[list[dict], int]:
-    """판정 가능한 주장(라벨·JEV 확률·제품 1차 필터 입력)과 JEV 실패로 뺀 수."""
+    """판정 가능한 주장(라벨·JEV 확률·제품 1차 필터 입력)과 JEV 실패로 뺀 수.
+
+    자연 주장은 하나라도 점수가 없으면 멈춘다(--limit 스모크·잘못된 --tag의 부분 점수로 조용히 폴백하지 않게).
+    통제 주장은 예산 규칙으로 뺐을 수 있으므로 점수가 있는 것만 쓴다.
+    """
     feats = _a2_inputs(P)
     jev = _scores(P, split_name)
+    claims = [c for c in _judgeable(P, split_name) if c["source"] == source]
+    missing = [c["cid"] for c in claims if c["cid"] not in jev]
+    if missing and source == "natural":
+        raise SystemExit(f"{len(missing)} {split_name} claims lack JEV scores (scores/{split_name}.jsonl)")
     rows, failed = [], 0
-    for c in _judgeable(P, split_name):
-        if c["source"] != source or c["cid"] not in jev:
+    for c in claims:
+        if c["cid"] not in jev:
             continue
         if not jev[c["cid"]]["ok"]:
             failed += 1
@@ -1479,15 +1499,10 @@ def a2_pool(P: Paths, split_name: str) -> list[dict]:
 
 
 def _r1_kappa(P: Paths, split_name: str) -> float | None:
-    """1차 라벨 이진 κ(지지됨 대 나머지, 비주장 제외) — labels-merge와 같은 계산."""
-    from lab.evidence.metrics import kappa
-
+    """분할의 1차 라벨 이진 κ(labels-merge와 같은 r1_binary_kappa)."""
     codes = {c["corp_code"] for c in companies(P, split_name)}
-    rows = [r for r in read_jsonl(P.jsonl("labels.jsonl")) if r["cid"].split("-q")[0] in codes]
-    both = [r["r1"] for r in rows if "non_claim" not in (r["r1"]["opus"]["label"], r["r1"]["codex"]["label"])]
-    if not both:
-        return None
-    return kappa([b["opus"]["label"] == "supported" for b in both], [b["codex"]["label"] == "supported" for b in both])
+    return r1_binary_kappa([(r["r1"]["opus"]["label"], r["r1"]["codex"]["label"])
+                            for r in read_jsonl(P.jsonl("labels.jsonl")) if r["cid"].split("-q")[0] in codes])
 
 
 def _labeled_natural(P: Paths, split_name: str) -> list[dict]:
@@ -1495,6 +1510,16 @@ def _labeled_natural(P: Paths, split_name: str) -> list[dict]:
     lab = {r["cid"]: r["label"] for r in read_jsonl(P.jsonl("labels.jsonl"))}
     return [dict(c, label=lab.get(c["cid"])) for c in read_jsonl(P.jsonl("claims.jsonl"))
             if c["source"] == "natural" and c["qid"].split("-q")[0] in codes]
+
+
+def _latency_by_split(P: Paths) -> dict:
+    """생성 지연을 분할별로 따로 요약한다(조정·확인을 섞지 않는다)."""
+    from lab.evidence import a2
+
+    split_of = {c["corp_code"]: c["split"] for c in load_split(P)["companies"]}
+    answers = read_jsonl(P.jsonl("answers.jsonl"))
+    return {s: a2.latency_summary([a for a in answers if split_of.get(a["qid"].split("-q")[0]) == s])
+            for s in ("tune", P.sealed)}
 
 
 def cmd_a2_tune(P: Paths, args) -> None:
@@ -1519,9 +1544,7 @@ def cmd_a2_tune(P: Paths, args) -> None:
               "tau_s_candidates": tau["candidates"], "theta_low_candidates": low["candidates"],
               "theta_high_candidates": high["candidates"],
               "not_claim_audit": a2.not_claim_audit(_labeled_natural(P, "tune")),
-              "generation_latency": a2.latency_summary([a for a in read_jsonl(P.jsonl("answers.jsonl"))
-                                                        if a["qid"].split("-q")[0] in
-                                                        {c["corp_code"] for c in companies(P, "tune")}]),
+              "generation_latency": _latency_by_split(P)["tune"],
               "note": "θ는 AI 참조 라벨과 어휘 점수로만 골랐다(MCA 2.3(b)). 확인 세트 결과를 보고 다시 고르지 않는다."}
     P.tune_json.parent.mkdir(parents=True, exist_ok=True)
     P.tune_json.write_text(json.dumps(result, ensure_ascii=False, indent=1) + "\n")
@@ -1545,6 +1568,7 @@ def _gate_lines(g: dict) -> list[str]:
     low = "미시험(조정 세트에서 θ_low 없음)" if hl["status"] == "not_tested" else (
         f"하단 {hl['band']}건, 지지됨 비율 {_num(hl['supported_rate'])}, 전체 대비 {_num(hl['share'])}")
     high = "미시험(조정 세트에서 θ_high 없음)" if hh["status"] == "not_tested" else (
+        f"판정 불가(확인 세트 상단 구간 {hh['band']}건 < 30) → 미채택" if hh["status"] == "insufficient" else
         f"상단 {hh['band']}건, 정밀도 {_num(hh['precision'])}, 상단 적용 ✅ 정밀도 {_num(hh['tier_precision'])} "
         f"대 SYS {_num(hh['sys_precision'])}")
     if ht["status"] == "not_applicable":
@@ -1585,8 +1609,9 @@ def report_md(res: dict) -> str:
              f"- 통제 주장 변형 유형별 정확도: {json.dumps(res['controlled_accuracy_by_variant'], ensure_ascii=False)}",
              f"- 비주장 규칙: 걸린 문장 {nc['flagged']}건 중 AI 라벨이 주장 {nc['claim']}건(비율 {_num(nc['claim_share'])}), "
              f"규칙에서 뺄 표현 {nc['drop_phrases'] or '없음'}",
-             f"- 생성 지연(서비스 생성기, 첫 호출 제외 {lat['n']}건): p50 {_num(lat['p50_ms'])}ms, p95 {_num(lat['p95_ms'])}ms "
-             f"→ 답변 생성 타임아웃 재설정값(p95 × 2) {_num(lat['timeout_s'])}초", ""]
+             *[f"- 생성 지연 {name}(서비스 생성기, 첫 호출 제외 {v['n']}건): p50 {_num(v['p50_ms'])}ms, "
+               f"p95 {_num(v['p95_ms'])}ms → 타임아웃 재설정값(p95 × 2) {_num(v['timeout_s'])}초"
+               for name, v in lat.items()], ""]
     return "\n".join(lines)
 
 
@@ -1617,7 +1642,7 @@ def cmd_a2_report(P: Paths, args) -> None:
            "sys_minus_lex": {"point": sl[0], "lo": sl[1], "hi": sl[2], "verdict": reported_verdict(sl[1], sl[2], False, False)},
            "controlled_accuracy_by_variant": {k: sum(v) / len(v) for k, v in sorted(by_var.items())},
            "not_claim_audit": a2.not_claim_audit(_labeled_natural(P, P.sealed)),
-           "generation_latency": a2.latency_summary(read_jsonl(P.jsonl("answers.jsonl"))),
+           "generation_latency": _latency_by_split(P),
            "check_answers": sum(a["qid"].split("-q")[0] in codes for a in read_jsonl(P.jsonl("answers.jsonl")))}
     out = P.ev / "results/a2-check.json"
     out.parent.mkdir(parents=True, exist_ok=True)

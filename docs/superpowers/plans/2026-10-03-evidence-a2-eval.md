@@ -11,7 +11,7 @@
 
 | 항목 | A-1 | A-2(`--study a2`) |
 |---|---|---|
-| 커밋 데이터 | `lab/evidence/data/` | `lab/evidence/a2/data/` |
+| 커밋 데이터 | `lab/evidence/data/` | `lab/evidence/study_a2/` |
 | 비공개 데이터(gitignore) | `lab/data/evidence/` | `lab/data/evidence_a2/`(문서·문단·벡터·점수·JEV 호출 기록) |
 | 분할 | `split.json` | `split_a2.json` |
 | 사전등록 | `prereg.json` | `prereg_a2.json` |
@@ -59,11 +59,11 @@ alias ev2o='OLLAMA_BASE_URL=http://127.0.0.1:11434 /tmp/ev2.sh'
 | # | 단계 | 어디서 | 소요(추정) | 커밋 |
 |---|---|---|---|---|
 | 0 | 사전등록·코드·테스트(이 PR) | 클라우드 | — | `prereg_a2.json`, `lab/evidence/a2.py` 등 |
-| 1 | 추첨·분할 | 로컬(OpenDART) | 15~30분 | `split_a2.json`, `a2/data/draw_ledger.jsonl`, `mention_edges.jsonl` |
-| 2 | 조정 세트 데이터: 문단·임베딩·질문·검색·생성·주장·통제 | 로컬(DART 원문·Ollama·Opus) | 약 1~1.5시간(8B 생성 120문항 약 30분) | `a2/data/*` |
-| 3 | 조정 세트 라벨(Opus·Codex 1·2차) | 로컬 | 약 1~1.5시간 | `a2/data/labels*` |
+| 1 | 추첨·분할 | 로컬(OpenDART) | 15~30분 | `split_a2.json`, `study_a2/draw_ledger.jsonl`, `mention_edges.jsonl` |
+| 2 | 조정 세트 데이터: 문단·임베딩·질문·검색·생성·주장·통제 | 로컬(DART 원문·Ollama·Opus) | 약 1~1.5시간(8B 생성 120문항 약 30분) | `study_a2/*` |
+| 3 | 조정 세트 라벨(Opus·Codex 1·2차) | 로컬 | 약 1~1.5시간 | `study_a2/labels*` |
 | 4 | 조정 세트 판정·선택 | 로컬(JEV) | 판정 5~10분, 선택 1분 | `results/a2-tune.json` |
-| 5 | 확인 세트 데이터·라벨 → 동결 | 로컬 | 약 2~3시간(8B 생성 120문항 약 30분) | `a2/data/*`, `prereg_a2_check.json` |
+| 5 | 확인 세트 데이터·라벨 → 동결 | 로컬 | 약 2~3시간(8B 생성 120문항 약 30분) | `study_a2/*`, `prereg_a2_check.json` |
 | 6 | 확인 세트 1회 판정·리포트 | 로컬(JEV) | 판정 5~10분, 리포트 2분 | `results/a2-check.json`, `docs/lab/evidence-a2-report.md` |
 | 7 | 정책 `a2-v1` 반영 | 클라우드 가능(P6) | — | 별도 PR |
 
@@ -85,15 +85,15 @@ alias ev2o='OLLAMA_BASE_URL=http://127.0.0.1:11434 /tmp/ev2.sh'
 - **중지:** 40개사를 못 채우거나 확인 < 15·조정 = 0이면 거부된다. 규칙을 바꾸려면 원장에 이유를 남기고 사전등록 개정(새 버전) 뒤에 다시 한다. JEV 호출 뒤에는 `split`이 거부된다.
 
 ```bash
-git add lab/evidence/split_a2.json lab/evidence/a2/data/draw_ledger.jsonl lab/evidence/a2/data/mention_edges.jsonl \
-  lab/evidence/a2/data/dart_ledger.jsonl lab/evidence/attempts.jsonl
+git add lab/evidence/split_a2.json lab/evidence/study_a2/draw_ledger.jsonl lab/evidence/study_a2/mention_edges.jsonl \
+  lab/evidence/study_a2/dart_ledger.jsonl lab/evidence/attempts.jsonl
 git commit -m "chore: A-2 추첨·분할(시드 20261103, A-1 제외)"
 ```
 
 ### 2단계: 조정 세트 데이터
 
 ```bash
-/tmp/ev2.sh passages                         # 40개사 문단(비공개) + a2/data/passages_manifest.jsonl
+/tmp/ev2.sh passages                         # 40개사 문단(비공개) + study_a2/passages_manifest.jsonl
 ev2o embed --split tune
 /tmp/ev2.sh question-packets --split tune    # lab/data/evidence_a2/packets/questions/<corp>.md
 ```
@@ -112,10 +112,10 @@ ev2o generate --split tune                   # 예상: "120 answers", 약 30분
 ```
 
 - `generate` 행에는 `latency_ms`, `cold`가 남는다. 첫 몇 개의 지연이 스모크(10~20초)보다 크게 다르면 Ollama 설정(Metal 사용)을 확인한다.
-- **중지:** `generate`가 digest 불일치로 거부되면 생성하지 않는다(6.5 절차: 새 사전등록). `claims`·`judge`·`a2-tune`·`a2-report`는 사전등록 코드 해시(`code_sha256`)가 다르면 거부된다.
+- **중지:** `generate`가 digest·프롬프트 해시(`generator.prompt_sha`) 불일치로 거부되면 생성하지 않는다(6.5 절차: 새 사전등록). `split`·`generate`·`claims`·`judge`·`a2-tune`·`a2-report`는 사전등록 코드 해시(`code_sha256`: 1차 필터·비주장·숫자·SYS·생성·추첨·선택 코드)가 다르면 외부 호출 전에 거부된다.
 
 ```bash
-git add lab/evidence/a2/data lab/evidence/attempts.jsonl
+git add lab/evidence/study_a2 lab/evidence/attempts.jsonl
 git commit -m "chore: A-2 조정 세트 질문·검색·8B 답변·주장·통제 주장"
 ```
 
@@ -129,7 +129,7 @@ A-1 Stage 0 Task 15와 같다. 경로만 A-2다.
 for f in lab/data/evidence_a2/packets/labels/r1_codex/*.md; do
   corp=$(basename "$f" .md)
   codex exec -s workspace-write -C $REPO \
-    "파일 $f 를 끝까지 읽고 그 안의 지시를 따르라. 결과는 lab/evidence/a2/data/labels/r1_codex/$corp.jsonl 에만 써라. 다른 파일을 수정하지 마라." >/dev/null
+    "파일 $f 를 끝까지 읽고 그 안의 지시를 따르라. 결과는 lab/evidence/study_a2/labels/r1_codex/$corp.jsonl 에만 써라. 다른 파일을 수정하지 마라." >/dev/null
 done
 /tmp/ev2.sh label-packets --labeler opus --round 2 --split tune     # 불일치만
 /tmp/ev2.sh label-packets --labeler codex --round 2 --split tune
@@ -141,7 +141,7 @@ done
 - **중지:** 1차 이진 κ < 0.6이면 `a2-tune`이 멈춘다. 라벨 절차를 고치고 원장에 남긴다(확인 세트는 열지 않는다).
 
 ```bash
-git add lab/evidence/a2/data/labels lab/evidence/a2/data/labels.jsonl lab/evidence/attempts.jsonl
+git add lab/evidence/study_a2/labels lab/evidence/study_a2/labels.jsonl lab/evidence/attempts.jsonl
 git commit -m "chore: A-2 조정 세트 AI 참조 라벨"
 ```
 
@@ -170,7 +170,7 @@ git commit -m "chore: A-2 조정 세트 τ_s·θ 선택"
 2·3단계를 `--split check`로 반복한다(`embed`, `question-packets`, 서브에이전트, `questions-merge`, `retrieve`, `generate`, `claims`, `controlled-*`, `label-packets`, `labels-merge`).
 
 ```bash
-git add lab/evidence/a2/data lab/evidence/attempts.jsonl
+git add lab/evidence/study_a2 lab/evidence/attempts.jsonl
 git commit -m "chore: A-2 확인 세트 데이터와 AI 참조 라벨"
 /tmp/ev2.sh freeze-holdout                   # 예상: "check frozen", prereg_a2_check.json 생성
 git add lab/evidence/prereg_a2_check.json lab/evidence/attempts.jsonl
@@ -189,8 +189,10 @@ git commit -m "chore: A-2 확인 세트 동결"
 
 - 예산: 자연 + 통제 주장 추정이 상한을 넘으면 통제 주장을 빼고 원장에 `budget-drop-controlled`를 남긴다. 자연만으로도 넘으면 거부(중지).
 - 두 번째 `judge --split check`는 출력 파일 또는 원장(같은 연구 줄)으로 거부된다. A-1의 `split: check` 원장 줄은 세지 않는다.
-- `a2-report`는 추가 호출 없이 계산한다: 관문 H-prec·H-low·H-high·H-tier(2단 군집 부트스트랩 2,000회, 시드 20261103), 정책 `a2-v1`(사전등록 반영 표), SYS − 어휘 겹침 AUC, 운영점, 통제 변형별 정확도, 비주장 규칙 오분류율, 생성 지연 p50·p95(cold 제외)와 타임아웃 재설정값(p95 × 2).
+- `a2-report`는 추가 호출 없이 계산한다: 관문 H-prec·H-low·H-high·H-tier(2단 군집 부트스트랩 2,000회, 시드 20261103), 정책 `a2-v1`(사전등록 반영 표), SYS − 어휘 겹침 AUC, 운영점, 통제 변형별 정확도, 비주장 규칙 오분류율, 생성 지연 p50·p95(cold 제외, 조정·확인 분할별)와 타임아웃 재설정값(p95 × 2).
 - 확인 세트 ✅ 예측이 150개 미만이면 H-prec는 기술 통계로만 보고하고 τ_s는 0.85다.
+- 확인 세트 상단 구간 주장이 30개 미만이면 H-high는 판정 불가 → 미채택이다(2026-10-03 데이터 전 개정).
+- 판정 가능한 자연 주장 중 점수가 없는 것이 있으면(잘못된 `--tag` 등) `a2-tune`·`a2-report`가 거부한다.
 - 리포트는 결과가 부정이어도 그대로 공개한다. 확인 세트 결과를 보고 τ_s·θ를 다시 고르지 않는다.
 
 ```bash
@@ -214,11 +216,12 @@ verify 레시피(`.claude/skills/verify/SKILL.md`)처럼 코드와 `lab/data/evi
 | 동결 뒤 `labels-merge --split check` | `check data is frozen (prereg_a2_check.json exists)` |
 | 판정 뒤 다시 `judge --split check --tag check` | `check judge check already ran` |
 | `--study a2 stage1-report` | `stage1-report is an a1 command` |
-| `lexical.py`를 고친 뒤 `claims` | `code changed after prereg_a2.json: [...]` |
+| `lexical.py`를 고친 뒤 `claims`(또는 `split`·`generate`) | `code changed after prereg_a2.json: [...]` |
+| `judge --split tune --limit 20` 뒤 `a2-tune` | `N tune claims lack JEV scores` |
 
 ## 테스트(이 PR)
 
-- `tests/evidence/test_name_condition.py`: 회사명 후보·조건, `lex_features`·`tier_route`, 실행기가 같은 함수를 쓰는지.
+- `tests/evidence/test_name_condition.py`: 회사명 후보(위치 무관·일반명사 제외)·토큰 경계 비교, `lex_features`·`tier_route`.
 - `tests/evidence/test_a2_split.py`: 시드·A-1 제외·교차 언급(양방향, 10회 경계, 2자 이름 무시)·분할 크기.
 - `tests/evidence/test_a2_select.py`: τ_s(정밀도 0.93 경계, 30개 경계, 폴백, 숫자 확인·반박 우선), 경계 비율, θ_low·θ_high(경계·빈 구간·조건 실패).
 - `tests/evidence/test_a2_tier.py`: 경로 집계, 호출 감소율, 관문 통과·실패, 150개 미만, 정책 매핑, 예산, 생성 지연, 비주장 감사.

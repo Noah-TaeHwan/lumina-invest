@@ -80,12 +80,31 @@ def test_tune_freeze_check_report(tmp_path, monkeypatch):
     assert res["gates"]["h_prec"]["descriptive_only"] is True  # ✅ 예측 150건 미만
     assert res["policy_a2_v1"]["tau_s"] == 0.85 and res["policy_a2_v1"]["version"] == "a2-v1"
     assert res["gates"]["h_tier"]["status"] == "tested" and res["gates"]["h_tier"]["call_reduction"] == 1.0
-    assert res["generation_latency"]["cold_excluded"] == 8 and res["generation_latency"]["n"] == 72
+    lat = res["generation_latency"]
+    assert set(lat) == {"tune", "check"} and lat["check"]["cold_excluded"] == 4 and lat["check"]["n"] == 36
     doc = (tmp_path / "docs/lab/evidence-a2-report.md").read_text()
     assert "AI 참조 라벨" in doc and "제휴 관계가 아니다" in doc and "정밀도 목표 미확인" in doc
     events = [json.loads(x) for x in P.attempts.read_text().splitlines()]
     assert [e["event"] for e in events] == ["a2-tune", "freeze-holdout", "a2-report"]
     assert all(e["study"] == "a2" for e in events)
+
+
+def test_tune_and_report_refuse_missing_scores(tmp_path, monkeypatch):
+    """--limit 스모크·잘못된 --tag로 점수 파일이 부분·빈 파일이면 조용히 폴백하지 않고 멈춘다."""
+    P = _setup(tmp_path, monkeypatch)
+    scores = _data(P, TUNE, "tune", 10)
+    cli.write_jsonl(P.priv / "scores/tune.jsonl", scores[:5])
+    with pytest.raises(SystemExit, match="lack JEV scores"):
+        cli.cmd_a2_tune(P, None)
+    assert not P.tune_json.exists()
+    cli.write_jsonl(P.priv / "scores/tune.jsonl", scores)
+    cli.cmd_a2_tune(P, None)
+    check_scores = _data(P, CHECK, "check", 10)
+    cli.cmd_freeze_holdout(P, None)
+    cli.write_jsonl(P.priv / "scores/check.jsonl", check_scores[:-1])
+    with pytest.raises(SystemExit, match="lack JEV scores"):
+        cli.cmd_a2_report(P, None)
+    assert not (P.ev / "results/a2-check.json").exists()
 
 
 def test_tune_stops_on_low_label_kappa(tmp_path, monkeypatch):
@@ -122,3 +141,24 @@ def test_budget_reserves_check_on_tune_and_drops_controlled_on_check(tmp_path, m
     assert json.loads(P.attempts.read_text().splitlines()[-1])["event"] == "budget-drop-controlled"
     with pytest.raises(SystemExit, match="budget"):
         cli.a2_budget(P, "check", cnat + cnat[:1], text, ret, names)
+
+
+def test_a2_split_and_generate_check_prereg_before_external_calls(tmp_path, monkeypatch):
+    """split·generate도 사전등록 대조를 먼저 한다(DART·Ollama 호출 전). generate는 프롬프트 해시도 본다."""
+    P = _setup(tmp_path, monkeypatch)
+    monkeypatch.undo()
+    calls = []
+    monkeypatch.setattr(cli, "verify_prereg_code", lambda P: calls.append("verify") or (_ for _ in ()).throw(SystemExit("code changed")))
+    monkeypatch.setattr(cli, "_ollama", lambda: (_ for _ in ()).throw(AssertionError("Ollama called")))
+    monkeypatch.setattr(cli, "a1_texts", lambda P: (_ for _ in ()).throw(AssertionError("draw started")))
+    with pytest.raises(SystemExit, match="code changed"):
+        cli.cmd_split(P, None)
+    with pytest.raises(SystemExit, match="code changed"):
+        cli.cmd_generate(P, type("A", (), {"split": "tune"})())
+    assert calls == ["verify", "verify"]
+    monkeypatch.setattr(cli, "verify_prereg_code", lambda P: None)
+    pre = __import__("json").loads(P.prereg.read_text())
+    pre["generator"]["prompt_sha"] = "0" * 64
+    P.prereg.write_text(__import__("json").dumps(pre))
+    with pytest.raises(SystemExit, match="prompt_sha"):
+        cli.cmd_generate(P, type("A", (), {"split": "tune"})())

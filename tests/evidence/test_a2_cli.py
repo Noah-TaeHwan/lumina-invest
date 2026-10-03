@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from app.services.evidence import claims, generate, judge
+from app.services.evidence import claims, generate, judge, lexical
 from lab.evidence import __main__ as cli
 from lab.evidence import a2
 from lab.evidence import split as sp
@@ -40,7 +40,7 @@ def _check_data(P):
 
 def test_a2_paths_are_separate_and_ledger_is_shared(tmp_path):
     P1, P2 = cli.Paths(tmp_path), cli.Paths(tmp_path, "a2")
-    assert P2.data == tmp_path / "lab/evidence/a2/data" and P2.priv == tmp_path / "lab/data/evidence_a2"
+    assert P2.data == tmp_path / "lab/evidence/study_a2" and P2.priv == tmp_path / "lab/data/evidence_a2"
     assert P2.split_json == tmp_path / "lab/evidence/split_a2.json"
     assert P2.prereg == tmp_path / "lab/evidence/prereg_a2.json"
     assert P2.prereg_holdout == tmp_path / "lab/evidence/prereg_a2_check.json"
@@ -157,5 +157,11 @@ def test_committed_prereg_a2_matches_code():
     rule = pre["claims"]["not_claim_rule"]
     assert rule["phrases"] == list(claims.NOT_CLAIM_PHRASES) and rule["lead"]["ends"] == list(claims.NOT_CLAIM_LEAD_ENDS)
     assert pre["provisional_policy"]["version"] == "a2-provisional-2"
+    assert pre["labels"]["kappa_stop"] == a2.KAPPA_MIN
+    assert {"app/services/evidence/generate.py", "lab/evidence/split.py", "app/services/evidence/lexical.py",
+            "lab/evidence/a2.py"} <= set(pre["code_sha256"])
+    assert pre["gates"]["h_high"]["min_band"] == 30
+    assert pre["claims"]["generic_nouns"] == list(lexical.GENERIC_NOUNS)
+    assert all("lab/evidence/a2/" not in json.dumps(v, ensure_ascii=False) for v in pre.values())
     for rel, sha in pre["code_sha256"].items():
         assert _sha(rel) == sha, rel

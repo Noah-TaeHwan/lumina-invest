@@ -74,6 +74,19 @@ def test_h_low_fails_on_small_band_and_h_high_on_precision_drop():
     assert g["h_tier"]["status"] == "not_applicable"
 
 
+def test_h_high_needs_30_claims_in_check_band():
+    """상단 구간 주장이 확인 세트에서 30개 미만이면 판정 불가 → 미채택(조정 세트 ≥ 30 규칙과 일관)."""
+    rows = [_row(i, s=0.9, y=1, lex=0.9) for i in range(29)]
+    rows += [_row(100 + i, s=0.9, y=1, lex=0.5) for i in range(150)] + [_row(300 + i, s=0.1, y=0, lex=0.1) for i in range(60)]
+    pool = [{"lex": r["lex"], "high_ok": r["high_ok"]} for r in rows]
+    g = a2.check_gates(rows, pool, CFG, n_boot=50)
+    assert g["h_high"]["status"] == "insufficient" and g["h_high"]["band"] == 29 and g["h_high"]["pass"] is False
+    assert a2.policy_a2_v1(g, CFG)["theta_high"] is None
+    rows += [_row(29, s=0.9, y=1, lex=0.9)]
+    g = a2.check_gates(rows, pool, CFG, n_boot=50)
+    assert g["h_high"]["status"] == "tested" and g["h_high"]["band"] == 30
+
+
 def test_missing_thresholds_mean_hypothesis_not_tested():
     rows = _check_rows()
     pool = [{"lex": r["lex"], "high_ok": r["high_ok"]} for r in rows]
@@ -99,6 +112,13 @@ def test_latency_summary_excludes_cold_start():
     got = a2.latency_summary(rows)
     assert got["n"] == 11 and got["cold_excluded"] == 1
     assert got["p50_ms"] == 15000.0 and got["timeout_s"] == pytest.approx(2 * got["p95_ms"] / 1000)
+
+
+def test_drop_phrases_only_when_over_limit():
+    rows = [{"text": "문단에 따르면 매출은 늘었다.", "not_claim_rule": True, "label": "supported"}]
+    rows += [{"text": "알 수 없습니다.", "not_claim_rule": True, "label": "non_claim"}] * 30
+    got = a2.not_claim_audit(rows)  # 전체 1/31 ≈ 3% ≤ 5%: 표현 하나가 100%여도 빼지 않는다
+    assert got["over_limit"] is False and got["drop_phrases"] == []
 
 
 def test_not_claim_audit_by_rule():

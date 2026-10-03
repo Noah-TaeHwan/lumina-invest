@@ -84,3 +84,8 @@ def test_theta_selection_reads_only_labels_and_lex():
     rows = [{"lex": 0.1, "y": 0, "high_ok": True}] * 40
     a2.choose_theta_low(rows)
     a2.choose_theta_high(rows)
+
+
+def test_theta_low_requires_high_ok_key():
+    with pytest.raises(KeyError):
+        a2.choose_theta_low([{"lex": 0.1, "y": 0}])

@@ -45,39 +45,63 @@ def lex_best(claim: str, passages: list[str]) -> tuple[float, int | None]:
 # JEV로 넘어갈 뿐이고, 놓치면 주체 교체 문장이 JEV 없이 ✅가 된다.
 _EDGE = re.compile(r"^[^\w]+|[^\w]+$")
 _QUOTED = re.compile(r"['‘\"“「『]([^'’\"”」』]{2,})['’\"”」』]")
-_TOPIC = re.compile(r"(?:은|는|이|가)$")
-_FIRST = re.compile(r"(?:은|는|이|가|의)$")
-_PARTICLES = re.compile(r"(?:으로|에서|은|는|이|가|을|를|의|에|도|와|과|로)$")
 _CORP_MARK = re.compile(r"㈜|\(주\)|주식회사")
-_STEM = re.compile(r"[가-힣A-Za-z0-9]{2,}")
-_VERBAL = ("하", "되", "있", "없", "않", "했", "됐", "한", "된")
+# 명사 뒤 조사·서술격(긴 것부터). 위치와 무관하게 이 꼬리가 붙은 토큰의 어간을 후보로 본다
+_TAILS = ("으로부터", "로부터", "에게서", "입니다", "이었다", "에서는", "에게", "에서", "으로", "이다", "이며", "였다",
+          "와의", "과의", "은", "는", "이", "가", "을", "를", "의", "에", "와", "과", "로", "도", "다")
+_HANGUL = re.compile(r"[가-힣]{2,}")
+_LATIN_STEM = re.compile(r"[A-Za-z0-9가-힣][\w&.\-]*")
+# 어간이 이 글자로 끝나면 서술형(생산하는·공급한다·체결했다 등)으로 보고 뺀다
+_VERBAL = ("하", "되", "있", "없", "않", "했", "됐", "한", "된", "었", "았", "였", "겠", "졌", "할", "될", "니")
+# 회사명이 아닌 일반명사(문단에 그대로 없어도 다른 회사를 가리키지 않는다)
+GENERIC_NOUNS = ("당사", "회사", "동사", "자사", "본사", "매출", "매출액", "매출처", "제품", "사업", "부문", "고객", "고객사",
+                 "거래처", "공급처", "협력사", "경쟁사", "시장", "기업", "그룹", "계열사", "자회사", "종속회사", "지배회사",
+                 "연결회사", "이익", "영업이익", "순이익", "비중", "원재료", "설비", "공장", "생산", "판매", "수출", "수입",
+                 "연구", "개발", "계약", "기술", "투자", "위험", "환율", "금리", "주요", "국내", "해외", "전년", "당기", "전기",
+                 "비용", "가격", "수요", "공급", "서비스", "브랜드", "업체", "주주", "최대주주", "사업부", "법인", "지역")
+_BOUND = r"[가-힣A-Za-z0-9]"
+_TAIL_RE = "|".join(sorted(_TAILS + ("만", "및"), key=len, reverse=True))
+
+
+def _stem(tok: str) -> str | None:
+    """꼬리(조사·서술격)를 뗀 어간. 꼬리가 없으면 None."""
+    for t in _TAILS:
+        if tok.endswith(t) and len(tok) > len(t):
+            return tok[:-len(t)]
+    return None
 
 
 def name_candidates(claim: str, company: str) -> set[str]:
-    """주장에서 회사명 후보를 모은다: 선택 회사명, 라틴 대문자 토큰, 따옴표 안 이름, 법인 표지 토큰,
-    주제·주격 조사(은·는·이·가, 첫 토큰은 의 포함)가 붙은 2자 이상 명사형 토큰(서술형 어간은 뺀다)."""
+    """주장에서 회사명 후보를 모은다(위치 무관): 선택 회사명(주장에 있을 때), 따옴표 안 이름, ㈜·(주)·주식회사 토큰,
+    라틴 대문자 토큰, 조사·서술격(GENERIC_NOUNS 제외, 서술형 어간 제외)이 붙은 2자 이상 한글 명사형 토큰."""
     out = {company} if company and company in claim else set()
     out |= {m.strip() for m in _QUOTED.findall(claim)}
-    for i, raw in enumerate(claim.split()):
+    for raw in claim.split():
         if _CORP_MARK.search(raw):
-            tok = _PARTICLES.sub("", _EDGE.sub("", _CORP_MARK.sub("", raw)))
-            if _STEM.fullmatch(tok):
+            tok = _EDGE.sub("", _CORP_MARK.sub("", raw))
+            tok = _stem(tok) or tok
+            if _LATIN_STEM.fullmatch(tok) and len(tok) >= 2:
                 out.add(tok)
             continue
         tok = _EDGE.sub("", raw)
         if re.search(r"[A-Z]", tok):
-            out.add(_PARTICLES.sub("", tok) if re.search(r"[가-힣]$", tok) else tok)
+            out.add((_stem(tok) or tok) if re.search(r"[가-힣]$", tok) else tok)
             continue
-        m = (_FIRST if i == 0 else _TOPIC).search(tok)
-        stem = tok[:m.start()] if m else ""
-        if _STEM.fullmatch(stem) and not stem.endswith(_VERBAL):
+        stem = _stem(tok)
+        if stem and _HANGUL.fullmatch(stem) and not stem.endswith(_VERBAL) and stem not in GENERIC_NOUNS:
             out.add(stem)
     return out
 
 
+def _in_passage(name: str, passage: str) -> bool:
+    """이름이 문단에 토큰 경계로 나오는지(뒤에 조사가 붙는 것은 허용). '삼성'은 '삼성전자'에 걸리지 않는다."""
+    pat = rf"(?<!{_BOUND}){re.escape(name)}(?=(?:{_TAIL_RE}){{0,2}}(?!{_BOUND}))"
+    return re.search(pat, passage) is not None
+
+
 def names_in_passage(claim: str, passage: str, company: str) -> bool:
-    """주장의 회사명 후보가 모두 문단에 그대로 있으면 참(후보가 없으면 참)."""
-    return all(n in passage for n in name_candidates(claim, company))
+    """주장의 회사명 후보가 모두 문단에 토큰 경계로 그대로 있으면 참(후보가 없으면 참)."""
+    return all(_in_passage(n, passage) for n in name_candidates(claim, company))
 
 
 @dataclass(frozen=True)
