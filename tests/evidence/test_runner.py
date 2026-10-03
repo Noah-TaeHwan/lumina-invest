@@ -157,11 +157,14 @@ def test_lexical_tier_routes():
     assert client.calls == ["회사의 메모리 판매가 늘었다."]
 
 
-def test_lex_high_requires_company_name_in_passage():
+def test_lex_high_requires_claim_names_in_passage():
+    """spec 6.1: 주장의 회사명 후보(여기서는 LG전자)가 근거 문단에 그대로 있어야 상단 구간이다."""
     policy = rn.Policy("tier", 0.70, 0.35, theta_high=0.8)
     client = FakeClient()
-    res = _run(client, "회사는 메모리 반도체와 스마트폰을 생산한다.", policy=policy)
-    assert res.claims[0].route == "jev" and len(client.calls) == 1
+    res = _run(client, "회사는 메모리 반도체와 스마트폰을 생산한다. LG전자는 메모리 반도체와 스마트폰을 생산한다.",
+               policy=policy)
+    assert [c.route for c in res.claims] == ["lex_high", "jev"]
+    assert client.calls == ["LG전자는 메모리 반도체와 스마트폰을 생산한다."]
 
 
 def test_pii_skips_whole_run():
