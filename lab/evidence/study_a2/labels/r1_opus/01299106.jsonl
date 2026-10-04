@@ -1,0 +1,25 @@
+{"lid": "7ac0f21d16", "label": "supported", "passage": 2, "reason": "11ha 스마트팜을 직접 운영·재배하기 때문에 기술자문·설계·시공 컨설팅이 가능하다고 명시"}
+{"lid": "f7b303e8e4", "label": "supported", "passage": 2, "reason": "스마트팜을 바탕으로 재배·생산·유통까지 연결하는 융복합 사업이라고 명시"}
+{"lid": "0927b6d8e6", "label": "no_evidence", "passage": null, "reason": "그린하베스트팜이라는 주체는 문단에 없음(문단은 우듬지팜)"}
+{"lid": "76d58b45a1", "label": "supported", "passage": 4, "reason": "수확한 토마토에 스테비아를 주입하는 기술을 특허권(제10-2188356호)으로 등록"}
+{"lid": "4b65a5e8b6", "label": "supported", "passage": 6, "reason": "스테비아를 첨가한 토망고를 주력 라인업으로 사업을 영위한다고 명시"}
+{"lid": "607a86c8b8", "label": "supported", "passage": 4, "reason": "스테비오사이드로 단맛 강화, 유출 방지로 맛 변질 방지, 유통기한 연장 특허기술로 토망고 생산"}
+{"lid": "572ff71e93", "label": "contradicted", "passage": 4, "reason": "문단은 해당 기술을 특허권으로 등록했다고 하여 미보유 주장과 반대"}
+{"lid": "261acf81e8", "label": "no_evidence", "passage": null, "reason": "농심에 관한 내용은 문단에 없음"}
+{"lid": "e36af62238", "label": "no_evidence", "passage": null, "reason": "매출 부문별 표는 머리글만 있고 스테비아 토마토 2022년 5% 비중은 문단에 없음"}
+{"lid": "65d4288cdf", "label": "no_evidence", "passage": null, "reason": "토망고 2022년 매출 90% 비중은 문단에 없음"}
+{"lid": "d3bb8d07ff", "label": "non_claim", "passage": null, "reason": "매출 구성이 달라질 수 있다는 일반적 단서·면책 문장"}
+{"lid": "9d9dd52fab", "label": "supported", "passage": 4, "reason": "2022년 B2B만이던 유통채널에 네이버 스마트스토어·11번가 B2C 온라인 채널 확보"}
+{"lid": "49a73f9826", "label": "non_claim", "passage": null, "reason": "뒤 목록을 소개하는 도입 문장으로 독자적 사실 내용 없음"}
+{"lid": "4b4cdace61", "label": "no_evidence", "passage": null, "reason": "대추토마토 2022년 매출 5% 비중은 문단에 없음"}
+{"lid": "b7050fb443", "label": "supported", "passage": 4, "reason": "토망고 가동률 제15기 64.1%, 제14기 60.4%, 제13기 64.7%로 표에 명시"}
+{"lid": "60c3f30abb", "label": "supported", "passage": 4, "reason": "2024년(제14기) 토망고 가동률 60.4%"}
+{"lid": "ed292bbe50", "label": "contradicted", "passage": 4, "reason": "2024년(제14기) 가동률은 60.4%로 72.8%와 다름"}
+{"lid": "a68e401347", "label": "supported", "passage": 1, "reason": "가격변동은 판매가격에 반영시켜 손실을 최소화한다고 명시"}
+{"lid": "8dbb36275f", "label": "supported", "passage": 6, "reason": "2024년 기후변화로 작황 부진, 수급 불안정으로 원재료 가격 상승"}
+{"lid": "9cb41df0ce", "label": "supported", "passage": 1, "reason": "기후변화·가격변동 시장위험에 대해 각 위험요인을 구매팀·경영자가 면밀히 모니터링"}
+{"lid": "eba5e3fd29", "label": "no_evidence", "passage": null, "reason": "문단은 2024년 사실만 말하며 2017년에 대한 서술은 없음"}
+{"lid": "35911e49d8", "label": "supported", "passage": 2, "reason": "연구개발팀 R&R에 당도 향상, 스테비아 토마토 저장·유통성, 콜라비·밤 당도, 토마토줄기, AI 수확로봇·선별, 자율주행 방제 과제 명시"}
+{"lid": "664062f33e", "label": "supported", "passage": 2, "reason": "연구개발팀 과제에 스테비아 토마토, 토마토줄기, 토마토 숙도·생육 등 토마토 관련 과제 다수"}
+{"lid": "2909dac0b9", "label": "no_evidence", "passage": null, "reason": "푸른들팜이라는 주체는 문단에 없음(문단은 우듬지팜)"}
+{"lid": "ddf10c3619", "label": "supported", "passage": 2, "reason": "연구개발팀 R&R에 스테비아 토마토의 저장성 및 유통성 향상 명시"}

@@ -1,0 +1,32 @@
+{"lid": "f3f571b77f", "label": "supported", "passage": 1, "reason": "문단 1은 2025년 하반기부터 화장품 OEM 제조사업을 신사업으로 개시했다고 명시한다."}
+{"lid": "9cbf3996f4", "label": "supported", "passage": 1, "reason": "문단 1은 여성과 남성의 피부관리·미용 관심 증가에 따라 화장품 시장이 계속 성장한다고 설명한다."}
+{"lid": "9c779dde63", "label": "no_evidence", "passage": null, "reason": "문단 1에 화장품 산업의 규모와 제품·브랜드 다양성은 있으나 이것이 OEM 신사업 추진 이유라는 인과관계는 없다."}
+{"lid": "af9683fff0", "label": "no_evidence", "passage": null, "reason": "시장 동향 파악과 2025년 OEM 진출의 목적을 모두 지지하는 문단이 없으며 문단 4의 외형·수익성 모색은 2020~2022년 하이드로콜로이드 사업에 연결된다."}
+{"lid": "dcf6d2e6ee", "label": "non_claim", "passage": null, "reason": "구체적인 차별점의 열거를 예고하는 도입 문장이다."}
+{"lid": "84827115ef", "label": "contradicted", "passage": 6, "reason": "문단 6의 Semi Gel 제24류 중국 등록일은 2020년 3월 7일로 2018년 3월과 다르다."}
+{"lid": "b4f633bcf3", "label": "supported", "passage": 1, "reason": "문단 1에 하이드로겔·바이오셀룰로스의 화학성분 관련 단점과 Semi Gel의 성능상 장점 및 합성가교제·방부제 미사용이 모두 명시되어 있다."}
+{"lid": "49db9408ef", "label": "supported", "passage": 1, "reason": "문단 1에 인공눈물·식품 첨가물 등에 쓰이는 CMC의 부직포 응용, 생분해 가능성 및 화학물질이 남지 않는 장점이 명시되어 있다."}
+{"lid": "889858f095", "label": "supported", "passage": 1, "reason": "문단 1은 Semi Gel이 하이드로겔의 Gel 형태와 바이오셀룰로스의 뛰어난 흡수력을 가진다고 명시한다."}
+{"lid": "cfdbcee6fb", "label": "supported", "passage": 6, "reason": "문단 6에 Semi Gel 제24류 상표의 중국 등록일이 2020년 3월 7일로 기재되어 있다."}
+{"lid": "8222f9f52e", "label": "supported", "passage": 8, "reason": "문단 8의 2025년 화장품제조판매 내수 매출 12,103,087,719원은 약 121억 원과 같다."}
+{"lid": "1472687b92", "label": "no_evidence", "passage": null, "reason": "문단 8에는 기타류와 화장품제조판매 매출만 있어 전체 제품군 중 화장품제조판매가 최대 비중인지 확인할 수 없다."}
+{"lid": "c9fabc4f26", "label": "no_evidence", "passage": null, "reason": "분자는 문단 8, 분모는 문단 6에 따로 있으며 해당 비중 24%는 이 질문의 문단에 명시되지 않은 계산값이다."}
+{"lid": "5192220305", "label": "no_evidence", "passage": null, "reason": "문단 8의 약 121억 원 내수 매출은 화장품제조판매에 해당하며 네일케어 부문의 매출 정보는 없다."}
+{"lid": "53b7adbc31", "label": "supported", "passage": 3, "reason": "문단 3은 하이드로콜로이드 화장품용 패치 제품군을 현재 생산·판매 중이라고 명시한다."}
+{"lid": "2497dd39ff", "label": "contradicted", "passage": 3, "reason": "문단 3은 하이드로콜로이드 화장품용 패치 제품군을 현재 생산·판매 중이라고 하여 생산·판매하지 않는다는 주장을 반박한다."}
+{"lid": "5c3eccf121", "label": "non_claim", "passage": null, "reason": "제공된 자료에서 가동률 정보를 찾지 못했다는 답변 유보 문장이다."}
+{"lid": "1e15ce95e4", "label": "supported", "passage": 8, "reason": "문단 8은 매출채권의 전체 기간 기대신용손실을 대손충당금으로 인식한다고 명시한다."}
+{"lid": "3ed8045efe", "label": "no_evidence", "passage": null, "reason": "제공된 문단에는 농심의 사업이나 라면·스낵 생산·판매에 관한 정보가 없다."}
+{"lid": "b7652e10f7", "label": "supported", "passage": 4, "reason": "문단 4에 마도공장의 당기 평균 가동률 103%, 실제가동시간 2,259시간 및 가동가능시간 2,196시간이 기재되어 초과 가동을 지지한다."}
+{"lid": "5203d2f134", "label": "no_evidence", "passage": null, "reason": "매출채권 금액과 대손충당금은 제시되지만 매출채권의 통화가 베트남 동화라는 정보는 없다."}
+{"lid": "75334235cb", "label": "no_evidence", "passage": null, "reason": "환율 10% 상승에 따른 손익 변화율이나 감소 방향을 제시하는 문단이 없다."}
+{"lid": "0cd3f5aa3c", "label": "no_evidence", "passage": null, "reason": "매출채권과 대손충당금 정보만으로 회사 손익이 그 가치에 의해 결정된다는 관계는 제시되지 않는다."}
+{"lid": "51e26d58c1", "label": "no_evidence", "passage": null, "reason": "환율 10% 상승 시 대손충당금 가치가 10% 감소한다는 관계나 계산값은 문단에 없다."}
+{"lid": "c7c81073f0", "label": "no_evidence", "passage": null, "reason": "회사의 환율 상승을 베트남 동화 환율 상승과 동일시할 통화별 환율 정보가 문단에 없다."}
+{"lid": "77fa354093", "label": "non_claim", "passage": null, "reason": "질문에 답하기 위해 손익 영향을 추정하겠다는 절차 안내이다."}
+{"lid": "a6be702a22", "label": "no_evidence", "passage": null, "reason": "환율 10% 상승 시 매출채권 가치가 10% 감소한다는 관계나 계산값은 문단에 없다."}
+{"lid": "cac3cccd66", "label": "non_claim", "passage": null, "reason": "계약기간 정보가 명시되지 않았다고 알리는 답변 유보 문장이다."}
+{"lid": "9fc0ea874f", "label": "supported", "passage": 7, "reason": "문단 7에 기술이전 대가가 부가세 포함 3,300만 원의 정액 기술료 지급으로 기재되어 있다."}
+{"lid": "b3fe63001c", "label": "contradicted", "passage": 7, "reason": "문단 7의 부가세 포함 정액 기술료는 3,300만 원으로 4,700만 원과 다르다."}
+{"lid": "24e753a640", "label": "no_evidence", "passage": null, "reason": "문단 3은 셀룰로스 분자 제어 기술을 적용한 소재 개발·제조를 설명하지만 해당 기술을 한국생산기술연구원이 개발했다는 출처는 명시하지 않는다."}
+{"lid": "5d9e37804d", "label": "non_claim", "passage": null, "reason": "계약기간과 기술이전 형태의 설명을 예고하는 도입 문장으로 구체적인 계약 사실을 제시하지 않는다."}

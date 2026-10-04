@@ -1,0 +1,25 @@
+{"lid": "f73d33a4a3", "label": "no_evidence", "passage": null, "reason": "유통사업과 중전기기 사업부문에 대한 언급은 있으나 회사의 전체 사업부문 구성을 한 문단이 제시하지 않는다."}
+{"lid": "0a219f3f9e", "label": "contradicted", "passage": 8, "reason": "문단 8은 기술연구소가 12개가 아닌 5개 팀으로 구성되어 있다고 명시한다."}
+{"lid": "a53144efe0", "label": "no_evidence", "passage": null, "reason": "POS 프린터 시장에 대한 설명은 있으나 중전기기 사업부문이 POS 프린터를 개발·판매한다는 내용은 없다."}
+{"lid": "58e70e3cf1", "label": "supported", "passage": 2, "reason": "문단 2는 샤오미 스마트 기기를 수입하여 자사 온라인 쇼핑몰 및 쇼핑 플랫폼 채널에서 판매하는 유통사업을 명시한다."}
+{"lid": "3c03b1c833", "label": "supported", "passage": 8, "reason": "문단 8은 기술연구소가 5개 팀으로 구성되며 각 팀에 팀장 이하 연구원이 있다고 명시한다."}
+{"lid": "6d3cd3b2e8", "label": "supported", "passage": 6, "reason": "문단 6은 전 세계에서 연간 수천 대의 반도체 전공정 중고장비가 입찰형식으로 거래된다고 명시한다."}
+{"lid": "4d75b5600f", "label": "contradicted", "passage": 6, "reason": "문단 6에 명시된 수천 대의 거래 기준 기간은 분기가 아니라 연간이다."}
+{"lid": "18baeef76b", "label": "no_evidence", "passage": null, "reason": "POS 프린터의 시장 성장 설명은 있으나 미니프린터 제품별 매출 비중이나 순위는 제시되지 않는다."}
+{"lid": "802d6ac56c", "label": "no_evidence", "passage": null, "reason": "문단 5의 10,930백만원은 2025년 영업손실 합계이며 전년 대비 감소액이나 전년 영업손익은 제시되지 않는다."}
+{"lid": "4a0f67232e", "label": "no_evidence", "passage": null, "reason": "문단 5는 2025년 매출액을 제시하지만 전년 연결 매출액이나 5,843백만원의 증가액은 제시하지 않는다."}
+{"lid": "1606161821", "label": "supported", "passage": 5, "reason": "문단 5의 2025년 영업이익 표에 유통사업의 영업이익이 383백만원으로 제시되어 있다."}
+{"lid": "a84e46eab8", "label": "no_evidence", "passage": null, "reason": "문단 5의 383백만원은 유통사업의 영업이익이며 바이오사업의 영업손익은 제시되지 않는다."}
+{"lid": "e2104828c8", "label": "non_claim", "passage": null, "reason": "제공된 자료에서 정보를 찾지 못했다는 답변 한계 안내이다."}
+{"lid": "5fb65ebf28", "label": "supported", "passage": 1, "reason": "문단 1은 샤오미 스마트 기기를 수입하여 자사 온라인 쇼핑몰 및 쇼핑 플랫폼 채널에서 판매한다고 명시한다."}
+{"lid": "fd8d1c42ad", "label": "contradicted", "passage": 1, "reason": "문단 1은 샤오미 스마트 기기를 수입하여 해당 온라인 채널에서 판매 중이라고 명시한다."}
+{"lid": "4cc1dcd748", "label": "non_claim", "passage": null, "reason": "질문에 필요한 원재료 매입 규모와 생산능력을 자료에서 찾지 못했다는 답변 한계 안내이다."}
+{"lid": "a64fc3c3ef", "label": "no_evidence", "passage": null, "reason": "여러 문단의 주제를 합친 자료 내용 요약이며 나열된 모든 정보의 제공을 한 문단이 지지하지 않는다."}
+{"lid": "abd7122813", "label": "no_evidence", "passage": null, "reason": "제공된 문단에는 파생금융상품자산의 당기말 평가액이 제시되지 않는다."}
+{"lid": "888f6236f0", "label": "no_evidence", "passage": null, "reason": "제공된 문단에는 오뚜기나 라면·카레의 제조 및 판매에 관한 내용이 없다."}
+{"lid": "2827cbdc51", "label": "supported", "passage": 5, "reason": "문단 5는 회사가 샤오미 코리아의 공식 파트너사라고 명시한다."}
+{"lid": "4f2ee040ad", "label": "no_evidence", "passage": null, "reason": "문단 1은 매출채권·투자자산의 손상 충당금을 설명할 뿐 파생금융상품자산이 그 충당금으로 구성된다고 하지 않는다."}
+{"lid": "cb3158367c", "label": "no_evidence", "passage": null, "reason": "문단 5는 전력변환기기 산업의 경쟁요소를 설명하지만 이를 양산 목표로 개발 중인 신제품과 연결하지 않는다."}
+{"lid": "3e1666d78c", "label": "contradicted", "passage": 6, "reason": "문단 6은 노광공정의 생산시간 비중을 약 45%가 아니라 약 60%로 명시한다."}
+{"lid": "a16c2818c7", "label": "no_evidence", "passage": null, "reason": "문단 1은 타기업과의 제휴 준비를, 문단 4는 금융위험을 설명하며 연구개발비 규모·매출 대비 비중은 제시하지 않는다."}
+{"lid": "22493f4f92", "label": "supported", "passage": 6, "reason": "문단 6은 노광공정이 반도체 전체 공정 생산시간의 약 60%를 차지한다고 명시한다."}

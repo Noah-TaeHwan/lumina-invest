@@ -1,0 +1,19 @@
+{"lid": "c4cea0d768", "label": "no_evidence", "passage": null, "reason": "LG화학에 관한 내용은 문단에 없다"}
+{"lid": "8750a1765b", "label": "supported", "passage": 2, "reason": "문단 2: 당사는 2023년 6월 1일에 인적분할된 신설법인"}
+{"lid": "2cee5d7e39", "label": "supported", "passage": 2, "reason": "문단 2: 2023년 6월 1일 인적분할된 신설법인으로 표현만 다름"}
+{"lid": "f1f843a0ff", "label": "supported", "passage": 2, "reason": "문단 2: 1960년대 국내 민간 최초로 50톤 용광로 운영"}
+{"lid": "2131729a19", "label": "contradicted", "passage": 2, "reason": "문단 2는 같은 시기 민간 최초 용광로를 50톤으로 기재, 80톤과 다름"}
+{"lid": "18907c74c3", "label": "supported", "passage": 2, "reason": "문단 2: 봉강, 형강, 후판은 동국제강의 주력 제품"}
+{"lid": "9fd3bd2524", "label": "contradicted", "passage": 6, "reason": "문단 6은 2025년 철강부문 매출을 3,203,431백만원으로 기재; 2,872,073은 비유동자산이고 331,358은 문단에 없는 계산값"}
+{"lid": "0c7406676b", "label": "no_evidence", "passage": null, "reason": "1,989,735는 2025년 봉형강 내수 매출이며 2021년 수치는 문단에 없다"}
+{"lid": "4ac5f4f5e2", "label": "supported", "passage": 8, "reason": "문단 8: 2025년 매출 합계 3,203,431백만원"}
+{"lid": "66a9d479e2", "label": "supported", "passage": 8, "reason": "문단 8: 2025년 봉형강 내수 매출 1,989,735백만원"}
+{"lid": "21dede73d6", "label": "no_evidence", "passage": null, "reason": "77.4%는 후판 가동률이며 냉연강판 설비는 문단에 없다"}
+{"lid": "eed7ddedf7", "label": "supported", "passage": 7, "reason": "문단 7: 2025년 봉형강 66.2%, 후판 77.4% 평균 가동률"}
+{"lid": "4d02b18e72", "label": "supported", "passage": 7, "reason": "문단 7: 후판 평균 가동률 77.4%"}
+{"lid": "1d1323f255", "label": "supported", "passage": 2, "reason": "문단 2: 특정 위험을 회피하기 위하여 파생상품을 이용"}
+{"lid": "598518a3fe", "label": "supported", "passage": 8, "reason": "문단 8: 환리스크를 줄이고자 선물환거래 등 파생금융상품을 거래"}
+{"lid": "e846630f6f", "label": "contradicted", "passage": 2, "reason": "문단 2는 특정 위험 회피를 위해 파생상품을 이용한다고 기재"}
+{"lid": "d9f837ba46", "label": "supported", "passage": 2, "reason": "문단 2: 2025년 7월 25일 삼성생명보험과 페럼타워 및 대지 양수 계약, 645,060,000,000원"}
+{"lid": "bc592d7a44", "label": "no_evidence", "passage": null, "reason": "현대자동차에 관한 내용은 문단에 없다"}
+{"lid": "1f722ba1f4", "label": "supported", "passage": 2, "reason": "문단 2: 계약상대방 삼성생명보험 주식회사, 계약금액 645,060,000,000원, 체결일 2025년 7월 25일"}

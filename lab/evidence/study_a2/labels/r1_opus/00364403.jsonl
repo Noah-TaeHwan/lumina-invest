@@ -1,0 +1,32 @@
+{"lid": "10ddfe6f88", "label": "supported", "passage": 1, "reason": "문단 1 주요사업의 내용과 동일(통신장비 분야, 중계기·광전송장비·개방형 무선네트워크 기지국 장비 연구개발·제조·판매)"}
+{"lid": "9994062b3e", "label": "supported", "passage": 1, "reason": "문단 1 주요사업 서술을 바꿔 쓴 것으로 모든 사실이 일치"}
+{"lid": "50dc10c04c", "label": "no_evidence", "passage": null, "reason": "삼성전자에 관한 문단이 없음"}
+{"lid": "bd9506dddc", "label": "contradicted", "passage": 4, "reason": "문단 4는 국내 납품 후 60일 이내 모두 현금화라고 함(75일 아님)"}
+{"lid": "01042a9bc5", "label": "supported", "passage": 4, "reason": "문단 4: 국내는 납품 후 60일 이내에 모두 현금화"}
+{"lid": "cfa4fa6075", "label": "no_evidence", "passage": null, "reason": "문단 2는 통신장비를 현재 주요 사업으로 기술할 뿐 신규사업으로 추진한다는 내용은 없음"}
+{"lid": "f7c7e03047", "label": "supported", "passage": 2, "reason": "문단 2: 1998년 11월 5일 설립, 2005년 7월 8일 코스닥 매매 개시"}
+{"lid": "54e2df2b87", "label": "supported", "passage": 2, "reason": "문단 2: 이동통신 및 유선통신 네트워크 장비 제조 개발 목적으로 1998년 11월 5일 설립"}
+{"lid": "3b6c489b06", "label": "non_claim", "passage": null, "reason": "표 제목 조각으로 사실 주장이 아님"}
+{"lid": "48435d7373", "label": "non_claim", "passage": null, "reason": "표를 참조하라는 안내 문장"}
+{"lid": "c90332a062", "label": "no_evidence", "passage": null, "reason": "문단 1의 수치는 생산실적이지 매출이 아니며 매출 수치를 주는 문단이 없음"}
+{"lid": "606059f644", "label": "supported", "passage": 1, "reason": "문단 1 생산실적 표 행과 동일"}
+{"lid": "396f11d600", "label": "contradicted", "passage": 2, "reason": "문단 2는 설립일을 1998년 11월 5일로 기재(2001년 아님)"}
+{"lid": "d2b79aa7c8", "label": "supported", "passage": 1, "reason": "문단 1 생산실적 표 합계 행과 동일"}
+{"lid": "3dd10bd5bf", "label": "supported", "passage": 1, "reason": "문단 1: 외주 생산, 연간 평준화가 아닌 사업자 수주 시점 일괄생산"}
+{"lid": "74b046d4b5", "label": "supported", "passage": 1, "reason": "문단 1 산출기준 문장과 동일"}
+{"lid": "0576ea02bb", "label": "no_evidence", "passage": null, "reason": "한빛네트웍스에 관한 문단이 없음"}
+{"lid": "87bc7049a9", "label": "supported", "passage": 1, "reason": "문단 1: 외주를 포함한 총생산 금액을 생산능력으로 파악"}
+{"lid": "18410de05b", "label": "no_evidence", "passage": null, "reason": "환율 10% 민감도 표가 문단에 없음(순액에서 계산한 값)"}
+{"lid": "50a2173ee2", "label": "non_claim", "passage": null, "reason": "아래 표를 소개하는 도입 문장"}
+{"lid": "e2d55b3d5b", "label": "no_evidence", "passage": null, "reason": "USD 10% 상승시 영향 수치가 문단에 없음(계산값)"}
+{"lid": "28b6b4ebe5", "label": "supported", "passage": 3, "reason": "문단 3: 외화로 표시된 거래를 하고 있어 환율변동위험에 노출"}
+{"lid": "e7006b3fc9", "label": "contradicted", "passage": 3, "reason": "문단 3은 외화 거래로 환율변동위험에 노출되어 있다고 함"}
+{"lid": "6d738e8620", "label": "non_claim", "passage": null, "reason": "표를 소개하는 도입 문장으로 구체적 사실 주장이 없음"}
+{"lid": "906a118e51", "label": "supported", "passage": 3, "reason": "문단 3 USD 외화자산·부채·순액 표 행과 동일"}
+{"lid": "a1e14a970f", "label": "no_evidence", "passage": null, "reason": "USD 10% 하락시 영향 수치가 문단에 없음(계산값)"}
+{"lid": "3e710fd044", "label": "no_evidence", "passage": null, "reason": "JPY 10% 상승시 영향 수치가 문단에 없음(계산값)"}
+{"lid": "be174815bb", "label": "supported", "passage": 3, "reason": "문단 3 JPY 외화자산·순액 표 행과 동일"}
+{"lid": "4bc008828a", "label": "no_evidence", "passage": null, "reason": "합산 영향액은 문단에 없는 계산값"}
+{"lid": "7cde189746", "label": "supported", "passage": 7, "reason": "문단 7: 연구개발비/매출액 비율 제28기(연결) 15.4%"}
+{"lid": "75b1616f03", "label": "contradicted", "passage": 7, "reason": "문단 2는 매년 10~14%라 하지만 문단 7은 최근 사업연도(제28기) 비율을 15.4%로 제시"}
+{"lid": "cd278cb76e", "label": "no_evidence", "passage": null, "reason": "SK하이닉스에 관한 문단이 없음"}

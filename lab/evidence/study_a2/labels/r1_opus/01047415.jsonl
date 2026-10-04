@@ -1,0 +1,25 @@
+{"lid": "26dfb7bb6b", "label": "contradicted", "passage": 5, "reason": "문단 5는 생물공학연구소가 2010년 2월 설립되었다고 하여 2016년 2월과 다르다"}
+{"lid": "9ff21c2af8", "label": "no_evidence", "passage": null, "reason": "육용오리를 지역 도축장에서 조달한다는 내용은 어느 문단에도 없다(문단 4는 자체 도압시설·사육농장만 언급)"}
+{"lid": "d7da7991c7", "label": "supported", "passage": 4, "reason": "문단 4에 도압, 신선정육, 훈제육, 우모 및 HMR 생산시설 보유가 명시됨"}
+{"lid": "bc0721723f", "label": "supported", "passage": 5, "reason": "문단 5에 품질관리·신제품 개발 목적으로 생물공학연구소를 2010년 2월 설립했다고 명시됨"}
+{"lid": "5b9caca058", "label": "supported", "passage": 4, "reason": "문단 4에 종속회사 제이디팜 소유 보성농장, 김제농장, 거창부화장 등 오리사육·종란 부화 시설이 명시됨"}
+{"lid": "61fab174d4", "label": "no_evidence", "passage": null, "reason": "제품별 매출액 정보가 없고 훈제 오리다리는 개발 제품으로만 언급됨"}
+{"lid": "f9c51145dd", "label": "contradicted", "passage": 5, "reason": "문단 5는 수출하는 우모가 도압 후 잔여물인 오리털이라고 하여 거위털과 다르다"}
+{"lid": "5dc9880e7b", "label": "supported", "passage": 3, "reason": "문단 3에 오리 사업의 우모를 1차 가공 후 대만 등 중개상을 통해 2차 가공업체로 전량 수출한다고 명시됨"}
+{"lid": "e03c8bd357", "label": "contradicted", "passage": 1, "reason": "문단 1에서 575,899,066원은 2025년 연구개발비 합계로 매출액 대비 0.30%라 매출액 자체가 아니다"}
+{"lid": "cb46130f21", "label": "contradicted", "passage": 1, "reason": "매출액 맥락의 수치이나 문단 1에서 575,899,066원은 2025년 연구개발비(매출액 대비 0.30%)다"}
+{"lid": "0322722d1f", "label": "contradicted", "passage": 1, "reason": "매출액 맥락의 수치이나 문단 1에서 540,199,544원은 2024년 연구개발비(매출액 대비 0.29%)다"}
+{"lid": "d735e6ded1", "label": "supported", "passage": 6, "reason": "문단 6 특허권 1번 '오리 훈연제품을 제조하는 방법'의 권리자가 정다운이다"}
+{"lid": "35ee09c241", "label": "non_claim", "passage": null, "reason": "구체적 사실 없이 뒤 목록을 안내하는 도입 문장"}
+{"lid": "4e5bae958b", "label": "contradicted", "passage": 1, "reason": "매출액 맥락의 수치이나 문단 1에서 507,178,426원은 2023년 연구개발비(매출액 대비 0.27%)다"}
+{"lid": "0d39148a09", "label": "contradicted", "passage": 6, "reason": "문단 6에 정다운이 권리자인 오리 훈연제품 제조방법 특허권이 있다"}
+{"lid": "07e77f5900", "label": "no_evidence", "passage": null, "reason": "6.1%는 업계 도압수 전년대비 증가율이며 회사의 도압 공정 가동률은 문단에 없다"}
+{"lid": "c654e29b47", "label": "no_evidence", "passage": null, "reason": "농심과 라면 제품에 관한 내용은 문단에 없다"}
+{"lid": "75ed14a1c0", "label": "supported", "passage": 7, "reason": "문단 7에 생물공학연구소가 10명의 연구원으로 구성되어 있다고 명시됨"}
+{"lid": "d775821a35", "label": "supported", "passage": 1, "reason": "문단 1에 주로 미국 달러화와 관련된 환율변동위험에 노출되어 있다고 명시됨"}
+{"lid": "73377b4911", "label": "supported", "passage": 6, "reason": "문단 6에 닭·오리 사육농장 500m 이내 가금가축 사육업 등록 제한이 명시됨"}
+{"lid": "c6a839f08b", "label": "contradicted", "passage": 6, "reason": "문단 6은 제한 거리를 500m로 명시하여 700m와 다르다"}
+{"lid": "46d9400ef2", "label": "no_evidence", "passage": null, "reason": "문단은 2023~2025년 연구개발비만 다루며 2018년 정보는 없다"}
+{"lid": "d8f8af1237", "label": "supported", "passage": 1, "reason": "문단 1에 2025년 연구개발비 합계 575,899,066원이 명시됨"}
+{"lid": "cd25a5326d", "label": "supported", "passage": 1, "reason": "문단 1에 2025년 연구개발비의 매출액 대비 비율 0.30%가 명시됨"}
+{"lid": "9872acfb86", "label": "supported", "passage": 1, "reason": "문단 1에 2025년 연구개발비가 매출액 대비 0.30%로 명시됨"}

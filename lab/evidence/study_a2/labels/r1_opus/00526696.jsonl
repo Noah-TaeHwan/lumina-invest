@@ -1,0 +1,29 @@
+{"lid": "13316e743f", "label": "supported", "passage": 8, "reason": "사업의 개요 표에 방산사업부문·통신사업부문·기타사업부문 구분이 있다"}
+{"lid": "dbc065f284", "label": "supported", "passage": 6, "reason": "1970년대 방산물자 지정 및 방산원가 제도를 중심으로 큰 변화 없이 이어 옴"}
+{"lid": "a96fc90846", "label": "contradicted", "passage": 6, "reason": "문단은 1990년대가 아니라 1970년대 제도라고 말함"}
+{"lid": "d38c52f45d", "label": "supported", "passage": 8, "reason": "나열된 활동(유무선 통신장비 제조, 전력증폭기 개발, 케이블모뎀 제조·판매, 통신관련 전자부품)이 모두 통신사업부문 표에 있음"}
+{"lid": "82c8873f3a", "label": "contradicted", "passage": 8, "reason": "중계기 임가공·유무선 통신장비·케이블모뎀 등은 표에서 통신사업부문 활동이지 방위산업이 아님"}
+{"lid": "72b5cbef1b", "label": "contradicted", "passage": 8, "reason": "표의 통신사업부문은 웨이브파워·더블유이엠에스·웨이브엔티·텔라움·현서전자통신·이엔시솔루션 등 7개사로 4개사가 아님"}
+{"lid": "ddab470cc6", "label": "contradicted", "passage": 8, "reason": "표의 방산사업부문은 웨이브일렉트로닉스와 아데나뿐이며 나머지는 통신사업부문"}
+{"lid": "fc8bffad43", "label": "supported", "passage": 1, "reason": "방산사업부문 웨이브일렉트로닉스의 주요 영업활동이 유도무기용 신호처리장치 제조"}
+{"lid": "c7729324d9", "label": "supported", "passage": 1, "reason": "방산사업부문 웨이브일렉트로닉스가 유도무기용 신호처리장치 제조"}
+{"lid": "f6d2de907a", "label": "supported", "passage": 1, "reason": "사업의 개요 첫 문장과 동일"}
+{"lid": "5242321e19", "label": "no_evidence", "passage": null, "reason": "한빛디펜스는 문단에 등장하지 않음(신호처리장치 제조사는 웨이브일렉트로닉스)"}
+{"lid": "b2bff365f7", "label": "supported", "passage": 4, "reason": "방산부문 맥락에서 개발샘플 매출이 지속적으로 증가한다고 기술"}
+{"lid": "a8dd45a0de", "label": "supported", "passage": 5, "reason": "사업의 개요 첫 문장을 그대로 인용"}
+{"lid": "5115a07749", "label": "contradicted", "passage": 4, "reason": "문단은 개발샘플 매출이 지속적으로 증가한다고 말함"}
+{"lid": "01ef1f7169", "label": "supported", "passage": 1, "reason": "문단 1 문장과 동일"}
+{"lid": "5058fc58e3", "label": "supported", "passage": 4, "reason": "방산부문 주요 고객사와 신호처리 장치 외 탐색기 등 핵심 부품을 지속 개발"}
+{"lid": "3e0634aae9", "label": "supported", "passage": 1, "reason": "문단 1 첫 문장과 동일"}
+{"lid": "e51e22ad8d", "label": "supported", "passage": 4, "reason": "개발샘플 매출 증가와 양산·정비 매출 성장 전망 문장과 동일"}
+{"lid": "84bf3ef873", "label": "supported", "passage": 1, "reason": "문단 1 문장과 동일"}
+{"lid": "a817bdba4f", "label": "no_evidence", "passage": null, "reason": "삼성전기·MLCC는 문단에 없음"}
+{"lid": "0f0d0ab9de", "label": "no_evidence", "passage": null, "reason": "전력증폭기 핵심부품 조달 방식 변경에 대한 문단 없음"}
+{"lid": "589b5859d2", "label": "supported", "passage": 4, "reason": "신규서비스 수요와 유지보수 수요로 안정적·연속적 시장 형성"}
+{"lid": "241c242d1a", "label": "no_evidence", "passage": null, "reason": "문단 6의 렌탈 임대는 계측기 이야기이며 이전 조달 방식이나 변경 사실은 없음"}
+{"lid": "3afe420e02", "label": "contradicted", "passage": 7, "reason": "2025년 12월말 수주잔액은 183,224백만원으로 157,480백만원이 아님"}
+{"lid": "2289c0759c", "label": "supported", "passage": 4, "reason": "외화사채 등의 환율변동위험을 통화스왑계약으로 관리"}
+{"lid": "6cfe9e0ced", "label": "supported", "passage": 7, "reason": "제27기(2025년 12월말) 수주잔액 183,224백만원"}
+{"lid": "3297ac7762", "label": "supported", "passage": 7, "reason": "주석에 방산사업본부와 아데나 수주잔액이 합산되었다고 명시"}
+{"lid": "f07e2c36e4", "label": "supported", "passage": 6, "reason": "인용 문장은 이 묶음의 문단 6에 그대로 있음(문단 번호는 답변 측 번호로 봄)"}
+{"lid": "4886585099", "label": "no_evidence", "passage": null, "reason": "문단은 2025년 12월말 기준만 다루며 2022년 수주잔액 구성은 없음"}

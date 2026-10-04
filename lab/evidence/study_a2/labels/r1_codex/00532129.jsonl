@@ -1,0 +1,26 @@
+{"lid": "b94ab51e66", "label": "supported", "passage": 5, "reason": "문단 5는 영림원소프트랩을 국내 대표적인 ERP 개발 및 판매 기업으로 설명한다."}
+{"lid": "243fd196b7", "label": "contradicted", "passage": 5, "reason": "문단 5의 K-System 국내 최초 개발·공급 연도는 1997년으로, 주장한 2003년과 다르다."}
+{"lid": "834dc27aff", "label": "no_evidence", "passage": null, "reason": "ERP 개발·판매는 문단 5, 중소기업용 월 과금형 클라우드 SystemEver 제공은 문단 3에 있어 한 문단이 전체를 지지하지 않는다."}
+{"lid": "ba4e1f6119", "label": "no_evidence", "passage": null, "reason": "확장형·서비스형·저가형·회계솔루션 시장 구분은 문단 4, 회사의 중견·대기업 및 중소기업 시장 활동은 문단 3에 있어 문단 결합이 필요하다."}
+{"lid": "46ed59bf09", "label": "supported", "passage": 5, "reason": "문단 5는 중소기업의 정보화 필요성에 따라 1997년 국내 최초 한국형 ERP 패키지 K-System을 개발·공급했다고 명시한다."}
+{"lid": "d6a426e871", "label": "supported", "passage": 7, "reason": "문단 7은 ERP의 데이터 통합·업무 및 프로세스 혁신 역할과 외부 정보 융합을 통한 의사결정 정보 제공의 중요성을 모두 설명한다."}
+{"lid": "7889f70cc6", "label": "supported", "passage": 1, "reason": "문단 1은 K-System Ace를 구축형으로, SystemEver를 클라우드 기반 월 과금형 ERP로 제공한다고 명시한다."}
+{"lid": "2539167682", "label": "supported", "passage": 1, "reason": "문단 1은 중소기업 시장에 클라우드 기반 월 과금형 ERP인 SystemEver를 제공한다고 명시한다."}
+{"lid": "cba552ce72", "label": "contradicted", "passage": 1, "reason": "문단 1에서 중소기업 대상 월 과금형 클라우드 ERP의 제품명은 SystemEver로, 주장한 CloudNova와 다르다."}
+{"lid": "32540c91bf", "label": "supported", "passage": 3, "reason": "문단 3은 2022년 K-System 내부회계와 K-System AI 경영분석 등 ERP 확장·연계 솔루션을 출시했다고 명시한다."}
+{"lid": "90217ef652", "label": "contradicted", "passage": 3, "reason": "문단 3은 해당 확장·연계 솔루션을 2022년에 출시했다고 명시하여 출시하지 않았다는 주장을 반박한다."}
+{"lid": "e5757ca3d2", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 회사의 2025년 유형별 매출 구성이나 그러한 구성이 없다는 설명이 없다."}
+{"lid": "33421a0be5", "label": "supported", "passage": 8, "reason": "문단 8은 인적자원을 활용하는 사업이며 프로젝트별 구축과정과 범위가 달라 생산능력·생산실적 산정이 어렵다고 명시한다."}
+{"lid": "b83b8adf45", "label": "supported", "passage": 8, "reason": "문단 8은 회사가 협력사, SW/HW 공급사 및 기타 협업업체와 협력하여 프로젝트를 수행한다고 설명한다."}
+{"lid": "10b6873c95", "label": "supported", "passage": 8, "reason": "문단 8은 고객 요구에 따라 ERP 구축범위와 프로젝트별 구축과정이 달라지며 여러 업무프로세스로 프로젝트를 수행한다고 설명한다."}
+{"lid": "d283141b09", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 삼성전자의 생산설비나 메모리 반도체 생산에 관한 내용이 없다."}
+{"lid": "b0d3401261", "label": "supported", "passage": 8, "reason": "문단 8은 생산설비를 통한 생산 대신 협력사·SW/HW 공급사 등과 협력하여 ERP 구축 프로젝트를 수행한다고 설명한다."}
+{"lid": "f2bead5c82", "label": "contradicted", "passage": 7, "reason": "문단 7의 주식회사 설립일은 1993년 5월 22일로, 주장한 5월 17일과 다르다."}
+{"lid": "946c1071de", "label": "no_evidence", "passage": null, "reason": "외환 위험 규모와 환율 변동의 세전손익 영향에 관한 정보가 없다고 명시한 문단은 없다."}
+{"lid": "a2eb9de977", "label": "contradicted", "passage": 1, "reason": "문단 1은 보고서 작성기준일 현재 파생상품·풋백옵션 거래내역이 없다는 거래현황 정보를 명시하므로 정보가 없다는 주장과 다르다."}
+{"lid": "5c98b7da8a", "label": "supported", "passage": 7, "reason": "문단 7은 1993년 5월 22일 주식회사 영림원소프트랩으로 설립되었다고 명시한다."}
+{"lid": "a4e72e6cd0", "label": "non_claim", "passage": null, "reason": "다음에 연구개발비 규모와 비율의 변화를 제시하겠다는 안내로, 구체적인 사실을 진술하지 않는다."}
+{"lid": "59673557dd", "label": "no_evidence", "passage": null, "reason": "문단 5는 이번 보고 기간의 정책·가격 변동이 없었다고 할 뿐, 그 기간이 2018년이라고 명시하지 않는다."}
+{"lid": "3496b8e579", "label": "no_evidence", "passage": null, "reason": "이 질문에 제시된 문단에는 2022년·2023년 연구개발비의 매출 대비 비율이나 그 변화가 없다."}
+{"lid": "f9dfd64fd6", "label": "no_evidence", "passage": null, "reason": "이 질문에 제시된 문단에는 2022년·2023년 연구개발비 금액이나 그 증가에 관한 수치가 없다."}
+{"lid": "364701ef70", "label": "supported", "passage": 5, "reason": "문단 5는 해당 기간 중 수익성에 중요한 영향을 줄 제품·서비스의 영업 정책 변화와 가격 변동이 없었다고 명시한다."}

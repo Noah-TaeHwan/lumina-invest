@@ -1,0 +1,77 @@
+{
+ "_meta": {
+  "authored_by": "AI(Claude Code), 2026-10-04",
+  "method": "저장된 확인 세트 JEV 점수(scores/check)와 labels.jsonl만 읽어 a2.decide·_op_point·cluster_bootstrap(2000회, 시드 20261103)로 계산. 추가 JEV 호출 없음. 갈린 라벨은 각 라벨러의 2차 라벨로 대체, 2차가 non_claim이면 제외.",
+  "basis_commit": "bd53331",
+  "descriptive_only": true
+ },
+ "main(disputed 제외)": {
+  "n": 257,
+  "supported": 146,
+  "tau_0.85": {
+   "predicted": 151,
+   "supported_precision": 0.901,
+   "supported_recall": 0.932,
+   "coverage": 0.588,
+   "contradiction_false_positive_rate": 0.045
+  },
+  "tau_0.9": {
+   "predicted": 144,
+   "supported_precision": 0.903,
+   "supported_recall": 0.89,
+   "coverage": 0.56,
+   "contradiction_false_positive_rate": 0.045
+  },
+  "sys_minus_lex": [
+   -0.012,
+   -0.061,
+   0.034
+  ]
+ },
+ "disputed→Opus 2차": {
+  "n": 267,
+  "supported": 149,
+  "tau_0.85": {
+   "predicted": 156,
+   "supported_precision": 0.885,
+   "supported_recall": 0.926,
+   "coverage": 0.584,
+   "contradiction_false_positive_rate": 0.051
+  },
+  "tau_0.9": {
+   "predicted": 149,
+   "supported_precision": 0.886,
+   "supported_recall": 0.886,
+   "coverage": 0.558,
+   "contradiction_false_positive_rate": 0.051
+  },
+  "sys_minus_lex": [
+   -0.002,
+   -0.057,
+   0.056
+  ]
+ },
+ "disputed→Codex 2차": {
+  "n": 267,
+  "supported": 150,
+  "tau_0.85": {
+   "predicted": 156,
+   "supported_precision": 0.885,
+   "supported_recall": 0.92,
+   "coverage": 0.584,
+   "contradiction_false_positive_rate": 0.044
+  },
+  "tau_0.9": {
+   "predicted": 148,
+   "supported_precision": 0.885,
+   "supported_recall": 0.873,
+   "coverage": 0.554,
+   "contradiction_false_positive_rate": 0.044
+  },
+  "sys_minus_lex": [
+   0.005,
+   -0.047,
+   0.065
+  ]
+ }
+}

@@ -1,0 +1,26 @@
+{"lid": "efe9de846f", "label": "supported", "passage": 1, "reason": "문단 1은 디에이피 지배기업이 전자부품 제조·판매업 등을 목적으로 1987년 11월 28일 설립되었다고 명시한다."}
+{"lid": "f4489e289c", "label": "no_evidence", "passage": null, "reason": "문단 1은 설립 목적을 설명할 뿐 지배기업이 현재 전자부품 제조·판매업을 영위한다는 사실까지 명시하지 않는다."}
+{"lid": "2671fb3498", "label": "no_evidence", "passage": null, "reason": "문단 1의 설립 주체는 디에이피이며 대덕전자의 설립 목적이나 날짜에 관한 근거는 없다."}
+{"lid": "80208da762", "label": "non_claim", "passage": null, "reason": "제공된 자료에서 답을 확인할 수 없다는 정보 한계 안내로 제품이나 매출에 관한 구체적 사실을 주장하지 않는다."}
+{"lid": "b825f9a3c4", "label": "supported", "passage": 5, "reason": "문단 5는 인쇄회로기판 제조 사업부문의 블라인드 비아홀 제조공법 특허 취득일을 2002년 6월 27일로 제시한다."}
+{"lid": "66f786920f", "label": "contradicted", "passage": 5, "reason": "문단 5는 해당 특허를 2002년 6월 27일 취득했다고 명시하여 취득하지 않았다는 주장을 반박한다."}
+{"lid": "6c29ddb1c3", "label": "no_evidence", "passage": null, "reason": "제공된 문단에는 연결 매출에서 항공운송 사업부문이 차지하는 비중이 제시되지 않는다."}
+{"lid": "6146550d61", "label": "non_claim", "passage": null, "reason": "뒤에 제시할 사업부문별 비중을 소개하는 안내 문장이다."}
+{"lid": "7a94b345e7", "label": "contradicted", "passage": 7, "reason": "문단 7은 인쇄회로기판 제조 사업부문을 명시하므로 항공운송 사업부문만 운영한다는 주장을 반박한다."}
+{"lid": "e0d523da90", "label": "no_evidence", "passage": null, "reason": "제공된 문단에는 제주항공의 주력 기재나 저비용항공사 여부에 관한 정보가 없다."}
+{"lid": "a3a2eab2b8", "label": "no_evidence", "passage": null, "reason": "인쇄회로기판 제조 사업부문의 연결 매출 비중이 0%라는 근거가 제시되지 않는다."}
+{"lid": "a8ff9fd852", "label": "no_evidence", "passage": null, "reason": "문단 8의 2,214,259천원은 유형자산 표의 합계이며 2025년 연결 매출액은 제시되지 않는다."}
+{"lid": "cf692b0787", "label": "supported", "passage": 8, "reason": "문단 8은 종속회사가 리스 계약으로 Airbus A320-200 3대를 추가 도입하여 총 9대를 운용한다고 명시한다."}
+{"lid": "32000f113b", "label": "no_evidence", "passage": null, "reason": "항공권 판매 방식과 항공사 전략은 제시되지만 대형 항공사에서 항공권을 매입한다는 근거는 없다."}
+{"lid": "35f936be9b", "label": "contradicted", "passage": 6, "reason": "문단 6의 당기말 차입금총계는 186,597,678로 주장한 192,415,300과 다르다."}
+{"lid": "cdfbd56700", "label": "supported", "passage": 6, "reason": "문단 6의 자본관리 표는 당기말 차입금총계를 186,597,678로 제시한다."}
+{"lid": "ab86d3b001", "label": "no_evidence", "passage": null, "reason": "문단 5는 당기말·전기말 시장성 있는 금융상품이 없다고 명시하지만 가격위험 발생 가능성이 낮다는 결론은 제시하지 않는다."}
+{"lid": "bebac984d3", "label": "contradicted", "passage": 2, "reason": "문단 2는 코스닥 상장과 매매 개시일을 2004년 5월 14일로 명시하여 2007년이라는 주장과 다르다."}
+{"lid": "be98ae9e0e", "label": "no_evidence", "passage": null, "reason": "문단 5는 가격위험 노출을 언급하지만 이를 연결회사의 주요 위험 중 하나라고 명시하지 않는다."}
+{"lid": "ca80d5f6f5", "label": "supported", "passage": 2, "reason": "문단 2는 디에이피 지배기업이 2004년 5월 14일 코스닥시장에 상장되어 매매가 개시되었다고 명시한다."}
+{"lid": "c51f8e768a", "label": "no_evidence", "passage": null, "reason": "문단 6의 특허 목록은 디에이피 보고서의 내용이며 심텍의 특허 취득에 관한 근거는 없다."}
+{"lid": "ac47f196ba", "label": "supported", "passage": 6, "reason": "문단 6은 차량용안테나 피시비 제조방법 특허의 취득일을 2018년 8월 22일로 제시한다."}
+{"lid": "4b18b2cc15", "label": "no_evidence", "passage": null, "reason": "제공된 문단에는 2020년·2021년 연구개발비용이나 그 증가율이 제시되지 않는다."}
+{"lid": "384b85416f", "label": "no_evidence", "passage": null, "reason": "연구개발비용의 최근 규모나 기간별 변화에 관한 수치 또는 설명이 없다."}
+{"lid": "bdfc35859b", "label": "no_evidence", "passage": null, "reason": "매출액 대비 연구개발비용 비율의 기간별 변화에 관한 근거가 없다."}
+{"lid": "25b7faad00", "label": "no_evidence", "passage": null, "reason": "제공된 문단에는 2020년·2021년 연구개발비용 비율이나 증가율이 제시되지 않는다."}

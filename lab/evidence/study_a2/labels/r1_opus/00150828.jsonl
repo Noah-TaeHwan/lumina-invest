@@ -1,0 +1,27 @@
+{"lid": "a828603005", "label": "supported", "passage": 1, "reason": "문단 1: 종합건설업체로서 토목, 건축/주택, 플랜트 3개 분야 진출"}
+{"lid": "2e3ce944ad", "label": "supported", "passage": 1, "reason": "문단 1 문장과 사실상 동일(설립 1959년 9월, 주 사업목적, 3개 분야)"}
+{"lid": "0fb0b13d56", "label": "contradicted", "passage": 1, "reason": "문단 1은 3개 분야라고 하는데 주장은 열한 개"}
+{"lid": "5e9cec3dbf", "label": "supported", "passage": 1, "reason": "문단 1: 발주처에 따라 공공부문과 민간부문 2개 부문"}
+{"lid": "d9159617b9", "label": "no_evidence", "passage": null, "reason": "문단 8은 회사 전체가 업무/상업·토목/환경·SOC 등에 참여한다고 할 뿐 플랜트 부문의 활동으로 말하지 않음"}
+{"lid": "0716b2cd58", "label": "supported", "passage": 8, "reason": "문단 8: 토목·건축공사, 주택건설과 판매를 주 사업목적으로 1959년 9월 설립"}
+{"lid": "c407eebe7e", "label": "no_evidence", "passage": null, "reason": "주택건설·판매는 회사의 주 사업목적으로만 나오며 건축/주택 부문의 주 수행 업무로 서술한 문단 없음"}
+{"lid": "bfed891817", "label": "supported", "passage": 2, "reason": "문단 2: 토목부문은 대부분이 SOC관련 공사"}
+{"lid": "f08a8852b6", "label": "supported", "passage": 8, "reason": "문단 8: 크게 토목, 건축/주택, 플랜트의 3개 분야"}
+{"lid": "efb1ee42a5", "label": "contradicted", "passage": 8, "reason": "문단 8은 1959년 9월 설립, 주장은 1972년 9월"}
+{"lid": "63b8c28102", "label": "non_claim", "passage": null, "reason": "뒤 내용을 예고하는 도입 문장으로 사실 주장 없음"}
+{"lid": "eab8a8f79c", "label": "supported", "passage": 8, "reason": "본문 사실(1959년 9월 설립, 주 사업목적, 3개 분야)은 문단 8이 모두 지지하며 앞의 항목명은 사실 주장이 아님"}
+{"lid": "5131ff10f2", "label": "supported", "passage": 8, "reason": "문단 8: 발주처에 따라 공공부문과 민간부문 2개 부문"}
+{"lid": "7cf5b30344", "label": "supported", "passage": 8, "reason": "문단 8: 발주처에 따라 공공부문과 민간부문 2개 부문"}
+{"lid": "86bcc620b1", "label": "no_evidence", "passage": null, "reason": "민간건축 매출 금액·비중을 말한 문단 없음"}
+{"lid": "fb30462599", "label": "supported", "passage": 6, "reason": "문단 6: 1977년 6월 25일 유가증권시장 상장되어 매매 개시"}
+{"lid": "73f559fd2f", "label": "supported", "passage": 8, "reason": "문단 8: 주 사업목적과 토목, 건축/주택, 플랜트 3개 분야 진출"}
+{"lid": "23ba523f00", "label": "no_evidence", "passage": null, "reason": "문단 6의 상장일은 진흥기업 것이며 한신공영에 관한 문단 없음"}
+{"lid": "c84de12fee", "label": "contradicted", "passage": 8, "reason": "문단 8은 제강사 고시단가가 동결되었다고 함"}
+{"lid": "9f40f3384a", "label": "supported", "passage": 8, "reason": "문단 8 원재료 표에 레미콘과 철근이 원재료로 제시됨"}
+{"lid": "978116a88c", "label": "supported", "passage": 8, "reason": "문단 8: 철스크랩 가격 보합세 속 제강사 고시단가 동결"}
+{"lid": "b8270bfc13", "label": "no_evidence", "passage": null, "reason": "당기말 42,596,250천원은 문단 8에 있으나 76.5% 감소는 문단에 없는 계산값(실제 계산 약 77.3%)"}
+{"lid": "fe49a70c1c", "label": "supported", "passage": 8, "reason": "문단 8: 금융보증계약 당기말 42,596,250천원, 전기말 187,978,977천원"}
+{"lid": "1c3e6e34cc", "label": "no_evidence", "passage": null, "reason": "농심에 관한 문단 없음"}
+{"lid": "7229f361d4", "label": "supported", "passage": 4, "reason": "문단 4: 당기말 994백만원이 금융부채 및 충당부채로 인식"}
+{"lid": "3ce070b43b", "label": "contradicted", "passage": 4, "reason": "문단 4는 당기말 994백만원, 주장은 815백만원"}
+{"lid": "2ab2cdfd45", "label": "supported", "passage": 1, "reason": "문단 1: 비경상적 중요계약 없음, 연구개발 별도 조직 없음"}

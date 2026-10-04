@@ -1,0 +1,31 @@
+{"lid": "e3ce48ecbe", "label": "supported", "passage": 5, "reason": "주요종속회사 서울신용평가(주)는 「자본시장법」에 따른 신용평가업을 영위한다고 명시"}
+{"lid": "2870dcb264", "label": "supported", "passage": 5, "reason": "신용조사업은 「신용정보법」에 근거하며 당사가 신용조사업 업무를 수행한다고 명시"}
+{"lid": "91d8485f21", "label": "supported", "passage": 5, "reason": "신용조사업 정의(신용도·재산상태·영업실적·재무제표 조사·분석, 부실채권 방지·회수)와 일치"}
+{"lid": "878f06ef88", "label": "contradicted", "passage": 2, "reason": "문단은 본사 및 2개 지점으로 안내한다고 해 지점 11곳과 다름"}
+{"lid": "d50dcf020e", "label": "supported", "passage": 2, "reason": "기업신용등급제공업무는 기업 대상 본사 및 2개 지점을 통해 안내"}
+{"lid": "2325905129", "label": "supported", "passage": 5, "reason": "「자산유동화법」에 따른 자산관리위탁계약으로 유동화자산 관리 업무 수행 명시"}
+{"lid": "540a45d6ab", "label": "supported", "passage": 3, "reason": "개인신용평가 전략 문장과 동일"}
+{"lid": "94fe13f877", "label": "supported", "passage": 6, "reason": "당사는 2025년 기술분석보고서 발간으로 기술·산업 분석 역량 강화"}
+{"lid": "2c177e0214", "label": "non_claim", "passage": null, "reason": "목록을 여는 도입 문장으로 사실 주장 아님"}
+{"lid": "6f1888f99e", "label": "contradicted", "passage": 6, "reason": "문단은 기술분석보고서 발간 연도를 2025년으로 기재해 2021년과 다름"}
+{"lid": "b789ffa0df", "label": "supported", "passage": 3, "reason": "채권추심업의 우량채권 수주·회수율 제고·진척 통지·고객서비스 지향 내용과 일치"}
+{"lid": "ff4ea40322", "label": "supported", "passage": 6, "reason": "부동산 정보 조회·기업 실명 확인·개인사업자 스코어 등 부가 정보 제공으로 경쟁력 확보"}
+{"lid": "218f8b2bbe", "label": "supported", "passage": 5, "reason": "기업 부가가치세정보·재무정보를 제공하는 기업거래정보조회서비스 상품 출시"}
+{"lid": "2d02594f09", "label": "supported", "passage": 5, "reason": "서울신용평가(주)의 신용평가업은 「자본시장법」에 의해 영업 인가 및 업무전반 감독을 받음"}
+{"lid": "618f4ccbd1", "label": "non_claim", "passage": null, "reason": "문단 머리표 조각으로 사실 주장 아님"}
+{"lid": "669e07b6d2", "label": "supported", "passage": 2, "reason": "문단 2의 해당 문장들과 동일"}
+{"lid": "06892dd0ae", "label": "contradicted", "passage": 5, "reason": "주요종속회사는 서울신용평가(주)로 기재되어 대한신용평가(주)와 다름"}
+{"lid": "b5f0aefaad", "label": "supported", "passage": 6, "reason": "잘린 문장이나 내용은 부가 정보 제공 문장과 동일"}
+{"lid": "2a4be6ddd2", "label": "non_claim", "passage": null, "reason": "문단 머리표 조각으로 사실 주장 아님"}
+{"lid": "4fbfabeae5", "label": "supported", "passage": 2, "reason": "개인신용평가 전략과 기업신용등급제공·기술신용평가 안내 문장과 동일"}
+{"lid": "1fb9d5702b", "label": "no_evidence", "passage": null, "reason": "유형자산 순장부금액을 다루는 문단 없음"}
+{"lid": "6a2babd6d0", "label": "no_evidence", "passage": null, "reason": "유형자산 항목 구성을 다루는 문단 없음"}
+{"lid": "5bda83b418", "label": "contradicted", "passage": 6, "reason": "문단은 외부차입을 최소화하는 정책을 유지한다고 명시"}
+{"lid": "a6da2d0bee", "label": "supported", "passage": 6, "reason": "연결회사는 외부차입을 최소화하는 정책을 유지"}
+{"lid": "b42b05dd76", "label": "supported", "passage": 6, "reason": "국제적인 영업활동을 하지 않아 외환위험에 중요하게 노출되어 있지 않음"}
+{"lid": "d72ce8b280", "label": "supported", "passage": 4, "reason": "이자율 변동 위험의 발생 원천과 금리동향 모니터링 문장과 동일"}
+{"lid": "4cf0437823", "label": "no_evidence", "passage": null, "reason": "삼성전자에 대한 문단 없음"}
+{"lid": "af57cb3b42", "label": "supported", "passage": 6, "reason": "외환위험 미노출과 외화표시 금융자산 미보유 문장과 동일"}
+{"lid": "f79b21f286", "label": "contradicted", "passage": 4, "reason": "문단은 수요 급증 기간을 3월말부터 6월말까지로 기재해 8월말과 다름"}
+{"lid": "696ccb4795", "label": "no_evidence", "passage": null, "reason": "사모투자 출자·투자 약정을 다루는 문단 없음"}
+{"lid": "db72007e3b", "label": "supported", "passage": 4, "reason": "법인 결산 종료 후 3월말부터 6월말까지 수요 급증"}

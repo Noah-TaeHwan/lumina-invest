@@ -1,0 +1,19 @@
+{"lid": "c4cea0d768", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 LG화학의 사업에 관한 근거가 없다."}
+{"lid": "8750a1765b", "label": "supported", "passage": 2, "reason": "문단 2는 당사가 2023년 6월 1일 인적분할된 신설법인임을 명시한다."}
+{"lid": "2cee5d7e39", "label": "supported", "passage": 2, "reason": "문단 2의 2023년 6월 1일 인적분할된 신설법인이라는 설명과 일치한다."}
+{"lid": "f1f843a0ff", "label": "supported", "passage": 2, "reason": "문단 2는 1960년대에 국내 민간 최초로 50톤 용광로를 운영했다고 밝힌다."}
+{"lid": "2131729a19", "label": "contradicted", "passage": 2, "reason": "문단 2는 해당 시기 국내 민간 최초로 운영한 용광로가 80톤이 아니라 50톤이라고 명시한다."}
+{"lid": "18907c74c3", "label": "supported", "passage": 2, "reason": "문단 2는 봉강, 형강, 후판을 동국제강의 주력 제품으로 명시한다."}
+{"lid": "9fd3bd2524", "label": "contradicted", "passage": 6, "reason": "문단 6의 철강부문 매출액은 3,203,431백만원으로, 주장한 2,872,073백만원과 다르다."}
+{"lid": "0c7406676b", "label": "no_evidence", "passage": null, "reason": "문단 8의 1,989,735백만원은 2025년 봉형강 내수 매출이며, 2021년 해당 매출은 제시되지 않았다."}
+{"lid": "4ac5f4f5e2", "label": "supported", "passage": 1, "reason": "문단 1은 2025년 매출 합계를 3,203,431백만원으로 제시한다."}
+{"lid": "66a9d479e2", "label": "supported", "passage": 8, "reason": "문단 8의 2025년 봉형강 내수 매출은 1,989,735백만원이다."}
+{"lid": "21dede73d6", "label": "no_evidence", "passage": null, "reason": "문단 7의 77.4%는 후판 가동률이며, 냉연강판 설비 가동률의 근거는 없다."}
+{"lid": "eed7ddedf7", "label": "supported", "passage": 7, "reason": "문단 7은 2025년 봉형강과 후판의 평균 가동률을 각각 66.2%와 77.4%로 제시한다."}
+{"lid": "4d02b18e72", "label": "supported", "passage": 7, "reason": "문단 7은 2025년 후판 설비의 평균 가동률을 77.4%로 제시한다."}
+{"lid": "1d1323f255", "label": "supported", "passage": 2, "reason": "문단 2는 특정 위험을 회피하기 위해 파생상품을 이용한다고 명시한다."}
+{"lid": "598518a3fe", "label": "no_evidence", "passage": null, "reason": "문단 2는 특정 위험 회피용 파생상품 이용을 밝히지만, 그 용도를 외환위험 관리로 특정하지 않는다."}
+{"lid": "e846630f6f", "label": "contradicted", "passage": 2, "reason": "문단 2는 특정 위험을 회피하기 위해 파생상품을 이용한다고 명시하여 이용하지 않는다는 주장과 반대다."}
+{"lid": "d9f837ba46", "label": "supported", "passage": 2, "reason": "문단 2에 삼성생명보험과의 페럼타워 및 대지 양수 계약, 2025년 7월 25일 체결일, 645,060,000,000원 금액이 모두 명시되어 있다."}
+{"lid": "bc592d7a44", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 현대자동차의 생산 및 판매에 관한 근거가 없다."}
+{"lid": "1f722ba1f4", "label": "supported", "passage": 2, "reason": "문단 2는 2025년 주요 계약의 상대방을 삼성생명보험 주식회사, 계약금액을 645,060,000,000원으로 명시한다."}

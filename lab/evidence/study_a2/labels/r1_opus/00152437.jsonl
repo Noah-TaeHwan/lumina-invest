@@ -1,0 +1,24 @@
+{"lid": "9bb9ec1db8", "label": "supported", "passage": 5, "reason": "문단 5가 2025년 기말 매출 중 약 32.2%가 국내외 교체용 제품이라고 명시"}
+{"lid": "abfac06721", "label": "no_evidence", "passage": null, "reason": "32.2%는 2025년 기말 수치이며 2019년 말 비중을 말하는 문단은 없음(기간이 달라 반박 아님)"}
+{"lid": "777a6b4614", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 설립 목적이나 주력 사업을 말하는 내용이 없음"}
+{"lid": "e78ab72812", "label": "no_evidence", "passage": null, "reason": "신조용/교체용 구분과 고객별 공급을 한 문단이 모두 지지하지 않음(문단 3·4를 합쳐도 신조용 고객 공급은 명시 안 됨)"}
+{"lid": "37dc1f25a3", "label": "supported", "passage": 4, "reason": "문단 4: 교체용 제품은 동일 타입이라도 신조선용보다 고가에 판매"}
+{"lid": "93802efc0a", "label": "no_evidence", "passage": null, "reason": "문단은 실린더라이너 이야기이며 피스톤링에 대한 내용은 없음"}
+{"lid": "2bcf59992c", "label": "contradicted", "passage": 6, "reason": "문단 6: 가공부문 소재는 전량 주물부문에서 조달"}
+{"lid": "c31536806c", "label": "non_claim", "passage": null, "reason": "문단 머리표 조각으로 사실 주장이 아님"}
+{"lid": "004924a8dd", "label": "supported", "passage": 2, "reason": "문단 2의 교체용 판매 확대 전략 문장을 그대로 옮김(끝이 잘렸으나 내용 일치)"}
+{"lid": "e972be7fb1", "label": "supported", "passage": 2, "reason": "문단 2의 엔진생산업체 등 기존 고객과의 유대강화 문장과 일치"}
+{"lid": "4ed08a2b3a", "label": "supported", "passage": 2, "reason": "문단 2의 판매전략(소재부터 품질 차별화, 일괄생산체제) 문장과 일치"}
+{"lid": "1fe5525d27", "label": "supported", "passage": 6, "reason": "문단 6: 가공부문 소재는 전량 주물부문에서 조달"}
+{"lid": "ae59068f3a", "label": "no_evidence", "passage": null, "reason": "삼성전자에 대한 문단이 없음"}
+{"lid": "a05ca4355f", "label": "supported", "passage": 5, "reason": "문단 5 (*2)와 동일한 문장"}
+{"lid": "94a402bd61", "label": "supported", "passage": 5, "reason": "문단 5 (*1): 실린더라이너 사업은 주물·가공·기타부문으로 구분"}
+{"lid": "ca0f49b5ee", "label": "supported", "passage": 5, "reason": "문단 5 (*2)의 주물부문 매출액 산정 방법과 동일"}
+{"lid": "919a003283", "label": "supported", "passage": 5, "reason": "문단 5 (*1)과 동일한 문장"}
+{"lid": "080cfb3469", "label": "non_claim", "passage": null, "reason": "정보가 제공되지 않았다는 답변 불가 안내로 회사에 대한 사실 주장이 아님"}
+{"lid": "c25e9d39f7", "label": "contradicted", "passage": 7, "reason": "문단 7은 교환 주기를 5~7년으로 명시해 5~10년과 다름"}
+{"lid": "fdd7062ee0", "label": "supported", "passage": 7, "reason": "문단 7: 내벽 마모 정도에 따라 5~7년 주기로 교환하는 고가의 소모품"}
+{"lid": "2b2d6055ba", "label": "supported", "passage": 5, "reason": "문단 5: 국내 조선업은 2021년을 기점으로 코로나 이전 수준 회복"}
+{"lid": "12c69b995a", "label": "supported", "passage": 2, "reason": "문단 2 판매전략 문장과 일치"}
+{"lid": "c349865f82", "label": "contradicted", "passage": 5, "reason": "문단 5는 회복 시점을 2021년으로 명시해 2017년과 다름"}
+{"lid": "4b61a05a55", "label": "non_claim", "passage": null, "reason": "내용 없는 도입 문장으로 사실 주장이 아님"}

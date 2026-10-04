@@ -1,0 +1,25 @@
+{"lid": "26dfb7bb6b", "label": "contradicted", "passage": 5, "reason": "문단 5는 생물공학연구소 설립 시점을 2010년 2월로 명시하여 2016년 2월이라는 주장과 다르다."}
+{"lid": "9ff21c2af8", "label": "no_evidence", "passage": null, "reason": "생산·사육 시설과 생체 가격 요인은 제시되지만 육용오리를 지역 도축장에서 조달한다는 내용은 없다."}
+{"lid": "d7da7991c7", "label": "supported", "passage": 4, "reason": "문단 4는 도압, 신선정육, 훈제육, 우모 및 HMR 생산 시설을 보유한다고 명시한다."}
+{"lid": "bc0721723f", "label": "supported", "passage": 5, "reason": "문단 5는 품질관리와 신제품 개발 목적의 생물공학연구소를 2010년 2월 설립했다고 명시한다."}
+{"lid": "5b9caca058", "label": "supported", "passage": 4, "reason": "문단 4는 종속회사 제이디팜 소유의 보성·김제 농장과 거창 부화장 등 오리사육·종란 부화 시설을 명시한다."}
+{"lid": "61fab174d4", "label": "no_evidence", "passage": null, "reason": "훈제 오리다리 개발·상품화는 제시되지만 훈제 제품별 매출액이나 매출 순위는 없다."}
+{"lid": "f9c51145dd", "label": "no_evidence", "passage": null, "reason": "문단 3의 우모 수출 경로에는 거위털이라는 명시가 없고, 거위털을 해당 방식으로 수출한다는 근거도 없다."}
+{"lid": "5dc9880e7b", "label": "no_evidence", "passage": null, "reason": "문단 3은 우모의 가공·중개 수출 경로만, 문단 5는 오리털 수출만 제시하여 한 문단이 모든 사실을 지지하지 않는다."}
+{"lid": "e03c8bd357", "label": "no_evidence", "passage": null, "reason": "문단 1의 575,899,066원은 연구개발비이며 2025년 연결 매출액은 제시되지 않는다."}
+{"lid": "cb46130f21", "label": "no_evidence", "passage": null, "reason": "매출액 답변 문맥의 2025년 금액이나, 문단 1의 해당 금액은 연구개발비로 연결 매출액의 근거가 아니다."}
+{"lid": "0322722d1f", "label": "no_evidence", "passage": null, "reason": "매출액 답변 문맥의 2024년 금액이나, 문단 1의 540,199,544원은 연구개발비로 연결 매출액의 근거가 아니다."}
+{"lid": "d735e6ded1", "label": "supported", "passage": 6, "reason": "문단 6은 오리 훈연제품 제조 방법에 관한 특허권의 권리자가 정다운이라고 명시한다."}
+{"lid": "35ee09c241", "label": "non_claim", "passage": null, "reason": "뒤에 나올 연도별 매출액 목록을 소개하는 문장으로 구체적인 금액이나 변화 내용을 주장하지 않는다."}
+{"lid": "4e5bae958b", "label": "no_evidence", "passage": null, "reason": "매출액 답변 문맥의 2023년 금액이나, 문단 1의 507,178,426원은 연구개발비로 연결 매출액의 근거가 아니다."}
+{"lid": "0d39148a09", "label": "contradicted", "passage": 6, "reason": "문단 6은 정다운을 오리 훈연제품 제조 방법 특허권의 권리자로 명시하여 미보유 주장과 반대다."}
+{"lid": "07e77f5900", "label": "no_evidence", "passage": null, "reason": "문단 4의 6.1%는 2025년 오리 도압수의 전년 대비 증가율이며 정다운 도압 공정 가동률은 제시되지 않는다."}
+{"lid": "c654e29b47", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 농심이나 신라면 제조·판매에 관한 내용이 없다."}
+{"lid": "75ed14a1c0", "label": "supported", "passage": 7, "reason": "문단 7은 정다운 생물공학연구소가 연구원 10명으로 구성되어 있다고 명시한다."}
+{"lid": "d775821a35", "label": "supported", "passage": 1, "reason": "문단 1은 국제 영업활동으로 특히 미국 달러화 관련 환율변동위험에 주로 노출된다고 명시한다."}
+{"lid": "73377b4911", "label": "supported", "passage": 6, "reason": "문단 6은 닭·오리 사육농장 500m 이내에서 가금가축 사육업 등록이 제한된다고 명시한다."}
+{"lid": "c6a839f08b", "label": "contradicted", "passage": 6, "reason": "문단 6은 가금가축 사육업 등록 제한 거리를 500m 이내로 명시하여 700m라는 주장과 다르다."}
+{"lid": "46d9400ef2", "label": "no_evidence", "passage": null, "reason": "문단 1의 0.30%는 2025년 연구개발비 비율이며 2018년 연구개발비 비율은 제시되지 않는다."}
+{"lid": "d8f8af1237", "label": "supported", "passage": 1, "reason": "문단 1의 연구개발비 합계 표에 2025년 금액이 575,899,066원으로 명시되어 있다."}
+{"lid": "cd25a5326d", "label": "supported", "passage": 1, "reason": "문단 1의 2025년 연구개발비 합계에 매출액 대비 비율 0.30%가 명시되어 있다."}
+{"lid": "9872acfb86", "label": "supported", "passage": 1, "reason": "문단 1은 2025년 연구개발비 합계와 매출액 대비 비율 0.30%를 함께 명시한다."}

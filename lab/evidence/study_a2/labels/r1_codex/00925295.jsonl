@@ -1,0 +1,30 @@
+{"lid":"fdd85aff65","label":"no_evidence","passage":null,"reason":"문단 5는 당사 소속 연예인을 열거하며 연결 종속회사 소속이라는 사실은 제시하지 않는다."}
+{"lid":"0a077ca463","label":"supported","passage":3,"reason":"소속 연예인의 방송·영화·광고 출연 등 활동에 따른 수익사업이라고 명시한다."}
+{"lid":"5b465bdfe8","label":"supported","passage":3,"reason":"당사가 배우·가수·예능인·스포츠맨 등 다양한 분야의 연예인 매니지먼트를 영위한다고 명시한다."}
+{"lid":"03b7dceac4","label":"supported","passage":3,"reason":"전기 중 인쇄사업을 중단하고 2024년 3분기부터 중단사업으로 분류했다고 명시한다."}
+{"lid":"f8e9d069ea","label":"no_evidence","passage":null,"reason":"연결 종속회사별 사업 내용이나 각 회사의 사업 배분은 제시되지 않는다."}
+{"lid":"980c15d4dd","label":"supported","passage":3,"reason":"사업의 개요에서 매니지먼트·인쇄·미디어콘텐츠 제작 사업을 구분하며 인쇄사업은 중단사업으로 표시한다."}
+{"lid":"e611cacaea","label":"no_evidence","passage":null,"reason":"현대자동차의 울산 공장 생산과 국내외 판매에 관한 내용은 없다."}
+{"lid":"adeba30d81","label":"no_evidence","passage":null,"reason":"82.36%는 문단 6의 엔터테인먼트 사업 총자산 비중이며 음악사업 매출 비중이나 2024년 3분기 기준은 제시되지 않는다."}
+{"lid":"cda93d0a9b","label":"no_evidence","passage":null,"reason":"미디어콘텐츠 제작 사업의 2024년 3분기 매출 비중 8.15%는 제시되지 않는다."}
+{"lid":"4c14bbd828","label":"non_claim","passage":null,"reason":"이어서 매출 유형별 비중을 제시하겠다는 도입·절차 안내 문장이다."}
+{"lid":"56a7af3821","label":"contradicted","passage":6,"reason":"엔터테인먼트 사업 총자산 비중은 82.36%·91.48%·93.27%로 제시되어 주장한 88.15%와 다르다."}
+{"lid":"15d219b0e7","label":"no_evidence","passage":null,"reason":"매니지먼트 사업의 2024년 3분기 매출 비중 9.49%는 제시되지 않는다."}
+{"lid":"1e72d7fda4","label":"no_evidence","passage":null,"reason":"매출 유형별 비중의 2024년 3분기 기준과 매니지먼트 사업이 최대 비중이라는 내용은 없다."}
+{"lid":"49447d5327","label":"supported","passage":6,"reason":"사업부문별 요약 재무현황에서 엔터테인먼트 사업의 총자산 비중 93.27%를 제시한다."}
+{"lid":"a16056cb6a","label":"no_evidence","passage":null,"reason":"음악사업의 최근 3년 내수 매출 수치나 증가 추이는 제시되지 않는다."}
+{"lid":"8535a02f12","label":"contradicted","passage":3,"reason":"정해인과 로운을 당사인 에프엔씨엔터 소속 배우로 명시하여 큐브엔터테인먼트 소속이라는 주장과 다르다."}
+{"lid":"4ae6a729cc","label":"non_claim","passage":null,"reason":"이어서 자산별 당기말 장부가액을 제시하겠다는 도입·절차 안내 문장이다."}
+{"lid":"7b94931d31","label":"no_evidence","passage":null,"reason":"90,739백만원은 문단 6의 엔터테인먼트 사업 총자산이며 사용권자산의 당기말 장부가액은 제시되지 않는다."}
+{"lid":"4f4489487b","label":"supported","passage":3,"reason":"당사 소속 유명 배우로 정해인과 로운을 명시한다."}
+{"lid":"6d26b3b3f8","label":"no_evidence","passage":null,"reason":"104,267백만원은 문단 6의 엔터테인먼트 사업 총자산이며 유형자산의 당기말 장부가액은 제시되지 않는다."}
+{"lid":"56ecb761bc","label":"supported","passage":8,"reason":"원화 외 통화로 표시된 거래에 환위험이 있으며 주된 통화가 JPY·USD라고 명시한다."}
+{"lid":"18c6f1eb48","label":"no_evidence","passage":null,"reason":"환율 5% 변동에 따른 법인세차감전순손익의 민감도나 1,870억원 영향은 제시되지 않는다."}
+{"lid":"c6a688a113","label":"contradicted","passage":8,"reason":"JPY·USD 등 원화 외 통화로 표시된 거래에 환위험이 노출되어 있다고 명시한다."}
+{"lid":"04c8014e58","label":"supported","passage":8,"reason":"원화 외 통화 거래에 환위험이 노출되며 주된 통화가 JPY·USD라고 명시한다."}
+{"lid":"b543d179e1","label":"no_evidence","passage":null,"reason":"아티스트 육성·매니지먼트 경험은 언급하지만 신인 발굴·육성을 위한 다양한 활동은 제시하지 않는다."}
+{"lid":"51dbcc708c","label":"supported","passage":6,"reason":"사업의 개요에서 미디어콘텐츠 제작 사업을 설명하고 드라마·영화 등의 콘텐츠 제작·공급을 명시한다."}
+{"lid":"a8b283895a","label":"no_evidence","passage":null,"reason":"문단 5는 피원하모니의 2020년 10월 데뷔를 언급하지만 회사가 최근 데뷔시켰다는 사실까지 지지하지 않는다."}
+{"lid":"f1dc4fe350","label":"no_evidence","passage":null,"reason":"삼성전자의 D램 생산과 전 세계 공급에 관한 내용은 없다."}
+{"lid":"9e5554a00e","label":"no_evidence","passage":null,"reason":"아티스트 육성·매니지먼트 경험은 제시하지만 이를 통한 신인 아티스트 발굴은 확인되지 않는다."}
+{"lid":"d9ce9bc065","label":"supported","passage":5,"reason":"종속회사 FNC스토리를 통해 피원하모니 프로모션 영화를 제작하며 영화제작사업에 본격 진출했다고 명시한다."}

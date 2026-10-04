@@ -1,0 +1,22 @@
+{"lid": "adfa7f3767", "label": "supported", "passage": 2, "reason": "문단 2가 당사가 커피유통사업 부문을 영위한다고 밝히며, 주장은 그 부문 이름을 풀어 쓴 것이다"}
+{"lid": "4dc90b4f8b", "label": "no_evidence", "reason": "오리온 관련 내용은 문단에 없다", "passage": null}
+{"lid": "27da872d16", "label": "supported", "passage": 2, "reason": "문단 2: 엔터테인먼트사업부문이 속한 미디어 콘텐츠 사업은 수요자 기호 변화가 빠르고 경기에 민감하다"}
+{"lid": "b09f6d24ee", "label": "supported", "passage": 2, "reason": "문단 2가 자원개발 사업부문을 언급하며, 주장은 그 부문 이름을 풀어 쓴 것이다"}
+{"lid": "e1ed212f7a", "label": "supported", "passage": 2, "reason": "문단 2: 엔터테인먼트사업부문이 속한 미디어 콘텐츠 사업"}
+{"lid": "c52ae9fb49", "label": "supported", "passage": 2, "reason": "문단 2가 커피유통사업, 엔터테인먼트사업, 자원개발 사업부문을 모두 당사 부문으로 열거한다"}
+{"lid": "e3a6fbe517", "label": "supported", "passage": 1, "reason": "문단 1: FIS 기준 2023년 세계 커피 시장 1,131억 5,260만 달러, 전년 대비 9.0% 증가"}
+{"lid": "b8d495aff5", "label": "contradicted", "passage": 1, "reason": "문단 1은 증가율을 13.7%가 아니라 9.0%로 적고 있다"}
+{"lid": "1f2c0ba54a", "label": "supported", "passage": 1, "reason": "문단 1 표: 커피 부문 주요 사업은 커피, 커피머신 등의 판매"}
+{"lid": "0bf244f32e", "label": "non_claim", "passage": null, "reason": "정보가 없다는 면책성 문장이다"}
+{"lid": "3bbc7ac158", "label": "no_evidence", "passage": null, "reason": "문단 6의 4조 원은 2022년 수치이고, 2019년 수치는 어느 문단에도 없다"}
+{"lid": "6e18a6f824", "label": "supported", "passage": 6, "reason": "문단 6: 2022년 국내 디지털 크리에이터 미디어 산업 매출액 4조"}
+{"lid": "231e8314a8", "label": "supported", "passage": 4, "reason": "문단 4: 미디어 콘텐츠 산업은 수요자 기호 변화가 빠르고 경기에 민감하며, 에이전시 사업은 그 업황에 영향을 받는다"}
+{"lid": "3f0f086816", "label": "supported", "passage": 1, "reason": "문단 1 표: 커피 부문은 커피, 커피머신 등을 판매한다"}
+{"lid": "bccef18f11", "label": "contradicted", "passage": 1, "reason": "문단 1 표에서 커피·커피머신 판매는 건설이 아니라 커피 부문의 사업이며, 건설 부문은 없다"}
+{"lid": "9b7dd21d76", "label": "no_evidence", "passage": null, "reason": "원두를 어디서 매입하는지는 어느 문단에도 나오지 않는다"}
+{"lid": "388d0d88c7", "label": "supported", "passage": 4, "reason": "문단 4: 자원개발 사업부문은 국제 유가의 영향을 받아 거시경제 상황에 따라 부정적 영향을 받을 수 있다"}
+{"lid": "cc42d9c5b4", "label": "contradicted", "passage": 5, "reason": "문단 5는 30,000,000 USD를 지불하고 지분 90%를 인수했다고 적고 있다"}
+{"lid": "5d7b71f220", "label": "supported", "passage": 5, "reason": "문단 5: 2007년 Caliente 유가스전에 30,000,000 USD를 지불하고 지분 90%를 인수"}
+{"lid": "c8288fd546", "label": "no_evidence", "passage": null, "reason": "농심 관련 내용은 문단에 없다"}
+{"lid": "5f9c946e27", "label": "non_claim", "passage": null, "reason": "정보가 없다는 면책성 문장이다"}
+{"lid": "da62599e11", "label": "supported", "passage": 3, "reason": "문단 3: 커피 시장은 내수 부진과 가계소득 감소로 소비심리가 위축된 상황에서도 꾸준히 성장했다"}

@@ -1,0 +1,22 @@
+{"lid": "5d19986770", "label": "supported", "passage": 4, "reason": "문단 4: '25년말 기준 총 117개 품목"}
+{"lid": "abd5f0df9e", "label": "supported", "passage": 4, "reason": "문단 4: 다양한 치료영역 전문의약품 개발과 천연물 유래 신약·저분자·개량신약·퍼스트제네릭 연구"}
+{"lid": "b081567644", "label": "supported", "passage": 4, "reason": "문단 4: 완제의약품 중 전문의약품 위주로 사업 영위"}
+{"lid": "c051c48161", "label": "no_evidence", "passage": null, "reason": "문단은 2025년말 117개만 말하며 2019년말 품목 수는 없음(기간이 달라 반박도 아님)"}
+{"lid": "06a5b03ff6", "label": "supported", "passage": 4, "reason": "문단 4: CMO 사업도 병행"}
+{"lid": "cf2b3193b5", "label": "supported", "passage": 4, "reason": "문단 4: 순환기용제 46.8%, 당뇨병용제 10.7%"}
+{"lid": "89a2c00c47", "label": "no_evidence", "passage": null, "reason": "문단 3은 대표 품목만 나열하고 매출액이 가장 크다는 근거는 없음"}
+{"lid": "22990cddd2", "label": "contradicted", "passage": 3, "reason": "문단 3의 순환기용제 대표 품목은 세자르정·카덴자정·에스올정·크레지정으로 아토젠정이 아님"}
+{"lid": "8a73d6bdd8", "label": "supported", "passage": 3, "reason": "문단 3: 순환기용제 대표 품목 세자르정, 카덴자정 등"}
+{"lid": "08877a2e92", "label": "supported", "passage": 8, "reason": "문단 8: 순환기용제(고혈압 및 고지혈증 치료제)에서 매출의 46.8%"}
+{"lid": "399628ef9a", "label": "supported", "passage": 8, "reason": "문단 8: 순환기용제 46.8%, CMO 11.4%('25년 기준 서술)"}
+{"lid": "d07e6fe88e", "label": "contradicted", "passage": 8, "reason": "문단 8은 순환기용제가 매출의 46.8%를 차지한다고 명시"}
+{"lid": "8168e950a8", "label": "supported", "passage": 5, "reason": "문단 5: 인천공장 정제, 타정기 9대"}
+{"lid": "2bf72310da", "label": "no_evidence", "passage": null, "reason": "문단 2의 가동율 20.86/21.31/31.05%는 정제 행으로 확인되지 않음(사면충전 앞 행), 정제 가동률 근거 없음"}
+{"lid": "4e04808efd", "label": "no_evidence", "passage": null, "reason": "셀트리온에 관한 문단 없음"}
+{"lid": "43bec538c3", "label": "no_evidence", "passage": null, "reason": "부채비율 관련 문단 없음"}
+{"lid": "3ddc58ae3c", "label": "non_claim", "passage": null, "reason": "정보 미제공을 알리는 면책성 문장"}
+{"lid": "493929cc16", "label": "contradicted", "passage": 7, "reason": "문단 7: CMO 거래처는 44개"}
+{"lid": "56e3d1f562", "label": "supported", "passage": 7, "reason": "문단 7: 현재 44개 거래처와 CMO 거래"}
+{"lid": "33f50f4238", "label": "contradicted", "passage": 7, "reason": "문단 7: 중앙연구소는 1995년 인천 부평에 개소"}
+{"lid": "337a57d274", "label": "non_claim", "passage": null, "reason": "정보 미제공을 알리는 면책성 문장"}
+{"lid": "c72ec5cadb", "label": "supported", "passage": 7, "reason": "문단 7: 중앙연구소는 1995년 인천 부평에 개소"}

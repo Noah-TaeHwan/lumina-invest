@@ -1,0 +1,27 @@
+{"lid": "abb4f646ed", "label": "no_evidence", "passage": null, "reason": "이빅스가 빅데이터 플랫폼 시장 점유율을 넓힌다는 언급만 있고 빅데이터 플랫폼을 주력 사업으로 밝힌 문단은 없다"}
+{"lid": "f7893d17f8", "label": "supported", "passage": 2, "reason": "문단 2가 일본·중국·미국의 3개 종속회사를 통해 해외 사업을 한다고 명시한다"}
+{"lid": "fb49406014", "label": "supported", "passage": 2, "reason": "문단 2에 2025.12.1 계약, 2026.1.6 매각 완료, 2025 회계연도 중단영업 분류가 모두 있다"}
+{"lid": "997abb8c8d", "label": "contradicted", "passage": 2, "reason": "문단 2는 종속회사가 9곳이 아니라 3개라고 말한다"}
+{"lid": "39c4a9f69a", "label": "supported", "passage": 2, "reason": "문단 2가 신제품 우드페커를 대학교·대기업 제조 계열사에 공급하며 AI 분석 수요에 대응한다고 말한다"}
+{"lid": "2ee42beb40", "label": "contradicted", "passage": 8, "reason": "문단 8은 신시웨이를 2022가 아니라 2025 회계연도 재무제표에서 중단영업으로 분류했다고 말한다"}
+{"lid": "76d98b7176", "label": "supported", "passage": 2, "reason": "문단 2의 엑셈블 제안 및 이빅스·우드페커 동반 공급 전략 문장과 같은 내용이다"}
+{"lid": "8cfea7873d", "label": "no_evidence", "passage": null, "reason": "우드페커·엑셈블이 신제품으로 언급되지만 AI·빅데이터 플랫폼 부문의 주요 제품이 이 둘이라고 규정한 문단은 없다(이빅스도 함께 언급)"}
+{"lid": "9d8d2f625b", "label": "supported", "passage": 8, "reason": "문단 8이 2025 회계연도 재무제표에 신시웨이를 중단영업사업으로 분류했다고 말한다"}
+{"lid": "1e068a9802", "label": "contradicted", "passage": 6, "reason": "문단 6의 DB 성능관리 솔루션 MaxGauge 2025 별도 매출은 12,657백만원(28.60%)이며 11,021억 원은 문단 3의 2021년 DBMS 시장규모다"}
+{"lid": "02f6462c92", "label": "supported", "passage": 6, "reason": "문단 6의 MaxGauge 제품 상세 설명(실시간 감시·가동 정보 수집과 분석·DB 성능 관리)과 일치한다"}
+{"lid": "08f8891069", "label": "non_claim", "passage": null, "reason": "뒤의 내용을 안내하는 도입 문장으로 사실 주장이 아니다"}
+{"lid": "00611b3d13", "label": "no_evidence", "passage": null, "reason": "엑셈의 유지보수·컨설팅 매출액·비중을 밝힌 문단이 없고 12,840억은 문단 3의 시장규모 수치다"}
+{"lid": "77cdb4bbe2", "label": "no_evidence", "passage": null, "reason": "해당 설명은 문단 6에서 MaxGauge에 대한 것이며 옵스뷰라는 제품은 어느 문단에도 나오지 않는다"}
+{"lid": "bfe0ac6721", "label": "contradicted", "passage": 1, "reason": "문단 1은 통합 공급을 원하는 일부 고객사에 장비를 외부에서 수급해 매출하는 경우가 있다고 말한다"}
+{"lid": "7bdb01b895", "label": "supported", "passage": 1, "reason": "문단 1이 소프트웨어 개발 업체로 별도 원재료가 필요 없고 별도 생산 설비가 없다고 말한다"}
+{"lid": "7633206395", "label": "supported", "passage": 1, "reason": "문단 1의 문장과 동일하다"}
+{"lid": "4f6e6cc42a", "label": "supported", "passage": 1, "reason": "문단 1이 일부 고객사 요청 시 장비를 외부에서 수급해 매출하는 경우가 있다고 말한다"}
+{"lid": "db6286f42c", "label": "supported", "passage": 5, "reason": "문단 5가 파생상품 및 풋백옵션 등 거래 현황은 해당사항 없다고 말한다"}
+{"lid": "77861587db", "label": "supported", "passage": 5, "reason": "문단 5가 파생상품 및 풋백옵션 등 거래 현황은 해당사항 없다고 말한다"}
+{"lid": "bdfa045fc9", "label": "no_evidence", "passage": null, "reason": "현대자동차에 관한 문단이 없다"}
+{"lid": "ff719e8fd0", "label": "supported", "passage": 5, "reason": "문단 5 표의 제10기 경상연구개발비 9,050,873천원, 비율 16.80%와 일치한다"}
+{"lid": "2cb7266975", "label": "contradicted", "passage": 5, "reason": "문단 5는 제12기 매출액 대비 연구개발비 비율을 14.37%가 아니라 12.86%로 적는다"}
+{"lid": "d6ac8fd33a", "label": "non_claim", "passage": null, "reason": "뒤의 내용을 안내하는 도입 문장으로 사실 주장이 아니다"}
+{"lid": "32915c4f41", "label": "supported", "passage": 5, "reason": "문단 5 표의 제12기 경상연구개발비 6,140,782천원, 비율 12.86%와 일치한다"}
+{"lid": "768cdf92b2", "label": "supported", "passage": 5, "reason": "문단 5 표의 제12기 연구개발비/매출액 비율 12.86%와 일치한다"}
+{"lid": "ce3710d9cd", "label": "supported", "passage": 5, "reason": "문단 5 표의 제11기 경상연구개발비 7,930,045천원, 비율 12.95%와 일치한다"}

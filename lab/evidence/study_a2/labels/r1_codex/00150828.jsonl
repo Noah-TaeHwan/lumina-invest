@@ -1,0 +1,27 @@
+{"lid":"a828603005","label":"supported","passage":1,"reason":"문단 1은 종합건설업체로서 토목, 건축/주택, 플랜트의 3개 분야에 진출했다고 명시한다."}
+{"lid":"2e3ce944ad","label":"supported","passage":1,"reason":"문단 1에 주 사업목적, 1959년 9월 설립, 종합건설업체라는 성격과 3개 사업 분야가 모두 제시되어 있다."}
+{"lid":"0fb0b13d56","label":"contradicted","passage":1,"reason":"문단 1은 사업 분야가 3개라고 명시하므로 열한 개라는 주장과 다르다."}
+{"lid":"5e9cec3dbf","label":"supported","passage":1,"reason":"문단 1은 발주처에 따라 공공부문과 민간부문의 2개 부문으로 나눈다고 명시한다."}
+{"lid":"d9159617b9","label":"no_evidence","passage":null,"reason":"문단 8은 회사 전체의 참여 사업을 나열하지만 업무/상업시설, 토목/환경, SOC를 플랜트 부문의 사업으로 특정하지 않는다."}
+{"lid":"0716b2cd58","label":"supported","passage":8,"reason":"문단 8은 토목 및 건축공사, 주택건설과 판매를 주 사업목적으로 1959년 9월 설립되었다고 명시한다."}
+{"lid":"c407eebe7e","label":"no_evidence","passage":null,"reason":"문단 8에는 회사 전체의 주 사업목적과 사업 분야가 있으나 건축/주택 부문이 주택 건설과 판매를 주로 수행한다는 부문별 설명은 없다."}
+{"lid":"bfed891817","label":"supported","passage":2,"reason":"문단 2는 토목부문 공사의 대부분이 SOC 관련 공사라고 명시한다."}
+{"lid":"f08a8852b6","label":"supported","passage":8,"reason":"문단 8은 회사가 크게 토목, 건축/주택, 플랜트의 3개 분야에 진출한다고 명시한다."}
+{"lid":"efb1ee42a5","label":"contradicted","passage":8,"reason":"문단 8의 설립 시기는 1959년 9월이므로 1972년 9월이라는 주장과 다르다."}
+{"lid":"63b8c28102","label":"non_claim","passage":null,"reason":"매출 금액과 비중을 이어서 제시하겠다는 안내 문장으로 구체적인 사실을 주장하지 않는다."}
+{"lid":"eab8a8f79c","label":"supported","passage":8,"reason":"문단 8이 1959년 9월 설립, 주 사업목적, 종합건설업체라는 성격과 3개 사업 분야를 모두 지지한다."}
+{"lid":"5131ff10f2","label":"supported","passage":8,"reason":"문단 8은 발주처에 따라 공공부문과 민간부문의 2개 부문으로 나눈다고 명시한다."}
+{"lid":"7cf5b30344","label":"supported","passage":8,"reason":"문단 8은 발주처에 따라 공공부문과 민간부문의 2개 부문으로 나눈다고 명시한다."}
+{"lid":"86bcc620b1","label":"no_evidence","passage":null,"reason":"제시된 문단에는 당기 민간건축 매출액이나 전체 매출 대비 비중이 없어 50% 이상이라는 추정을 지지하지 못한다."}
+{"lid":"fb30462599","label":"supported","passage":6,"reason":"문단 6은 진흥기업 주식이 1977년 6월 25일 유가증권시장에 상장되어 매매가 개시되었다고 명시한다."}
+{"lid":"73f559fd2f","label":"supported","passage":8,"reason":"문단 8에 토목 및 건축공사, 주택건설과 판매라는 주 사업목적과 종합건설업체의 3개 사업 분야가 명시되어 있다."}
+{"lid":"23ba523f00","label":"no_evidence","passage":null,"reason":"문단 6의 상장 및 매매 개시일은 진흥기업에 관한 것으로 한신공영의 상장 시기는 제시되어 있지 않다."}
+{"lid":"c84de12fee","label":"contradicted","passage":8,"reason":"문단 8은 철스크랩 가격의 보합세 속에서 제강사 고시단가가 동결되었다고 하므로 유지되지 않았다는 주장과 다르다."}
+{"lid":"9f40f3384a","label":"supported","passage":8,"reason":"문단 8의 원재료 및 생산설비 항목은 레미콘과 철근을 원재료 가격표의 품목으로 제시한다."}
+{"lid":"978116a88c","label":"supported","passage":8,"reason":"문단 8은 철스크랩 가격의 보합세 기조 속에서 제강사 고시단가가 동결되었다고 명시한다."}
+{"lid":"b8270bfc13","label":"no_evidence","passage":null,"reason":"문단 8의 당기말 최대노출금액은 일치하지만 76.5% 감소율은 문단에 없는 계산값이므로 전체 주장을 지지하지 못한다."}
+{"lid":"fe49a70c1c","label":"supported","passage":8,"reason":"문단 8은 금융보증계약 최대노출액을 당기말 42,596,250천원, 전기말 187,978,977천원으로 제시하여 감소를 지지한다."}
+{"lid":"1c3e6e34cc","label":"no_evidence","passage":null,"reason":"제시된 문단에는 농심이나 농심의 라면 및 스낵 생산·판매에 관한 내용이 없다."}
+{"lid":"7229f361d4","label":"supported","passage":4,"reason":"문단 4는 금융보증계약 관련 당기말 금융부채 및 충당부채 인식액을 994백만원으로 명시한다."}
+{"lid":"3ce070b43b","label":"contradicted","passage":4,"reason":"문단 4의 당기말 금융보증계약 관련 인식액은 994백만원이므로 815백만원이라는 주장과 다르다."}
+{"lid":"2ab2cdfd45","label":"supported","passage":1,"reason":"문단 1은 별도의 연구개발 조직·활동내역과 재무상태에 중요한 영향을 미치는 비경상적 중요계약이 없다고 명시한다."}

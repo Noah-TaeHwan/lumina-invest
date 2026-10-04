@@ -1,0 +1,33 @@
+{"lid": "8e09582033", "label": "supported", "passage": 1, "reason": "문단 1이 선재사업부문과 AT사업부문을 함께 기술한다"}
+{"lid": "f9be6f8f15", "label": "no_evidence", "passage": null, "reason": "단조사업부문은 문단에 없고 서울·부산·대구 판매 분담은 선재사업부문의 것이다"}
+{"lid": "c57c170123", "label": "supported", "passage": 1, "reason": "문단 1에 선재사업부문의 서울사무소·부산·대구영업소 지역별 판매 분담이 있다"}
+{"lid": "e8f0d4abb5", "label": "supported", "passage": 1, "reason": "문단 1 문장과 같다"}
+{"lid": "83e9b5eb21", "label": "supported", "passage": 1, "reason": "문단 1 문장과 같다"}
+{"lid": "6cfc55d621", "label": "contradicted", "passage": 6, "reason": "문단 6은 선재와 봉강이 여러 전방산업에 기초소재로 공급된다고 한다"}
+{"lid": "a9e3ea9c90", "label": "non_claim", "passage": null, "reason": "목록 도입 문장이다"}
+{"lid": "d4cdb21d99", "label": "supported", "passage": 6, "reason": "문단 6이 봉강의 전방산업 공급과 자동차산업 업황 영향을 말한다"}
+{"lid": "597758a92d", "label": "no_evidence", "passage": null, "reason": "품목별 매출 비중이 문단에 없다"}
+{"lid": "6ddbeb9670", "label": "no_evidence", "passage": null, "reason": "문단 6의 국산화 목적은 회사 설립 목적이지 자동차부품 제품 개발 목적이 아니다"}
+{"lid": "765e17f29a", "label": "no_evidence", "passage": null, "reason": "품목별 매출 비중이 문단에 없다"}
+{"lid": "ef03c97578", "label": "supported", "passage": 6, "reason": "문단 6과 같은 내용이다"}
+{"lid": "c829aaf34f", "label": "non_claim", "passage": null, "reason": "목록 도입 문장이다"}
+{"lid": "25f8a55aca", "label": "supported", "passage": 6, "reason": "문단 6이 선재의 전방산업 공급과 자동차산업 업황 영향을 말한다"}
+{"lid": "d2d0aaebc2", "label": "no_evidence", "passage": null, "reason": "품목별 매출 비중이 문단에 없다"}
+{"lid": "a1a6e5735b", "label": "no_evidence", "passage": null, "reason": "농심에 대한 문단이 없다"}
+{"lid": "47c6cee6d5", "label": "no_evidence", "passage": null, "reason": "해외 매출액 수치가 문단에 없다"}
+{"lid": "15afd705b0", "label": "supported", "passage": 7, "reason": "문단 7에 수출로 약 30여개국에 판매한다고 있다"}
+{"lid": "6f5afcabd8", "label": "no_evidence", "passage": null, "reason": "국내 매출액 수치가 문단에 없다"}
+{"lid": "e1b2407678", "label": "non_claim", "passage": null, "reason": "목록 도입 문장이다"}
+{"lid": "67ae742055", "label": "supported", "passage": 8, "reason": "문단 8에 대기·수질 배출오염물질을 법적기준치 대비 30% 이내로 관리한다고 있다"}
+{"lid": "2728981e07", "label": "supported", "passage": 4, "reason": "문단 4에 일부 물량을 해외에서 조달한다고 있다"}
+{"lid": "adb632fe89", "label": "supported", "passage": 4, "reason": "문단 4에 포스코·세아창원특수강 등 소수공급자에 의한 원재료 공급 구조가 있다"}
+{"lid": "91feab62fd", "label": "contradicted", "passage": 8, "reason": "문단 8은 45%가 아니라 30% 이내라고 한다"}
+{"lid": "4a9a7fbdac", "label": "non_claim", "passage": null, "reason": "정보 부재를 알리는 면책 문장이다"}
+{"lid": "8847f550d8", "label": "contradicted", "passage": 6, "reason": "문단 6은 TPM 도입을 2009년이 아니라 2004년이라고 한다"}
+{"lid": "68de5d4eb2", "label": "no_evidence", "passage": null, "reason": "문단 1은 투기 목적 파생거래를 하지 않는 정책만 말하고 헤지 계약 유무는 말하지 않는다"}
+{"lid": "18b85fa18b", "label": "supported", "passage": 6, "reason": "문단 6에 2004년부터 TPM 활동을 도입했다고 있다"}
+{"lid": "79423bc5a3", "label": "supported", "passage": 6, "reason": "문단 6에 2006년 ISO/TS 16949 인증이 있다"}
+{"lid": "db714c48ca", "label": "supported", "passage": 5, "reason": "문단 5에 고객 납기 준수를 최우선으로 단납기 생산 체제를 구축해 왔다고 있다"}
+{"lid": "1da5f5b413", "label": "no_evidence", "passage": null, "reason": "문단 5의 TPM은 전 임직원 활동이며 연구개발 조직에 대한 언급이 없다"}
+{"lid": "2cf5e8a61c", "label": "supported", "passage": 6, "reason": "문단 6 문장과 같은 내용이다"}
+{"lid": "2ccb5b5e49", "label": "no_evidence", "passage": null, "reason": "고려제강에 대한 문단이 없다"}

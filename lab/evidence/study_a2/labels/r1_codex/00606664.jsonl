@@ -1,0 +1,39 @@
+{"lid": "ada62d11fc", "label": "supported", "passage": 3, "reason": "문단 3은 연결회사의 사업을 전자부품소재·자동차부품소재·반도체소재의 세 부문으로 명시한다."}
+{"lid": "aeb9724d3a", "label": "supported", "passage": 3, "reason": "문단 3은 케이엔더블유와 종속회사로 이루어진 연결회사의 세 사업부문을 모두 제시한다."}
+{"lid": "edfdbc54fa", "label": "supported", "passage": 3, "reason": "문단 3에 생산시설 소재지로 경기도 파주시·울산광역시·중국·베트남이 모두 명시되어 있다."}
+{"lid": "21529d5dd6", "label": "contradicted", "passage": 3, "reason": "문단 3의 세 사업부문 중 해당 부문은 의료기기소재가 아니라 반도체소재이다."}
+{"lid": "2722f11e1a", "label": "supported", "passage": 3, "reason": "문단 3은 반도체소재 사업부문의 제품으로 F2·SF6 특수가스를 제시한다."}
+{"lid": "21fc2a2e79", "label": "supported", "passage": 3, "reason": "문단 3은 반도체소재 사업부문의 대표 소재로 F2·SF6 특수가스를 명시한다."}
+{"lid": "c46cb1bdf9", "label": "contradicted", "passage": 3, "reason": "문단 3은 반도체소재 사업부문이 F2·SF6 특수가스를 다룬다고 명시한다."}
+{"lid": "ad26c8d102", "label": "no_evidence", "passage": null, "reason": "제시된 8개 문단에는 농심의 제품이나 생산·판매 사업에 관한 내용이 없다."}
+{"lid": "909937df05", "label": "non_claim", "passage": null, "reason": "사업부문별 매출액을 뒤에 제시하겠다는 도입 문장으로 구체적인 수치를 주장하지 않는다."}
+{"lid": "26a3911566", "label": "supported", "passage": 1, "reason": "문단 1의 2025년 자동차부품소재 외부고객 수익은 25,094,181천원이다."}
+{"lid": "d9b88051eb", "label": "supported", "passage": 1, "reason": "문단 1의 2025년 반도체소재 외부고객 수익은 52,015,487천원이다."}
+{"lid": "37911e6a77", "label": "supported", "passage": 2, "reason": "문단 2는 반도체소재의 주요제품을 반도체용 특수가스로, 2025년 매출비중을 세 부문 중 가장 큰 64.17%로 제시한다."}
+{"lid": "20584f451f", "label": "supported", "passage": 2, "reason": "문단 2의 2025년 반도체소재 매출비중은 64.17%이다."}
+{"lid": "78cb438de6", "label": "supported", "passage": 2, "reason": "문단 2의 2025년 전자부품소재 매출비중은 4.87%이다."}
+{"lid": "234e1eb2fc", "label": "contradicted", "passage": 1, "reason": "문단 1에서 81,058,653천원은 연결 합계이며 전자부품소재의 외부고객 수익은 3,948,985천원이다."}
+{"lid": "0c1bc65e67", "label": "supported", "passage": 2, "reason": "문단 2의 2025년 자동차부품소재 매출비중은 30.96%이다."}
+{"lid": "ad390204a0", "label": "non_claim", "passage": null, "reason": "사업부문별 매출비중을 뒤에 제시하겠다는 안내 문장이다."}
+{"lid": "ba89e41293", "label": "contradicted", "passage": 5, "reason": "문단 5의 2025년 반도체소재 원재료 AHF·KOH·AL(OH)3 매입비중은 48.3%가 아니라 62.1%이다."}
+{"lid": "af0a69a1e4", "label": "supported", "passage": 5, "reason": "문단 5는 연결 기준 2025년 반도체소재 원재료 AHF·KOH·AL(OH)3의 매입비중을 62.1%로 제시한다."}
+{"lid": "20ec0d4418", "label": "supported", "passage": 5, "reason": "문단 5의 점착제 가격표에 2025년 당기 단가가 3,000원으로 제시되어 있다."}
+{"lid": "edf21a61ec", "label": "supported", "passage": 5, "reason": "문단 5의 점착제 가격표에 2024년 전기 단가가 3,000원으로 제시되어 있다."}
+{"lid": "6d222133e2", "label": "non_claim", "passage": null, "reason": "최근 3년의 단가 변동을 뒤에 제시하겠다는 안내 문장이다."}
+{"lid": "85fb1afb4a", "label": "supported", "passage": 5, "reason": "문단 5는 반도체소재 부문의 주요 원재료를 AHF·KOH·AL(OH)3로 명시한다."}
+{"lid": "06a7345ac5", "label": "supported", "passage": 5, "reason": "문단 5의 점착제 가격표에 2023년 전전기 단가가 3,050원으로 제시되어 있다."}
+{"lid": "a2384e716b", "label": "supported", "passage": 3, "reason": "문단 3은 주식회사 케이.엠.더블유로 설립하여 2008년 8월 케이엔더블유로 상호를 변경했다고 명시한다."}
+{"lid": "fb7d8f8446", "label": "non_claim", "passage": null, "reason": "조기상환청구권의 조건을 뒤에 제시하겠다는 도입 문장이다."}
+{"lid": "f4bf2b5b7f", "label": "no_evidence", "passage": null, "reason": "제시된 8개 문단에는 조기상환청구권 행사에 사채권자 1/2 이상의 동의가 필요하다는 조건이 없다."}
+{"lid": "5c5bd75eb3", "label": "no_evidence", "passage": null, "reason": "제시된 8개 문단에는 사채권자가 전부 또는 일부의 조기상환을 청구할 수 있다는 내용이 없다."}
+{"lid": "95a8177d90", "label": "no_evidence", "passage": null, "reason": "제시된 8개 문단에는 해당 조기상환청구권의 거래상대방에 관한 내용이 없다."}
+{"lid": "9210a3ebbd", "label": "no_evidence", "passage": null, "reason": "제시된 8개 문단에는 사채권 전부 또는 일부에 대한 조기상환청구 범위가 명시되어 있지 않다."}
+{"lid": "fe6cc88e09", "label": "contradicted", "passage": 3, "reason": "문단 3에 명시된 케이엔더블유로의 상호 변경 시점은 2013년 8월이 아니라 2008년 8월이다."}
+{"lid": "824123d118", "label": "no_evidence", "passage": null, "reason": "제시된 8개 문단에는 조기상환청구권의 동의 요건이 제시되어 있지 않다."}
+{"lid": "308c93aba9", "label": "supported", "passage": 4, "reason": "문단 4의 위험관리 및 파생거래 표 합계에 단위 천원과 여섯 숫자가 동일한 순서로 제시되어 있다."}
+{"lid": "a7dad4ef0b", "label": "no_evidence", "passage": null, "reason": "문단 4의 수치는 위험관리 표에 있으나 2023·2022·2021년 연구개발비라는 지표와 연도 대응은 제시되지 않는다."}
+{"lid": "b5b66f2585", "label": "no_evidence", "passage": null, "reason": "제시된 8개 문단에는 2023·2022·2021년 연구개발비 비율 6.1%·7.6%·108.5%에 관한 근거가 없다."}
+{"lid": "189f6eb4cc", "label": "supported", "passage": 7, "reason": "문단 7은 2025년 전자부품소재 부문의 원재료를 점착제 등으로, 전체 원재료 매입비중을 6.1%로 명시한다."}
+{"lid": "7b0c6fc942", "label": "no_evidence", "passage": null, "reason": "문단 7의 점착제 등 매입비중 6.1%는 전자부품소재에 관한 수치이며 식품포장소재 부문의 매입에 관한 근거는 없다."}
+{"lid": "a3bc1f6e4c", "label": "no_evidence", "passage": null, "reason": "189,738,075는 문단 8의 생산설비 당기말 합계이고 나머지는 문단 4의 위험관리 수치로, 주장한 연도별 매출액은 제시되지 않는다."}
+{"lid": "facf092f47", "label": "no_evidence", "passage": null, "reason": "제시된 8개 문단에는 해당 연도별 연구개발비와 그 증가 추이를 확인할 근거가 없다."}

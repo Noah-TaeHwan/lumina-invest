@@ -1,0 +1,29 @@
+{"lid": "13316e743f", "label": "supported", "passage": 8, "reason": "문단 8의 사업 개요 표가 방산사업부문, 통신사업부문, 기타사업부문을 구분한다."}
+{"lid": "dbc065f284", "label": "supported", "passage": 6, "reason": "문단 6은 1970년대 방산물자 지정 및 방산원가 제도를 중심으로 현재까지 큰 변화 없이 이어졌다고 설명한다."}
+{"lid": "a96fc90846", "label": "contradicted", "passage": 6, "reason": "문단 6이 제도의 기점을 1970년대로 명시하므로 1990년대라는 주장과 다르다."}
+{"lid": "d38c52f45d", "label": "supported", "passage": 8, "reason": "문단 8의 통신사업부문 표가 잘리지 않은 부분에 명시된 유무선 통신장비 제조, 전력증폭기 개발, 케이블모뎀 제조·판매를 지지한다."}
+{"lid": "82c8873f3a", "label": "contradicted", "passage": 8, "reason": "문단 8은 중계기 임가공, 케이블모뎀 제조·판매, 소프트웨어 및 탐색기 개발 등을 통신사업부문으로 분류하여 모두 방위산업이라는 주장과 다르다."}
+{"lid": "72b5cbef1b", "label": "contradicted", "passage": 8, "reason": "문단 8의 통신사업부문에는 열거된 회사 외 더블유이엠에스, 웨이브엔티, 현서전자통신도 포함되어 4개 회사만으로 구성된다는 주장과 다르다."}
+{"lid": "ddab470cc6", "label": "contradicted", "passage": 8, "reason": "문단 8은 방산사업부문에 웨이브일렉트로닉스와 아데나를 두고 나머지 열거된 회사들을 통신사업부문으로 분류한다."}
+{"lid": "fc8bffad43", "label": "supported", "passage": 1, "reason": "문단 1은 웨이브일렉트로닉스의 방산사업부문 주요 영업활동을 유도무기용 신호처리장치 제조로 명시한다."}
+{"lid": "c7729324d9", "label": "supported", "passage": 1, "reason": "문단 1의 표가 웨이브일렉트로닉스의 방산사업부문과 유도무기용 신호처리장치 제조를 함께 명시한다."}
+{"lid": "f6d2de907a", "label": "supported", "passage": 1, "reason": "문단 1은 당사 및 종속회사가 군사용 무기 생산·개발에 기여하는 방위사업과 유무선통신 장비 제조·판매 사업을 영위한다고 설명한다."}
+{"lid": "5242321e19", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 한빛디펜스의 사업이나 제품에 관한 내용이 없다."}
+{"lid": "b2bff365f7", "label": "supported", "passage": 4, "reason": "문단 4는 방산부문 핵심 부품 개발에 따른 개발샘플 매출이 지속적으로 증가한다고 명시한다."}
+{"lid": "a8dd45a0de", "label": "supported", "passage": 5, "reason": "문단 5의 사업 개요가 문장에 제시된 당사 및 종속회사의 방위사업과 유무선통신 장비 제조·판매 내용을 그대로 담고 있다."}
+{"lid": "5115a07749", "label": "contradicted", "passage": 4, "reason": "문단 4는 개발샘플 매출이 지속적으로 증가한다고 명시하여 늘어나고 있지 않다는 주장과 반대다."}
+{"lid": "01ef1f7169", "label": "supported", "passage": 1, "reason": "문단 1은 방위산업이 국방예산과 관련되어 경기변동과 연관이 적고 안정적인 매출을 실현할 수 있다고 설명한다."}
+{"lid": "5058fc58e3", "label": "supported", "passage": 4, "reason": "문단 4는 방산부문 주요 고객사와 유도무기 신호처리장치 외 탐색기 등 핵심 부품을 지속적으로 개발한다고 명시한다."}
+{"lid": "3e0634aae9", "label": "supported", "passage": 1, "reason": "문단 1은 방위산업 수요가 국가 안보정책과 국제정세의 영향을 받으며 경기변동의 직접적인 영향을 받지 않는다고 설명한다."}
+{"lid": "e51e22ad8d", "label": "supported", "passage": 4, "reason": "문단 4가 개발샘플 매출의 지속적 증가와 향후 양산·정비 매출의 견조한 성장 전망을 모두 명시한다."}
+{"lid": "84bf3ef873", "label": "supported", "passage": 1, "reason": "문단 1이 사전 계획된 사업, 무기·장비·물자 생산, 군이라는 안정적인 고객, 선발업체의 우월적 입지와 제한경쟁을 모두 설명한다."}
+{"lid": "a817bdba4f", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 삼성전기나 적층세라믹콘덴서의 생산·판매에 관한 내용이 없다."}
+{"lid": "0f0d0ab9de", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 전력증폭기 핵심부품의 조달 방식이 변경되었다는 내용이 없다."}
+{"lid": "589b5859d2", "label": "supported", "passage": 4, "reason": "문단 4는 전력증폭기에 신규서비스 수요와 기존 시스템 유지보수 수요가 함께 있어 상대적으로 안정적이고 연속적인 시장이 형성된다고 설명한다."}
+{"lid": "241c242d1a", "label": "no_evidence", "passage": null, "reason": "문단 6은 현재 계측기의 자체 보유분 외 필요 수량을 임대한다고만 설명하며 이전 조달 방식이나 변경 내역은 제시하지 않는다."}
+{"lid": "3afe420e02", "label": "contradicted", "passage": 7, "reason": "문단 7의 2025년 12월 말 연결회사 수주잔액은 183,224백만원으로 157,480백만원과 다르다."}
+{"lid": "2289c0759c", "label": "supported", "passage": 4, "reason": "문단 4는 외화사채 등의 환율변동위험을 회피하기 위해 통화스왑계약을 체결하여 관리한다고 명시한다."}
+{"lid": "6cfe9e0ced", "label": "supported", "passage": 7, "reason": "문단 7의 표가 2025년 12월 말 연결회사의 수주잔액을 183,224백만원으로 명시한다."}
+{"lid": "3297ac7762", "label": "supported", "passage": 7, "reason": "문단 7은 2025년 12월 말 수주잔액에 당사 방산사업본부와 종속회사 아데나의 잔액이 합산되어 있다고 명시한다."}
+{"lid": "f07e2c36e4", "label": "no_evidence", "passage": null, "reason": "인용한 사업 개요 내용은 문단 6에 있으며 문단 7에는 없어 문단 7에 인용문이 있다는 출처 주장까지 지지되지는 않는다."}
+{"lid": "4886585099", "label": "no_evidence", "passage": null, "reason": "문단 7은 2025년 12월 말 수주잔액의 합산 범위만 제시하며 2022년 12월 말의 합산 범위는 제시하지 않는다."}

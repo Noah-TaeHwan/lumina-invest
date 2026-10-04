@@ -1,0 +1,19 @@
+{"lid": "8fdd5019be", "label": "supported", "passage": 6, "reason": "문단 6이 타액 당 감지 제품과 채취 용기·스트립·리더기 구성을 그대로 서술"}
+{"lid": "4e30f86cbe", "label": "supported", "passage": 2, "reason": "문단 2가 기존 전자(반도체) 산업에서 융합산업 디지털 헬스케어 신규사업 개발·상용화 추진을 서술"}
+{"lid": "21e1dbce69", "label": "supported", "passage": 6, "reason": "문단 6이 디지털 헬스케어 시장 진출 위해 타액 기반 당 진단 시스템 시제품 개발을 서술"}
+{"lid": "95cfaa0753", "label": "no_evidence", "passage": null, "reason": "어보브반도체에 대한 문단이 없음"}
+{"lid": "06340b5069", "label": "supported", "passage": 6, "reason": "문단 6의 타액 채취 용기·시험지 스트립·계측 리더기 구성과 일치"}
+{"lid": "6b2c82ead7", "label": "contradicted", "passage": 6, "reason": "문단 6은 해당 구성으로 이루어진다고 명시해 부정 주장과 반대"}
+{"lid": "1de8864eaf", "label": "supported", "passage": 6, "reason": "문단 6이 타액 기반 당 진단 시스템의 시제품을 개발했다고 서술(주장의 사실 내용과 일치)"}
+{"lid": "f0b8031b36", "label": "supported", "passage": 6, "reason": "문단 6의 문장과 동일"}
+{"lid": "ff3f9cf516", "label": "contradicted", "passage": 1, "reason": "문단 1에서 OIS 매출은 105,451,531천원에서 78,508,348천원으로 감소해 증가 주장과 반대"}
+{"lid": "684253d05d", "label": "no_evidence", "passage": null, "reason": "삼성전자 메모리 반도체에 대한 문단이 없음"}
+{"lid": "c4e277b246", "label": "supported", "passage": 1, "reason": "문단 1의 OIS Driver IC 2024년 105,451,531, 2025년 78,508,348 천원과 일치"}
+{"lid": "2cc7e48248", "label": "contradicted", "passage": 3, "reason": "문단 3의 2025년 내수 매출은 95,433,507천원으로 59,433,507천원과 다름"}
+{"lid": "65d32a2e60", "label": "no_evidence", "passage": null, "reason": "295,898은 연구개발비용 표의 2024년 제조원가이며 외주가공비 관련 서술은 문단에 없음"}
+{"lid": "213bfdf2d7", "label": "no_evidence", "passage": null, "reason": "22,245,123은 연구개발비용(판관비) 값이며 외주가공비 총액은 문단에 없음"}
+{"lid": "35bf486ac5", "label": "supported", "passage": 3, "reason": "문단 3의 2025년 내수 95,433,507, 수출 32,197,040 천원과 일치"}
+{"lid": "4abdee363a", "label": "contradicted", "passage": 1, "reason": "문단 1은 전기말 38.6%, 당기말 58.8%로 방향이 반대(58.8%→38.6%는 감소이며 순서도 틀림)"}
+{"lid": "c8200d1a2b", "label": "no_evidence", "passage": null, "reason": "LX세미콘에 대한 문단이 없음"}
+{"lid": "e7e084e2cf", "label": "contradicted", "passage": 2, "reason": "문단 2에서 2025년 연구개발비 매출액 대비 비율은 17.43%로 0%와 다름"}
+{"lid": "93499e66b9", "label": "supported", "passage": 2, "reason": "문단 2의 2025년 매출액 대비 비율 17.43%와 일치"}

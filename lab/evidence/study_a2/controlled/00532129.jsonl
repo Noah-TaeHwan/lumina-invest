@@ -1,0 +1,6 @@
+{"qid": "00532129-q1", "true_text": "영림원소프트랩은 1997년에 중소기업용 한국형 ERP 패키지인 K-System을 국내에서 처음으로 개발해 공급했다.", "variant_text": "영림원소프트랩은 2003년에 중소기업용 한국형 ERP 패키지인 K-System을 국내에서 처음으로 개발해 공급했다.", "variant_type": "기간 바꾸기", "source_passage": 5}
+{"qid": "00532129-q2", "true_text": "영림원소프트랩은 중소기업 고객에게 매달 이용료를 받는 클라우드형 ERP로 SystemEver를 공급한다.", "variant_text": "영림원소프트랩은 중소기업 고객에게 매달 이용료를 받는 클라우드형 ERP로 CloudNova를 공급한다.", "variant_type": "주체 교체", "source_passage": 1}
+{"qid": "00532129-q3", "true_text": "영림원소프트랩은 2022년에 내부회계와 AI 경영분석 같은 K-System 확장·연계 솔루션을 내놓았다.", "variant_text": "영림원소프트랩은 2022년에 내부회계와 AI 경영분석 같은 K-System 확장·연계 솔루션을 내놓지 않았다.", "variant_type": "부정", "source_passage": 3}
+{"qid": "00532129-q4", "true_text": "영림원소프트랩은 생산설비를 돌리는 대신 협력사와 SW·HW 공급사 등과 손잡고 ERP 구축 프로젝트를 수행한다.", "variant_text": "삼성전자는 자체 생산설비를 갖추고 메모리 반도체를 직접 생산한다.", "variant_type": "다른 기업 사실", "source_passage": 8}
+{"qid": "00532129-q5", "true_text": "영림원소프트랩은 1993년 5월 22일에 주식회사로 세워졌다.", "variant_text": "영림원소프트랩은 1993년 5월 17일에 주식회사로 세워졌다.", "variant_type": "숫자 변경", "source_passage": 7}
+{"qid": "00532129-q6", "true_text": "이번 보고 기간 동안 영림원소프트랩은 수익성에 큰 영향을 줄 만한 제품·서비스의 영업 정책이나 가격을 바꾸지 않았다.", "variant_text": "2018년 동안 영림원소프트랩은 수익성에 큰 영향을 줄 만한 제품·서비스의 영업 정책이나 가격을 바꾸지 않았다.", "variant_type": "기간 바꾸기", "source_passage": 5}

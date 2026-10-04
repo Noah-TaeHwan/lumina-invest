@@ -1,0 +1,44 @@
+{"lid": "d40a3fd011", "label": "supported", "passage": 4, "reason": "생물자원부문 주요 제품: 배합사료"}
+{"lid": "940f6e6e09", "label": "supported", "passage": 4, "reason": "사업부문은 제분부문, 생물자원부문으로 구별"}
+{"lid": "3350fcdc43", "label": "supported", "passage": 4, "reason": "제분 점유율 24.5→24.3→24.1로 감소"}
+{"lid": "1a1ed60120", "label": "contradicted", "passage": 4, "reason": "표에 생물자원부문 주요 제품이 배합사료로 명시"}
+{"lid": "1d9d619e4e", "label": "contradicted", "passage": 4, "reason": "2024년과 2025년 모두 1.5로 같아 점점 증가가 아님"}
+{"lid": "398b887058", "label": "supported", "passage": 1, "reason": "제분 품목 소맥분 외"}
+{"lid": "aac0a14522", "label": "supported", "passage": 1, "reason": "생물자원 제55기 556원/kg"}
+{"lid": "b1ada45200", "label": "non_claim", "passage": null, "reason": "목록을 여는 안내 문장"}
+{"lid": "990ea8facb", "label": "supported", "passage": 1, "reason": "생물자원 품목 양계, 양돈"}
+{"lid": "50d0233467", "label": "supported", "passage": 1, "reason": "제55기 674원, 제54기 695원으로 하락"}
+{"lid": "4ab5621a57", "label": "non_claim", "passage": null, "reason": "목록을 여는 안내 문장"}
+{"lid": "a537969fee", "label": "supported", "passage": 1, "reason": "제분 품목 소맥분 외"}
+{"lid": "0ee891a9a3", "label": "no_evidence", "passage": null, "reason": "현대자동차 관련 문단 없음"}
+{"lid": "584e546bda", "label": "supported", "passage": 1, "reason": "제분 제55기 674원/kg"}
+{"lid": "908a8c7bbe", "label": "supported", "passage": 1, "reason": "생물자원 품목 양계, 양돈"}
+{"lid": "723ca6c04b", "label": "supported", "passage": 1, "reason": "제분 제54기 695원/kg"}
+{"lid": "e8a068588b", "label": "supported", "passage": 1, "reason": "제분 제53기 758원/kg"}
+{"lid": "f0ef6841a2", "label": "supported", "passage": 3, "reason": "2025년 매출 약 6,743억원, 영업이익 425억원"}
+{"lid": "b255d2ae8e", "label": "no_evidence", "passage": null, "reason": "6,743억원은 회사 전체 매출이며 제분부문 매출은 문단에 없음"}
+{"lid": "4b05ba08cb", "label": "non_claim", "passage": null, "reason": "정보 부재를 밝히는 면책 문장"}
+{"lid": "ee7fa9b317", "label": "supported", "passage": 3, "reason": "공시대상 사업부문이 제분·생물자원이며 사업부문별 매출실적을 구분"}
+{"lid": "1f70651291", "label": "non_claim", "passage": null, "reason": "수치 미제시를 밝히는 면책 문장"}
+{"lid": "7a0bbc2303", "label": "contradicted", "passage": 3, "reason": "2025년 매출은 약 6,743억원"}
+{"lid": "412ffdf5ff", "label": "non_claim", "passage": null, "reason": "정보 부재를 밝히는 면책 문장"}
+{"lid": "2a10899435", "label": "supported", "passage": 7, "reason": "원맥 미국·호주·캐나다, 옥수수 미국, 대두박 브라질, 소맥 호주"}
+{"lid": "ba3bcd9129", "label": "supported", "passage": 1, "reason": "2017년 최대주주 한국제분 흡수합병, 제분사업부문 통합"}
+{"lid": "3fc35618fc", "label": "contradicted", "passage": 1, "reason": "흡수합병 시점은 2017년"}
+{"lid": "06f1bd33b3", "label": "non_claim", "passage": null, "reason": "잘린 불완전 문장"}
+{"lid": "ca2a8890bb", "label": "supported", "passage": 6, "reason": "신용·유동성·시장위험 등 금융위험에 노출"}
+{"lid": "3644546cc6", "label": "supported", "passage": 3, "reason": "생물자원부문 주원료 옥수수·대두박 대부분 수입, 환율변동 영향"}
+{"lid": "db2b6d8bbb", "label": "supported", "passage": 6, "reason": "단기금융상품 제55기 500,000, 이전 기 없음"}
+{"lid": "4d8d07c2a6", "label": "no_evidence", "passage": null, "reason": "환율 위험 관리 목적과 위험 노출을 잇는 내용이 문단에 없음"}
+{"lid": "b7c553de77", "label": "no_evidence", "passage": null, "reason": "환율 위험 관리 방법이 문단에 없음"}
+{"lid": "c41f4a2007", "label": "non_claim", "passage": null, "reason": "표를 여는 안내 문장"}
+{"lid": "7415308144", "label": "supported", "passage": 6, "reason": "매출채권및기타채권 세 기 값 일치"}
+{"lid": "a51a52a959", "label": "no_evidence", "passage": null, "reason": "파생상품 손익 수치가 문단에 없음"}
+{"lid": "af6dae1361", "label": "non_claim", "passage": null, "reason": "표를 여는 안내 문장"}
+{"lid": "183cd37ffc", "label": "non_claim", "passage": null, "reason": "표를 여는 안내 문장"}
+{"lid": "f3daf9967f", "label": "supported", "passage": 6, "reason": "현금성자산 세 기 값 일치"}
+{"lid": "17a9099928", "label": "no_evidence", "passage": null, "reason": "건강기능식품부문은 문단에 없고 해당 내용은 생물자원부문에 대한 것"}
+{"lid": "f232d5a6f0", "label": "supported", "passage": 8, "reason": "보조금 차감 후 연구개발비용 1,052,137 > 1,038,093"}
+{"lid": "a2e6a7d3dd", "label": "non_claim", "passage": null, "reason": "정보 부재를 밝히는 면책 문장"}
+{"lid": "d39127c14d", "label": "contradicted", "passage": 8, "reason": "제55기 1,052,137로 제54기 1,038,093보다 늘었음"}
+{"lid": "c629025a36", "label": "supported", "passage": 8, "reason": "연구개발비용 1,052,137천원, 매출액 대비 0.16%"}

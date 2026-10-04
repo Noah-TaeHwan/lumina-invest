@@ -1,0 +1,19 @@
+{"lid": "8fdd5019be", "label": "supported", "passage": 6, "reason": "문단 6은 타액의 당을 감지·측정하는 기기와 타액 채취 용기·시험지 스트립·리더기 구성을 모두 명시한다."}
+{"lid": "4e30f86cbe", "label": "supported", "passage": 2, "reason": "문단 2는 기존 전자(반도체) 산업에서 융합산업인 디지털 헬스케어 신규사업의 개발·상용화를 지속 추진한다고 명시한다."}
+{"lid": "21e1dbce69", "label": "supported", "passage": 6, "reason": "문단 6은 디지털 헬스케어 시장 진출을 위해 타액 기반 당 진단 시스템의 시제품을 개발했다고 명시한다."}
+{"lid": "95cfaa0753", "label": "no_evidence", "passage": null, "reason": "제시 문단은 동운아나텍의 신규사업을 설명하며 어보브반도체의 디지털 헬스케어 사업 추진 근거는 없다."}
+{"lid": "06340b5069", "label": "supported", "passage": 6, "reason": "문단 6은 타액 기반 당 진단 시제품 개발과 타액 채취 용기·시험지 스트립·계측 리더기 구성을 함께 명시한다."}
+{"lid": "6b2c82ead7", "label": "contradicted", "passage": 6, "reason": "문단 6은 시제품이 타액 채취 용기·시험지 스트립·리더기로 구성된다고 명시하여 구성되어 있지 않다는 주장을 반박한다."}
+{"lid": "1de8864eaf", "label": "supported", "passage": 6, "reason": "문단 6은 신규사업 제품이 개발된 타액 기반 당 진단 시스템의 시제품임을 명시한다."}
+{"lid": "f0b8031b36", "label": "supported", "passage": 6, "reason": "문단 6은 타액의 당을 감지·측정하는 기능과 타액 채취 용기·시험지 스트립·리더기 구성을 모두 명시한다."}
+{"lid": "ff3f9cf516", "label": "contradicted", "passage": 1, "reason": "문단 1의 OIS Driver IC 매출은 2024년 105,451,531천원에서 2025년 78,508,348천원으로 감소하여 증가 주장과 반대다."}
+{"lid": "684253d05d", "label": "no_evidence", "passage": null, "reason": "제시 문단에는 삼성전자의 D램·낸드플래시 생산 및 판매에 관한 근거가 없다."}
+{"lid": "c4e277b246", "label": "supported", "passage": 1, "reason": "문단 1은 OIS Driver IC 매출을 2024년 105,451,531천원, 2025년 78,508,348천원으로 명시하여 두 금액과 감소를 지지한다."}
+{"lid": "2cc7e48248", "label": "contradicted", "passage": 3, "reason": "문단 3의 2025년 내수 매출은 95,433,507천원으로 주장한 59,433,507천원과 다르다."}
+{"lid": "65d32a2e60", "label": "no_evidence", "passage": null, "reason": "295,898천원은 연구개발 비용의 제조원가 항목에 나오지만 외주가공비를 포함한 비용처리라는 사실은 문단에 없다."}
+{"lid": "213bfdf2d7", "label": "no_evidence", "passage": null, "reason": "22,245,123천원은 연구개발 비용 표의 금액이며 2025년 외주가공비 총액에 관한 근거는 없다."}
+{"lid": "35bf486ac5", "label": "supported", "passage": 3, "reason": "문단 3은 2025년 내수 매출 95,433,507천원과 수출 매출 32,197,040천원을 함께 명시하며 내수가 훨씬 크다."}
+{"lid": "4abdee363a", "label": "contradicted", "passage": 1, "reason": "문단 1의 부채비율은 전기말 38.6%, 당기말 58.8%로 주장에 적힌 이전·이후 수치가 뒤바뀌었다."}
+{"lid": "c8200d1a2b", "label": "no_evidence", "passage": null, "reason": "제시 문단의 17.43%는 동운아나텍의 연구개발 비용 비율이며 LX세미콘에 관한 근거는 없다."}
+{"lid": "e7e084e2cf", "label": "contradicted", "passage": 2, "reason": "문단 2는 2025년 연구개발 비용의 매출액 대비 비율을 17.43%로 명시하여 0% 주장과 다르다."}
+{"lid": "93499e66b9", "label": "supported", "passage": 2, "reason": "문단 2는 2025년 연구개발 비용의 매출액 대비 비율을 17.43%로 명시한다."}

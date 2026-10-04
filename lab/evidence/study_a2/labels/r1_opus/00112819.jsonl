@@ -1,0 +1,26 @@
+{"lid": "efd1271477", "label": "no_evidence", "passage": null, "reason": "오뚜기에 대한 내용은 보여 준 문단에 없다"}
+{"lid": "0ae9af8f6c", "label": "supported", "passage": 2, "reason": "2024년 4월 1일 기점으로 오프라인 매출을 배제하고 온라인 전용으로 재편했다고 문단 2에 있다"}
+{"lid": "e236536050", "label": "supported", "passage": 2, "reason": "문단 2의 사업 구조 재편 서술과 일치한다"}
+{"lid": "406bef8996", "label": "supported", "passage": 2, "reason": "자사몰과 온라인몰을 통한 내수 매출 전개, 자사몰 오픈을 통한 브랜드 경쟁력 강화가 문단 2에 있다"}
+{"lid": "81c5f03e94", "label": "contradicted", "passage": 5, "reason": "문단 5는 당기말 손실충당금을 36,705천원(전액 1년 초과 연체)으로 적어 41,820천원과 다르다"}
+{"lid": "eb721034c5", "label": "supported", "passage": 5, "reason": "문단 5 표에서 1년 초과 연체 36,705천원이 손실충당금 계 36,705천원 전부다"}
+{"lid": "0fc78c3b33", "label": "non_claim", "passage": null, "reason": "자료에 명시되지 않았다는 답변 회피·면책 문장이다"}
+{"lid": "8bf725e332", "label": "non_claim", "passage": null, "reason": "내용 없이 뒤를 예고하는 도입 문장이다"}
+{"lid": "ae9a6ef753", "label": "supported", "passage": 3, "reason": "문단 3의 자사몰 오픈·홍보 및 수주상황 해당사항 없음 서술과 동일하다"}
+{"lid": "63fa0eb0a7", "label": "supported", "passage": 3, "reason": "문단 3의 판매전략 서술과 동일하다"}
+{"lid": "a61abcd4e8", "label": "non_claim", "passage": null, "reason": "중간에 잘린 불완전한 문장 조각이다"}
+{"lid": "aab5de16d0", "label": "contradicted", "passage": 3, "reason": "문단 3은 자사몰 오픈 시기를 2025년 하반기로 적어 2022년 하반기와 다르다"}
+{"lid": "37b11c3153", "label": "supported", "passage": 3, "reason": "2025년 하반기 자사몰 오픈과 검색채널·인스타 홍보가 문단 3에 있다"}
+{"lid": "39789f2e6d", "label": "non_claim", "passage": null, "reason": "문단 번호와 머리말 조각일 뿐 사실 주장이 아니다"}
+{"lid": "44ea9a23e5", "label": "supported", "passage": 3, "reason": "미입점 온라인몰 업데이트와 추후 입점을 통한 판매망 확충 관리가 문단 3에 있다"}
+{"lid": "92d96fcf9b", "label": "supported", "passage": 4, "reason": "중산층 이하 가계 소득·소비지출 위축이 의류 수요에 큰 영향을 미친다는 서술이 데코앤에프 보고서 문단 4에 있다"}
+{"lid": "7f35be722c", "label": "no_evidence", "passage": null, "reason": "세림어패럴에 대한 문단이 없다(문단 3은 데코앤에프 보고서다)"}
+{"lid": "8c597c4b13", "label": "supported", "passage": 3, "reason": "보고기간말 변동금리 차입금이 없어 이자비용 변동 위험에 노출되지 않는다고 문단 3에 있다"}
+{"lid": "8b27d7534e", "label": "supported", "passage": 4, "reason": "도소매 거래처 수취채권·확정계약과 현금성자산·예치금에서 발생하는 신용위험을 회사 차원에서 관리한다고 문단 4에 있다"}
+{"lid": "6be24b98a4", "label": "supported", "passage": 7, "reason": "문단 7 표의 당기말 손실충당금이 36,705천원이다"}
+{"lid": "a60cbf8e4e", "label": "supported", "passage": 4, "reason": "도매거래처 대부분이 독립 신용등급이 없어 예수보증금·담보를 받아 관리한다고 문단 4에 있다"}
+{"lid": "fb55cdc8aa", "label": "supported", "passage": 4, "reason": "문단 4의 도매거래처 신용위험 관리 서술과 동일하다"}
+{"lid": "0f28fd460b", "label": "contradicted", "passage": 4, "reason": "문단 4는 예수보증금을 수령하고 담보를 제공받는다고 적어 받지 않는다는 주장과 반대다"}
+{"lid": "f105cdf7c2", "label": "non_claim", "passage": null, "reason": "정보가 제공되지 않았다는 답변 회피·면책 문장이다"}
+{"lid": "4a54babf3f", "label": "supported", "passage": 3, "reason": "1993년 코스닥 상장, 2019년 11월 부도로 상장폐지된 비상장법인이라고 문단 3에 있다"}
+{"lid": "96f6c3c267", "label": "no_evidence", "passage": null, "reason": "LG화학에 대한 내용은 보여 준 문단에 없다"}

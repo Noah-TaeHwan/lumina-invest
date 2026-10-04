@@ -1,0 +1,25 @@
+{"lid": "7ac0f21d16", "label": "supported", "passage": 2, "reason": "문단 2는 11ha 스마트팜을 직접 운영·재배하는 경험을 바탕으로 기술자문과 설계·시공 컨설팅을 제공한다고 명시한다."}
+{"lid": "f7b303e8e4", "label": "supported", "passage": 2, "reason": "문단 2는 스마트팜을 바탕으로 재배·생산·유통을 연결하는 융복합 사업이라고 명시한다."}
+{"lid": "0927b6d8e6", "label": "no_evidence", "passage": null, "reason": "11ha 스마트팜 운영과 컨설팅에 관한 설명은 우듬지팜에 대한 것이며 그린하베스트팜에 관한 근거는 없다."}
+{"lid": "76d58b45a1", "label": "supported", "passage": 4, "reason": "문단 4는 수확한 토마토에 스테비아를 주입하는 기술을 개발하고 특허권 제10-2188356호로 등록했다고 명시한다."}
+{"lid": "4b65a5e8b6", "label": "supported", "passage": 6, "reason": "문단 6은 스테비아를 첨가한 토망고를 주력 라인업으로 사업을 영위한다고 명시한다."}
+{"lid": "607a86c8b8", "label": "supported", "passage": 4, "reason": "문단 4는 스테비오사이드 첨가로 단맛을 강화하고 물질 유출과 맛 변질을 막으며 유통기한을 연장하는 특허기술로 토망고를 생산한다고 명시한다."}
+{"lid": "572ff71e93", "label": "contradicted", "passage": 4, "reason": "문단 4는 해당 스테비아 주입 기술을 특허권 제10-2188356호로 등록했다고 명시하여 특허권이 없다는 주장을 반박한다."}
+{"lid": "261acf81e8", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 농심의 제품이나 국내외 판매 사업에 관한 설명이 없다."}
+{"lid": "e36af62238", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 2022년 스테비아 토마토 매출 비중 5%를 확인할 수 있는 수치가 없다."}
+{"lid": "65d4288cdf", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 2022년 토망고 매출 비중 90%를 확인할 수 있는 수치가 없다."}
+{"lid": "d3bb8d07ff", "label": "no_evidence", "passage": null, "reason": "제품군별 판매량과 수익률에 따라 매출 구성이 달라진다는 관계는 제시된 문단에 설명되어 있지 않다."}
+{"lid": "9d9dd52fab", "label": "supported", "passage": 4, "reason": "문단 4는 2022년 기존 B2B 채널에서 네이버 스마트스토어와 11번가를 통한 B2C 온라인 채널을 확보했다고 명시한다."}
+{"lid": "49a73f9826", "label": "non_claim", "passage": null, "reason": "다음에 제품군별 매출 구성을 제시하겠다는 도입 안내이며 구체적인 구성이나 수치를 주장하지 않는다."}
+{"lid": "4b4cdace61", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 2022년 대추토마토 매출 비중 5%를 확인할 수 있는 수치가 없다."}
+{"lid": "b7050fb443", "label": "supported", "passage": 4, "reason": "문단 4는 주요 제품 토망고의 가동률을 2025년 64.1%, 2024년 60.4%, 2023년 64.7%로 제시한다."}
+{"lid": "60c3f30abb", "label": "supported", "passage": 4, "reason": "문단 4의 생산설비 표에서 2024년 제14기 토망고 가동률은 60.4%이다."}
+{"lid": "ed292bbe50", "label": "contradicted", "passage": 4, "reason": "문단 4의 동일한 2024년 제14기 토망고 가동률은 72.8%가 아니라 60.4%이다."}
+{"lid": "a68e401347", "label": "supported", "passage": 1, "reason": "문단 1은 농산물 가격변동을 판매가격에 반영하여 손실을 최소화한다고 명시한다."}
+{"lid": "8dbb36275f", "label": "supported", "passage": 6, "reason": "문단 6은 2024년 기후변화에 따른 작황 부진과 농산물 수급 불안정으로 원재료 가격이 상승했다고 명시한다."}
+{"lid": "9cb41df0ce", "label": "supported", "passage": 1, "reason": "문단 1은 기후변화·농산물 가격변동을 시장위험으로 제시하고 구매팀과 경영자가 각 위험요인을 면밀하게 모니터링한다고 설명한다."}
+{"lid": "eba5e3fd29", "label": "no_evidence", "passage": null, "reason": "작황 부진과 수급 불안정에 따른 원재료 가격 상승은 2024년에 대해 설명되며 2017년의 발생 여부는 제시되지 않는다."}
+{"lid": "35911e49d8", "label": "supported", "passage": 2, "reason": "문단 2의 연구개발팀 과제에는 과채 당도 향상, 스테비아 토마토 저장·유통성, 콜라비·밤 당도, 줄기 원료, AI 수확·선별 및 자율주행 생육점검·방제가 모두 포함된다."}
+{"lid": "664062f33e", "label": "supported", "passage": 2, "reason": "문단 2는 연구개발팀이 토마토 저장·유통성 개선, 줄기 활용, 숙도 확인·수확로봇, 자동선별 및 생육점검·방제 등 여러 과제를 맡는다고 제시한다."}
+{"lid": "2909dac0b9", "label": "no_evidence", "passage": null, "reason": "스테비아 토마토 저장성·유통성 향상 과제는 우듬지팜 연구개발팀의 것이며 푸른들팜 연구개발팀에 관한 근거는 없다."}
+{"lid": "ddf10c3619", "label": "supported", "passage": 2, "reason": "문단 2는 우듬지팜 연구개발팀의 과제로 스테비아 토마토의 저장성 및 유통성 향상을 명시한다."}
