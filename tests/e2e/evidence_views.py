@@ -441,7 +441,7 @@ async def s_done(browser, base, ck: Checks):
     ck.ok(await summary(page) == "AI 판정 중…", "done: 판정 중 요약줄")
     body = fake.bodies("POST", "/api/evidence/chat")[0]
     ck.ok(body["corp_code"] == "00126380" and body["company"] == "삼성전자" and body["question"], "done: 요청 본문")
-    await page.wait_for_function("document.querySelector('.ev-msg .ev-summary').innerText.startsWith('AI 판정: ✅')",
+    await page.wait_for_function("document.querySelector('.ev-msg .ev-summary')?.innerText.startsWith('AI 판정: ✅')",
                                  timeout=5000)
     b1 = await badges(page)
     ck.ok(b1 == ["✅", "✅", "⚠️", "❔"], f"done: 확정 배지 {b1}")
@@ -548,7 +548,7 @@ async def _final_state(browser, base, ck: Checks, name, final, expect_badges, ex
     await pick_company(page)
     await ask(page)
     await page.wait_for_selector(".ev-msg")
-    await page.wait_for_function("!document.querySelector('.ev-msg .ev-summary').innerText.startsWith('AI 판정 중')",
+    await page.wait_for_function("document.querySelector('.ev-msg .ev-summary')?.innerText.startsWith('AI 판정 중') === false",
                                  timeout=5000)
     b = await badges(page)
     ck.ok(b == expect_badges, f"{name}: 배지 {b}")
@@ -572,7 +572,7 @@ async def s_states(browser, base, ck: Checks):
     fake.retry = started("r9")
     fake.runs["r9"] = [run("r9", "running"), run("r9", "done", DONE["statuses"], DONE["extra"])]
     await page.click(".ev-msg .ev-retry")
-    await page.wait_for_function("document.querySelector('.ev-msg .ev-summary').innerText.startsWith('AI 판정: ✅ 2')",
+    await page.wait_for_function("document.querySelector('.ev-msg .ev-summary')?.innerText.startsWith('AI 판정: ✅ 2')",
                                  timeout=5000)
     ck.ok(fake.n("POST", "/api/evidence/runs/r1/retry") == 1, "partial: 최신 실행 id로 다시 판정 요청")
     ck.ok(await badges(page) == ["✅", "✅", "⚠️", "❔"], "partial: 다시 판정 결과로 배지 갱신")
@@ -611,7 +611,7 @@ async def s_timeout(browser, base, ck: Checks):
     await pick_company(page)
     await ask(page)
     await page.wait_for_selector(".ev-msg")
-    await page.wait_for_function("document.querySelector('.ev-msg .ev-summary').innerText.includes('판정이 지연되고 있습니다')",
+    await page.wait_for_function("document.querySelector('.ev-msg .ev-summary')?.innerText.includes('판정이 지연되고 있습니다')",
                                  timeout=5000)
     n = fake.n("GET", "/api/evidence/runs/r1")
     await page.wait_for_timeout(1200)
@@ -619,7 +619,7 @@ async def s_timeout(browser, base, ck: Checks):
     ck.ok(n <= 3, f"timeout: 500ms 간격(1초 상한에 {n}회)")
     fake.runs["r1"] = [run("r1", "done", DONE["statuses"], DONE["extra"])]
     await page.click(".ev-msg .ev-refresh")
-    await page.wait_for_function("document.querySelector('.ev-msg .ev-summary').innerText.startsWith('AI 판정: ✅')",
+    await page.wait_for_function("document.querySelector('.ev-msg .ev-summary')?.innerText.startsWith('AI 판정: ✅')",
                                  timeout=3000)
     ck.ok(await badges(page) == ["✅", "✅", "⚠️", "❔"], "timeout: 새로고침으로 결과 반영")
     ck.ok(not page.errors, f"timeout: JS 오류 없음 {page.errors}")
@@ -712,7 +712,7 @@ async def s_policy_v1(browser, base, ck: Checks):
     ck.ok("정밀도 목표를 확인하지 못한" not in old_tip, f"policy-v1: 잠정 정책 배지에는 a2-v1 문구 없음 {old_tip}")
     await page.locator(".ev-msg .ev-badge").first.click()  # 펼친 칸은 재판정 뒤 닫는다
     await btn.click()
-    await page.wait_for_function("document.querySelector('.ev-msg .ev-summary').innerText.startsWith('AI 판정: ✅ 2 · ⚠️ 0 · ❔ 2')",
+    await page.wait_for_function("document.querySelector('.ev-msg .ev-summary')?.innerText.startsWith('AI 판정: ✅ 2 · ⚠️ 0 · ❔ 2')",
                                  timeout=5000)
     ck.ok(fake.n("POST", "/api/evidence/runs/r1/rejudge") == 1, "policy-v1: 옛 실행 id로 재판정 요청")
     ck.ok(fake.n("GET", "/api/evidence/runs/r2") == 0, "policy-v1: 재판정은 폴링하지 않는다(응답이 종결 실행)")
@@ -746,7 +746,7 @@ async def s_policy_v1(browser, base, ck: Checks):
     await turn_on(page)
     await pick_company(page)
     await ask(page)
-    await page.wait_for_function("document.querySelector('.ev-msg .ev-summary').innerText.startsWith('AI 판정: ✅')",
+    await page.wait_for_function("document.querySelector('.ev-msg .ev-summary')?.innerText.startsWith('AI 판정: ✅')",
                                  timeout=5000)
     ck.ok(await badges(page) == ["✅", "✅", "❔", "❔"], "policy-v1-live: lex_high 포함 배지")
     ck.ok(not await page.locator(".ev-msg .ev-rejudge").count(), "policy-v1-live: 현재 정책 실행에는 재판정 버튼 없음")
