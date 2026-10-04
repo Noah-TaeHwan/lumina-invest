@@ -75,3 +75,22 @@ def test_take_excludes_report_whose_document_is_missing(tmp_path, monkeypatch):
     corp = dart.Corp("00000001", "가나다", "000001")
     result, row, text = cli._take(cli.Paths(tmp_path), None, "K", corp, "random")
     assert result.startswith("document:") and "014" in result and row is None and text == ""
+
+
+def test_take_reraises_other_dart_errors(tmp_path, monkeypatch):
+    """014(원문 없음)가 아닌 오류(020 요청 제한·키 오류 등)는 조용히 빼지 않고 멈춘다(표본이 바뀌지 않게)."""
+    import pytest
+
+    from app.services.evidence import dart
+    from lab.evidence import __main__ as cli
+
+    monkeypatch.setattr(dart, "list_annual_reports", lambda *a, **k: [])
+    monkeypatch.setattr(dart, "pick_annual_report", lambda items: {"rcept_no": "1", "report_nm": "사업보고서"})
+    monkeypatch.setattr(dart, "company_info", lambda *a, **k: {"induty_code": "264"})
+
+    def limited(*a, **k):
+        raise ValueError("DART 응답이 zip이 아니다: b'<result><status>020</status>'")
+
+    monkeypatch.setattr(dart, "download_document", limited)
+    with pytest.raises(ValueError, match="020"):
+        cli._take(cli.Paths(tmp_path), None, "K", dart.Corp("00000001", "가나다", "000001"), "random")

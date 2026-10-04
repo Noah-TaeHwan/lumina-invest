@@ -320,6 +320,8 @@ def _take(P: Paths, client, key, corp, source: str, check=None) -> tuple[str, di
     try:  # 공시 원문이 없으면(DART status 014 등) 사업보고서가 없는 것과 같이 뺀다
         path = dart.download_document(client, key, rep["rcept_no"], P.priv / "docs", P.jsonl("dart_ledger.jsonl"))
     except ValueError as exc:
+        if "<status>014</status>" not in str(exc):  # 요청 제한·키 오류 등은 표본을 바꾸지 않게 멈춘다
+            raise
         return f"document: {exc}"[:200], None, ""
     try:
         ps = passages.build_passages(corp.corp_code, rep["rcept_no"], path.read_text(encoding="utf-8", errors="ignore"))
