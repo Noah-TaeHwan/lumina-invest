@@ -336,6 +336,16 @@ def dart_self_aliases(info: dict, corp_name: str) -> list[str]:
     return out
 
 
+def company_names(P: Paths):
+    """주체 확인 (d) 상장사 이름 사전: 연구 추첨 때 받은 DART corpCode.xml(비공개 폴더). 없으면 멈춘다."""
+    from app.services.evidence import subject
+
+    path = P.priv / "corpCode.xml"
+    if not path.exists():
+        raise SystemExit(f"{_rel(P, path)} is needed for the subject check (listed-company names); run split")
+    return subject.load_company_names(path)
+
+
 def self_names(P: Paths) -> dict[str, tuple[str, ...]]:
     """회사별 자기 회사 표기(회사명 + 추첨 때 남긴 DART 별칭). 별칭이 없는 분할(A-2)은 회사명만."""
     return {c["corp_code"]: (c["corp_name"], *c.get("self_aliases", ())) for c in load_split(P)["companies"]}
@@ -1603,6 +1613,7 @@ def _a2_inputs(P: Paths):
     names = _corp_names(P)
     cluster = {c["corp_code"]: c["cluster"] for c in load_split(P)["companies"]}
     selves = self_names(P)
+    dic = company_names(P) if P.study == "a3" else None
 
     def feats(c: dict) -> dict:
         corp = c["qid"].split("-q")[0]
@@ -1614,8 +1625,8 @@ def _a2_inputs(P: Paths):
             from app.services.evidence import subject
 
             me, alias = selves[corp], subject.aliases(ps)
-            row.update(best=f.best, text=c["text"], subj=subject.subject_valid(c["text"], ps, me),
-                       missing=[subject.missing_subjects(c["text"], p, me, alias) for p in ps])
+            row.update(best=f.best, text=c["text"], subj=subject.subject_valid(c["text"], ps, me, names=dic),
+                       missing=[subject.missing_subjects(c["text"], p, me, alias, names=dic) for p in ps])
         return row
     return feats
 
@@ -1845,6 +1856,8 @@ def a3_report_md(res: dict) -> str:
              f"(95% {_pct(pr['diff']['lo'])}~{_pct(pr['diff']['hi'])})"
              f"{', 기술 통계만(150건 미만)' if pr['descriptive_only'] else ''} | {'통과' if pr['pass'] else '실패'} |",
              "", "## 권고(사전등록 규칙)", "", f"- {rec['note']}", "", "## 보조 결과", "",
+             *[f"- H-swap 하위 유형 {k}: {v['n']}건, 정확도 a2-v1 {_pct(v['base_accuracy'])} → a3 {_pct(v['exp_accuracy'])}"
+               for k, v in sw["by_subtype"].items()],
              f"- 문단 안 교체(관문 밖, 주체 확인이 원리상 못 잡음) {g['in_passage_swap']['n']}건: 정확도 a2-v1 "
              f"{_pct(g['in_passage_swap']['base_accuracy'])}, a3 {_pct(g['in_passage_swap']['exp_accuracy'])}",
              f"- 표기 변형 오탐(a2-v1 ✅인 c3 중 a3에서 ✅ 아님): {nf['lost']}/{nf['n_base_supported']}"
@@ -1905,13 +1918,14 @@ def cmd_a3_explore(P: Paths, args) -> None:
     text = _passage_text(A2)
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(A2.jsonl("retrieval.jsonl"))}
     names = self_names(A2)  # A-2 추첨 행에는 DART 별칭이 없어 회사명만(A-3보다 보수적)
+    dic = company_names(A2)  # A-2 추첨 때 받은 corpCode.xml(lab/data/evidence_a2)
     rows, failed = a2_rows(A2, "tune")
     claim_text = {c["cid"]: c["text"] for c in _judgeable(A2, "tune")}
     for r in rows:
         ps, co, claim = [text[i] for i in ret[r["qid"]]], names[r["qid"].split("-q")[0]], claim_text[r["cid"]]
         alias = subject.aliases(ps)
-        r.update(best=lex_best(claim, ps)[1], text=claim, subj=subject.subject_valid(claim, ps, co),
-                 missing=[subject.missing_subjects(claim, p, co, alias) for p in ps])
+        r.update(best=lex_best(claim, ps)[1], text=claim, subj=subject.subject_valid(claim, ps, co, names=dic),
+                 missing=[subject.missing_subjects(claim, p, co, alias, names=dic) for p in ps])
     summary = a3.explore_summary(rows)
     removed = a3.removed_audit(rows)
     out = {"split": "tune (A-2)", "n": len(rows), "jev_failed_excluded": failed, **summary,

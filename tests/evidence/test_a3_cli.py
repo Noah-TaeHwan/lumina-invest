@@ -15,6 +15,15 @@ COMPS = [{"corp_code": "k", "corp_name": "케이산업", "split": "check", "clus
          {"corp_code": "m", "corp_name": "엠소재", "split": "check", "cluster": 1, "rcept_no": "3"}]
 
 
+def _corpcode(P, *names):
+    """상장사 이름 사전 픽스처(DART CORPCODE.xml 형식, 종목코드가 있는 행만 상장사)."""
+    rows = "".join(f"<list><corp_code>{i:08d}</corp_code><corp_name>{n}</corp_name><corp_eng_name></corp_eng_name>"
+                   f"<stock_code>{i:06d}</stock_code></list>" for i, n in enumerate(names, 1))
+    rows += "<list><corp_code>99999999</corp_code><corp_name>비상장</corp_name><stock_code> </stock_code></list>"
+    P.priv.mkdir(parents=True, exist_ok=True)
+    (P.priv / "corpCode.xml").write_text(f"<result>{rows}</result>", encoding="utf-8")
+
+
 def _P(tmp_path, status="draft"):
     P = cli.Paths(tmp_path, "a3")
     P.split_json.parent.mkdir(parents=True, exist_ok=True)
@@ -164,7 +173,11 @@ def test_committed_prereg_a3_matches_code():
     assert pre["controlled"]["notation_types"] == list(a3.NOTATION_TYPES)
     assert pre["controlled"]["prompt_sha256"] == _sha("lab/evidence/prompts/controlled_writer_a3.md")
     assert pre["subject_check"]["generic_extra"] == list(subject.SUBJECT_GENERIC)
-    assert pre["subject_check"]["heads"] == sorted(subject._HEADS)
+    sc = pre["subject_check"]
+    assert sc["division_suffixes"] == list(subject.DIVISION_SUFFIXES)
+    assert sc["division_generic_cores"] == list(subject.DIVISION_GENERIC_CORES)
+    assert sc["common_word_names"] == list(subject.COMMON_WORD_NAMES)
+    assert "heads" not in sc and pre["exploration"]["history"][0]["loss_rate"] == 0.0845
     assert pre["claims"]["cap"] == a3.CLAIM_CAP == a2.CLAIM_CAP
     assert pre["claims"]["not_claim_phrases"] == list(claims.NOT_CLAIM_PHRASES)
     assert pre["claims"]["generic_nouns"] == list(lexical.GENERIC_NOUNS)
@@ -195,6 +208,7 @@ def test_a3_report_end_to_end_on_frozen_fake_data(tmp_path, monkeypatch):
     cli.write_jsonl(P.jsonl("questions.jsonl"), [{"qid": "k-q1", "corp_code": "k", "question": "q", "split": "check"}])
     cli.write_jsonl(P.jsonl("retrieval.jsonl"), [{"qid": "k-q1", "passage_ids": ["k-p1"]}])
     cli.write_jsonl(P.jsonl("answers.jsonl"), [{"qid": "k-q1", "answer": "a"}])
+    _corpcode(P, "고려제강", "케이산업")
     claim_rows = [
         {"cid": "k-q1-n1", "qid": "k-q1", "source": "natural", "text": "케이산업은 2006년 인증을 획득했다."},
         {"cid": "k-q1-c1", "qid": "k-q1", "source": "controlled", "text": "케이산업은 2006년 인증을 받았다.",
@@ -250,6 +264,9 @@ def test_a3_explore_reads_a2_tune_only(tmp_path):
                                                {"cid": "t-q1-n2", "label": "supported"}])
     cli.write_jsonl(A2.priv / "scores/tune.jsonl", [{"cid": c, "s": [0.9], "c": [0.0], "ok": True}
                                                     for c in ("t-q1-n1", "t-q1-n2")])
+    with pytest.raises(SystemExit, match="corpCode.xml"):  # 상장사 이름 사전 없이는 재지 않는다
+        cli.cmd_a3_explore(P, None)
+    _corpcode(A2, "고려제강", "티산업")
     cli.cmd_a3_explore(P, None)
     out = json.loads((P.priv / "a3_explore_tune.json").read_text())
     assert (out["positive"], out["base_supported_true"], out["lost"]) == (2, 2, 1)

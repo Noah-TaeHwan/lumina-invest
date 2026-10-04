@@ -2,31 +2,36 @@
 """주체 확인(A-3 spec 3절): 숫자 확인처럼 코드로 보는 ✅ 필요조건. 실험 정책(runner.A3_SUBJECT)에서만 켠다.
 
 주장의 회사·부문·제품 이름 후보가 근거 문단에 토큰 경계로 있어야 그 문단이 ✅ 출처가 될 수 있다.
-1차 필터의 회사명 조건(lexical.names_in_passage)과 오류 방향이 반대다: 거기서는 후보가 많으면 JEV로 넘어갈 뿐이지만,
-여기서는 후보가 많으면 진짜 지지 주장이 ❔가 된다(재현율 손실). 그래서
-- 선택 회사 자신(회사명과 DART 종목명·영문명, 법인 표기 무관)은 후보에서 뺀다. 사업보고서 문단은 자기 회사를 '당사'로
-  쓴다. 접두만 같은 이름(포스코 ↔ 포스코인터내셔널)은 계열사이므로 빼지 않는다.
-- 서술형 활용(늘린다·올렸다·늘리는)은 이름이 아니다. 부문명은 꼬리 변형('건설 부문' ↔ '건설사업부문')을 같은 것으로 본다.
-- 일반명사(lexical.GENERIC_NOUNS + SUBJECT_GENERIC)와 조사 두 겹을 뗀 어간이 일반명사인 토큰은 뺀다.
-- 표기 차이(㈜·(주)·주식회사·Co., Ltd., 띄어쓰기, 라틴 대소문자, 문단 묶음 안 괄호 약칭 정의)는 같은 이름으로 본다.
-- 일반 머리명사(부문·설비·소속·법인 표지 등) 앞의 맨 수식어('건설 부문', '냉연강판 설비')도 후보로 본다.
+후보는 **허용 목록(엔티티)** 만이다(초안 3판, 2026-10-04 A-2 조정 세트 탐색에서 일반명사 제외 목록 방식의 재현율 손실
+0.0845 → 제외 목록은 수렴하지 않는다고 판단):
+  (a) 법인 표지(㈜·(주)·주식회사)가 붙은 토큰(띄어 쓴 표지면 앞 토큰), (b) 라틴 대문자 약칭(ERP·SOC·ESCADA),
+  (c) 따옴표 안 이름, (d) 상장사 이름 사전(DART corpCode.xml의 상장사 corp_name·corp_eng_name)에 있는 이름,
+  (e) '~부문·~사업부·~본부·~사업본부'로 끝나는 부문 이름(같은 문단의 부문 이름과 대조, 문단에 부문 이름이 없으면 묻지 않음).
+일반명사·서술어는 후보가 되지 않는다. 대가로 일반명사로 된 제품·설비 이름 교체(아토젠정·냉연강판)는 놓친다.
 
-판정(subject_decision)은 a2-v1 SYS 규칙 위에서 ✅만 좁히는 순수 제한이다: 반박 규칙은 숫자 확인만 본 S_V를 그대로 쓴다.
+- 선택 회사 자신(회사명과 DART 종목명·영문명, 법인 표기 무관)은 후보에서 뺀다. 접두만 같은 이름(포스코 ↔
+  포스코인터내셔널)은 계열사이므로 빼지 않는다.
+- 표기 차이(㈜·(주)·주식회사·Co., Ltd., 띄어쓰기, 라틴 대소문자, 문단 묶음 안 괄호 약칭 정의, 부문 꼬리 변형)는 같은
+  이름으로 본다.
+
+판정(subject_decision)은 a2-v1 SYS 규칙 위에서 ✅만 좁힌다: 반박 규칙은 숫자 확인만 본 S_V를 그대로 쓴다.
 제품 실행기(runner)와 A-3 평가(lab/evidence/a3)가 이 모듈의 같은 함수를 쓴다. lexical.py는 A-2 사전등록 해시에 묶여 있어
 고치지 않고 가져다 쓴다.
 """
 from __future__ import annotations
 
+import functools
 import re
-
-from collections.abc import Sequence
+import xml.etree.ElementTree as ET
+from collections.abc import Iterable, Sequence
+from pathlib import Path
 
 from app.services.evidence import lexical
 from app.services.evidence.judge import Judgement, sys_decision
 
-# 사업보고서 문장에 흔한 일반명사(회사·부문·제품 이름이 아니다). AI(Claude Code)가 일반 어휘로 초안을 쓰고, A-2 조정 세트
-# 자연 주장 문장(탐색 허용, 확인 세트는 보지 않음)에서 후보로 잡힌 낱말 중 고유명이 아닌 것과 독립 리뷰가 짚은 낱말을 더했다.
-# 확정 전 탐색(prereg_a3.json exploration)의 허용 범위 안에서만 더하고, 확정 뒤에는 고치지 않는다(코드 해시로 대조).
+# 일반명사(이름이 아니다). 허용 목록 방식에서는 부문 이름의 핵심어와 상장사 이름 사전 항목을 거르는 데만 쓴다.
+# AI(Claude Code)가 일반 어휘로 초안을 쓰고, A-2 조정 세트 자연 주장 문장(탐색 허용, 확인 세트는 보지 않음)에서 잡힌 낱말과
+# 독립 리뷰가 짚은 낱말을 더했다. 확정 뒤에는 고치지 않는다(코드 해시로 대조).
 SUBJECT_GENERIC = (
     "기준", "거래", "보고서", "제출일", "기준일", "사업연도", "연도", "분기", "반기", "상반기", "하반기", "올해", "작년",
     "품목", "상품", "원료", "주원료", "부품", "소재", "재료", "가동률", "생산능력", "생산량", "실적", "수량", "금액",
@@ -39,27 +44,25 @@ SUBJECT_GENERIC = (
     "구축", "운영", "관리", "유지", "설계", "시공", "분석", "정보", "데이터", "프로젝트", "프로세스", "장비", "기반",
     "글로벌", "별도", "기존", "전반", "경우", "때문", "통해", "위해", "따라", "대비", "특징", "특성", "변화", "상황",
     "천원", "백만원", "억원", "원", "콘텐츠", "조직", "체제", "가동", "최고", "최적", "트렌드", "전망", "평균", "사업부문",
-    # 독립 리뷰(2026-10-04)가 짚은 낱말과 같은 꼴의 흔한 명사
     "성과", "절감", "개선", "확대", "축소", "강화", "확보", "효율", "효율성", "공정", "배터리", "음반", "철광석",
 )
 _GENERIC = frozenset(lexical.GENERIC_NOUNS) | frozenset(SUBJECT_GENERIC)
-# 앞의 맨 토큰을 이름 후보로 만드는 머리명사: 회사·부문·제품을 묶는 말만('건설 부문', '냉연강판 설비', '큐브엔터테인먼트 소속').
-# 일반명사 전체로 넓히면 '있으며 제품', '따라 매출' 같은 서술어가 후보가 된다(A-2 조정 세트 탐색에서 확인)
-_HEADS = frozenset({"부문", "사업부문", "사업부", "사업본부", "본부", "설비", "공장", "법인", "소속", "브랜드", "라인",
-                    "계열사", "자회사", "종속회사", "주식", "지분"})
-_ADJ_END = ("적",)  # 지속적·추가적·독자적: '-적' 꼴은 이름이 아니다
+# (e) 부문 이름 꼬리와 대조할 때의 변형. 핵심어가 일반 부문어면(영업부문·기타부문·공공부문) 이름이 아니다
+DIVISION_SUFFIXES = ("사업본부", "사업부문", "사업부", "본부", "부문")
+DIVISION_GENERIC_CORES = ("영업", "사업", "기타", "공공", "민간", "해외", "국내", "전체", "주요", "각", "일부", "신규",
+                          "기존", "주력", "전사", "연결", "보고", "당사", "회사", "모든", "개별", "단일", "복수", "여러")
+_DIVISION_ALTS = ("부문", "사업부문", "사업부", "사업본부", "본부", "사업")
+# (d) 상장사 이름 중 일상어와 겹쳐 이름으로 볼 수 없는 것('고객을 대상으로')
+COMMON_WORD_NAMES = ("대상", "한국", "동방", "국보", "세방", "대교", "한일", "동양", "신성", "대성", "삼양", "태양")
 _QUOTE_MAX = 20  # 따옴표 안 이름 최대 길이(문장 전체 인용은 이름이 아니다)
-# 부문명 변형('건설 부문' ↔ '건설사업부문' ↔ '건설사업부'): 이 꼬리로 끝나는 이름은 핵심어 + 각 꼬리를 대안으로 본다
-_DIVISION = ("사업부문", "사업본부", "사업부", "부문", "본부", "사업")
-# 서술형 판별: 받침 있는 어간 + '다'(늘린다·올렸다; 서술격 '다'는 받침 없는 명사 뒤에만 붙는다), 짧은 동사 어간 + '는'
-_COPULA_TAILS = ("이다", "입니다", "이었다", "였다", "이며")
-_VERB_STEM_END = tuple("리히기우추키시치지르드오보주내이")
-_SHORT_VERB = 3
+_NGRAM = 4  # 상장사 이름 사전과 맞출 연속 토큰 수 상한('Hyundai Motor Company', '고려 제강')
 
 _LEGAL = re.compile(r"㈜|\(\s*주\s*\)|주식회사|\bCo\.,?\s*Ltd\.?|\bCo\.(?![A-Za-z])|\bLtd\.?(?![A-Za-z])"
                     r"|\bInc\.?(?![A-Za-z])|\bCorp(?:oration|\.)?(?![A-Za-z])", re.I)
+_MARK = re.compile(r"㈜|\(\s*주\s*\)|주식회사")
+_SPLIT = re.compile(r"[\s(),/·:;\[\]]+")
+_CAPS = re.compile(r"[A-Z][A-Z0-9&\-]*[A-Z0-9]")
 _DIGIT = re.compile(r"\d")
-_BARE = re.compile(r"[가-힣A-Za-z][가-힣A-Za-z0-9&.\-]*")
 # 괄호 약칭 정의: X(Y), X(이하 'Y'), X(이하 "Y"라 한다). 법인 표지는 먼저 지운 본문에서 찾는다
 _ALIAS = re.compile(r"([가-힣A-Za-z0-9&.\-]{2,})\s*\(\s*(?:이하\s*)?['‘\"“「]?([^()'’\"”」,]{2,}?)['’\"”」]?"
                     r"\s*(?:(?:이)?라\s*(?:한다|함|합니다))?\s*\)")
@@ -74,72 +77,76 @@ def _strip_legal(text: str) -> str:
     return _LEGAL.sub("", text)
 
 
-def _edge(tok: str) -> str:
-    return lexical._EDGE.sub("", tok)
+class CompanyNames:
+    """(d) 상장사 이름 사전: 정규화한 회사명·영문명 집합. 일반명사·일상어와 겹치는 이름, 1자 이름은 넣지 않는다."""
+
+    def __init__(self, names: Iterable[str] = (), eng: Iterable[str] = ()):
+        skip = _GENERIC | frozenset(COMMON_WORD_NAMES)
+        self.names = frozenset(n for n in (normalize(x) for x in (*names, *eng) if x)
+                               if len(n) >= 2 and n not in skip)
+
+    def __contains__(self, name: str) -> bool:
+        return normalize(name) in self.names
+
+    def __len__(self) -> int:
+        return len(self.names)
+
+    @classmethod
+    def from_corpcode(cls, xml_bytes: bytes) -> "CompanyNames":
+        """DART CORPCODE.xml에서 종목코드가 있는(상장) 회사의 corp_name·corp_eng_name(있으면)."""
+        names, eng = [], []
+        for e in ET.fromstring(xml_bytes).iter("list"):
+            if (e.findtext("stock_code") or "").strip():
+                names.append((e.findtext("corp_name") or "").strip())
+                eng.append((e.findtext("corp_eng_name") or "").strip())
+        return cls(names, eng)
 
 
-def _is_generic(name: str) -> bool:
-    """일반명사이거나, 조사 하나를 더 뗀 어간이 일반명사면 참(부문에서도 → 부문에서 → 부문)."""
-    if name in _GENERIC or (re.fullmatch(r"[가-힣]+", name) and name.endswith(_ADJ_END)):
-        return True
-    stem = lexical._stem(name) if re.fullmatch(r"[가-힣]+", name) else None
-    return stem is not None and stem in _GENERIC
+EMPTY_NAMES = CompanyNames()
+# 런타임 사전: load_passages가 받아 둔 corpCode.xml(app.services.evidence.load_passages.DEFAULT_DATA_DIR)
+DEFAULT_CORPCODE = Path("data/evidence_passages/corpCode.xml")
 
 
-def _is_head(raw: str) -> bool:
-    """머리명사 토큰(조사 붙어도 됨)이거나 법인 표지만 있는 토큰('주식회사와')."""
-    tok = _edge(raw)
-    if lexical._CORP_MARK.search(tok):
-        rest = _edge(lexical._CORP_MARK.sub("", tok))
-        return rest == "" or rest in lexical._TAILS
-    stem = lexical._stem(tok) or tok
-    return tok in _HEADS or stem in _HEADS or (lexical._stem(stem) or "") in _HEADS
+@functools.lru_cache(maxsize=4)
+def load_company_names(path: str | Path = DEFAULT_CORPCODE) -> CompanyNames:
+    """corpCode.xml을 한 번만 읽는다. 파일이 없으면 빈 사전((d) 규칙만 꺼진다)."""
+    p = Path(path)
+    return CompanyNames.from_corpcode(p.read_bytes()) if p.exists() else EMPTY_NAMES
 
 
-def _bare(raw: str) -> str | None:
-    """조사가 붙지 않은 이름꼴 토큰(숫자·서술형·일반명사 아님, 2자 이상). 수식어·띄어 쓴 이름 앞부분 후보."""
-    tok = _edge(raw)
-    if (len(tok) < 2 or _DIGIT.search(tok) or not _BARE.fullmatch(tok) or lexical._CORP_MARK.search(tok)
-            or lexical._stem(tok) or tok.endswith(lexical._VERBAL) or _is_generic(tok)):
-        return None
-    return tok
+def _name(tok: str) -> str:
+    """토큰의 이름 부분: 앞뒤 부호와 뒤 조사(두 겹까지)를 뗀다."""
+    t = lexical._EDGE.sub("", tok)
+    for _ in range(2):
+        s = lexical._stem(t)
+        if not s:
+            break
+        t = s
+    return t
 
 
-def _has_final(ch: str) -> bool:
-    """한글 음절에 받침이 있는가."""
-    return "가" <= ch <= "힣" and (ord(ch) - 0xAC00) % 28 != 0
+def _is_caps(name: str) -> bool:
+    """(b) 라틴 대문자 약칭(대문자 2자 이상)."""
+    return bool(_CAPS.fullmatch(name)) and sum(c.isupper() for c in name) >= 2
 
 
-def _is_predicate(tok: str) -> bool:
-    """서술형 활용 토큰인가(lexical.name_candidates가 어간을 이름으로 잡는 꼴).
-
-    - '다'로 끝나고 서술격 꼬리(이다·입니다·였다…)가 아니며 '다' 앞 음절에 받침이 있다: 늘린다·이른다·올렸다·만든다.
-      서술격 '다'는 받침 없는 명사 뒤에만 붙으므로(삼성전자다) 이름을 잃지 않는다.
-    - '는'으로 끝나고 어간이 3자 이하이며 동사 어간 끝 음절(리·히·기·르·드 등)로 끝난다: 늘리는·만드는.
-    """
-    if tok.endswith("다") and not tok.endswith(_COPULA_TAILS) and len(tok) >= 2:
-        return _has_final(tok[-2])
-    if tok.endswith("는") and 1 < len(tok) - 1 <= _SHORT_VERB:
-        return tok[-2] in _VERB_STEM_END
-    return False
+def _division_core(name: str) -> str | None:
+    """(e) 부문 이름의 핵심어('토목사업부문' → '토목'). 일반 부문어·일반명사면 None."""
+    for d in DIVISION_SUFFIXES:
+        if name.endswith(d):
+            core = name[:-len(d)]
+            core = core[:-2] if core.endswith("사업") and len(core) > 3 else core
+            return core if _division_word(core) else None
+    return None
 
 
-def _token_name(raw: str) -> str | None:
-    """토큰 하나의 이름 후보(lexical.name_candidates 규칙). 일반명사·서술형 활용이면 None."""
-    if _is_predicate(_edge(raw)):
-        return None
-    names = lexical.name_candidates(raw, "")
-    names = {n for n in names if not _is_generic(n)}
-    return next(iter(names)) if names else None
+def _division_word(core: str) -> bool:
+    return (len(core) >= 2 and not _DIGIT.search(core) and core not in DIVISION_GENERIC_CORES
+            and core not in _GENERIC and re.fullmatch(r"[가-힣A-Za-z][가-힣A-Za-z0-9&\-]*", core) is not None)
 
 
-def _division_alts(name: str) -> tuple[str, ...]:
-    """부문명이면 핵심어 + 부문 꼬리 변형을 대안으로 더한다(건설사업부문 → 건설부문·건설사업부…)."""
-    for d in _DIVISION:
-        core = name[:-len(d)] if name.endswith(d) else ""
-        if len(core) >= 2 and not _is_generic(core):
-            return (name, *(core + x for x in _DIVISION if core + x != name))
-    return (name,)
+def _division_alts(core: str) -> tuple[str, ...]:
+    return (core, *(core + x for x in _DIVISION_ALTS))
 
 
 def _self_names(company: str | Sequence[str]) -> list[str]:
@@ -169,40 +176,69 @@ def _is_self(name: str, company: str | Sequence[str], alias: dict[str, set[str]]
     return bool(selves & forms)
 
 
-def subject_groups(claim: str, company: str | Sequence[str],
-                   alias: dict[str, set[str]] | None = None) -> list[tuple[str, ...]]:
-    """주장의 이름 후보 묶음. 묶음 안의 대안 중 하나만 문단에 있으면 그 묶음은 통과다.
+def _candidates(claim: str, names: CompanyNames) -> list[tuple[tuple[str, ...], bool]]:
+    """허용 목록 후보: (대안 묶음, 부문 이름 여부) 목록. 선택 회사 처리는 하지 않는다."""
+    toks = [t for t in _SPLIT.split(_MARK.sub("㈜", claim)) if t]
+    plain = [_name(t.replace("㈜", "")) for t in toks]
+    out: list[tuple[tuple[str, ...], bool]] = []
+    used: set[int] = set()
+    for i in range(len(toks)):  # (d) 사전: 긴 연속 토큰부터('Hyundai Motor Company', '고려 제강')
+        for n in range(min(_NGRAM, len(toks) - i), 0, -1):
+            span = range(i, i + n)
+            if used & set(span):
+                continue
+            joined = " ".join(plain[j] for j in span)
+            if plain[i + n - 1] and joined in names:
+                out.append(((joined, joined.replace(" ", "")) if n > 1 else (joined,), False))
+                used |= set(span)
+                break
+    for i, t in enumerate(toks):
+        if i in used:
+            continue
+        nm = plain[i]
+        if "㈜" in t:  # (a) 법인 표지: 붙은 토큰이면 그 이름. 표지만 있으면 앞에 둔 표지('주식회사 X')는 뒤 토큰,
+            # 조사가 붙은 표지('X 주식회사와')는 앞 토큰
+            j = i + 1 if t == "㈜" else i - 1
+            if len(nm) >= 2:
+                out.append(((nm,), False))
+            elif 0 <= j < len(toks) and j not in used and len(plain[j]) >= 2 and "㈜" not in toks[j]:
+                out.append(((plain[j],), False))
+                used.add(j)
+        elif _is_caps(nm):  # (b)
+            out.append(((nm,), False))
+        elif (core := _division_core(nm)) is not None:  # (e) 붙여 쓴 부문 이름
+            out.append((_division_alts(core), True))
+        elif nm in DIVISION_SUFFIXES and i and _division_word(plain[i - 1]) and "㈜" not in toks[i - 1]:
+            out.append((_division_alts(plain[i - 1]), True))  # (e) 띄어 쓴 부문 이름('토목 부문')
+    out += [((m.strip(),), False) for m in lexical._QUOTED.findall(claim)  # (c)
+            if 2 <= len(m.strip()) <= _QUOTE_MAX and m.strip() not in _GENERIC]
+    return out
 
-    - 토큰 이름(lexical.name_candidates 규칙): 앞 토큰이 맨 이름꼴이면 붙인 형태를 대안으로 더한다('고려 제강' ↔ '고려제강').
-    - 머리명사·법인 표지 토큰 앞의 맨 수식어: ('건설', '건설부문'), ('한빛소재',).
-    - 따옴표 안 이름.
-    - 부문명은 꼬리 변형을 대안으로 더한다('건설 부문' ↔ '건설사업부문').
-    선택 회사 자신(회사명·DART 별칭)은 먼저 '당사'로 바꿔 후보에서 빼고, 남은 묶음도 자기 회사면 뺀다.
-    """
+
+def _groups(claim: str, company: str | Sequence[str], alias: dict[str, set[str]] | None,
+            names: CompanyNames | None) -> list[tuple[tuple[str, ...], bool]]:
     pat = _self_pattern(company)
     if pat is not None:
         claim = pat.sub(" 당사", claim)
-    toks = claim.split()
-    out: list[tuple[str, ...]] = []
-    for i, raw in enumerate(toks):
-        prev = _bare(toks[i - 1]) if i else None
-        name = _token_name(raw)
-        if name:
-            alts = _division_alts(name)
-            out.append(alts + _division_alts(prev + name) if prev else alts)
-        elif prev and _is_head(raw):
-            head = lexical._stem(_edge(raw)) or _edge(raw)
-            plain = not lexical._CORP_MARK.search(raw)
-            out.append((prev, *_division_alts(prev + head)) if plain else (prev,))
-    out += [(m.strip(),) for m in lexical._QUOTED.findall(claim)
-            if len(m.strip()) <= _QUOTE_MAX and not _is_generic(m.strip())]
     seen, groups = set(), []
-    for g in out:
+    for g, div in _candidates(claim, names if names is not None else EMPTY_NAMES):
         if any(_is_self(n, company, alias) for n in g) or frozenset(g) in seen:
             continue
         seen.add(frozenset(g))
-        groups.append(g)
+        groups.append((g, div))
     return groups
+
+
+def subject_groups(claim: str, company: str | Sequence[str], alias: dict[str, set[str]] | None = None,
+                   names: CompanyNames | None = None) -> list[tuple[str, ...]]:
+    """주장의 이름 후보 묶음(허용 목록). 묶음 안의 대안 중 하나만 문단에 있으면 그 묶음은 통과다.
+    선택 회사 자신(회사명·DART 별칭)은 먼저 '당사'로 바꿔 빼고, 남은 묶음도 자기 회사면 뺀다."""
+    return [g for g, _ in _groups(claim, company, alias, names)]
+
+
+def _passage_divisions(text: str) -> bool:
+    """문단에 (e) 규칙의 부문 이름이 하나라도 있는가(부문 이름은 이것과 대조한다)."""
+    return any(div for _, div in _candidates(text, EMPTY_NAMES))
 
 
 def aliases(passages: list[str]) -> dict[str, set[str]]:
@@ -231,22 +267,27 @@ def _group_ok(group: tuple[str, ...], text: str, alias: dict[str, set[str]]) -> 
     return any(_found(n, text) or any(_found(a, text) for a in alias.get(normalize(n), ())) for n in group)
 
 
-def missing_subjects(claim: str, passage: str, company: str | Sequence[str], alias: dict[str, set[str]] | None = None) -> list[str]:
-    """문단에서 찾지 못한 후보 묶음의 대표 이름(감사·리포트용)."""
+def missing_subjects(claim: str, passage: str, company: str | Sequence[str], alias: dict[str, set[str]] | None = None,
+                     names: CompanyNames | None = None) -> list[str]:
+    """문단에서 찾지 못한 후보 묶음의 대표 이름(감사·리포트용). 부문 이름은 문단에 부문 이름이 있을 때만 대조한다."""
     alias = alias or {}
     text = _strip_legal(passage)
-    return [g[0] for g in subject_groups(claim, company, alias) if not _group_ok(g, text, alias)]
+    gs = _groups(claim, company, alias, names)
+    has_div = any(div for _, div in gs) and _passage_divisions(passage)
+    return [g[0] for g, div in gs if (has_div or not div) and not _group_ok(g, text, alias)]
 
 
-def subject_ok(claim: str, passage: str, company: str | Sequence[str], alias: dict[str, set[str]] | None = None) -> bool:
+def subject_ok(claim: str, passage: str, company: str | Sequence[str], alias: dict[str, set[str]] | None = None,
+               names: CompanyNames | None = None) -> bool:
     """주장의 이름 후보 묶음이 모두 문단에 있으면 참(후보가 없으면 참)."""
-    return not missing_subjects(claim, passage, company, alias)
+    return not missing_subjects(claim, passage, company, alias, names)
 
 
-def subject_valid(claim: str, passages: list[str], company: str | Sequence[str]) -> list[bool]:
+def subject_valid(claim: str, passages: list[str], company: str | Sequence[str],
+                  names: CompanyNames | None = None) -> list[bool]:
     """문단별 주체 확인 통과 여부. 괄호 약칭 정의는 문단 묶음 전체에서 모은다(판정 문단 k개와 같은 범위)."""
     alias = aliases(passages)
-    return [subject_ok(claim, p, company, alias) for p in passages]
+    return [subject_ok(claim, p, company, alias, names) for p in passages]
 
 
 def subject_decision(j: Judgement, valid: list[bool], subj: list[bool], tau_s: float,

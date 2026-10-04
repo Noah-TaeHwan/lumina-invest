@@ -154,10 +154,15 @@ def check_gates(natural: list[dict], swaps: list[dict], n_boot: int = BOOTSTRAP_
     acc = _acc
     p_acc, lo, hi = cluster_bootstrap(sw, acc("exp"), n=n_boot, seed=seed)
     d, dlo, dhi = cluster_bootstrap(sw, _diff(acc("exp"), acc("base")), n=n_boot, seed=seed)
+    by_subtype = {}
+    for r in sw:
+        by_subtype.setdefault((r.get("variant") or "").split(":", 1)[-1], []).append(r)
+    by_subtype = {k: {"n": len(v), "exp_accuracy": acc("exp")(v), "base_accuracy": acc("base")(v)}
+                  for k, v in sorted(by_subtype.items())}
     small = len(sw) < G["h_swap"]["min_n"]
     gs = G["h_swap"]
     h_swap = {"n": len(sw), "exp_accuracy": p_acc, "ci": [lo, hi], "base_accuracy": acc("base")(sw),
-              "diff": {"point": d, "lo": dlo, "hi": dhi}, "descriptive_only": small,
+              "diff": {"point": d, "lo": dlo, "hi": dhi}, "by_subtype": by_subtype, "descriptive_only": small,
               "pass": (not small and p_acc is not None and lo is not None and dlo is not None
                        and p_acc >= gs["accuracy_min"] and lo >= gs["ci_lo_min"]
                        and dlo > gs["diff_lo_min_exclusive"])}

@@ -6,6 +6,7 @@ from dataclasses import replace
 from app.lib import jev_service
 from app.services.evidence import records
 from app.services.evidence import runner as rn
+from app.services.evidence import subject as sj
 from tests.evidence.test_runner import NOW, FakeClient, _Room
 
 CO = "대원산업"
@@ -13,12 +14,13 @@ PASSAGES = ["당사는 2006년 국제 자동차분야 품질경영시스템 인�
             "커피 부문은 커피와 커피머신 등 상품을 판매하는 사업을 영위합니다."]
 SWAP = "고려제강은 2006년 국제 자동차분야 품질경영시스템 인증을 획득했다."
 TRUE = "대원산업은 2006년 국제 자동차분야 품질경영시스템 인증을 획득했다."
+NAMES = sj.CompanyNames(["고려제강", "대원산업"])  # 상장사 이름 사전 픽스처
 
 
-def _run(client, answer, *, policy, passages=PASSAGES):
+def _run(client, answer, *, policy, passages=PASSAGES, names=NAMES):
     async def go():
         quota = jev_service.Quota(_Room(), now=lambda: NOW)
-        return await rn.Runner(client, quota).run(company=CO, answer=answer, passages=passages, user_id="u1",
+        return await rn.Runner(client, quota, company_names=names).run(company=CO, answer=answer, passages=passages, user_id="u1",
                                                   policy=policy)
     return asyncio.run(go())
 
@@ -59,10 +61,12 @@ def test_lex_high_also_needs_subject_check():
     claim = "건설 부문은 커피와 커피머신 등 상품을 판매하는 사업을 영위합니다."
     loose = rn.Policy("tier", 0.85, 0.35, theta_high=0.8)
     a2 = _run(FakeClient(), claim, policy=loose, passages=PASSAGES)
-    client = FakeClient(_probs)
+    # 부문 이름이 있는 1번 문단만 지지 확률이 높다(0번 문단은 부문 이름이 없어 부문 후보를 묻지 않는다)
+    client = FakeClient(lambda c, n: ("probs", [(0.1, 0.0), (0.9, 0.0)]))
     a3 = _run(client, claim, policy=replace(loose, subject_check=True), passages=PASSAGES)
     assert a2.claims[0].route == "lex_high"
     assert a3.claims[0].route == "jev" and client.calls == [claim] and a3.claims[0].status == "no_evidence"
+    assert a3.claims[0].subject_ok == [True, False]
 
 
 def test_rejudge_into_subject_policy_needs_stored_subject_check():
@@ -94,3 +98,14 @@ def test_lex_high_claim_can_become_contradicted_under_a3():
     a3 = _run(client, claim, policy=replace(loose, subject_check=True), passages=PASSAGES)
     assert (a2.claims[0].route, a2.claims[0].status, a2.calls) == ("lex_high", "supported", 0)
     assert (a3.claims[0].route, a3.claims[0].status) == ("jev", "contradicted") and len(client.calls) == 1
+
+
+
+def test_company_names_load_lazily_only_for_subject_policy(monkeypatch):
+    """Runner에 사전을 주지 않으면 주체 확인 정책을 처음 돌릴 때만 기본 corpCode.xml 사전을 읽는다."""
+    calls = []
+    monkeypatch.setattr(sj, "load_company_names", lambda *a: calls.append(a) or NAMES)
+    _run(FakeClient(_probs), SWAP, policy=rn.A2_V1, names=None)
+    assert calls == []
+    res = _run(FakeClient(_probs), SWAP, policy=rn.A3_SUBJECT, names=None)
+    assert len(calls) == 1 and res.claims[0].status == "no_evidence"

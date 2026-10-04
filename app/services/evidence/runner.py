@@ -23,6 +23,7 @@ from app.services.evidence.claims import claim_spans, is_not_claim
 from app.services.evidence.lexical import lex_features, tier_route
 from app.services.evidence.numbers import number_check
 from app.services.evidence.privacy import has_pii
+from app.services.evidence import subject
 from app.services.evidence.subject import decide_claim, route_claim, subject_valid
 
 log = logging.getLogger("app.evidence.runner")
@@ -136,10 +137,16 @@ def _finish(claims: list[ClaimResult], fatal: str | None) -> tuple[str, str | No
 class Runner:
     """판정 실행기. 사용자별 진행 중 실행을 1건으로 묶는다(같은 사용자의 다음 실행은 앞 실행이 끝난 뒤 시작)."""
 
-    def __init__(self, client: Any, quota: Quota):
+    def __init__(self, client: Any, quota: Quota, company_names: subject.CompanyNames | None = None):
         self._client = client
         self._quota = quota
         self._user_locks: dict[str, asyncio.Lock] = {}
+        self._names = company_names  # 주체 확인의 상장사 이름 사전. 없으면 주체 확인 정책을 처음 돌릴 때 읽는다
+
+    def _company_names(self) -> subject.CompanyNames:
+        if self._names is None:
+            self._names = subject.load_company_names()
+        return self._names
 
     async def run(self, *, company: str, answer: str, passages: list[str], user_id: str,
                   policy: Policy = DEFAULT_POLICY, trigger: str = "auto", run_id: str | None = None) -> RunResult:
@@ -163,7 +170,7 @@ class Runner:
             f = lex_features(c.text, passages, company)
             c.lex = f.lex
             if policy.subject_check:
-                c.subject_ok = subject_valid(c.text, passages, company)
+                c.subject_ok = subject_valid(c.text, passages, company, names=self._company_names())
             route = route_claim(policy, f.lex, f.high_ok, f.best, c.subject_ok)
             if route == "lex_low":
                 c.status, c.route = "no_evidence", "lex_low"

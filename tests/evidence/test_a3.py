@@ -166,3 +166,14 @@ def test_removed_audit_lists_missing_subjects():
     out = a3.removed_audit([r, _row("k-q1-n2", y=1)])
     assert out == [{"cid": "k-q1-n1", "label": "supported", "text": "고려제강은 인증을 획득했다.",
                     "missing": ["고려제강"]}]
+
+
+def test_h_swap_reports_accuracy_by_subtype():
+    """허용 목록 밖 교체(일반명사 제품·부문)를 놓치는 대가를 드러내도록 하위 유형별 정확도를 따로 낸다."""
+    sw = [_row(f"a{i}-q1-c2", cluster=i, variant="주체 교체:회사", expected="not_supported", subj=(False,))
+          for i in range(10)]
+    sw += [_row(f"b{i}-q1-c2", cluster=100 + i, variant="주체 교체:제품·브랜드", expected="not_supported",
+                subj=(i < 2,)) for i in range(10)]
+    by = a3.check_gates(_natural(200, 0), sw, n_boot=50)["h_swap"]["by_subtype"]
+    assert by["회사"] == {"n": 10, "exp_accuracy": 1.0, "base_accuracy": 0.0}
+    assert by["제품·브랜드"] == {"n": 10, "exp_accuracy": 0.8, "base_accuracy": 0.0}
