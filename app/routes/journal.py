@@ -4,6 +4,7 @@
   GET    /api/journal                       – 내 기록 목록(최근 판단 기준 거르기, total·due_count)
   GET    /api/journal/export                – 내 기록 내보내기(JSON 하나, 고지·AI 생성 표시, 결정 7-2)
   GET    /api/journal/{id}                  – 상세: 스냅샷, update 목록, source_available(원 실행 존재 여부)
+  GET    /api/journal/{id}/changes          – 이후 공시 변화: 스냅샷과 지금 적재된 문단 비교(결정 6-1, 저장하지 않음)
   POST   /api/journal/{id}/updates          – 다시 보기 기록 덧붙이기(kind=revisit). 고치기·1건 삭제는 없다
   DELETE /api/journal/{id}                  – 기록과 update 전부 삭제
   DELETE /api/journal?confirm=delete-all    – 내 기록 전부 삭제(쿼리가 정확히 이 값일 때만, 아니면 400)
@@ -37,6 +38,8 @@ from app.models import Chat, EvidenceRun, JudgmentEntry, JudgmentUpdate
 from app.models.journal import DECISIONS
 from app.services.audit import audit
 from app.services.evidence import records
+from app.routes.evidence import get_passage_store
+from app.services.journal import changes as chg
 from app.services.journal import snapshot as snap
 
 log = logging.getLogger("app.journal.api")
@@ -285,6 +288,26 @@ async def export_entries(user=Depends(get_current_user_any), db: AsyncSession = 
 @router.get("/{entry_id}", summary="판단 기록 상세")
 async def get_entry(entry_id: str, user=Depends(get_current_user_any), db: AsyncSession = Depends(get_pg_session)):
     return await _detail(db, await _owned_entry(db, entry_id, user))
+
+
+@router.get("/{entry_id}/changes", summary="판단 기록 이후 공시 변화(지금 적재된 문단과 비교)")
+async def get_changes(entry_id: str, user=Depends(get_current_user_any), db: AsyncSession = Depends(get_pg_session),
+                      passage_store=Depends(get_passage_store)):
+    """외부 호출 없이 그 회사 문단의 Qdrant scroll 한 번만 쓴다. 비교 결과는 저장하지 않는다(결정 6-2).
+
+    확인할 수 없으면(저장소 미연결·컬렉션 없음·연결 실패) `{"status": "unavailable"}` 하나만 돌려준다. 그 밖에는:
+
+        {"status": "ok",
+         "report":   {"status": "same" | "replaced" | "company_gone",
+                      "snapshot_rcept_no": 스냅샷 rcept_no, "current_rcept_nos": [지금 rcept_no...]},
+         "passages": [{"passage_idx": 스냅샷 passages 위치, "passage_id", "sha256", "status": "same" | "gone"}],
+         "policy":   {"snapshot": 스냅샷 policy_version, "current": 현재 정책}}
+
+    gone 문단의 대체 본문은 돌려주지 않는다(새 근거는 새 질문으로만 본다).
+    """
+    snapshot = (await _owned_entry(db, entry_id, user)).snapshot
+    await db.rollback()  # 읽기만 했다. 저장소가 최대 STORE_TIMEOUT_S를 끄는 동안 PG 연결을 쥐고 있지 않게 풀에 돌려준다
+    return await chg.compare(passage_store, snapshot)
 
 
 @router.post("/{entry_id}/updates", status_code=201, summary="다시 보기 기록 덧붙이기")

@@ -77,6 +77,11 @@ def set_passage_store(store) -> None:
     _passage_store = store
 
 
+def get_passage_store():
+    """연결된 저장소 그대로(없으면 None). 일지 변화 비교가 의존성으로 받는다(모듈 C spec 결정 6-1)."""
+    return _passage_store
+
+
 def get_passage_search() -> PassageSearch | None:
     return _passage_store.search if _passage_store is not None else None
 
