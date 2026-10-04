@@ -18,7 +18,7 @@ from app.lib import jev
 from app.lib.jev_service import Quota, QuotaUnavailable
 from app.services.evidence import judge
 from app.services.evidence.claims import claim_spans, is_not_claim
-from app.services.evidence.lexical import lex_best
+from app.services.evidence.lexical import lex_features, tier_route
 from app.services.evidence.numbers import number_check
 from app.services.evidence.privacy import has_pii
 
@@ -147,12 +147,13 @@ class Runner:
         targets = targets[:policy.max_claims]
         for c in targets:
             c.number_ok = [number_check(c.text, p) for p in passages]
-            c.lex, best = lex_best(c.text, passages)
-            if policy.theta_low is not None and c.lex < policy.theta_low:
+            f = lex_features(c.text, passages, company)
+            c.lex = f.lex
+            route = tier_route(f.lex, f.high_ok, policy.theta_low, policy.theta_high)
+            if route == "lex_low":
                 c.status, c.route = "no_evidence", "lex_low"
-            elif (policy.theta_high is not None and c.lex >= policy.theta_high and best is not None
-                  and c.number_ok[best] and company in passages[best]):
-                c.status, c.route, c.source_idx = "supported", "lex_high", best
+            elif route == "lex_high":
+                c.status, c.route, c.source_idx = "supported", "lex_high", f.best
             else:
                 c.route, c.reason = "jev", "deadline"  # 끝나기 전에 마감되면 이 사유가 남는다
         jev_claims = [c for c in targets if c.route == "jev"]
@@ -258,11 +259,9 @@ def rejudge(claims: list[ClaimResult], policy: Policy) -> RunResult:
             continue
         if c.route == "jev" and c.s is not None and c.c is not None:
             _decide(c, policy)
-        elif c.route == "lex_low":
-            if not (policy.theta_low is not None and c.lex < policy.theta_low):
-                c.status, c.reason, c.source_idx = "unjudged", "needs_call", None
-        elif c.route == "lex_high":
-            if not (policy.theta_high is not None and c.lex >= policy.theta_high):
+        elif c.route in ("lex_low", "lex_high"):
+            # lex_high였다면 상단 조건(숫자·회사명)은 통과한 주장이다
+            if tier_route(c.lex, c.route == "lex_high", policy.theta_low, policy.theta_high) != c.route:
                 c.status, c.reason, c.source_idx = "unjudged", "needs_call", None
     status, code = _finish(out, None)
     return RunResult(status, code, policy.version, "rejudge", out, counts=_counts(out))

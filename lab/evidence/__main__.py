@@ -4,6 +4,10 @@
 호스트(uv)에서 돌리는 명령: split, passages, question-packets, questions-merge, claims, controlled-packets,
 controlled-check, label-packets, labels-merge, judge, stage0-report.
 컨테이너(Ollama 접근)에서 돌리는 명령: embed, retrieve, generate.
+
+`--study a2`(A-2 spec 6절)는 같은 명령을 A-2 경로(lab/evidence/study_a2, lab/data/evidence_a2, split_a2.json,
+prereg_a2.json)에서 돌린다. A-2의 봉인 분할은 check(확인 세트)이고, 조정·리포트는 a2-tune·a2-report다.
+원장은 같은 attempts.jsonl에 "study": "a2"로 덧붙인다.
 """
 from __future__ import annotations
 
@@ -17,18 +21,34 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 
-class Paths:
-    """저장소 루트 기준 경로. 테스트·검증은 임시 루트를 쓴다."""
+STUDIES = ("a1", "a2")
 
-    def __init__(self, root: Path):
+
+class Paths:
+    """저장소 루트 기준 경로. 테스트·검증은 임시 루트를 쓴다. study="a2"면 A-2 연구 경로(A-1 파일을 건드리지 않는다)."""
+
+    def __init__(self, root: Path, study: str = "a1"):
         self.root = Path(root)
+        self.study = study
         self.ev = self.root / "lab/evidence"
-        self.data = self.ev / "data"
-        self.priv = self.root / "lab/data/evidence"
-        self.split_json = self.ev / "split.json"
-        self.prereg = self.ev / "prereg.json"
-        self.prereg_holdout = self.ev / "prereg_holdout.json"
         self.attempts = self.ev / "attempts.jsonl"
+        if study == "a2":
+            self.data = self.ev / "study_a2"  # lab/evidence/a2.py 모듈과 이름이 겹치지 않게
+            self.priv = self.root / "lab/data/evidence_a2"
+            self.split_json = self.ev / "split_a2.json"
+            self.prereg = self.ev / "prereg_a2.json"
+            self.prereg_holdout = self.ev / "prereg_a2_check.json"
+            self.tune_json = self.ev / "results/a2-tune.json"
+            self.sealed = "check"
+            self.groups = {"dev": {"tune"}, "all": {"tune", "check"}}
+        else:
+            self.data = self.ev / "data"
+            self.priv = self.root / "lab/data/evidence"
+            self.split_json = self.ev / "split.json"
+            self.prereg = self.ev / "prereg.json"
+            self.prereg_holdout = self.ev / "prereg_holdout.json"
+            self.sealed = "holdout"
+            self.groups = {"dev": {"tune", "check"}, "all": {"tune", "check", "holdout"}}
         self.calls = self.priv / "jev_calls.jsonl"
 
     def jsonl(self, name: str) -> Path:
@@ -52,9 +72,11 @@ def write_jsonl(path: Path, rows: list[dict]) -> None:
 def log_attempt(P: Paths, event: str, **detail) -> None:
     """시도 원장에 한 줄을 남긴다."""
     P.attempts.parent.mkdir(parents=True, exist_ok=True)
+    rec = {"at": datetime.now(timezone.utc).isoformat(), "event": event}
+    if P.study != "a1":
+        rec["study"] = P.study
     with P.attempts.open("a") as f:
-        f.write(json.dumps({"at": datetime.now(timezone.utc).isoformat(), "event": event, **detail},
-                           ensure_ascii=False) + "\n")
+        f.write(json.dumps({**rec, **detail}, ensure_ascii=False) + "\n")
 
 
 def load_split(P: Paths) -> dict:
@@ -74,8 +96,17 @@ def holdout_frozen(P: Paths) -> bool:
 
 
 def holdout_data_open(P: Paths) -> bool:
-    """사전등록에 stage1 블록(임계값·B*·MDE·프롬프트)이 있어야 홀드아웃 데이터를 만들 수 있다."""
+    """사전등록에 stage1 블록(임계값·B*·MDE·프롬프트)이 있어야 홀드아웃 데이터를 만들 수 있다.
+
+    A-2: 조정 결과(results/a2-tune.json, τ_s·θ)가 있어야 확인 세트 데이터를 만든다.
+    """
+    if P.study == "a2":
+        return P.tune_json.exists()
     return P.prereg.exists() and bool(json.loads(P.prereg.read_text()).get("stage1"))
+
+
+_SEALED = {"a1": "holdout data is sealed until prereg.json has a stage1 block",
+           "a2": "check data is sealed until results/a2-tune.json exists (run a2-tune)"}
 
 
 def companies(P: Paths, split_name: str, stage: str = "judge") -> list[dict]:
@@ -83,30 +114,31 @@ def companies(P: Paths, split_name: str, stage: str = "judge") -> list[dict]:
 
     데이터(stage="data"): stage1 사전등록 뒤부터 동결 전까지만. 판정(그 밖): 동결 뒤, 동결 해시가 그대로일 때만.
     """
-    names = {"dev": {"tune", "check"}, "all": {"tune", "check", "holdout"}}.get(split_name, {split_name})
-    if "holdout" in names:
+    names = P.groups.get(split_name, {split_name})
+    if P.sealed in names:
         if stage == "data":
             if not holdout_data_open(P):
-                raise SystemExit("holdout data is sealed until prereg.json has a stage1 block")
+                raise SystemExit(_SEALED[P.study])
             if P.prereg_holdout.exists():
-                raise SystemExit("holdout data is frozen (prereg_holdout.json exists)")
+                raise SystemExit(f"{P.sealed} data is frozen ({P.prereg_holdout.name} exists)")
         else:
             if not holdout_frozen(P):
-                raise SystemExit("holdout is frozen until prereg_holdout.json")
+                raise SystemExit(f"{P.sealed} is frozen until {P.prereg_holdout.name}")
             verify_freeze(P)
     return [c for c in load_split(P)["companies"] if c["split"] in names]
 
 
 def once(P: Paths, path: Path, split_name: str, event: str, tag: str) -> None:
-    """홀드아웃 판정·기준선은 한 번만. 비공개 출력 파일뿐 아니라 커밋되는 원장으로도 확인한다."""
+    """봉인 분할(A-1 홀드아웃, A-2 확인) 판정·기준선은 한 번만. 비공개 출력 파일뿐 아니라 커밋되는 원장으로도
+    확인한다. 원장은 연구가 같은 줄만 센다(A-1 줄에는 study가 없다)."""
     if split_name == "all":
-        raise SystemExit("use --split holdout or a dev split (not all) for judge/baselines")
-    if split_name != "holdout":
+        raise SystemExit(f"use --split {P.sealed} or a dev split (not all) for judge/baselines")
+    if split_name != P.sealed:
         return
-    done = any(r.get("event") == event and r.get("split") == "holdout" and r.get("tag") == tag
-               for r in read_jsonl(P.attempts))
+    done = any(r.get("event") == event and r.get("split") == P.sealed and r.get("tag") == tag
+               and r.get("study", "a1") == P.study for r in read_jsonl(P.attempts))
     if Path(path).exists() or done:
-        raise SystemExit(f"holdout {event} {tag} already ran")
+        raise SystemExit(f"{P.sealed} {event} {tag} already ran")
 
 
 def _code_sha(P: Paths) -> str:
@@ -144,9 +176,10 @@ def _file_sha(path: Path) -> str:
 
 def freeze_bundle(P: Paths) -> dict:
     """spec 7절 5단계 동결 묶음: 원문·문단·검색·답변·주장·라벨·프롬프트·사전등록·코드 해시."""
-    codes = {c["corp_code"] for c in load_split(P)["companies"] if c["split"] == "holdout"}
+    codes = {c["corp_code"] for c in load_split(P)["companies"] if c["split"] == P.sealed}
     pick = lambda name, key: [r for r in read_jsonl(P.jsonl(name)) if r[key].split("-q")[0] in codes]
-    return {"split_sha256": _file_sha(P.split_json),
+    extra = {"tune_sha256": _file_sha(P.tune_json)} if P.study == "a2" else {}
+    return {**extra, "split_sha256": _file_sha(P.split_json),
             "passages_manifest_sha256": _file_sha(P.jsonl("passages_manifest.jsonl")),
             "dart_ledger_sha256": _file_sha(P.jsonl("dart_ledger.jsonl")),
             "questions_sha256": _sha_rows(pick("questions.jsonl", "qid")),
@@ -259,46 +292,73 @@ def session_stats(rows: list[dict]) -> list[dict]:
     return out
 
 
-def cmd_split(P: Paths, args) -> None:
-    """상장사 목록에서 시드 15 + 무작위 25개사를 고르고 군집 단위로 분할한다. JEV 호출 뒤에는 거부."""
-    import httpx
+def _corp_list(P: Paths, client, key) -> tuple[bytes, list]:
+    """OpenDART 회사 고유번호 파일(비공개 폴더에 한 번 받아 둔다)과 파싱한 회사 목록."""
+    from app.services.evidence import dart
 
-    from app.services.evidence import dart, passages
-    from lab.evidence import split as sp
-
-    if P.calls.exists():
-        raise SystemExit("split is frozen once JEV calls exist")
-    key = dart.load_dart_key()
-    client = httpx.Client(timeout=60)
     xml_path = P.priv / "corpCode.xml"
     if not xml_path.exists():
         xml_path.parent.mkdir(parents=True, exist_ok=True)
         xml_path.write_bytes(dart.fetch_corp_codes(client, key))
     raw = xml_path.read_bytes()
-    corps = dart.parse_corp_codes(raw)
+    return raw, dart.parse_corp_codes(raw)
+
+
+def _take(P: Paths, client, key, corp, source: str, check=None) -> tuple[str, dict | None, str]:
+    """사업보고서를 받아 문단으로 나누고 추첨 조건을 본다. (결과, 회사 행 또는 None, 지정 절 본문).
+
+    check(corp, text)가 사유 문자열을 돌려주면 그 사유로 뺀다(A-2 교차 언급 제외).
+    """
+    from app.services.evidence import dart, passages
+    from lab.evidence import split as sp
+
+    rep = dart.pick_annual_report(dart.list_annual_reports(client, key, corp.corp_code))
+    if rep is None:
+        return "no_annual_report", None, ""
+    if source == "random" and sp.is_finance(dart.company_info(client, key, corp.corp_code).get("induty_code", "")):
+        return "finance", None, ""
+    path = dart.download_document(client, key, rep["rcept_no"], P.priv / "docs", P.jsonl("dart_ledger.jsonl"))
+    try:
+        ps = passages.build_passages(corp.corp_code, rep["rcept_no"], path.read_text(encoding="utf-8", errors="ignore"))
+    except ValueError as exc:
+        return f"parse: {exc}", None, ""
+    chars = sum(len(p.text) for p in ps)
+    if source == "random" and chars < sp.MIN_CHARS:
+        return "short", None, ""
+    text = " ".join(p.text for p in ps)
+    why = check(corp, text) if check else None
+    if why:
+        return why, None, text
+    return "ok", {**asdict(corp), "rcept_no": rep["rcept_no"], "report_nm": rep["report_nm"],
+                  "source": source, "chars": chars}, text
+
+
+def cmd_split(P: Paths, args) -> None:
+    """상장사 목록에서 시드 15 + 무작위 25개사를 고르고 군집 단위로 분할한다. JEV 호출 뒤에는 거부."""
+    import httpx
+
+    from app.services.evidence import dart
+    from lab.evidence import split as sp
+
+    if P.calls.exists():
+        raise SystemExit("split is frozen once JEV calls exist")
+    if P.study == "a2":
+        verify_prereg_code(P)
+        return _split_a2(P)
+    key = dart.load_dart_key()
+    client = httpx.Client(timeout=60)
+    raw, corps = _corp_list(P, client, key)
     by_stock = {c.stock_code: c for c in corps}
     chosen: list[dict] = []
     texts: dict[str, str] = {}
     ledger: list[dict] = []
 
     def take(corp, source: str) -> str:
-        rep = dart.pick_annual_report(dart.list_annual_reports(client, key, corp.corp_code))
-        if rep is None:
-            return "no_annual_report"
-        if source == "random" and sp.is_finance(dart.company_info(client, key, corp.corp_code).get("induty_code", "")):
-            return "finance"
-        path = dart.download_document(client, key, rep["rcept_no"], P.priv / "docs", P.jsonl("dart_ledger.jsonl"))
-        try:
-            ps = passages.build_passages(corp.corp_code, rep["rcept_no"], path.read_text(encoding="utf-8", errors="ignore"))
-        except ValueError as exc:
-            return f"parse: {exc}"
-        chars = sum(len(p.text) for p in ps)
-        if source == "random" and chars < sp.MIN_CHARS:
-            return "short"
-        chosen.append({**asdict(corp), "rcept_no": rep["rcept_no"], "report_nm": rep["report_nm"],
-                       "source": source, "chars": chars})
-        texts[corp.corp_code] = " ".join(p.text for p in ps)
-        return "ok"
+        result, row, text = _take(P, client, key, corp, source)
+        if row is not None:
+            chosen.append(row)
+            texts[corp.corp_code] = text
+        return result
 
     for group in sp.SEED_GROUPS.values():
         for stock in group:
@@ -340,6 +400,79 @@ def cmd_split(P: Paths, args) -> None:
     print(json.dumps(counts))
 
 
+def a1_texts(P: Paths) -> tuple[dict[str, str], dict[str, str]]:
+    """A-1 40개사 이름과 지정 절 본문(A-1 비공개 문단 파일). 하나라도 빠지면 멈춘다(교차 언급 제외를 못 하므로)."""
+    A1 = Paths(P.root)
+    names = {c["corp_code"]: c["corp_name"] for c in load_split(A1)["companies"]}
+    texts: dict[str, list[str]] = {}
+    for r in read_jsonl(A1.priv / "passages.jsonl"):
+        texts.setdefault(r["corp_code"], []).append(r["text"])
+    missing = sorted(set(names) - set(texts))
+    if missing:
+        raise SystemExit(f"A-1 passages missing for {len(missing)} companies; A-2 draw needs lab/data/evidence/passages.jsonl")
+    return names, {code: " ".join(texts[code]) for code in names}
+
+
+def _split_a2(P: Paths) -> None:
+    """A-2 spec 6.2: 무작위 40개사(A-1 40개사·A-1과 교차 언급 10회 이상 제외), 군집 단위 확인 ≤ 20 / 나머지 조정."""
+    import httpx
+
+    from app.services.evidence import dart
+    from lab.evidence import split as sp
+
+    a1_names, a1_body = a1_texts(P)
+    key = dart.load_dart_key()
+    client = httpx.Client(timeout=60)
+    raw, corps = _corp_list(P, client, key)
+    chosen: list[dict] = []
+    texts: dict[str, str] = {}
+    ledger: list[dict] = []
+
+    def linked(corp, text: str) -> str | None:
+        code = sp.a1_link(corp.corp_name, text, a1_names, a1_body)
+        return f"a1_mention:{code}" if code else None
+
+    for corp in sp.shuffled(corps, seed=sp.A2_SEED):
+        if len(chosen) >= sp.A2_RANDOM_N:
+            break
+        skip = sp.a2_skip(corp, set(a1_names))
+        if skip == "prefix":
+            continue  # A-1처럼 원장에 남기지 않는다
+        if skip:
+            result = skip
+        else:
+            result, row, text = _take(P, client, key, corp, "random", linked)
+            if row is not None:
+                chosen.append(row)
+                texts[corp.corp_code] = text
+        ledger.append({"corp_code": corp.corp_code, "corp_name": corp.corp_name, "source": "random", "result": result})
+    names = {c["corp_code"]: c["corp_name"] for c in chosen}
+    cl = sp.clusters(names, texts, [])
+    check, tune = sp.assign(cl, sp.A2_CHECK_CAP, seed=sp.A2_SEED)
+    label = {code: name for name, part in (("check", check), ("tune", tune)) for members in part for code in members}
+    index = {code: i for i, members in enumerate(cl) for code in members}
+    for c in chosen:
+        c.update(cluster=index[c["corp_code"]], split=label[c["corp_code"]])
+    write_jsonl(P.jsonl("draw_ledger.jsonl"), ledger)
+    write_jsonl(P.jsonl("mention_edges.jsonl"), [{"from": a, "to": b, "name": n} for a, b, n in sp.mention_edges(names, texts)])
+    counts = {s: sum(c["split"] == s for c in chosen) for s in ("tune", "check")}
+    excluded: dict[str, int] = {}
+    for r in ledger:
+        if r["result"] != "ok":
+            k = r["result"].split(":")[0]
+            excluded[k] = excluded.get(k, 0) + 1
+    log_attempt(P, "split", companies=len(chosen), clusters=len(cl), excluded=excluded, **counts)
+    if len(chosen) < sp.A2_RANDOM_N:
+        raise SystemExit(f"only {len(chosen)} companies drawn (need {sp.A2_RANDOM_N})")
+    sp.check_split_sizes(counts, sealed="check", others=("tune",))
+    P.split_json.parent.mkdir(parents=True, exist_ok=True)
+    P.split_json.write_text(json.dumps({"seed": sp.A2_SEED, "corpcode_sha256": hashlib.sha256(raw).hexdigest(),
+                                        "a1_split_sha256": _file_sha(Paths(P.root).split_json),
+                                        "companies": sorted(chosen, key=lambda c: c["corp_code"]),
+                                        "clusters": cl}, ensure_ascii=False, indent=1) + "\n")
+    print(json.dumps(counts))
+
+
 def cmd_passages(P: Paths, args) -> None:
     """분할된 모든 회사의 문단을 비공개 파일에 쓰고, ID·해시 매니페스트를 커밋용으로 쓴다."""
     from app.services.evidence import passages
@@ -361,6 +494,19 @@ K = 8
 GEN_MODEL = "llama3.2:1b"
 GEN_DIGEST = "baf6a787fdff"
 EMBED_MODEL = "nomic-embed-text"
+
+
+def _rel(P: Paths, path: Path) -> str:
+    """꾸러미에 적는 저장소 기준 경로."""
+    return path.relative_to(P.root).as_posix()
+
+
+def _generator(P: Paths) -> tuple[str, str]:
+    """연구의 생성기 태그와 digest 앞 12자리. A-2는 사전등록 파일에 적힌 값만 쓴다."""
+    if P.study == "a1":
+        return GEN_MODEL, GEN_DIGEST
+    g = json.loads(P.prereg.read_text())["generator"]
+    return g["model"], g["digest"]
 
 
 def merge_questions(rows: list[dict], corp_code: str, split: str) -> list[dict]:
@@ -432,7 +578,7 @@ def cmd_question_packets(P: Paths, args) -> None:
         out = P.priv / "packets/questions" / f"{c['corp_code']}.md"
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(f"{guide}\n\n# 회사: {c['corp_name']} ({c['corp_code']})\n"
-                       f"# 출력 파일: lab/evidence/data/questions/{c['corp_code']}.jsonl\n\n{body}\n")
+                       f"# 출력 파일: {_rel(P, P.data)}/questions/{c['corp_code']}.jsonl\n\n{body}\n")
     print("ok")
 
 
@@ -513,16 +659,26 @@ def _passage_text(P: Paths) -> dict[str, str]:
 
 
 def cmd_generate(P: Paths, args) -> None:
-    """질문마다 검색 문단 8개로 답변을 한 번 생성해 동결한다(이미 있는 qid는 건너뜀). 컨테이너에서 실행."""
+    """질문마다 검색 문단 8개로 답변을 한 번 생성해 동결한다(이미 있는 qid는 건너뜀). 컨테이너에서 실행.
+
+    답변마다 생성 지연(ms)을 남긴다. 이 프로세스의 첫 답변은 모델 적재가 끼므로 cold로 표시한다(A-2 spec 7.1).
+    """
     import asyncio
+    import time
 
     import httpx
 
     from app.services.evidence.generate import PROMPT_SHA, generate_answer
 
+    if P.study == "a2":
+        verify_prereg_code(P)
+        registered = json.loads(P.prereg.read_text())["generator"].get("prompt_sha")
+        if registered != PROMPT_SHA:
+            raise SystemExit(f"generator prompt_sha {PROMPT_SHA} != registered {registered}")
     llm = _ollama()
     tags = httpx.get(f"{llm._base}/api/tags", timeout=30).json()["models"]
-    digest = model_digest(tags, GEN_MODEL, GEN_DIGEST)
+    gen_model, gen_digest = _generator(P)
+    digest = model_digest(tags, gen_model, gen_digest)
     text = _passage_text(P)
     names = _corp_names(P)
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
@@ -533,11 +689,12 @@ def cmd_generate(P: Paths, args) -> None:
 
     async def run():
         out = []
-        for q in todo:
-            ans = await generate_answer(llm, GEN_MODEL, names[q["corp_code"]], q["question"],
+        for n, q in enumerate(todo):
+            t0 = time.perf_counter()
+            ans = await generate_answer(llm, gen_model, names[q["corp_code"]], q["question"],
                                         [text[i] for i in ret[q["qid"]]])
-            out.append({"qid": q["qid"], "model": GEN_MODEL, "digest": digest, "prompt_sha": PROMPT_SHA,
-                        "answer": ans})
+            out.append({"qid": q["qid"], "model": gen_model, "digest": digest, "prompt_sha": PROMPT_SHA,
+                        "answer": ans, "latency_ms": round((time.perf_counter() - t0) * 1000, 1), "cold": n == 0})
             write_jsonl(P.jsonl("answers.jsonl"), sorted(existing + out, key=lambda r: r["qid"]))
         return out
 
@@ -545,12 +702,25 @@ def cmd_generate(P: Paths, args) -> None:
 
 
 def cmd_claims(P: Paths, args) -> None:
-    """분할의 답변에서 자연 주장을 만든다(통제 주장 행은 보존)."""
+    """분할의 답변에서 자연 주장을 만든다(통제 주장 행은 보존).
+
+    A-2: 제품과 같은 claim_spans·비주장 규칙·상한 8(lab.evidence.a2.natural_claims). 규칙에 걸린 문장도 표시해 남긴다.
+    """
     codes = {c["corp_code"] for c in companies(P, args.split, stage="data")}
     answers = [a for a in read_jsonl(P.jsonl("answers.jsonl")) if a["qid"].split("-q")[0] in codes]
     keep = [c for c in read_jsonl(P.jsonl("claims.jsonl"))
             if c["source"] == "controlled" or c["qid"].split("-q")[0] not in codes]
-    rows = natural_claims(answers)
+    if P.study == "a2":
+        from app.services.evidence.claims import claim_spans
+        from lab.evidence import a2
+
+        verify_prereg_code(P)
+        rows = a2.natural_claims(answers)
+        spans = sum(len(claim_spans(a["answer"])) for a in answers)
+        log_attempt(P, "claims", split=args.split, answers=len(answers), sentences=spans, rows=len(rows),
+                    not_claim_rule=sum(r["not_claim_rule"] for r in rows), capped=spans - len(rows))
+    else:
+        rows = natural_claims(answers)
     write_jsonl(P.jsonl("claims.jsonl"), sorted(keep + rows, key=lambda r: r["cid"]))
     print(f"{len(rows)} natural claims")
 
@@ -573,7 +743,7 @@ def cmd_controlled_packets(P: Paths, args) -> None:
             parts.append(f"## {q['qid']} — 변형 유형: {assigned_variant(q['qid'], all_qids)}\n질문: {q['question']}\n{ps}\n")
         out = P.priv / "packets/controlled" / f"{corp}.md"
         out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(f"{guide}\n\n# 출력 파일: lab/evidence/data/controlled/{corp}.jsonl\n\n" + "\n".join(parts))
+        out.write_text(f"{guide}\n\n# 출력 파일: {_rel(P, P.data)}/controlled/{corp}.jsonl\n\n" + "\n".join(parts))
     print("ok")
 
 
@@ -599,7 +769,8 @@ def cmd_controlled_check(P: Paths, args) -> None:
     keep = [c for c in read_jsonl(P.jsonl("claims.jsonl"))
             if not (c["source"] == "controlled" and c["qid"].split("-q")[0] in codes)]
     write_jsonl(P.jsonl("claims.jsonl"), sorted(keep + rows, key=lambda r: r["cid"]))
-    write_jsonl(P.jsonl("controlled_rejected.jsonl"), rejected)
+    others = [r for r in read_jsonl(P.jsonl("controlled_rejected.jsonl")) if r["qid"].split("-q")[0] not in codes]
+    write_jsonl(P.jsonl("controlled_rejected.jsonl"), sorted(others + rejected, key=lambda r: r["qid"]))
     log_attempt(P, "controlled-check", accepted=len(rows) // 2, rejected=len(rejected))
     print(f"{len(rows) // 2} accepted, {len(rejected)} rejected")
 
@@ -707,9 +878,17 @@ def cmd_label_packets(P: Paths, args) -> None:
             continue
         out = P.priv / "packets/labels" / f"r{args.round}_{args.labeler}" / f"{corp}.md"
         out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_text(f"{guide}\n\n# 출력 파일: lab/evidence/data/labels/r{args.round}_{args.labeler}/{corp}.jsonl\n\n"
+        out.write_text(f"{guide}\n\n# 출력 파일: {_rel(P, P.data)}/labels/r{args.round}_{args.labeler}/{corp}.jsonl\n\n"
                        + "\n".join(parts))
     print("ok")
+
+
+def r1_binary_kappa(pairs: list[tuple[str, str]]) -> float | None:
+    """1차 라벨 (opus, codex) 쌍의 이진 κ(지지됨 대 나머지, 어느 한쪽이 비주장이면 뺀다). 쌍이 없으면 None."""
+    from lab.evidence.metrics import kappa
+
+    both = [(a, b) for a, b in pairs if "non_claim" not in (a, b)]
+    return kappa([a == "supported" for a, _ in both], [b == "supported" for _, b in both]) if both else None
 
 
 def cmd_labels_merge(P: Paths, args) -> None:
@@ -727,18 +906,57 @@ def cmd_labels_merge(P: Paths, args) -> None:
     rows = merge_labels(r1, r2)
     keep = [r for r in read_jsonl(P.jsonl("labels.jsonl")) if r["cid"].split("-q")[0] not in codes]
     write_jsonl(P.jsonl("labels.jsonl"), sorted(keep + rows, key=lambda r: r["cid"]))
-    both = [c for c in r1["opus"].keys() & r1["codex"].keys()
-            if "non_claim" not in (r1["opus"][c]["label"], r1["codex"][c]["label"])]
-    k = kappa([r1["opus"][c]["label"] == "supported" for c in both], [r1["codex"][c]["label"] == "supported" for c in both])
+    k = r1_binary_kappa([(r1["opus"][c]["label"], r1["codex"][c]["label"]) for c in r1["opus"].keys() & r1["codex"].keys()])
     log_attempt(P, "labels-merge", split=args.split, labeled=len(rows),
-                disputed=sum(r["label"] == "disputed" for r in rows), kappa_binary_r1=round(k, 4))
-    print(f"{len(rows)} labels, kappa r1 {k:.3f}")
+                disputed=sum(r["label"] == "disputed" for r in rows), kappa_binary_r1=None if k is None else round(k, 4))
+    print(f"{len(rows)} labels, kappa r1 {'n/a' if k is None else f'{k:.3f}'}")
 
 
 COMMANDS.update({"label-packets": cmd_label_packets, "labels-merge": cmd_labels_merge})
 
 
 TOKEN_CAP = 20_000_000
+
+
+def _token_cap(P: Paths) -> int:
+    """연구별 입력 토큰 상한(A-1 20,000,000, A-2는 사전등록 값 6,000,000). 호출 기록 파일도 연구별이다."""
+    return TOKEN_CAP if P.study == "a1" else int(json.loads(P.prereg.read_text())["token_cap"])
+
+
+def a2_budget(P: Paths, split_name: str, claims: list[dict], text: dict, ret: dict, names: dict) -> list[dict]:
+    """A-2 예산 규칙(prereg_a2.json budget): 캐시에 없는 주장 × 5,070 토큰으로 추정해 호출 전에 확인한다.
+
+    조정 세트: 자연 주장만 판정하고, 확인 세트 자연 주장 몫(조정 세트와 같은 크기로 추정)을 예약한다.
+    확인 세트: 자연 + 통제가 상한을 넘으면 통제 주장을 빼고(원장 기록), 자연만으로도 넘으면 멈춘다.
+    """
+    from app.lib.jev import request_key
+    from app.services.evidence.judge import build_questions, build_state
+    from lab.evidence import a2
+
+    calls = read_jsonl(P.calls)
+    used = sum(r["input_tokens"] for r in calls)
+    cached = {r["key"] for r in calls if r["ok"]}
+
+    def estimate(rows: list[dict]) -> int:
+        n = 0
+        for c in rows:
+            ps = [text[i] for i in ret[c["qid"]]]
+            n += request_key(build_state(names[c["qid"].split("-q")[0]], c["text"], ps), build_questions(len(ps))) not in cached
+        return n * a2.TOKENS_PER_CALL
+
+    cap = _token_cap(P)
+    if split_name != "check":
+        claims = [c for c in claims if c["source"] == "natural"]
+        a2.check_budget(used, estimate(claims), cap, reserve=len(claims) * a2.TOKENS_PER_CALL)
+        return claims
+    natural = [c for c in claims if c["source"] == "natural"]
+    est_all, est_nat = estimate(claims), estimate(natural)
+    if used + est_all > cap:
+        log_attempt(P, "budget-drop-controlled", split=split_name, used=used, estimate_all=est_all, cap=cap,
+                    dropped=len(claims) - len(natural))
+        claims, est_all = natural, est_nat
+    a2.check_budget(used, est_all, cap)
+    return claims
 
 
 def subset(cids: list[str], n: int) -> list[str]:
@@ -758,12 +976,13 @@ def sessions(times: list[str], gap_hours: float = 1.0) -> list[list[str]]:
 
 
 def _judgeable(P: Paths, split_name: str, include_disputed: bool = False) -> list[dict]:
-    """분할의 주장 중 판정 대상(라벨 포함). 기본은 disputed·non_claim 제외, 민감도용으로 disputed 포함 가능."""
+    """분할의 주장 중 판정 대상(라벨 포함). 기본은 disputed·non_claim 제외, 민감도용으로 disputed 포함 가능.
+    A-2 비주장 규칙에 걸린 문장(not_claim_rule)은 제품이 판정하지 않으므로 뺀다."""
     codes = {c["corp_code"] for c in companies(P, split_name)}
     lab = {r["cid"]: r["label"] for r in read_jsonl(P.jsonl("labels.jsonl"))}
     skip = {None, "non_claim"} | (set() if include_disputed else {"disputed"})
     return [dict(c, label=lab[c["cid"]]) for c in read_jsonl(P.jsonl("claims.jsonl"))
-            if c["qid"].split("-q")[0] in codes and lab.get(c["cid"]) not in skip]
+            if c["qid"].split("-q")[0] in codes and lab.get(c["cid"]) not in skip and not c.get("not_claim_rule")]
 
 
 def cmd_judge(P: Paths, args) -> None:
@@ -772,20 +991,24 @@ def cmd_judge(P: Paths, args) -> None:
     from app.services.evidence.judge import judge_claim
 
     if not P.prereg.exists():
-        raise SystemExit("prereg.json must be committed before JEV calls")
+        raise SystemExit(f"{P.prereg.name} must be committed before JEV calls")
     if not args.tag:
         raise SystemExit("--tag is required")
-    if args.split == "holdout" and (args.tag != "holdout" or args.limit or args.single or args.no_cache):
-        raise SystemExit("holdout judge runs once with --tag holdout and no --limit/--single/--no-cache")
+    if args.split == P.sealed and (args.tag != P.sealed or args.limit or args.single or args.no_cache):
+        raise SystemExit(f"{P.sealed} judge runs once with --tag {P.sealed} and no --limit/--single/--no-cache")
+    if P.study == "a2":
+        verify_prereg_code(P)
     once(P, P.priv / "scores" / f"{args.tag}.jsonl", args.split, "judge", args.tag)
-    claims = _judgeable(P, args.split, include_disputed=(args.split == "holdout"))
+    claims = _judgeable(P, args.split, include_disputed=(args.split == P.sealed))
     if args.limit:
         keep = set(subset([c["cid"] for c in claims if c["source"] == "natural"], args.limit))
         claims = [c for c in claims if c["cid"] in keep]
     text = _passage_text(P)
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
     names = _corp_names(P)
-    client = JevClient(P.calls, TOKEN_CAP)
+    if P.study == "a2":
+        claims = a2_budget(P, args.split, claims, text, ret, names)
+    client = JevClient(P.calls, _token_cap(P))
     out = []
     for c in claims:
         j = judge_claim(client, names[c["qid"].split("-q")[0]], c["text"], [text[i] for i in ret[c["qid"]]],
@@ -1117,21 +1340,24 @@ def _sha_rows(rows: list[dict]) -> str:
 
 
 def cmd_freeze_holdout(P: Paths, args) -> None:
-    """홀드아웃 동결 묶음(spec 7절 5단계)을 쓴다(판정 봉인 해제). 덮어쓰기·미커밋 변경 금지."""
+    """봉인 분할 동결 묶음(A-1 spec 7절 5단계, A-2 spec 6.4절 5단계)을 쓴다(판정 봉인 해제). 덮어쓰기·미커밋 변경 금지."""
     if P.prereg_holdout.exists():
-        raise SystemExit("prereg_holdout.json already exists")
+        raise SystemExit(f"{P.prereg_holdout.name} already exists")
     if _tree_dirty(P):
         raise SystemExit("commit app/ and lab/evidence/ changes before freezing")
-    codes = {c["corp_code"] for c in companies(P, "holdout", stage="data")}
+    codes = {c["corp_code"] for c in companies(P, P.sealed, stage="data")}
     if not [r for r in read_jsonl(P.jsonl("labels.jsonl")) if r["cid"].split("-q")[0] in codes]:
-        raise SystemExit("no holdout labels")
+        raise SystemExit(f"no {P.sealed} labels")
+    pre = json.loads(P.prereg.read_text())
+    labelers = (pre.get("stage1", {}) if P.study == "a1" else pre.get("labels", {})).get("labelers")
+    gen_model, gen_digest = _generator(P)
     data = {**freeze_bundle(P),
-            "models": {"jev": "jev-1.13.0", "generator": f"{GEN_MODEL}@{GEN_DIGEST}", "embedder": "nomic-embed-text@0a109f422b47",
-                       "labelers": json.loads(P.prereg.read_text()).get("stage1", {}).get("labelers")},
+            "models": {"jev": "jev-1.13.0", "generator": f"{gen_model}@{gen_digest}", "embedder": "nomic-embed-text@0a109f422b47",
+                       "labelers": labelers},
             "code_commit": _git_head(P), "frozen_at": datetime.now(timezone.utc).isoformat()}
     P.prereg_holdout.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n")
     log_attempt(P, "freeze-holdout", claims=len([r for r in read_jsonl(P.jsonl("claims.jsonl")) if r["cid"].split("-q")[0] in codes]))
-    print("holdout frozen")
+    print(f"{P.sealed} frozen")
 
 
 def _sensitivity(P: Paths, cfg: dict, b: str, rows: list[dict]) -> dict:
@@ -1205,10 +1431,240 @@ COMMANDS.update({"stage1-tune": cmd_stage1_tune, "freeze-holdout": cmd_freeze_ho
                  "stage1-report": cmd_stage1_report})
 
 
+def verify_prereg_code(P: Paths) -> None:
+    """A-2 사전등록에 적힌 코드 파일 해시(1차 필터·비주장 규칙·숫자 확인)가 지금과 같은지 본다. 다르면 멈춘다."""
+    pre = json.loads(P.prereg.read_text()).get("code_sha256")
+    if not pre:
+        raise SystemExit(f"{P.prereg.name} has no code_sha256")
+    bad = sorted(rel for rel, sha in pre.items() if _file_sha(P.root / rel) != sha)
+    if bad:
+        raise SystemExit(f"code changed after {P.prereg.name}: {bad}")
+
+
+def guard_tune_open(P: Paths) -> None:
+    """조정(τ_s·θ 선택)은 확인 세트 데이터를 만들기 전에만 한다. 확인 세트를 본 뒤 다시 고르지 못하게."""
+    codes = {c["corp_code"] for c in load_split(P)["companies"] if c["split"] == P.sealed}
+    if P.prereg_holdout.exists() or any(q["corp_code"] in codes for q in read_jsonl(P.jsonl("questions.jsonl"))):
+        raise SystemExit("tune is closed: check data exists")
+
+
+def _a2_inputs(P: Paths):
+    from app.services.evidence.lexical import lex_features
+    from app.services.evidence.numbers import number_check
+
+    text = _passage_text(P)
+    ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
+    names = _corp_names(P)
+    cluster = {c["corp_code"]: c["cluster"] for c in load_split(P)["companies"]}
+
+    def feats(c: dict) -> dict:
+        corp = c["qid"].split("-q")[0]
+        ps = [text[i] for i in ret[c["qid"]]]
+        f = lex_features(c["text"], ps, names[corp])
+        return {"cid": c["cid"], "qid": c["qid"], "cluster": cluster[corp], "lex": f.lex, "high_ok": f.high_ok,
+                "valid": [number_check(c["text"], p) for p in ps]}
+    return feats
+
+
+def a2_rows(P: Paths, split_name: str, source: str = "natural") -> tuple[list[dict], int]:
+    """판정 가능한 주장(라벨·JEV 확률·제품 1차 필터 입력)과 JEV 실패로 뺀 수.
+
+    자연 주장은 하나라도 점수가 없으면 멈춘다(--limit 스모크·잘못된 --tag의 부분 점수로 조용히 폴백하지 않게).
+    통제 주장은 예산 규칙으로 뺐을 수 있으므로 점수가 있는 것만 쓴다.
+    """
+    feats = _a2_inputs(P)
+    jev = _scores(P, split_name)
+    claims = [c for c in _judgeable(P, split_name) if c["source"] == source]
+    missing = [c["cid"] for c in claims if c["cid"] not in jev]
+    if missing and source == "natural":
+        raise SystemExit(f"{len(missing)} {split_name} claims lack JEV scores (scores/{split_name}.jsonl)")
+    rows, failed = [], 0
+    for c in claims:
+        if c["cid"] not in jev:
+            continue
+        if not jev[c["cid"]]["ok"]:
+            failed += 1
+            continue
+        rows.append({**feats(c), "s": jev[c["cid"]]["s"], "c": jev[c["cid"]]["c"], "label": c["label"],
+                     "y": int(c["label"] == "supported"), "variant": c.get("variant"), "expected": c.get("expected")})
+    return rows, failed
+
+
+def a2_pool(P: Paths, split_name: str) -> list[dict]:
+    """JEV 호출 감소율의 분모: 규칙을 통과한 자연 주장 전체(라벨과 무관)의 1차 필터 입력."""
+    feats = _a2_inputs(P)
+    codes = {c["corp_code"] for c in companies(P, split_name)}
+    return [feats(c) for c in read_jsonl(P.jsonl("claims.jsonl"))
+            if c["source"] == "natural" and not c.get("not_claim_rule") and c["qid"].split("-q")[0] in codes]
+
+
+def _r1_kappa(P: Paths, split_name: str) -> float | None:
+    """분할의 1차 라벨 이진 κ(labels-merge와 같은 r1_binary_kappa)."""
+    codes = {c["corp_code"] for c in companies(P, split_name)}
+    return r1_binary_kappa([(r["r1"]["opus"]["label"], r["r1"]["codex"]["label"])
+                            for r in read_jsonl(P.jsonl("labels.jsonl")) if r["cid"].split("-q")[0] in codes])
+
+
+def _labeled_natural(P: Paths, split_name: str) -> list[dict]:
+    codes = {c["corp_code"] for c in companies(P, split_name)}
+    lab = {r["cid"]: r["label"] for r in read_jsonl(P.jsonl("labels.jsonl"))}
+    return [dict(c, label=lab.get(c["cid"])) for c in read_jsonl(P.jsonl("claims.jsonl"))
+            if c["source"] == "natural" and c["qid"].split("-q")[0] in codes]
+
+
+def _latency_by_split(P: Paths) -> dict:
+    """생성 지연을 분할별로 따로 요약한다(조정·확인을 섞지 않는다)."""
+    from lab.evidence import a2
+
+    split_of = {c["corp_code"]: c["split"] for c in load_split(P)["companies"]}
+    answers = read_jsonl(P.jsonl("answers.jsonl"))
+    return {s: a2.latency_summary([a for a in answers if split_of.get(a["qid"].split("-q")[0]) == s])
+            for s in ("tune", P.sealed)}
+
+
+def cmd_a2_tune(P: Paths, args) -> None:
+    """A-2 spec 6.3: 조정 세트에서 τ_s(τ_c 0.35 고정)·θ_low·θ_high를 고른다. 확인 세트 데이터가 생기면 거부."""
+    from lab.evidence import a2
+
+    guard_tune_open(P)
+    verify_prereg_code(P)
+    k = _r1_kappa(P, "tune")
+    if k is None or k < a2.KAPPA_MIN:
+        log_attempt(P, "a2-tune-stop", reason="kappa", kappa=k)
+        raise SystemExit(f"stop: tune label kappa {k} < {a2.KAPPA_MIN}")
+    rows, failed = a2_rows(P, "tune")
+    tau = a2.choose_tau_s(rows)
+    low, high = a2.choose_theta_low(rows), a2.choose_theta_high(rows)
+    cfg = {"tau_s": tau["tau_s"], "tau_c": a2.TAU_C, "theta_low": low["theta_low"], "theta_high": high["theta_high"]}
+    d = a2.decide(rows, cfg)
+    result = {**cfg, "tau_s_fallback": tau["fallback"], "n": len(rows), "jev_failed_excluded": failed,
+              "supported_labels": sum(r["y"] for r in rows), "kappa_r1": k,
+              "boundary_share": a2.boundary_share(rows, cfg["tau_s"]),
+              "operating_point": _op_point([dict(r, decision=r["sys_decision"]) for r in d]),
+              "tau_s_candidates": tau["candidates"], "theta_low_candidates": low["candidates"],
+              "theta_high_candidates": high["candidates"],
+              "not_claim_audit": a2.not_claim_audit(_labeled_natural(P, "tune")),
+              "generation_latency": _latency_by_split(P)["tune"],
+              "note": "θ는 AI 참조 라벨과 어휘 점수로만 골랐다(MCA 2.3(b)). 확인 세트 결과를 보고 다시 고르지 않는다."}
+    P.tune_json.parent.mkdir(parents=True, exist_ok=True)
+    P.tune_json.write_text(json.dumps(result, ensure_ascii=False, indent=1) + "\n")
+    log_attempt(P, "a2-tune", **cfg, tau_s_fallback=tau["fallback"], n=len(rows))
+    print(json.dumps(cfg))
+
+
+def _num(v) -> str:
+    return "—" if v is None else (f"{v:.3f}" if isinstance(v, float) else str(v))
+
+
+def _passfail(b: bool) -> str:
+    return "통과" if b else "실패"
+
+
+def _gate_lines(g: dict) -> list[str]:
+    hp, hl, hh, ht = g["h_prec"], g["h_low"], g["h_high"], g["h_tier"]
+    prec = f"✅ 예측 {hp['predicted']}건, 정밀도 {_num(hp['precision'])} (95% {_num(hp['ci'][0])}~{_num(hp['ci'][1])})"
+    if hp["descriptive_only"]:
+        prec += ", 기술 통계만(✅ 예측 150건 미만)"
+    low = "미시험(조정 세트에서 θ_low 없음)" if hl["status"] == "not_tested" else (
+        f"하단 {hl['band']}건, 지지됨 비율 {_num(hl['supported_rate'])}, 전체 대비 {_num(hl['share'])}")
+    high = "미시험(조정 세트에서 θ_high 없음)" if hh["status"] == "not_tested" else (
+        f"판정 불가(확인 세트 상단 구간 {hh['band']}건 < 30) → 미채택" if hh["status"] == "insufficient" else
+        f"상단 {hh['band']}건, 정밀도 {_num(hh['precision'])}, 상단 적용 ✅ 정밀도 {_num(hh['tier_precision'])} "
+        f"대 SYS {_num(hh['sys_precision'])}")
+    if ht["status"] == "not_applicable":
+        tier = "해당 없음(채택된 구간 없음)"
+    else:
+        a = ht["auc_diff"]
+        tier = (f"구간 {'+'.join(ht['adopted'])}, AUC 차이 {_num(a['point'])} (95% {_num(a['lo'])}~{_num(a['hi'])}), "
+                f"JEV 호출 감소 {_num(ht['call_reduction'])}")
+    return ["| 가설 | 값 | 결과 |", "|---|---|---|", f"| H-prec | {prec} | {_passfail(hp['pass'])} |",
+            f"| H-low | {low} | {_passfail(hl['pass'])} |", f"| H-high | {high} | {_passfail(hh['pass'])} |",
+            f"| H-tier | {tier} | {_passfail(ht['pass'])} |"]
+
+
+def report_md(res: dict) -> str:
+    """A-2 리포트 본문(AI 생성 표시, 금액 없음)."""
+    cfg, pol, lat, nc = res["tuned"], res["policy_a2_v1"], res["generation_latency"], res["not_claim_audit"]
+    sl = res["sys_minus_lex"]
+    lines = ["# 근거 판정 A-2 평가 리포트(확인 세트 1회 실행)", "",
+             "> 이 리포트는 `python -m lab.evidence --study a2 a2-report`가 자동 생성했다. 정답 라벨은 사람이 아니라 "
+             "AI(Claude Opus·Codex)가 만든 **AI 참조 라벨**이며, 수치는 그 라벨과의 일치 성능이다. "
+             "판정에는 TypeSafe의 JEV 모델을 썼고, 이 프로젝트는 TypeSafe와 제휴 관계가 아니다.", "",
+             f"- 사전등록: `lab/evidence/prereg_a2.json`, 동결: `lab/evidence/prereg_a2_check.json`, 원자료: "
+             "`lab/evidence/results/a2-check.json`",
+             f"- 조정 세트에서 고른 값: τ_s {_num(cfg['tau_s'])}{' (폴백)' if cfg.get('tau_s_fallback') else ''}, "
+             f"τ_c {_num(cfg['tau_c'])}, θ_low {_num(cfg['theta_low'])}, θ_high {_num(cfg['theta_high'])}",
+             f"- 확인 세트 판정 가능 자연 주장 {res['n']}건(AI 라벨 지지됨 {res['supported_labels']}건), "
+             f"JEV 실패로 제외 {res['jev_failed_excluded']}건, τ_s ± 0.05 경계 비율 {_num(res['boundary_share'])}", "",
+             "## 관문", "", *_gate_lines(res["gates"]), "",
+             "## 제품 정책 a2-v1(사전등록 반영 규칙 표에 따름)", "",
+             f"- τ_s {_num(pol['tau_s'])}, τ_c {_num(pol['tau_c'])}, θ_low {_num(pol['theta_low'])}, "
+             f"θ_high {_num(pol['theta_high'])}",
+             "- 정밀도 목표 확인됨" if pol["precision_target_confirmed"] else
+             "- **정밀도 목표 미확인** — τ_s 0.85 고정, 배지 툴팁에 \"확신도 기준을 보수적으로 둔 시험 운영\"을 덧붙인다", "",
+             "## 보조 결과", "",
+             f"- SYS − 어휘 겹침 AUC: {_num(sl['point'])} (95% {_num(sl['lo'])}~{_num(sl['hi'])}), "
+             f"판정 {sl['verdict']['statistical']}, 실용적 동등 {sl['verdict']['practically_equivalent']}",
+             f"- SYS 운영점: {json.dumps(res['operating_point'], ensure_ascii=False)}",
+             f"- 통제 주장 변형 유형별 정확도: {json.dumps(res['controlled_accuracy_by_variant'], ensure_ascii=False)}",
+             f"- 비주장 규칙: 걸린 문장 {nc['flagged']}건 중 AI 라벨이 주장 {nc['claim']}건(비율 {_num(nc['claim_share'])}), "
+             f"규칙에서 뺄 표현 {nc['drop_phrases'] or '없음'}",
+             *[f"- 생성 지연 {name}(서비스 생성기, 첫 호출 제외 {v['n']}건): p50 {_num(v['p50_ms'])}ms, "
+               f"p95 {_num(v['p95_ms'])}ms → 타임아웃 재설정값(p95 × 2) {_num(v['timeout_s'])}초"
+               for name, v in lat.items()], ""]
+    return "\n".join(lines)
+
+
+def cmd_a2_report(P: Paths, args) -> None:
+    """확인 세트(동결 뒤 1회 판정 결과)로 관문·정책 a2-v1·보조 지표를 계산해 결과 JSON과 리포트를 쓴다. 추가 호출 없음."""
+    from lab.evidence import a2
+    from lab.evidence.metrics import auc, cluster_bootstrap
+
+    companies(P, P.sealed)  # 동결 확인
+    verify_prereg_code(P)
+    cfg = json.loads(P.tune_json.read_text())
+    rows, failed = a2_rows(P, P.sealed)
+    g = a2.check_gates(rows, a2_pool(P, P.sealed), cfg)
+    d = a2.decide(rows, cfg)
+    sl = cluster_bootstrap(d, lambda rs: (lambda x, y: None if x is None or y is None else x - y)(
+        auc([r["y"] for r in rs], [r["sys_score"] for r in rs]), auc([r["y"] for r in rs], [r["lex"] for r in rs])),
+        n=a2.BOOTSTRAP_N, seed=a2.SEED)
+    ctrl, _ = a2_rows(P, P.sealed, source="controlled")
+    by_var: dict[str, list[bool]] = {}
+    for r in a2.decide(ctrl, cfg):
+        by_var.setdefault(r["variant"], []).append((r["sys_decision"] == "supported") == (r["expected"] == "supported"))
+    codes = {c["corp_code"] for c in companies(P, P.sealed)}
+    res = {"tuned": {k: cfg.get(k) for k in ("tau_s", "tau_c", "theta_low", "theta_high", "tau_s_fallback")},
+           "n": len(rows), "supported_labels": sum(r["y"] for r in rows), "jev_failed_excluded": failed,
+           "gates": g, "policy_a2_v1": a2.policy_a2_v1(g, cfg),
+           "boundary_share": a2.boundary_share(rows, cfg["tau_s"]),
+           "operating_point": _op_point([dict(r, decision=r["sys_decision"]) for r in d]),
+           "sys_minus_lex": {"point": sl[0], "lo": sl[1], "hi": sl[2], "verdict": reported_verdict(sl[1], sl[2], False, False)},
+           "controlled_accuracy_by_variant": {k: sum(v) / len(v) for k, v in sorted(by_var.items())},
+           "not_claim_audit": a2.not_claim_audit(_labeled_natural(P, P.sealed)),
+           "generation_latency": _latency_by_split(P),
+           "check_answers": sum(a["qid"].split("-q")[0] in codes for a in read_jsonl(P.jsonl("answers.jsonl")))}
+    out = P.ev / "results/a2-check.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(res, ensure_ascii=False, indent=1, default=str) + "\n")
+    doc = P.root / "docs/lab/evidence-a2-report.md"
+    doc.parent.mkdir(parents=True, exist_ok=True)
+    doc.write_text(report_md(res))
+    log_attempt(P, "a2-report", policy=res["policy_a2_v1"], h_prec=g["h_prec"]["pass"], h_low=g["h_low"]["pass"],
+                h_high=g["h_high"]["pass"], h_tier=g["h_tier"]["pass"])
+    print(json.dumps(res["policy_a2_v1"]))
+
+
+COMMANDS.update({"a2-tune": cmd_a2_tune, "a2-report": cmd_a2_report})
+A1_ONLY = {"stage0-report", "stage1-tune", "stage1-freeze-config", "stage1-report", "baselines", "claim-embed"}
+A2_ONLY = {"a2-tune", "a2-report"}
+
+
 def main(argv: list[str] | None = None) -> None:
     """명령 분기."""
     ap = argparse.ArgumentParser(prog="lab.evidence")
     ap.add_argument("--root", type=Path, default=ROOT)
+    ap.add_argument("--study", default="a1", choices=STUDIES)
     ap.add_argument("cmd", choices=sorted(COMMANDS))
     ap.add_argument("--split", default="dev", choices=SPLITS)
     ap.add_argument("--labeler", choices=["opus", "codex"])
@@ -1218,7 +1674,11 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--no-cache", action="store_true")
     ap.add_argument("--limit", type=int, default=0)
     args = ap.parse_args(argv)
-    COMMANDS[args.cmd](Paths(args.root), args)
+    if args.study != "a1" and args.cmd in A1_ONLY:
+        raise SystemExit(f"{args.cmd} is an a1 command")
+    if args.study != "a2" and args.cmd in A2_ONLY:
+        raise SystemExit(f"{args.cmd} needs --study a2")
+    COMMANDS[args.cmd](Paths(args.root, args.study), args)
 
 
 if __name__ == "__main__":

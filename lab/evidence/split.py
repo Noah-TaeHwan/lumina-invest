@@ -1,5 +1,5 @@
 # lab/evidence/split.py
-"""기업 표본 추첨, 교차 언급 군집, 군집 단위 분할(spec 2절)."""
+"""기업 표본 추첨, 교차 언급 군집, 군집 단위 분할(spec 2절). A-2(A-2 spec 6.2절)는 시드·제외 규칙만 더한다."""
 from __future__ import annotations
 
 import random
@@ -25,11 +25,16 @@ EXCLUDED_PREFIXES = ("삼성", "SK", "에스케이", "현대", "기아", "LG", "
                      "POSCO", "포스코", "셀트리온")
 FINANCE_KSIC = ("64", "65", "66")
 
+# A-2: 무작위 40개사(시드 그룹 없음), 확인 세트 상한 20(나머지가 조정 세트)
+A2_SEED = 20261103
+A2_RANDOM_N = 40
+A2_CHECK_CAP = 20
 
-def shuffled(corps: list[Corp]) -> list[Corp]:
+
+def shuffled(corps: list[Corp], seed: int = SEED) -> list[Corp]:
     """corp_code 오름차순 정렬 뒤 고정 시드로 섞은 추첨 순서."""
     out = sorted(corps, key=lambda c: c.corp_code)
-    random.Random(SEED).shuffle(out)
+    random.Random(seed).shuffle(out)
     return out
 
 
@@ -58,9 +63,31 @@ def mention_edges(names: dict[str, str], texts: dict[str, str]) -> list[tuple[st
             if a != b and len(names[b]) >= MIN_NAME_LEN and texts.get(a, "").count(names[b]) >= MIN_MENTIONS]
 
 
-def check_split_sizes(counts: dict[str, int], holdout_min: int = 15) -> None:
-    """조정·확인 세트가 비거나 홀드아웃이 하한보다 작으면 멈춘다(군집이 한 덩어리로 뭉친 경우)."""
-    if counts.get("tune", 0) == 0 or counts.get("check", 0) == 0 or counts.get("holdout", 0) < holdout_min:
+def a2_skip(corp: Corp, a1_codes: set[str]) -> str | None:
+    """A-2 추첨에서 본문을 받기 전에 거르는 사유: A-1 40개사, 시드 그룹 이름 접두어."""
+    if corp.corp_code in a1_codes:
+        return "a1_company"
+    return None if is_candidate(corp) else "prefix"
+
+
+def a1_link(name: str, text: str, a1_names: dict[str, str], a1_texts: dict[str, str]) -> str | None:
+    """후보와 A-1 회사 사이 교차 언급(어느 쪽 본문이든 상대 이름이 MIN_MENTIONS번 이상)이면 그 A-1 회사 코드.
+
+    이름 길이·횟수 기준은 A-1 군집 규칙(mention_edges)과 같다.
+    """
+    for code in sorted(a1_names):
+        a1 = a1_names[code]
+        if len(a1) >= MIN_NAME_LEN and text.count(a1) >= MIN_MENTIONS:
+            return code
+        if len(name) >= MIN_NAME_LEN and a1_texts.get(code, "").count(name) >= MIN_MENTIONS:
+            return code
+    return None
+
+
+def check_split_sizes(counts: dict[str, int], holdout_min: int = 15, sealed: str = "holdout",
+                      others: tuple[str, ...] = ("tune", "check")) -> None:
+    """봉인 분할(A-1 홀드아웃, A-2 확인)이 하한보다 작거나 나머지 분할이 비면 멈춘다(군집이 한 덩어리로 뭉친 경우)."""
+    if any(counts.get(o, 0) == 0 for o in others) or counts.get(sealed, 0) < holdout_min:
         raise SystemExit(f"split sizes unusable: {counts}")
 
 
@@ -89,10 +116,10 @@ def clusters(names: dict[str, str], texts: dict[str, str], groups: list[list[str
     return sorted((sorted(v) for v in comp.values()), key=lambda v: v[0])
 
 
-def assign(cluster_list: list[list[str]], cap: int) -> tuple[list[list[str]], list[list[str]]]:
+def assign(cluster_list: list[list[str]], cap: int, seed: int = SEED) -> tuple[list[list[str]], list[list[str]]]:
     """고정 시드로 섞은 군집을 앞에서부터 보며, 넣어도 cap 이하면 앞 묶음에, 아니면 뒤 묶음에 둔다."""
     order = list(cluster_list)
-    random.Random(SEED).shuffle(order)
+    random.Random(seed).shuffle(order)
     take, rest, n = [], [], 0
     for cl in order:
         if n + len(cl) <= cap:

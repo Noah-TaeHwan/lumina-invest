@@ -79,19 +79,27 @@ def _proper_noun_candidate(sentence: str) -> bool:
     return False
 
 
+def not_claim_reason(sentence: str) -> str | None:
+    """비주장 규칙에 걸린 첫 사유(question / phrase:<표현> / lead / short). 걸리지 않으면 None."""
+    s = sentence.strip()
+    if s.endswith(("?", "？")):
+        return "question"
+    for p in NOT_CLAIM_PHRASES:
+        if p in s:
+            return f"phrase:{p}"
+    if re.search(r"\d", s):
+        return None
+    if s.endswith((NOT_CLAIM_LEAD_COLON, "：")) or s.rstrip(".").endswith(NOT_CLAIM_LEAD_ENDS):
+        return "lead"
+    if len(s) < NOT_CLAIM_MAX_SHORT and not _proper_noun_candidate(s):
+        return "short"
+    return None
+
+
 def is_not_claim(sentence: str) -> bool:
     """A-2 spec 5.2절 비주장 규칙: 물음표로 끝남, 답변 불가·자료 언급 표현, 숫자 없는 목록 머리말,
     숫자·고유명사 후보 없는 10자 미만."""
-    s = sentence.strip()
-    if s.endswith(("?", "？")):
-        return True
-    if any(p in s for p in NOT_CLAIM_PHRASES):
-        return True
-    if re.search(r"\d", s):
-        return False
-    if s.endswith((NOT_CLAIM_LEAD_COLON, "：")) or s.rstrip(".").endswith(NOT_CLAIM_LEAD_ENDS):
-        return True
-    return len(s) < NOT_CLAIM_MAX_SHORT and not _proper_noun_candidate(s)
+    return not_claim_reason(sentence) is not None
 
 
 def numeric_tokens(text: str) -> set[str]:
