@@ -360,7 +360,6 @@ async def s_pure(browser, base, ck: Checks):
     ck.ok(note not in res["tip_prov"] and note not in res["tip_pending"],
           f"pure: 잠정 정책·판정 중 배지에는 덧붙이지 않는다 {res['tip_prov']} / {res['tip_pending']}")
     ck.ok("(시험 기준)" in res["s_prov2"], f"pure: 비주장 규칙 보강 뒤 잠정 정책도 시험 기준 {res['s_prov2']}")
-    ck.ok(not page.errors, f"pure: JS 오류 없음(a2-v1 확인 포함) {page.errors}")
     ck.ok(res["retry"] == [True, False, False, False], "pure: 다시 판정은 failed·partial이면서 서버 retryable일 때만")
     ck.ok(not page.errors, f"pure: JS 오류 없음 {page.errors}")
     await ctx.close()

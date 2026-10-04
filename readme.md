@@ -89,7 +89,7 @@ AI 답변의 문장마다 DART 사업보고서 문단이 그 문장을 뒷받침
 | 계층형 판정의 JEV 호출 감소 | 16.9%(목표 30%) → 실패 |
 | 통제 주장 변형별 정확도 | 숫자·기간·부정·다른 기업 1.00, 의역 0.93, **주체 교체 0.57**(회사·부문 이름만 바꾼 문장이 여전히 많이 ✅로 넘어감) |
 
-- 제품 정책 `a2-v1`은 사전등록 반영 규칙 그대로입니다: τ_s 0.85(정밀도 관문 실패 시 고정값), 상단 구간 θ 0.95. 결과를 보고 값을 다시 고르지 않았고, 화면에는 "(시험 기준)"과 "정밀도 목표를 확인하지 못한 시험 운영"을 표시합니다.
+- 제품 정책 `a2-v1`은 사전등록 반영 규칙 그대로입니다: τ_s 0.85(정밀도 관문 실패 시 고정값), 상단 구간 θ 0.95. 결과를 보고 값을 다시 고르지 않았고, 화면에는 "(시험 기준)"과 "정밀도 목표를 확인하지 못한 시험 운영"을 표시합니다. τ_s 0.85에서의 정밀도는 같은 확인 세트의 저장된 확률로 사후 계산한 기술 통계 0.901(✅ 151건)이며, 사전등록 관문 수치가 아닙니다([해석 문서](docs/lab/evidence-a2-interpretation.md)).
 - 정답은 Claude·Codex가 만든 **AI 참조 라벨**이며 사람 감사는 하지 않았습니다. 판정에는 TypeSafe의 JEV 모델을 썼고, 이 프로젝트는 TypeSafe와 제휴 관계가 아닙니다. 비용·금액은 공개하지 않습니다.
 
 리포트: [A-2 평가(자동)](docs/lab/evidence-a2-report.md) · [A-2 해석과 한계](docs/lab/evidence-a2-interpretation.md) · [A-2 설계](docs/superpowers/specs/2026-10-02-evidence-chat-a2-design.md) · [Stage 1 홀드아웃](docs/lab/evidence-stage1-report.md) · [Stage 0 실현 가능성](docs/lab/evidence-stage0-report.md) · [설계](docs/superpowers/specs/2026-10-02-evidence-assistant-design.md)

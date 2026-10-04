@@ -7,7 +7,7 @@
 - stale: 앱 시작 시 pending·running 전부, 조회 시 생성 후 60초가 지난 pending·running을 failed(stale)로 바꾼다.
 - 실패 처리는 fail_runs 한 곳에서 한다: 실행을 failed(code)로, 그 실행의 pending 문장을 unjudged(reason=code)로.
 - 판정 결과 저장은 실행이 아직 running일 때만 한다(조건부 UPDATE). stale로 바뀐 실행은 되살리지 않는다.
-- 재판정(rejudge, spec 6.4·7.4): 이전 정책 실행의 저장된 문장 행(s·c·경로)에 현재 정책을 다시 적용해
+- 재판정(rejudge, spec 6.4·7.4): 이전 정책(a2-provisional-2) 실행의 저장된 문장 행(s·c·경로)에 현재 정책을 다시 적용해
   종결 상태의 새 실행을 바로 만든다. JEV를 부르지 않으므로 pending·백그라운드 작업을 거치지 않는다.
 """
 from __future__ import annotations
@@ -34,8 +34,10 @@ POLL_MARGIN_S = 4  # 마감 뒤 취소 정리·저장 여유
 CLAIM_STATUSES = ("supported", "contradicted", "no_evidence", "not_claim", "unjudged", "pending")
 PASSAGE_FIELDS = ("passage_id", "section", "idx", "sha256", "text")
 POLICIES = {p.version: p for p in (A2_V1, A2_PROVISIONAL, A2_PROVISIONAL_1)}  # 확신도 라벨에 쓰는 정책별 τ_s(새 정책을 넣으면 여기에도)
-# 재판정 버튼을 보이는 이전 정책(spec 6.4: a2-v1이 정해진 뒤 사용자가 연 스레드에서만, 자동 일괄 재판정은 없다)
-REJUDGE_FROM = frozenset({A2_PROVISIONAL.version, A2_PROVISIONAL_1.version})
+# 재판정 버튼을 보이는 이전 정책(spec 6.4: a2-v1이 정해진 뒤 사용자가 연 스레드에서만, 자동 일괄 재판정은 없다).
+# 재판정은 문장을 다시 나누지 않으므로 a2-v1과 비주장 규칙이 같은 a2-provisional-2만 대상이다.
+# a2-provisional(목록 머리말 비주장 규칙 이전) 실행에 a2-v1을 붙이면 비주장 규칙 출처가 실제와 어긋난다
+REJUDGE_FROM = frozenset({A2_PROVISIONAL.version})
 REJUDGEABLE = ("done", "partial")  # 저장된 확률이 있는 종결 상태. failed·limited·skipped는 다시 판정으로
 CONFIDENCE_BAND = 0.15  # spec 3.3: τ_s 이상 0.15 구간 안이면 "보통"
 

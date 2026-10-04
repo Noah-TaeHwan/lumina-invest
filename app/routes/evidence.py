@@ -315,7 +315,8 @@ async def retry_run(
 
 @router.post("/evidence/runs/{run_id}/rejudge", status_code=201, summary="이전 정책 실행을 현재 정책으로 재판정")
 async def rejudge_run(run_id: str, user=Depends(get_current_user_any), db: AsyncSession = Depends(get_pg_session)):
-    """spec 6.4·7.4: 사용자가 연 스레드에서 이전 정책(a2-provisional·a2-provisional-2) 실행만 재판정한다.
+    """spec 6.4·7.4: 사용자가 연 스레드에서 이전 정책 a2-provisional-2 실행만 재판정한다(records.REJUDGE_FROM).
+    a2-provisional 실행은 비주장 규칙이 달라 제외한다(재판정은 문장을 다시 나누지 않는다).
     저장된 s·c로 SYS 규칙만 다시 적용하므로 JEV를 부르지 않고 한도도 쓰지 않는다. 결과 실행을 바로 돌려준다."""
     run = await _owned_run(db, run_id, user)
     if await records.expire_stale(db, [run], records.now()):

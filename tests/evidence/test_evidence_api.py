@@ -10,10 +10,10 @@ from datetime import timedelta
 
 import httpx
 import pytest
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 
 from app.config import settings
-from app.models import Chat, Conversation, EvidenceRun
+from app.models import Chat, Conversation, EvidenceClaim, EvidenceRun
 from app.services.evidence import background, records
 from tests.evidence.p2_support import (ANSWER, CO, CORP, PASSAGES, FakeJev, FakeLLM, Who, client, database, drain,
                                        fake_search, make_app, make_runner, seed_user)
@@ -501,7 +501,7 @@ def test_rejudge_previous_policy_run_without_calls(pg, enabled):
     assert [x["id"] for x in tl["runs"]] == [body["id"]]
 
 
-@pytest.mark.parametrize("case", ["a2_v1_run", "failed_run", "other_user"])
+@pytest.mark.parametrize("case", ["a2_v1_run", "failed_run", "other_user", "provisional_1_run"])
 def test_rejudge_refused(pg, enabled, case):
     from app.services.evidence import runner as rn
 
@@ -512,6 +512,10 @@ def test_rejudge_refused(pg, enabled, case):
             if case == "a2_v1_run":
                 run = await _store(factory, _run_for(seed))
                 await background.start_run(run.id, runner=make_runner(), session_factory=factory)
+            elif case == "provisional_1_run":  # 비주장 머리말 규칙 이전 정책: 재판정하면 규칙 출처가 어긋난다
+                run = await _store(factory, _run_for(seed, policy=rn.A2_PROVISIONAL_1))
+                await background.start_run(run.id, runner=make_runner(), session_factory=factory,
+                                           policy=rn.A2_PROVISIONAL_1)
             elif case == "failed_run":
                 run = _run_for(seed, policy=rn.A2_PROVISIONAL)
                 run.status, run.error_code = "failed", "timeout"
@@ -523,7 +527,7 @@ def test_rejudge_refused(pg, enabled, case):
             async with client(app) as c:
                 return await c.post(f"/api/evidence/runs/{run.id}/rejudge")
 
-    want = {"a2_v1_run": 409, "failed_run": 409, "other_user": 404}[case]
+    want = {"a2_v1_run": 409, "failed_run": 409, "other_user": 404, "provisional_1_run": 409}[case]
     assert asyncio.run(go()).status_code == want
 
 
@@ -617,6 +621,37 @@ def test_admin_stats_requires_admin_and_caps_days(pg):
     denied, too_long, ok = asyncio.run(go())
     assert (denied.status_code, too_long.status_code, ok.status_code) == (403, 422, 200)
     assert ok.json()["days"] == 30 and ok.json()["runs"] == 0
+
+
+def test_admin_stats_exclude_rejudge_runs(pg):
+    """재판정 실행은 같은 답변을 한 번 더 담으므로 실행 수·상태·문장 상태·경로·답변당 문장 수에서 뺀다."""
+    from app.services.evidence import runner as rn
+
+    async def go():
+        async with database(pg) as factory:
+            seed = await seed_user(factory)
+            old = _run_for(seed, policy=rn.A2_PROVISIONAL)
+            old.status = "partial"
+            await _store(factory, old)
+            async with factory() as db:
+                await db.execute(update(EvidenceClaim).where(EvidenceClaim.run_id == old.id,
+                                                             EvidenceClaim.status == "pending")
+                                 .values(status="unjudged", reason="deadline", route="jev"))
+                await db.commit()
+            async with factory() as db:
+                run = await db.get(EvidenceRun, old.id)
+                claims = (await records.load_claims(db, [old.id]))[old.id]
+                db.add(records.rejudge_run(run, claims))
+                await db.commit()
+            app = make_app(factory, Who({**seed["user"], "roles": ["admin"]}))
+            async with client(app) as c:
+                return (await c.get("/api/admin/evidence/stats?days=7")).json()
+
+    stats = asyncio.run(go())
+    assert stats["runs"] == 1 and stats["status"] == {"partial": 1} and stats["rejudge_runs"] == 1
+    assert stats["claim_status"] == {"unjudged": 2, "not_claim": 1}
+    assert stats["routes"] == {"jev": 2, "rule_not_claim": 1} and stats["unjudged_reasons"] == {"deadline": 2}
+    assert stats["claims_per_answer"]["p50"] == 2
 
 
 def test_admin_stats_from_db(pg):

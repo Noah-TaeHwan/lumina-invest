@@ -75,7 +75,7 @@ def _run_row(policy_version, status="done"):
 
 
 @pytest.mark.parametrize("policy_version, status, latest, want", [
-    ("a2-provisional", "done", True, True),
+    ("a2-provisional", "done", True, False),       # 비주장 머리말 규칙 이전 실행: 문장을 다시 나누지 않으므로 제외
     ("a2-provisional-2", "done", True, True),
     ("a2-provisional-2", "partial", True, True),
     ("a2-provisional-2", "done", False, False),    # 최신 실행만
