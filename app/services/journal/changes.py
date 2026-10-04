@@ -7,10 +7,11 @@
   STORE_TIMEOUT_S 안에 끝나지 않으면 {"status": "unavailable"} 하나만 돌려준다. `existing()`은 컬렉션이 없을 때 빈
   dict를 주므로 이 확인 없이 비교하면 모든 문단이 gone으로 잘못 보인다.
 - 문단: 스냅샷 문단의 sha256(본문만의 해시)이 지금 그 회사 문단들의 sha256 집합 안에 있으면 same, 없으면 gone.
-  passage_id(위치 이름)로 짝짓지 않는다. ✅(supported)·⚠️(contradicted) 문장의 근거 문단을 맨 위에 둔다.
+  passage_id(위치 이름)로 짝짓지 않는다. 문단은 스냅샷 순서이고 passage_idx는 스냅샷 passages 위치(문장 source_idx와
+  같은 번호)다. ✅·⚠️ 근거 문단을 맨 위에 두는 것은 스냅샷 문장을 가진 화면(P3)이 한다.
 - 보고서: 지금 그 회사 문단들의 rcept_no 집합이 스냅샷 rcept_no 하나뿐이면 same, 아니면 replaced(집합을 그대로),
   그 회사 문단이 0개면 company_gone(이때 문단은 모두 gone). 접수번호 변화는 문단 상태에 섞지 않는다.
-- 판정 정책: 스냅샷 run.policy_version과 현재 DEFAULT_POLICY.version이 같으면 same, 다르면 changed. 다시 판정하지 않는다.
+- 판정 정책: 스냅샷 run.policy_version과 현재 DEFAULT_POLICY.version을 둘 다 돌려준다(다르면 화면이 안내). 다시 판정하지 않는다.
 """
 from __future__ import annotations
 
@@ -23,7 +24,6 @@ from app.services.evidence.runner import DEFAULT_POLICY
 log = logging.getLogger("app.journal.changes")
 
 STORE_TIMEOUT_S = 5.0  # 저장소가 멈춰 있으면 기다리지 않고 unavailable(상세는 이 경로와 따로 뜬다)
-CITING = ("supported", "contradicted")  # ✅·⚠️ — 근거 문단을 펼쳐 보이는 상태
 UNAVAILABLE = {"status": "unavailable"}
 
 
@@ -33,25 +33,13 @@ def diff(snapshot: dict, current: list[dict], policy_version: str = DEFAULT_POLI
     rcepts = sorted({p.get("rcept_no") for p in current if p.get("rcept_no")})
     then = snapshot.get("rcept_no")
     report = "company_gone" if not current else "same" if rcepts == [then] else "replaced"
-
-    passages = snapshot.get("passages") or []
-    cited: dict[int, list[int]] = {i: [] for i in range(len(passages))}
-    for c in sorted(snapshot.get("claims") or [], key=lambda c: c["idx"]):
-        src = c.get("source_idx")
-        if c.get("status") in CITING and isinstance(src, int) and src in cited:
-            cited[src].append(c["idx"])
-    rows = [{"passage_id": p.get("passage_id"), "section": p.get("section"), "idx": p.get("idx"),
-             "sha256": p.get("sha256"), "status": "same" if p.get("sha256") in hashes else "gone",
-             "cited_by": cited[i]} for i, p in enumerate(passages)]
-    rows.sort(key=lambda r: not r["cited_by"])  # 안정 정렬: 근거 문단 먼저, 나머지는 스냅샷 순서
-
-    then_policy = (snapshot.get("run") or {}).get("policy_version")
     return {
         "status": "ok",
-        "report": {"status": report, "then": then, "now": rcepts},
-        "passages": rows,
-        "policy": {"status": "same" if then_policy == policy_version else "changed",
-                   "then": then_policy, "now": policy_version},
+        "report": {"status": report, "snapshot_rcept_no": then, "current_rcept_nos": rcepts},
+        "passages": [{"passage_idx": i, "passage_id": p.get("passage_id"), "sha256": p.get("sha256"),
+                      "status": "same" if p.get("sha256") in hashes else "gone"}
+                     for i, p in enumerate(snapshot.get("passages") or [])],
+        "policy": {"snapshot": (snapshot.get("run") or {}).get("policy_version"), "current": policy_version},
     }
 
 

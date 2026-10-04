@@ -81,8 +81,8 @@ def test_same_report_all_passages_same_and_no_embedding():
     out, embeds = _compare(_snapshot(ps), (SAMSUNG, ps))
     assert out["status"] == "ok"
     assert set(_statuses(out).values()) == {"same"}
-    assert out["report"] == {"status": "same", "then": RCEPT, "now": [RCEPT]}
-    assert out["policy"] == {"status": "same", "then": DEFAULT_POLICY.version, "now": DEFAULT_POLICY.version}
+    assert out["report"] == {"status": "same", "snapshot_rcept_no": RCEPT, "current_rcept_nos": [RCEPT]}
+    assert out["policy"] == {"snapshot": DEFAULT_POLICY.version, "current": DEFAULT_POLICY.version}
     assert embeds == 0  # 비교는 Qdrant scroll만 쓴다(Ollama 임베딩·검색 없음)
 
 
@@ -109,7 +109,8 @@ def test_rcept_no_only_change_passages_same_report_replaced():
     ps = _passages()
     out, _ = _compare(_snapshot(ps), (SAMSUNG, _passages(rcept_no="20260320000555")))
     assert set(_statuses(out).values()) == {"same"}
-    assert out["report"] == {"status": "replaced", "then": RCEPT, "now": ["20260320000555"]}
+    assert out["report"] == {"status": "replaced", "snapshot_rcept_no": RCEPT,
+                             "current_rcept_nos": ["20260320000555"]}
 
 
 def test_mixed_rcept_nos_are_replaced_with_whole_set():
@@ -117,14 +118,15 @@ def test_mixed_rcept_nos_are_replaced_with_whole_set():
     ps = _passages()
     mixed = _passages(TEXTS[:2]) + _passages(TEXTS[2:], rcept_no="20260320000555", start=2)
     out, _ = _compare(_snapshot(ps), (SAMSUNG, mixed))
-    assert out["report"] == {"status": "replaced", "then": RCEPT, "now": [RCEPT, "20260320000555"]}
+    assert out["report"] == {"status": "replaced", "snapshot_rcept_no": RCEPT,
+                             "current_rcept_nos": [RCEPT, "20260320000555"]}
     assert set(_statuses(out).values()) == {"same"}
 
 
 def test_company_without_passages_is_company_gone_and_all_gone():
     ps = _passages()
     out, _ = _compare(_snapshot(ps), (HYNIX, _passages(corp=HYNIX)))
-    assert out["report"] == {"status": "company_gone", "then": RCEPT, "now": []}
+    assert out["report"] == {"status": "company_gone", "snapshot_rcept_no": RCEPT, "current_rcept_nos": []}
     assert set(_statuses(out).values()) == {"gone"}
 
 
@@ -136,25 +138,21 @@ def test_other_corp_same_text_does_not_count():
     assert out["report"]["status"] == "same"
 
 
-def test_cited_passages_come_first_with_claim_idx():
-    """✅(supported)·⚠️(contradicted) 근거 문단을 맨 위에 둔다. 나머지는 스냅샷 순서."""
+def test_passages_keep_snapshot_order_with_passage_idx():
+    """P3 화면(PR #30)과 맞춘 모양: 스냅샷 문단 순서 그대로, passage_idx는 스냅샷 passages 위치(source_idx와 같은 번호).
+    ✅·⚠️ 근거 문단을 맨 위에 두는 것은 스냅샷 문장(source_idx)을 가진 화면이 한다."""
     ps = _passages()
-    claims = [{"idx": 0, "status": "supported", "source_idx": 2},
-              {"idx": 1, "status": "no_evidence", "source_idx": 0},
-              {"idx": 2, "status": "contradicted", "source_idx": 3},
-              {"idx": 3, "status": "supported", "source_idx": 2},
-              {"idx": 4, "status": "not_claim", "source_idx": None},
-              {"idx": 5, "status": "supported", "source_idx": 99}]  # 범위 밖은 무시
-    out, _ = _compare(_snapshot(ps, claims=claims), (SAMSUNG, ps))
-    assert [(p["passage_id"], p["cited_by"]) for p in out["passages"]] == [
-        (ps[2].id, [0, 3]), (ps[3].id, [2]), (ps[0].id, []), (ps[1].id, [])]
-    assert set(out["passages"][0]) == {"passage_id", "section", "idx", "sha256", "status", "cited_by"}
+    claims = [{"idx": 0, "status": "supported", "source_idx": 2}, {"idx": 1, "status": "contradicted", "source_idx": 3}]
+    out, _ = _compare(_snapshot(ps, claims=claims), (SAMSUNG, ps[:1] + ps[2:]))
+    assert out["passages"] == [{"passage_idx": i, "passage_id": p.id, "sha256": p.sha256,
+                                "status": "gone" if i == 1 else "same"} for i, p in enumerate(ps)]
+    assert set(out) == {"status", "report", "passages", "policy"}
 
 
 def test_policy_change_reports_both_versions():
     ps = _passages()
     out, _ = _compare(_snapshot(ps, policy=A2_PROVISIONAL.version), (SAMSUNG, ps))
-    assert out["policy"] == {"status": "changed", "then": A2_PROVISIONAL.version, "now": DEFAULT_POLICY.version}
+    assert out["policy"] == {"snapshot": A2_PROVISIONAL.version, "current": DEFAULT_POLICY.version}
 
 
 # ── 확인 불가 ─────────────────────────────────────────────────────────────────
@@ -273,9 +271,10 @@ def test_changes_api_compares_without_saving(pg, journal):
     assert r1.status_code == 200 and r1.json() == r2.json()
     body = r1.json()
     assert body["status"] == "ok"
-    assert body["report"] == {"status": "replaced", "then": RCEPT, "now": ["20260320000555"]}
-    assert [(p["passage_id"], p["status"]) for p in body["passages"]] == [
-        (ps[1].id, "same"), (ps[0].id, "gone"), (ps[2].id, "same"), (ps[3].id, "same")]
+    assert body["report"] == {"status": "replaced", "snapshot_rcept_no": RCEPT,
+                             "current_rcept_nos": ["20260320000555"]}
+    assert [(p["passage_idx"], p["passage_id"], p["status"]) for p in body["passages"]] == [
+        (0, ps[0].id, "gone"), (1, ps[1].id, "same"), (2, ps[2].id, "same"), (3, ps[3].id, "same")]
     assert before == after == (1, 1) and stored == snapshot  # 결정 6-2: 비교 결과를 저장하지 않는다
 
 

@@ -298,10 +298,10 @@ async def get_changes(entry_id: str, user=Depends(get_current_user_any), db: Asy
     확인할 수 없으면(저장소 미연결·컬렉션 없음·연결 실패) `{"status": "unavailable"}` 하나만 돌려준다. 그 밖에는:
 
         {"status": "ok",
-         "report":   {"status": "same" | "replaced" | "company_gone", "then": 스냅샷 rcept_no, "now": [지금 rcept_no...]},
-         "passages": [{"passage_id", "section", "idx", "sha256", "status": "same" | "gone",
-                       "cited_by": [이 문단을 근거로 든 ✅·⚠️ 문장 idx...]}],   # 근거 문단 먼저, 나머지는 스냅샷 순서
-         "policy":   {"status": "same" | "changed", "then": 스냅샷 policy_version, "now": 현재 정책}}
+         "report":   {"status": "same" | "replaced" | "company_gone",
+                      "snapshot_rcept_no": 스냅샷 rcept_no, "current_rcept_nos": [지금 rcept_no...]},
+         "passages": [{"passage_idx": 스냅샷 passages 위치, "passage_id", "sha256", "status": "same" | "gone"}],
+         "policy":   {"snapshot": 스냅샷 policy_version, "current": 현재 정책}}
 
     gone 문단의 대체 본문은 돌려주지 않는다(새 근거는 새 질문으로만 본다).
     """
