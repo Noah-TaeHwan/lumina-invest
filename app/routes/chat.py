@@ -84,7 +84,7 @@ async def chat(
                     f"[{d['title']}] {d['text'][:500]}" for d in docs
                 )
         except Exception:
-            pass
+            pass  # 검색 실패는 rag_pipeline이 로그로 남긴다. 채팅은 참고 문서 없이 이어 간다
 
     # LangGraph 에이전트 실행
     try:
@@ -172,7 +172,7 @@ async def chat_async(
                     f"[{d['title']}] {d['text'][:500]}" for d in docs
                 )
         except Exception:
-            pass
+            pass  # 검색 실패는 rag_pipeline이 로그로 남긴다. 채팅은 참고 문서 없이 이어 간다
 
     task = run_agent_task.delay(
         user_id=user_id,

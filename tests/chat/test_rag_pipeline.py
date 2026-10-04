@@ -1,0 +1,137 @@
+# tests/chat/test_rag_pipeline.py
+"""app/services/rag_pipeline.py: 메모리 Qdrant와 가짜 임베딩으로 검색·저장·삭제를 본다(외부 호출 없음).
+
+A-1 spec 12절이 기록한 결함: 비동기 클라이언트 예외를 빈 결과로 삼키는 경로, 크롤링 payload 키(text)와
+LangChain 키(page_content) 불일치.
+"""
+from __future__ import annotations
+
+import asyncio
+import hashlib
+import json
+import logging
+
+import numpy as np
+import pytest
+from qdrant_client import AsyncQdrantClient
+from qdrant_client.http.models import Distance, PointStruct, VectorParams
+
+from app.services import rag_pipeline as rp
+
+COLL = "test_rag"
+DIM = 768  # rag_pipeline이 만드는 컬렉션 차원
+
+
+def vec(text: str) -> list[float]:
+    """텍스트마다 다른 결정적 벡터."""
+    seed = int.from_bytes(hashlib.sha256(text.encode()).digest()[:8], "big")
+    return np.random.default_rng(seed).normal(size=DIM).tolist()
+
+
+class FakeEmbeddings:
+    async def aembed_query(self, text):
+        return vec(text)
+
+    async def aembed_documents(self, texts):
+        return [vec(t) for t in texts]
+
+
+@pytest.fixture
+def qdrant(monkeypatch):
+    """rag_pipeline이 매번 만드는 클라이언트를 공유 메모리 클라이언트 하나로 바꾼다(close는 기록만)."""
+    shared = AsyncQdrantClient(location=":memory:")
+    closed = []
+
+    async def close(*a, **k):
+        closed.append(True)
+
+    def factory(*a, **k):
+        shared.close = close
+        return shared
+
+    monkeypatch.setattr(rp, "AsyncQdrantClient", factory)
+    monkeypatch.setattr(rp, "_make_embeddings", lambda: FakeEmbeddings())
+    shared.closed = closed
+    return shared
+
+
+def run(coro):
+    return asyncio.run(coro)
+
+
+async def _seed(client, points):
+    if not await client.collection_exists(COLL):
+        await client.create_collection(COLL, vectors_config=VectorParams(size=DIM, distance=Distance.COSINE))
+    await client.upsert(COLL, points=points)
+
+
+LC_POINT = PointStruct(id=1, vector=vec("메모리 반도체"), payload={
+    "page_content": "메모리 반도체", "metadata": {"url": "upload://a.pdf", "title": "a.pdf", "source": "upload:u1:a.pdf"}})
+
+
+# ── 비동기 클라이언트 예외를 빈 결과로 삼키는 경로 ─────────────────────────────
+
+def test_search_returns_langchain_layout_hit(qdrant):
+    async def go():
+        await _seed(qdrant, [LC_POINT])
+        return await rp.rag_search("메모리 반도체", top_k=3, collection=COLL)
+
+    hits = run(go())
+    assert [(h["text"], h["title"], h["url"], h["source"]) for h in hits] == [
+        ("메모리 반도체", "a.pdf", "upload://a.pdf", "upload:u1:a.pdf")]
+    assert hits[0]["score"] == pytest.approx(1.0, abs=1e-4)
+    assert qdrant.closed
+
+
+def test_store_chunks_then_search(qdrant):
+    async def go():
+        n = await rp.store_chunks(["첫 청크", "둘째 청크"], {"title": "b.pdf", "source": "upload:u1:b.pdf"},
+                                  collection=COLL)
+        return n, await rp.rag_search("둘째 청크", top_k=1, collection=COLL)
+
+    n, hits = run(go())
+    assert n == 2
+    assert [(h["text"], h["source"]) for h in hits] == [("둘째 청크", "upload:u1:b.pdf")]
+
+
+def test_search_failure_propagates_and_logs(qdrant, monkeypatch, caplog):
+    async def boom(*a, **k):
+        raise ConnectionError("qdrant down")
+
+    async def go():
+        await _seed(qdrant, [LC_POINT])
+        monkeypatch.setattr(qdrant, "query_points", boom)
+        return await rp.rag_search("q", collection=COLL)
+
+    with caplog.at_level(logging.ERROR, logger="app.rag"), pytest.raises(ConnectionError):
+        run(go())
+    events = [json.loads(r.getMessage()) for r in caplog.records if r.name == "app.rag"]
+    assert events == [{"event": "rag_search_failed", "collection": COLL, "error": "ConnectionError"}]
+    assert qdrant.closed  # 실패해도 클라이언트를 닫는다
+
+
+def test_store_failure_propagates(qdrant, monkeypatch):
+    async def boom(*a, **k):
+        raise ConnectionError("qdrant down")
+
+    monkeypatch.setattr(qdrant, "upsert", boom)
+    with pytest.raises(ConnectionError):
+        run(rp.store_chunks(["c"], {"source": "s"}, collection=COLL))
+
+
+def test_connection_error_is_not_mistaken_for_missing_collection(qdrant, monkeypatch):
+    """컬렉션 조회 실패(연결 오류)를 '없음'으로 보고 만들러 가지 않는다."""
+    created = []
+
+    async def down(*a, **k):
+        raise ConnectionError("qdrant down")
+
+    async def create(*a, **k):
+        created.append(a)
+
+    monkeypatch.setattr(qdrant, "get_collection", down)
+    monkeypatch.setattr(qdrant, "collection_exists", down)
+    monkeypatch.setattr(qdrant, "create_collection", create)
+    with pytest.raises(ConnectionError):
+        run(rp.rag_search("q", collection=COLL))
+    assert created == []

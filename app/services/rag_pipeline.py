@@ -5,7 +5,9 @@
   LCEL 체인: retriever | format_docs | prompt | llm | StrOutputParser
 """
 from __future__ import annotations
-from typing import Any
+import json
+import logging
+import uuid
 
 from langchain_ollama import OllamaEmbeddings
 from langchain_qdrant import QdrantVectorStore
@@ -15,9 +17,18 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_ollama import ChatOllama
 from qdrant_client import AsyncQdrantClient
-from qdrant_client.http.models import Distance, VectorParams
+from qdrant_client.http.models import Distance, FieldCondition, Filter, MatchValue, PointStruct, VectorParams
 
 from app.config import settings
+
+log = logging.getLogger("app.rag")
+
+# 비동기 경로는 QdrantVectorStore를 쓰지 않는다: QdrantVectorStore는 동기 QdrantClient만 받아서
+# AsyncQdrantClient를 넘기면 생성자에서 예외가 나고, 예전 코드는 그 예외를 빈 결과로 삼켜
+# 검색은 늘 [], 저장은 늘 0이었다. AsyncQdrantClient를 직접 부르고 임베딩만 LangChain을 쓴다.
+# 저장 payload는 LangChain 배치(page_content + metadata)를 따른다(build_rag_chain이 읽는 모양).
+CONTENT_KEY = QdrantVectorStore.CONTENT_KEY
+METADATA_KEY = QdrantVectorStore.METADATA_KEY
 
 
 # ── 내부 팩토리 ───────────────────────────────────────────────────────────────
@@ -30,14 +41,34 @@ def _make_embeddings() -> OllamaEmbeddings:
 
 
 async def _get_or_create_collection(client: AsyncQdrantClient, collection: str) -> None:
-    """Qdrant 컬렉션이 없으면 nomic-embed-text 기준 dim=768로 생성한다."""
-    try:
-        await client.get_collection(collection)
-    except Exception:
+    """Qdrant 컬렉션이 없으면 nomic-embed-text 기준 dim=768로 생성한다.
+
+    존재 여부를 묻는다: 조회 실패(연결 오류 등)를 '없음'으로 보고 만들러 가지 않는다."""
+    if not await client.collection_exists(collection):
         await client.create_collection(
             collection,
             vectors_config=VectorParams(size=768, distance=Distance.COSINE),
         )
+
+
+def _fail(event: str, collection: str, exc: Exception) -> None:
+    """실패를 빈 결과로 바꾸지 않는다: 로그를 남기고 호출부가 예외를 받는다(질문·예외 메시지는 남기지 않는다)."""
+    log.error(json.dumps({"event": event, "collection": collection, "error": type(exc).__name__}))
+
+
+def _hit(payload: dict, score: float) -> dict:
+    meta = payload.get(METADATA_KEY) or {}
+    return {
+        "text":   payload.get(CONTENT_KEY, ""),
+        "url":    meta.get("url", ""),
+        "title":  meta.get("title", ""),
+        "source": meta.get("source", ""),
+        "score":  float(score),
+    }
+
+
+def _source_filter(source: str) -> Filter:
+    return Filter(must=[FieldCondition(key="source", match=MatchValue(value=source))])
 
 
 # ── 공개 함수 ─────────────────────────────────────────────────────────────────
@@ -49,7 +80,7 @@ async def rag_search(
     filter_source: str | None = None,
 ) -> list[dict]:
     """
-    LangChain QdrantVectorStore를 통해 유사 문서를 검색한다.
+    Qdrant에서 유사 문서를 검색한다(임베딩은 LangChain OllamaEmbeddings).
 
     Args:
         query:         검색 쿼리
@@ -59,42 +90,28 @@ async def rag_search(
 
     Returns:
         [{"text": ..., "url": ..., "title": ..., "source": ..., "score": ...}, ...]
+
+    Raises:
+        Qdrant·임베딩 오류를 그대로 올린다(빈 결과와 구별되게). 로그는 여기서 남긴다.
     """
     coll = collection or settings.QDRANT_COLLECTION
+    client = AsyncQdrantClient(url=settings.QDRANT_URL)
     try:
-        client = AsyncQdrantClient(url=settings.QDRANT_URL)
         await _get_or_create_collection(client, coll)
-
-        store = QdrantVectorStore(
-            client=client,
-            collection_name=coll,
-            embedding=_make_embeddings(),
+        vector = await _make_embeddings().aembed_query(query)
+        res = await client.query_points(
+            coll,
+            query=vector,
+            limit=top_k,
+            query_filter=_source_filter(filter_source) if filter_source else None,
+            with_payload=True,
         )
-
-        qdrant_filter = None
-        if filter_source:
-            from qdrant_client.http.models import Filter, FieldCondition, MatchValue
-            qdrant_filter = Filter(
-                must=[FieldCondition(key="source", match=MatchValue(value=filter_source))]
-            )
-
-        results = await store.asimilarity_search_with_score(
-            query, k=top_k, filter=qdrant_filter
-        )
+        return [_hit(p.payload or {}, p.score) for p in res.points]
+    except Exception as exc:
+        _fail("rag_search_failed", coll, exc)
+        raise
+    finally:
         await client.close()
-
-        return [
-            {
-                "text":   doc.page_content,
-                "url":    doc.metadata.get("url", ""),
-                "title":  doc.metadata.get("title", ""),
-                "source": doc.metadata.get("source", ""),
-                "score":  float(score),
-            }
-            for doc, score in results
-        ]
-    except Exception:
-        return []
 
 
 async def store_chunks(
@@ -106,27 +123,28 @@ async def store_chunks(
     텍스트 청크 목록을 OllamaEmbeddings로 임베딩하여 Qdrant에 저장한다.
 
     Returns:
-        실제 저장된 청크 수
+        실제 저장된 청크 수 (실패하면 예외를 올린다)
     """
     if not chunks:
         return 0
 
     coll = collection or settings.QDRANT_COLLECTION
+    client = AsyncQdrantClient(url=settings.QDRANT_URL)
     try:
-        client = AsyncQdrantClient(url=settings.QDRANT_URL)
         await _get_or_create_collection(client, coll)
-
-        store = QdrantVectorStore(
-            client=client,
-            collection_name=coll,
-            embedding=_make_embeddings(),
-        )
-        docs = [Document(page_content=chunk, metadata=metadata) for chunk in chunks]
-        await store.aadd_documents(docs)
+        vectors = await _make_embeddings().aembed_documents(chunks)
+        points = [
+            PointStruct(id=uuid.uuid4().hex, vector=v,
+                        payload={CONTENT_KEY: chunk, METADATA_KEY: dict(metadata)})
+            for chunk, v in zip(chunks, vectors)
+        ]
+        await client.upsert(collection_name=coll, points=points)
+        return len(points)
+    except Exception as exc:
+        _fail("rag_store_failed", coll, exc)
+        raise
+    finally:
         await client.close()
-        return len(docs)
-    except Exception:
-        return 0
 
 
 def build_rag_chain(collection: str | None = None):
@@ -185,19 +203,15 @@ async def delete_chunks_by_source(source: str, collection: str | None = None) ->
     특정 source 메타데이터를 가진 모든 벡터를 Qdrant에서 삭제한다.
 
     Returns:
-        삭제 요청이 성공하면 1, 실패하면 0
+        삭제 요청이 성공하면 1 (실패하면 예외를 올린다)
     """
     coll = collection or settings.QDRANT_COLLECTION
+    client = AsyncQdrantClient(url=settings.QDRANT_URL)
     try:
-        from qdrant_client.http.models import Filter, FieldCondition, MatchValue
-        client = AsyncQdrantClient(url=settings.QDRANT_URL)
-        await client.delete(
-            collection_name=coll,
-            points_selector=Filter(
-                must=[FieldCondition(key="source", match=MatchValue(value=source))]
-            ),
-        )
-        await client.close()
+        await client.delete(collection_name=coll, points_selector=_source_filter(source))
         return 1
-    except Exception:
-        return 0
+    except Exception as exc:
+        _fail("rag_delete_failed", coll, exc)
+        raise
+    finally:
+        await client.close()
