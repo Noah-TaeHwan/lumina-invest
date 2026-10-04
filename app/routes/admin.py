@@ -6,7 +6,7 @@ from app.database.postgres import get_pg_session
 from app.lib.session import get_current_user
 from app.models import (
     AuditEvent, BankProduct, BrokerSettings, Chat, CorporateCbStat,
-    CrawledDoc, FundProduct, Order, PersonalCbStat, Portfolio,
+    CrawledDoc, FundProduct, JudgmentEntry, JudgmentUpdate, Order, PersonalCbStat, Portfolio,
 )
 from app.services.audit import audit
 from app.services.evidence.stats import MAX_DAYS as EVIDENCE_MAX_DAYS, evidence_stats
@@ -14,7 +14,8 @@ from app.services.evidence.stats import MAX_DAYS as EVIDENCE_MAX_DAYS, evidence_
 router = APIRouter(prefix="/api/admin")
 
 FINANCIAL_MODELS = [PersonalCbStat, CorporateCbStat, BankProduct, FundProduct]
-USER_MODELS = [Chat, Portfolio, Order, BrokerSettings, CrawledDoc, AuditEvent]
+# 판단 일지: 자식(update) 먼저. 초기화가 대화를 비우면 일지 사본도 비운다, 통계는 행 수만(모듈 C 결정 5-7)
+USER_MODELS = [Chat, Portfolio, Order, BrokerSettings, CrawledDoc, AuditEvent, JudgmentUpdate, JudgmentEntry]
 
 
 def _require_admin(user=Depends(get_current_user)):

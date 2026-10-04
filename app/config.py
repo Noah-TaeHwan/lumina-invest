@@ -55,6 +55,11 @@ class Settings(BaseSettings):
     EVIDENCE_DAILY_USER_CALLS: int = 150
     EVIDENCE_DAILY_USER_TOKENS: int = 750_000
     EVIDENCE_DAILY_GLOBAL_TOKENS: int = 3_000_000
+    # ── 투자 판단 일지(모듈 C) ───────────────────────────────────────────────
+    # 끄면 /api/journal 전체가 404이고, 판정 API에서는 일지 표(0010)를 조회하지 않는다. 근거 모드 플래그와 묶지 않는다
+    # (근거 모드를 꺼도 자기 기록을 보고·내보내고·지울 수 있어야 한다, spec 결정 5-6).
+    # 관리자 stats·reset은 플래그와 무관하게 일지 표를 돈다 — 0010 적용 필수
+    JOURNAL_ENABLED: bool = False
 
     NEO4J_URI: str = "bolt://localhost:7687"
     NEO4J_USER: str = "neo4j"

@@ -121,6 +121,9 @@ app.include_router(formula_routes.router)
 # 공시 근거 모드 채팅 + 판정 기록 (EVIDENCE_CHAT_ENABLED=false면 404)
 from app.routes import evidence as evidence_routes  # noqa: E402
 app.include_router(evidence_routes.router)
+# 투자 판단 일지 (JOURNAL_ENABLED=false면 404)
+from app.routes import journal as journal_routes  # noqa: E402
+app.include_router(journal_routes.router)
 
 # 정적 파일 (프론트엔드)
 _public = os.path.join(os.path.dirname(__file__), "..", "public")
