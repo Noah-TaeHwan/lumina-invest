@@ -8,6 +8,10 @@ controlled-check, label-packets, labels-merge, judge, stage0-report.
 `--study a2`(A-2 spec 6절)는 같은 명령을 A-2 경로(lab/evidence/study_a2, lab/data/evidence_a2, split_a2.json,
 prereg_a2.json)에서 돌린다. A-2의 봉인 분할은 check(확인 세트)이고, 조정·리포트는 a2-tune·a2-report다.
 원장은 같은 attempts.jsonl에 "study": "a2"로 덧붙인다.
+
+`--study a3`(A-3 spec 5절)는 A-3 경로(lab/evidence/study_a3, lab/data/evidence_a3, split_a3.json, prereg_a3.json)에서
+돌린다. 조정 세트가 없고 전부 확인 세트(check)다. 사전등록 파일이 "status": "registered"가 되기 전에는 추첨·데이터를
+만들지 않는다. 통제 주장은 c1 의역·c2 주체 교체·c3 표기 변형이고, 결과는 a3-report다.
 """
 from __future__ import annotations
 
@@ -21,11 +25,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 
-STUDIES = ("a1", "a2")
+STUDIES = ("a1", "a2", "a3")
 
 
 class Paths:
-    """저장소 루트 기준 경로. 테스트·검증은 임시 루트를 쓴다. study="a2"면 A-2 연구 경로(A-1 파일을 건드리지 않는다)."""
+    """저장소 루트 기준 경로. 테스트·검증은 임시 루트를 쓴다. study="a2"·"a3"면 그 연구 경로(앞 연구 파일을 건드리지 않는다)."""
 
     def __init__(self, root: Path, study: str = "a1"):
         self.root = Path(root)
@@ -41,6 +45,15 @@ class Paths:
             self.tune_json = self.ev / "results/a2-tune.json"
             self.sealed = "check"
             self.groups = {"dev": {"tune"}, "all": {"tune", "check"}}
+        elif study == "a3":
+            self.data = self.ev / "study_a3"  # lab/evidence/a3.py 모듈과 이름이 겹치지 않게
+            self.priv = self.root / "lab/data/evidence_a3"
+            self.split_json = self.ev / "split_a3.json"
+            self.prereg = self.ev / "prereg_a3.json"
+            self.prereg_holdout = self.ev / "prereg_a3_check.json"
+            self.tune_json = self.ev / "results/a3-tune.json"  # 쓰지 않는다(조정 세트 없음)
+            self.sealed = "check"
+            self.groups = {"dev": set(), "all": {"check"}}
         else:
             self.data = self.ev / "data"
             self.priv = self.root / "lab/data/evidence"
@@ -99,14 +112,23 @@ def holdout_data_open(P: Paths) -> bool:
     """사전등록에 stage1 블록(임계값·B*·MDE·프롬프트)이 있어야 홀드아웃 데이터를 만들 수 있다.
 
     A-2: 조정 결과(results/a2-tune.json, τ_s·θ)가 있어야 확인 세트 데이터를 만든다.
+    A-3: 고르는 값이 없으므로 사전등록 파일이 확정("status": "registered")되어 있어야 한다.
     """
     if P.study == "a2":
         return P.tune_json.exists()
+    if P.study == "a3":
+        return prereg_registered(P)
     return P.prereg.exists() and bool(json.loads(P.prereg.read_text()).get("stage1"))
 
 
 _SEALED = {"a1": "holdout data is sealed until prereg.json has a stage1 block",
-           "a2": "check data is sealed until results/a2-tune.json exists (run a2-tune)"}
+           "a2": "check data is sealed until results/a2-tune.json exists (run a2-tune)",
+           "a3": "check data is sealed until prereg_a3.json is registered (status: registered)"}
+
+
+def prereg_registered(P: Paths) -> bool:
+    """사전등록 파일이 초안이 아니라 확정본인가(A-3). 확정 커밋 뒤에는 그 파일을 고치지 않는다."""
+    return P.prereg.exists() and json.loads(P.prereg.read_text()).get("status") == "registered"
 
 
 def companies(P: Paths, split_name: str, stage: str = "judge") -> list[dict]:
@@ -179,6 +201,7 @@ def freeze_bundle(P: Paths) -> dict:
     codes = {c["corp_code"] for c in load_split(P)["companies"] if c["split"] == P.sealed}
     pick = lambda name, key: [r for r in read_jsonl(P.jsonl(name)) if r[key].split("-q")[0] in codes]
     extra = {"tune_sha256": _file_sha(P.tune_json)} if P.study == "a2" else {}
+    prompts = ("labeler.md", "question_writer.md", "controlled_writer_a3.md" if P.study == "a3" else "controlled_writer.md")
     return {**extra, "split_sha256": _file_sha(P.split_json),
             "passages_manifest_sha256": _file_sha(P.jsonl("passages_manifest.jsonl")),
             "dart_ledger_sha256": _file_sha(P.jsonl("dart_ledger.jsonl")),
@@ -187,7 +210,7 @@ def freeze_bundle(P: Paths) -> dict:
             "answers_sha256": _sha_rows(pick("answers.jsonl", "qid")),
             "claims_sha256": _sha_rows(pick("claims.jsonl", "cid")),
             "labels_sha256": _sha_rows(pick("labels.jsonl", "cid")),
-            "prompts_sha256": {n: _file_sha(P.ev / "prompts" / n) for n in ("labeler.md", "question_writer.md", "controlled_writer.md")},
+            "prompts_sha256": {n: _file_sha(P.ev / "prompts" / n) for n in prompts},
             "prereg_sha256": _file_sha(P.prereg),
             "code_sha256": _code_sha(P)}
 
@@ -347,6 +370,11 @@ def cmd_split(P: Paths, args) -> None:
 
     if P.calls.exists():
         raise SystemExit("split is frozen once JEV calls exist")
+    if P.study == "a3":
+        if not prereg_registered(P):
+            raise SystemExit("split needs prereg_a3.json registered (status: registered)")
+        verify_prereg_code(P)
+        return _split_a3(P)
     if P.study == "a2":
         verify_prereg_code(P)
         return _split_a2(P)
@@ -405,27 +433,37 @@ def cmd_split(P: Paths, args) -> None:
     print(json.dumps(counts))
 
 
-def a1_texts(P: Paths) -> tuple[dict[str, str], dict[str, str]]:
-    """A-1 40개사 이름과 지정 절 본문(A-1 비공개 문단 파일). 하나라도 빠지면 멈춘다(교차 언급 제외를 못 하므로)."""
-    A1 = Paths(P.root)
-    names = {c["corp_code"]: c["corp_name"] for c in load_split(A1)["companies"]}
+def prior_texts(P: Paths, studies: tuple[str, ...]) -> tuple[dict[str, str], dict[str, str]]:
+    """앞 연구 회사 이름과 지정 절 본문(각 연구의 비공개 문단 파일). 하나라도 빠지면 멈춘다(교차 언급 제외를 못 하므로)."""
+    names: dict[str, str] = {}
     texts: dict[str, list[str]] = {}
-    for r in read_jsonl(A1.priv / "passages.jsonl"):
-        texts.setdefault(r["corp_code"], []).append(r["text"])
+    for st in studies:
+        S = Paths(P.root, st)
+        names.update({c["corp_code"]: c["corp_name"] for c in load_split(S)["companies"]})
+        for r in read_jsonl(S.priv / "passages.jsonl"):
+            texts.setdefault(r["corp_code"], []).append(r["text"])
     missing = sorted(set(names) - set(texts))
     if missing:
-        raise SystemExit(f"A-1 passages missing for {len(missing)} companies; A-2 draw needs lab/data/evidence/passages.jsonl")
+        where = ", ".join(_rel(P, Paths(P.root, st).priv / "passages.jsonl") for st in studies)
+        raise SystemExit(f"prior passages missing for {len(missing)} companies; draw needs {where}")
     return names, {code: " ".join(texts[code]) for code in names}
 
 
-def _split_a2(P: Paths) -> None:
-    """A-2 spec 6.2: 무작위 40개사(A-1 40개사·A-1과 교차 언급 10회 이상 제외), 군집 단위 확인 ≤ 20 / 나머지 조정."""
+def a1_texts(P: Paths) -> tuple[dict[str, str], dict[str, str]]:
+    """A-1 40개사 이름과 지정 절 본문(A-1 비공개 문단 파일)."""
+    return prior_texts(P, ("a1",))
+
+
+def _draw_random(P: Paths, prior_names: dict[str, str], prior_body: dict[str, str], *, seed: int, n: int,
+                 check_cap: int, tag: str, meta: dict) -> None:
+    """무작위 n개사(앞 연구 회사·교차 언급 10회 이상 제외), 군집 단위 확인 ≤ check_cap / 나머지 조정. A-2·A-3 공용.
+
+    원장 제외 사유는 {tag}_company·{tag}_mention:<코드>(A-2는 tag a1)."""
     import httpx
 
     from app.services.evidence import dart
     from lab.evidence import split as sp
 
-    a1_names, a1_body = a1_texts(P)
     key = dart.load_dart_key()
     client = httpx.Client(timeout=60)
     raw, corps = _corp_list(P, client, key)
@@ -434,17 +472,17 @@ def _split_a2(P: Paths) -> None:
     ledger: list[dict] = []
 
     def linked(corp, text: str) -> str | None:
-        code = sp.a1_link(corp.corp_name, text, a1_names, a1_body)
-        return f"a1_mention:{code}" if code else None
+        code = sp.a1_link(corp.corp_name, text, prior_names, prior_body)
+        return f"{tag}_mention:{code}" if code else None
 
-    for corp in sp.shuffled(corps, seed=sp.A2_SEED):
-        if len(chosen) >= sp.A2_RANDOM_N:
+    for corp in sp.shuffled(corps, seed=seed):
+        if len(chosen) >= n:
             break
-        skip = sp.a2_skip(corp, set(a1_names))
+        skip = sp.a2_skip(corp, set(prior_names))
         if skip == "prefix":
             continue  # A-1처럼 원장에 남기지 않는다
         if skip:
-            result = skip
+            result = skip.replace("a1_", f"{tag}_")
         else:
             result, row, text = _take(P, client, key, corp, "random", linked)
             if row is not None:
@@ -453,7 +491,7 @@ def _split_a2(P: Paths) -> None:
         ledger.append({"corp_code": corp.corp_code, "corp_name": corp.corp_name, "source": "random", "result": result})
     names = {c["corp_code"]: c["corp_name"] for c in chosen}
     cl = sp.clusters(names, texts, [])
-    check, tune = sp.assign(cl, sp.A2_CHECK_CAP, seed=sp.A2_SEED)
+    check, tune = sp.assign(cl, check_cap, seed=seed)
     label = {code: name for name, part in (("check", check), ("tune", tune)) for members in part for code in members}
     index = {code: i for i, members in enumerate(cl) for code in members}
     for c in chosen:
@@ -467,15 +505,34 @@ def _split_a2(P: Paths) -> None:
             k = r["result"].split(":")[0]
             excluded[k] = excluded.get(k, 0) + 1
     log_attempt(P, "split", companies=len(chosen), clusters=len(cl), excluded=excluded, **counts)
-    if len(chosen) < sp.A2_RANDOM_N:
-        raise SystemExit(f"only {len(chosen)} companies drawn (need {sp.A2_RANDOM_N})")
-    sp.check_split_sizes(counts, sealed="check", others=("tune",))
+    if len(chosen) < n:
+        raise SystemExit(f"only {len(chosen)} companies drawn (need {n})")
+    if P.study == "a2":
+        sp.check_split_sizes(counts, sealed="check", others=("tune",))
     P.split_json.parent.mkdir(parents=True, exist_ok=True)
-    P.split_json.write_text(json.dumps({"seed": sp.A2_SEED, "corpcode_sha256": hashlib.sha256(raw).hexdigest(),
-                                        "a1_split_sha256": _file_sha(Paths(P.root).split_json),
+    P.split_json.write_text(json.dumps({"seed": seed, "corpcode_sha256": hashlib.sha256(raw).hexdigest(), **meta,
                                         "companies": sorted(chosen, key=lambda c: c["corp_code"]),
                                         "clusters": cl}, ensure_ascii=False, indent=1) + "\n")
     print(json.dumps(counts))
+
+
+def _split_a2(P: Paths) -> None:
+    """A-2 spec 6.2: 무작위 40개사(A-1 40개사·A-1과 교차 언급 10회 이상 제외), 군집 단위 확인 ≤ 20 / 나머지 조정."""
+    from lab.evidence import split as sp
+
+    a1_names, a1_body = a1_texts(P)
+    _draw_random(P, a1_names, a1_body, seed=sp.A2_SEED, n=sp.A2_RANDOM_N, check_cap=sp.A2_CHECK_CAP, tag="a1",
+                 meta={"a1_split_sha256": _file_sha(Paths(P.root).split_json)})
+
+
+def _split_a3(P: Paths) -> None:
+    """A-3 spec 5.2: 무작위 40개사(A-1·A-2 80개사와 그들과 교차 언급 10회 이상 제외), 전부 확인 세트(조정 세트 없음)."""
+    from lab.evidence import a3
+
+    names, body = prior_texts(P, ("a1", "a2"))
+    _draw_random(P, names, body, seed=a3.SEED, n=a3.RANDOM_N, check_cap=a3.RANDOM_N, tag="prior",
+                 meta={"a1_split_sha256": _file_sha(Paths(P.root).split_json),
+                       "a2_split_sha256": _file_sha(Paths(P.root, "a2").split_json)})
 
 
 def cmd_passages(P: Paths, args) -> None:
@@ -675,7 +732,7 @@ def cmd_generate(P: Paths, args) -> None:
 
     from app.services.evidence.generate import PROMPT_SHA, generate_answer
 
-    if P.study == "a2":
+    if P.study in ("a2", "a3"):
         verify_prereg_code(P)
         registered = json.loads(P.prereg.read_text())["generator"].get("prompt_sha")
         if registered != PROMPT_SHA:
@@ -715,7 +772,7 @@ def cmd_claims(P: Paths, args) -> None:
     answers = [a for a in read_jsonl(P.jsonl("answers.jsonl")) if a["qid"].split("-q")[0] in codes]
     keep = [c for c in read_jsonl(P.jsonl("claims.jsonl"))
             if c["source"] == "controlled" or c["qid"].split("-q")[0] not in codes]
-    if P.study == "a2":
+    if P.study in ("a2", "a3"):
         from app.services.evidence.claims import claim_spans
         from lab.evidence import a2
 
@@ -730,9 +787,19 @@ def cmd_claims(P: Paths, args) -> None:
     print(f"{len(rows)} natural claims")
 
 
+def _assignment_line(P: Paths, qid: str, all_qids: list[str]) -> str:
+    """꾸러미 질문 머리줄의 배정. A-3은 주체 교체 하위 유형과 표기 변형 유형, 그 밖은 변형 유형."""
+    if P.study == "a3":
+        from lab.evidence import a3
+
+        sub, nt = a3.assigned(qid, all_qids)
+        return f"주체 교체 하위 유형: {sub}, 표기 변형 유형: {nt}"
+    return f"변형 유형: {assigned_variant(qid, all_qids)}"
+
+
 def cmd_controlled_packets(P: Paths, args) -> None:
-    """회사마다 질문·검색 문단 8개·배정 변형 유형을 담은 통제 주장 작성 꾸러미를 쓴다."""
-    guide = (P.ev / "prompts/controlled_writer.md").read_text()
+    """회사마다 질문·검색 문단 8개·배정 변형 유형을 담은 통제 주장 작성 꾸러미를 쓴다(A-3은 전용 지시문)."""
+    guide = (P.ev / "prompts" / ("controlled_writer_a3.md" if P.study == "a3" else "controlled_writer.md")).read_text()
     text = _passage_text(P)
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
     codes = [c["corp_code"] for c in companies(P, args.split, stage="data")]
@@ -745,7 +812,7 @@ def cmd_controlled_packets(P: Paths, args) -> None:
             if q["corp_code"] != corp:
                 continue
             ps = "\n".join(f"[문단 {j}] {text[pid]}" for j, pid in enumerate(ret[q["qid"]], 1))
-            parts.append(f"## {q['qid']} — 변형 유형: {assigned_variant(q['qid'], all_qids)}\n질문: {q['question']}\n{ps}\n")
+            parts.append(f"## {q['qid']} — {_assignment_line(P, q['qid'], all_qids)}\n질문: {q['question']}\n{ps}\n")
         out = P.priv / "packets/controlled" / f"{corp}.md"
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(f"{guide}\n\n# 출력 파일: {_rel(P, P.data)}/controlled/{corp}.jsonl\n\n" + "\n".join(parts))
@@ -753,12 +820,30 @@ def cmd_controlled_packets(P: Paths, args) -> None:
 
 
 def cmd_controlled_check(P: Paths, args) -> None:
-    """통제 주장 작성 결과를 검사해 claims.jsonl에 c1(의역, 기대 지지됨)·c2(변형, 기대 지지 안 됨)로 넣는다."""
+    """통제 주장 작성 결과를 검사해 claims.jsonl에 c1(의역, 기대 지지됨)·c2(변형, 기대 지지 안 됨)로 넣는다.
+    A-3은 c3(표기 변형 참, 기대 지지됨)까지 세 문장이다."""
     text = _passage_text(P)
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
     names = tuple(_corp_names(P).values())
     codes = {c["corp_code"] for c in companies(P, args.split, stage="data")}
     all_qids = [q["qid"] for q in read_jsonl(P.jsonl("questions.jsonl"))]
+    if P.study == "a3":
+        rows, rejected = _controlled_a3(P, codes, text, ret, names, all_qids)
+    else:
+        rows, rejected = _controlled_a2(P, codes, text, ret, names, all_qids)
+    keep = [c for c in read_jsonl(P.jsonl("claims.jsonl"))
+            if not (c["source"] == "controlled" and c["qid"].split("-q")[0] in codes)]
+    write_jsonl(P.jsonl("claims.jsonl"), sorted(keep + rows, key=lambda r: r["cid"]))
+    others = [r for r in read_jsonl(P.jsonl("controlled_rejected.jsonl")) if r["qid"].split("-q")[0] not in codes]
+    write_jsonl(P.jsonl("controlled_rejected.jsonl"), sorted(others + rejected, key=lambda r: r["qid"]))
+    accepted = len({r["qid"] for r in rows})
+    log_attempt(P, "controlled-check", accepted=accepted, rejected=len(rejected))
+    print(f"{accepted} accepted, {len(rejected)} rejected")
+
+
+def _controlled_a2(P: Paths, codes: set[str], text: dict, ret: dict, names: tuple[str, ...],
+                   all_qids: list[str]) -> tuple[list[dict], list[dict]]:
+    """A-1·A-2 통제 주장: c1 의역(지지됨), c2 배정 변형(지지 안 됨)."""
     rows, rejected = [], []
     for corp in sorted(codes):
         for r in unique_by_qid(read_jsonl(P.data / "controlled" / f"{corp}.jsonl")):
@@ -771,13 +856,38 @@ def cmd_controlled_check(P: Paths, args) -> None:
                          "variant": "의역", "expected": "supported"})
             rows.append({"cid": f"{r['qid']}-c2", "qid": r["qid"], "source": "controlled", "text": r["variant_text"],
                          "variant": r["variant_type"], "expected": "not_supported"})
-    keep = [c for c in read_jsonl(P.jsonl("claims.jsonl"))
-            if not (c["source"] == "controlled" and c["qid"].split("-q")[0] in codes)]
-    write_jsonl(P.jsonl("claims.jsonl"), sorted(keep + rows, key=lambda r: r["cid"]))
-    others = [r for r in read_jsonl(P.jsonl("controlled_rejected.jsonl")) if r["qid"].split("-q")[0] not in codes]
-    write_jsonl(P.jsonl("controlled_rejected.jsonl"), sorted(others + rejected, key=lambda r: r["qid"]))
-    log_attempt(P, "controlled-check", accepted=len(rows) // 2, rejected=len(rejected))
-    print(f"{len(rows) // 2} accepted, {len(rejected)} rejected")
+    return rows, rejected
+
+
+def _controlled_a3(P: Paths, codes: set[str], text: dict, ret: dict, names: tuple[str, ...],
+                   all_qids: list[str]) -> tuple[list[dict], list[dict]]:
+    """A-3 통제 주장: c1 의역 참(지지됨), c2 주체 교체(지지 안 됨), c3 표기 변형 참(지지됨). 하나라도 검사에 걸리면
+    그 질문의 문장을 모두 뺀다(짝 비교를 질문 단위로 맞춘다). 영문·약칭 배정인데 문단에 약칭이 없으면 c3 없이 c1·c2만."""
+    from lab.evidence import a3
+
+    rows, rejected = [], []
+    for corp in sorted(codes):
+        for r in unique_by_qid(read_jsonl(P.data / "controlled" / f"{corp}.jsonl")):
+            ps = [text[i] for i in ret[r["qid"]]]
+            sub, nt = a3.assigned(r["qid"], all_qids)
+            # 영문·약칭인데 문단에 쓸 약칭이 없으면 notation_text가 null이다(c1·c2만 넣는다)
+            skip_c3 = r.get("notation_text") is None and nt == "영문·약칭"
+            checks = [("swap", (r.get("swap_subtype") == sub, "swap subtype mismatch")),
+                      ("notation", (r.get("notation_type") == nt, "notation type mismatch")),
+                      ("swap", a3.check_swap(r["true_text"], r["swap_text"], ps, names)),
+                      ("notation", (True, "ok") if skip_c3 else
+                       a3.check_notation(r["true_text"], r.get("notation_text") or "", nt, ps))]
+            bad = next(((k, why) for k, (ok, why) in checks if not ok), None)
+            if bad:
+                rejected.append({"qid": r["qid"], "reason": f"{bad[0]}: {bad[1]}"})
+                continue
+            rows += [{"cid": f"{r['qid']}-c1", "qid": r["qid"], "source": "controlled", "text": r["true_text"],
+                      "variant": "의역", "expected": "supported"},
+                     {"cid": f"{r['qid']}-c2", "qid": r["qid"], "source": "controlled", "text": r["swap_text"],
+                      "variant": f"주체 교체:{sub}", "expected": "not_supported"},
+                     {"cid": f"{r['qid']}-c3", "qid": r["qid"], "source": "controlled", "text": r["notation_text"],
+                      "variant": f"표기 변형:{nt}", "expected": "supported"}][:2 if skip_c3 else 3]
+    return rows, rejected
 
 
 COMMANDS = {"split": cmd_split, "passages": cmd_passages, "question-packets": cmd_question_packets,
@@ -930,6 +1040,7 @@ def _token_cap(P: Paths) -> int:
 
 def a2_budget(P: Paths, split_name: str, claims: list[dict], text: dict, ret: dict, names: dict) -> list[dict]:
     """A-2 예산 규칙(prereg_a2.json budget): 캐시에 없는 주장 × 5,070 토큰으로 추정해 호출 전에 확인한다.
+    A-3(prereg_a3.json budget)은 같은 추정으로 상한(7,000,000)을 넘으면 멈추기만 한다.
 
     조정 세트: 자연 주장만 판정하고, 확인 세트 자연 주장 몫(조정 세트와 같은 크기로 추정)을 예약한다.
     확인 세트: 자연 + 통제가 상한을 넘으면 통제 주장을 빼고(원장 기록), 자연만으로도 넘으면 멈춘다.
@@ -950,6 +1061,10 @@ def a2_budget(P: Paths, split_name: str, claims: list[dict], text: dict, ret: di
         return n * a2.TOKENS_PER_CALL
 
     cap = _token_cap(P)
+    if P.study == "a3":
+        # A-3은 통제 주장이 주결과라 빼지 않는다. 상한을 넘으면 호출 전에 멈춘다(새 사전등록으로 상한을 다시 정한다)
+        a2.check_budget(used, estimate(claims), cap)
+        return claims
     if split_name != "check":
         claims = [c for c in claims if c["source"] == "natural"]
         a2.check_budget(used, estimate(claims), cap, reserve=len(claims) * a2.TOKENS_PER_CALL)
@@ -1001,7 +1116,7 @@ def cmd_judge(P: Paths, args) -> None:
         raise SystemExit("--tag is required")
     if args.split == P.sealed and (args.tag != P.sealed or args.limit or args.single or args.no_cache):
         raise SystemExit(f"{P.sealed} judge runs once with --tag {P.sealed} and no --limit/--single/--no-cache")
-    if P.study == "a2":
+    if P.study in ("a2", "a3"):
         verify_prereg_code(P)
     once(P, P.priv / "scores" / f"{args.tag}.jsonl", args.split, "judge", args.tag)
     claims = _judgeable(P, args.split, include_disputed=(args.split == P.sealed))
@@ -1011,7 +1126,7 @@ def cmd_judge(P: Paths, args) -> None:
     text = _passage_text(P)
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
     names = _corp_names(P)
-    if P.study == "a2":
+    if P.study in ("a2", "a3"):
         claims = a2_budget(P, args.split, claims, text, ret, names)
     client = JevClient(P.calls, _token_cap(P))
     out = []
@@ -1354,6 +1469,14 @@ def cmd_freeze_holdout(P: Paths, args) -> None:
     if not [r for r in read_jsonl(P.jsonl("labels.jsonl")) if r["cid"].split("-q")[0] in codes]:
         raise SystemExit(f"no {P.sealed} labels")
     pre = json.loads(P.prereg.read_text())
+    if P.study == "a3":
+        from lab.evidence import a3
+
+        k = r1_binary_kappa([(r["r1"]["opus"]["label"], r["r1"]["codex"]["label"])
+                             for r in read_jsonl(P.jsonl("labels.jsonl")) if r["cid"].split("-q")[0] in codes])
+        if k is None or not k >= a3.KAPPA_MIN:  # 한 종류 라벨뿐이면 κ가 nan이다
+            log_attempt(P, "freeze-stop", reason="kappa", kappa=None if k is None or k != k else k)
+            raise SystemExit(f"stop: label kappa {k} < {a3.KAPPA_MIN}")
     labelers = (pre.get("stage1", {}) if P.study == "a1" else pre.get("labels", {})).get("labelers")
     gen_model, gen_digest = _generator(P)
     data = {**freeze_bundle(P),
@@ -1466,8 +1589,15 @@ def _a2_inputs(P: Paths):
         corp = c["qid"].split("-q")[0]
         ps = [text[i] for i in ret[c["qid"]]]
         f = lex_features(c["text"], ps, names[corp])
-        return {"cid": c["cid"], "qid": c["qid"], "cluster": cluster[corp], "lex": f.lex, "high_ok": f.high_ok,
-                "valid": [number_check(c["text"], p) for p in ps]}
+        row = {"cid": c["cid"], "qid": c["qid"], "cluster": cluster[corp], "lex": f.lex, "high_ok": f.high_ok,
+               "valid": [number_check(c["text"], p) for p in ps]}
+        if P.study == "a3":  # 주체 확인(제품과 같은 subject_valid)과 감사용 못 찾은 이름
+            from app.services.evidence import subject
+
+            alias = subject.aliases(ps)
+            row.update(best=f.best, text=c["text"], subj=subject.subject_valid(c["text"], ps, names[corp]),
+                       missing=[subject.missing_subjects(c["text"], p, names[corp], alias) for p in ps])
+        return row
     return feats
 
 
@@ -1661,8 +1791,123 @@ def cmd_a2_report(P: Paths, args) -> None:
 
 
 COMMANDS.update({"a2-tune": cmd_a2_tune, "a2-report": cmd_a2_report})
+
+
+def _pct(v) -> str:
+    return "—" if v is None else f"{v:.3f}"
+
+
+def _ci(ci) -> str:
+    return f"95% {_pct(ci[0])}~{_pct(ci[1])}"
+
+
+def a3_report_md(res: dict) -> str:
+    """A-3 리포트 본문(AI 생성 표시, 금액 없음)."""
+    g, ctl, rec = res["gates"], res["controlled"], res["recommendation"]
+    sw, rc, pr = g["h_swap"], g["h_recall"], g["h_prec"]
+    nf = ctl["notation_false_negative"]
+    lines = ["# 근거 판정 A-3 평가 리포트(주체 확인, 확인 세트 1회 실행)", "",
+             "> 이 리포트는 `python -m lab.evidence --study a3 a3-report`가 자동 생성했다. 정답 라벨은 사람이 아니라 "
+             "AI(Claude Opus·Codex)가 만든 **AI 참조 라벨**이며, 통제 주장 기대값은 AI 작성자가 만든 변형에서 왔다. "
+             "판정에는 TypeSafe의 JEV 모델을 썼고, 이 프로젝트는 TypeSafe와 제휴 관계가 아니다.", "",
+             "- 사전등록: `lab/evidence/prereg_a3.json`, 동결: `lab/evidence/prereg_a3_check.json`, 원자료: "
+             "`lab/evidence/results/a3-check.json`",
+             f"- 비교: 같은 JEV 확률 위에서 a2-v1 대 a3-subject-exp(주체 확인만 다름). 자연 주장 {res['n_natural']}건"
+             f"(AI 라벨 지지됨 {rc['positive']}건), 통제 주체 교체 {sw['n']}건, JEV 실패 제외 {res['jev_failed_excluded']}건",
+             "", "## 관문", "", "| 가설 | 값 | 결과 |", "|---|---|---|",
+             f"| H-swap | 주체 교체 정확도 a3 {_pct(sw['exp_accuracy'])} ({_ci(sw['ci'])}) 대 a2-v1 "
+             f"{_pct(sw['base_accuracy'])}, 차이 {_pct(sw['diff']['point'])} "
+             f"(95% {_pct(sw['diff']['lo'])}~{_pct(sw['diff']['hi'])})"
+             f"{', 기술 통계만(150건 미만)' if sw['descriptive_only'] else ''} | {'통과' if sw['pass'] else '실패'} |",
+             f"| H-recall | ✅ 재현율 a2-v1 {_pct(rc['base_recall'])} → a3 {_pct(rc['exp_recall'])}, 손실 {_pct(rc['loss'])} "
+             f"({_ci(rc['ci'])}) | {'통과' if rc['pass'] else '실패'} |",
+             f"| H-prec | ✅ 예측 {pr['predicted']}건, 정밀도 {_pct(pr['precision'])} ({_ci(pr['ci'])}), a2-v1 "
+             f"{pr['base_predicted']}건 {_pct(pr['base_precision'])}"
+             f"{', 기술 통계만(150건 미만)' if pr['descriptive_only'] else ''} | {'통과' if pr['pass'] else '실패'} |",
+             "", "## 권고(사전등록 규칙)", "", f"- {rec['note']}", "", "## 보조 결과", "",
+             f"- 표기 변형 오탐(a2-v1 ✅인 c3 중 a3에서 ✅ 아님): {nf['lost']}/{nf['n_base_supported']}"
+             f" (비율 {_pct(nf['rate'])}), 유형별 {json.dumps(nf['by_type'], ensure_ascii=False)}",
+             f"- 통제 주장 변형별 정확도 a2-v1: {json.dumps(ctl['accuracy']['base'], ensure_ascii=False)}",
+             f"- 통제 주장 변형별 정확도 a3: {json.dumps(ctl['accuracy']['exp'], ensure_ascii=False)}",
+             f"- 자연 주장 AUC a2-v1 {_pct(res['auc']['base'])}, a3 {_pct(res['auc']['exp'])}",
+             f"- a2-v1 ✅ → a3 ❔로 바뀐 자연 주장 {len(res['removed'])}건(목록과 못 찾은 이름은 원자료 removed)", ""]
+    return "\n".join(lines)
+
+
+def cmd_a3_report(P: Paths, args) -> None:
+    """확인 세트(동결 뒤 1회 판정 결과)로 a2-v1 대 a3-subject-exp 관문·보조 지표를 계산한다. 추가 호출 없음."""
+    from lab.evidence import a3
+    from lab.evidence.metrics import auc
+
+    companies(P, P.sealed)  # 동결 확인
+    verify_prereg_code(P)
+    pre = json.loads(P.prereg.read_text())
+    if pre.get("status") != "registered":
+        raise SystemExit("a3-report needs prereg_a3.json registered")
+    want = {"base": a3.policy_fields(a3.BASE), "exp": a3.policy_fields(a3.EXP)}
+    if pre.get("policies") != want:
+        raise SystemExit(f"policy constants differ from prereg_a3.json: {want}")
+    natural, failed = a2_rows(P, P.sealed)
+    ctrl, _ = a2_rows(P, P.sealed, source="controlled")
+    swaps = [r for r in ctrl if (r["variant"] or "").startswith("주체 교체")]
+    g = a3.check_gates(natural, swaps)
+    d = a3.annotate(natural)
+    y = [r["y"] for r in d]
+    res = {"policies": want, "n_natural": len(natural), "jev_failed_excluded": failed, "gates": g,
+           "recommendation": a3.recommendation(g), "controlled": a3.controlled_summary(ctrl),
+           "auc": {k: auc(y, [r[f"{k}_score"] for r in d]) for k in ("base", "exp")},
+           "removed": a3.removed_audit(natural)}
+    out = P.ev / "results/a3-check.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(res, ensure_ascii=False, indent=1, default=str) + "\n")
+    doc = P.root / "docs/lab/evidence-a3-report.md"
+    doc.parent.mkdir(parents=True, exist_ok=True)
+    doc.write_text(a3_report_md(res))
+    log_attempt(P, "a3-report", h_swap=g["h_swap"]["pass"], h_recall=g["h_recall"]["pass"], h_prec=g["h_prec"]["pass"],
+                switch_default=res["recommendation"]["switch_default"])
+    print(json.dumps({k: v["pass"] for k, v in g.items()}))
+
+
+def cmd_a3_explore(P: Paths, args) -> None:
+    """A-3 사전등록 확정 전 탐색(prereg_a3.json order 0): A-2 조정 세트(탐색 허용)의 저장된 JEV 확률로 a2-v1 대
+    a3-subject-exp를 비교하고, a2-v1 ✅인데 a3에서 빠지는 자연 주장과 못 찾은 이름을 비공개 파일에 쓴다. 추가 호출 없음.
+    A-2 확인 세트는 읽지 않는다(조정 세트만 연다). 확정(registered) 뒤에는 거부한다."""
+    from app.services.evidence import subject
+    from app.services.evidence.lexical import lex_best
+    from lab.evidence import a3
+
+    if prereg_registered(P):
+        raise SystemExit("a3-explore is for the draft prereg only (prereg_a3.json is registered)")
+    A2 = Paths(P.root, "a2")
+    text = _passage_text(A2)
+    ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(A2.jsonl("retrieval.jsonl"))}
+    names = _corp_names(A2)
+    rows, failed = a2_rows(A2, "tune")
+    claim_text = {c["cid"]: c["text"] for c in _judgeable(A2, "tune")}
+    for r in rows:
+        ps, co, claim = [text[i] for i in ret[r["qid"]]], names[r["qid"].split("-q")[0]], claim_text[r["cid"]]
+        alias = subject.aliases(ps)
+        r.update(best=lex_best(claim, ps)[1], text=claim, subj=subject.subject_valid(claim, ps, co),
+                 missing=[subject.missing_subjects(claim, p, co, alias) for p in ps])
+    d = a3.annotate(rows)
+    removed = a3.removed_audit(rows)
+    pos = [r for r in d if r["y"]]
+    out = {"split": "tune (A-2)", "n": len(rows), "positive": len(pos), "jev_failed_excluded": failed,
+           "base_supported_true": sum(r["base"] == "supported" for r in pos),
+           "exp_supported_true": sum(r["exp"] == "supported" for r in pos),
+           "removed": removed, "generic_extra": list(subject.SUBJECT_GENERIC)}
+    path = P.priv / "a3_explore_tune.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n")
+    log_attempt(P, "a3-explore", source="a2-tune", n=len(rows), positive=len(pos),
+                lost_true=out["base_supported_true"] - out["exp_supported_true"], removed=len(removed))
+    print(json.dumps({k: out[k] for k in ("n", "positive", "base_supported_true", "exp_supported_true")}))
+
+
+COMMANDS.update({"a3-report": cmd_a3_report, "a3-explore": cmd_a3_explore})
 A1_ONLY = {"stage0-report", "stage1-tune", "stage1-freeze-config", "stage1-report", "baselines", "claim-embed"}
 A2_ONLY = {"a2-tune", "a2-report"}
+A3_ONLY = {"a3-report", "a3-explore"}
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -1683,6 +1928,8 @@ def main(argv: list[str] | None = None) -> None:
         raise SystemExit(f"{args.cmd} is an a1 command")
     if args.study != "a2" and args.cmd in A2_ONLY:
         raise SystemExit(f"{args.cmd} needs --study a2")
+    if args.study != "a3" and args.cmd in A3_ONLY:
+        raise SystemExit(f"{args.cmd} needs --study a3")
     COMMANDS[args.cmd](Paths(args.root, args.study), args)
 
 
