@@ -372,6 +372,11 @@ export function setConversationId(cid) {
   if (cid) state.conversationId = cid;
 }
 
+/** 화면이 보고 있는 스레드 id. 일반 채팅(js/agent.js)도 같은 값을 보낸다. 초기화하면 null. */
+export function getConversationId() {
+  return state.conversationId;
+}
+
 /** 기능 플래그 확인: 가벼운 GET /api/evidence/notice로 본다. 404(꺼짐)·401 등 200이 아니면 토글을 숨긴다.
  *  응답의 고지 확인 여부도 함께 기억한다. 저장소 준비 여부(503)는 회사를 찾을 때 알린다. */
 async function probe() {

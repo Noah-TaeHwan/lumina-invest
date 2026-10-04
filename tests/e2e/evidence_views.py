@@ -152,7 +152,7 @@ class FakeApi:
         if path == f"/api/conversations/{CID}":
             return 200, self.conv
         if path == "/api/chat":
-            return 200, {"answer": self.agent_answer, "steps": [], "citations": []}
+            return 200, {"answer": self.agent_answer, "steps": [], "citations": [], "conversation_id": CID}
         return 200, {}
 
     def n(self, method: str, path: str) -> int:
@@ -383,6 +383,24 @@ async def s_flag_off(browser, base, ck: Checks):
     fake = FakeApi(notice_status=401)
     ctx, page = await open_app(browser, base, fake)
     ck.ok(not await page.is_visible("#ev-bar"), "flag-off: 401이어도 토글을 숨긴다")
+    await ctx.close()
+
+
+async def s_agent_thread(browser, base, ck: Checks):
+    print("[agent-thread] 일반 채팅도 현재 스레드 id를 보내고, 초기화하면 비운다")
+    fake = FakeApi(flag=404)
+    ctx, page = await open_app(browser, base, fake)
+    labels = "#chat-messages .ai-label"
+    await ask(page, "첫 질문")
+    await page.wait_for_function(f"document.querySelectorAll('{labels}').length === 1")
+    await ask(page, "두 번째 질문")
+    await page.wait_for_function(f"document.querySelectorAll('{labels}').length === 2")
+    await page.click("#clear-chat")
+    await ask(page, "초기화 뒤 질문")
+    await page.wait_for_function(f"document.querySelectorAll('{labels}').length === 1")
+    sent = [b.get("conversation_id") for b in fake.bodies("POST", "/api/chat")]
+    ck.ok(sent == [None, CID, None], f"agent-thread: 첫 질문은 id 없이, 다음은 응답 스레드 id로, 초기화 뒤 다시 없이 {sent}")
+    ck.ok(not page.errors, f"agent-thread: JS 오류 없음 {page.errors}")
     await ctx.close()
 
 
@@ -668,6 +686,10 @@ async def s_restore(browser, base, ck: Checks):
     vis = await page.eval_on_selector_all(".steps-btn", "els => els.map(e => !document.getElementById(e.dataset.target)"
                                           ".classList.contains('hidden'))")
     ck.ok(vis == [False, False, True], f"restore-steps: 세 번째 버튼은 세 번째 패널만 연다 {vis}")
+    # 복원한 스레드에 일반 채팅으로 이어 묻는다: Redis 활성 값이 아니라 화면의 스레드 id로 보낸다
+    await ask(page, "이어서")
+    await page.wait_for_function("document.querySelectorAll('#chat-messages .ai-label').length === 4")
+    ck.ok(fake.bodies("POST", "/api/chat")[0].get("conversation_id") == CID, "restore-steps: 일반 채팅도 복원한 스레드 id로 질문")
     await ctx.close()
 
     print("[restore-active] 진행 중 실행 복원 시 폴링 재개")
@@ -801,7 +823,7 @@ async def main() -> int:
     ck = Checks()
     async with async_playwright() as p:
         browser = await p.chromium.launch(executable_path=_chromium())
-        for scenario in (s_pure, s_flag_off, s_notice, s_done, s_double_send, s_states, s_timeout, s_restore,
+        for scenario in (s_pure, s_flag_off, s_agent_thread, s_notice, s_done, s_double_send, s_states, s_timeout, s_restore,
                          s_policy_v1, s_mobile):
             try:
                 await scenario(browser, base, ck)
