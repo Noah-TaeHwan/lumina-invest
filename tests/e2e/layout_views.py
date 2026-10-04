@@ -66,6 +66,9 @@ async def s_view(browser, base, ck: ev.Checks, width: int, hash_: str):
         if shot:
             os.makedirs(shot, exist_ok=True)
             await page.screenshot(path=os.path.join(shot, f"375_{hash_}.png"))
+        # 글자(.gnb-label)를 숨겨도 버튼의 접근 가능한 이름은 남아야 한다
+        ck.ok(await page.get_by_role("button", name="로그아웃", exact=True).is_visible(),
+              f"{tag}: 로그아웃 버튼의 접근 가능한 이름이 '로그아웃'이다")
         ck.ok(await page.is_visible("#gnb-more-btn"), f"{tag}: 더보기 버튼이 보인다")
         btn = await page.evaluate("(() => { const r = document.querySelector('#gnb-more-btn').getBoundingClientRect();"
                                   " return [r.left, r.right, window.innerWidth]; })()")
