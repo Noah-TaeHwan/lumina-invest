@@ -126,6 +126,16 @@ async def _store_qdrant(chunks: list[str], meta: dict, ollama: OllamaClient) -> 
             ))
 
         if points:
+            # 같은 URL의 기존 점(예전 hash() ID, 문서가 짧아져 남은 꼬리 청크)을 지우고 새로 쓴다.
+            # 새 청크를 만들지 못했으면 기존 점은 그대로 둔다. 업로드 점(owner_user_id 있음)은 건드리지 않는다.
+            if meta.get("url"):
+                from qdrant_client.http.models import (
+                    FieldCondition, Filter, IsEmptyCondition, MatchValue, PayloadField,
+                )
+                await client.delete(collection_name=collection, points_selector=Filter(must=[
+                    FieldCondition(key="url", match=MatchValue(value=meta["url"])),
+                    IsEmptyCondition(is_empty=PayloadField(key="owner_user_id")),
+                ]))
             await client.upsert(collection_name=collection, points=points)
         await client.close()
         return len(points)
