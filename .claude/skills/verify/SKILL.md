@@ -55,6 +55,25 @@ env -u TYPESAFE_API_KEY HOME=$(mktemp -d) /tmp/evv.sh judge --split tune --tag t
 - **Stage 0 지연 관문은 tune·check·repeat1~3 첫 시도만 읽고, holdout(Stage 1) 호출은 뺀다.** 입력 토큰 합계도 Stage 0 호출(single 포함)만 더하므로 나중에 다시 돌려도 Stage 1 호출이 섞이지 않는다. 판정은 여전히 커밋된 `lab/evidence/results/stage0.json`이 기준이다.
 - 생성·임베딩은 호스트 Ollama가 빠르다: `OLLAMA_BASE_URL=http://127.0.0.1:11434 /tmp/ev.sh ...`(Docker Ollama와 같은 모델 digest).
 
+## A-2 평가 (`--study a2`)
+
+비공개 데이터는 `lab/data/evidence_a2/`다. 저장소 전체를 `git archive`로 임시 루트에 풀면 코드 해시 대상이 빠짐없이 들어간다.
+
+```bash
+H=$(git rev-parse HEAD); T=$(mktemp -d)
+git archive $H | tar -x -C $T && mkdir -p $T/lab/data && cp -R lab/data/evidence lab/data/evidence_a2 $T/lab/data/
+cd $T && EV=(uv run -q --no-project --python 3.12 --with numpy==2.5.3 --with httpx==0.28.1 --with scikit-learn==1.9.1 --with scipy==1.18.1 --with pydantic-settings python -m lab.evidence --root $T)
+env -u TYPESAFE_API_KEY HOME=$(mktemp -d) "${EV[@]}" --study a2 judge --split check --tag check   # "check judge check already ran"
+"${EV[@]}" --study a2 labels-merge --split check   # "check data is frozen"
+"${EV[@]}" --study a2 a2-tune                      # "tune is closed: check data exists"
+```
+
+- 거부 경로 전후로 `lab/data/evidence*/jev_calls.jsonl`의 해시가 같아야 한다(유료 호출 0건). 줄 수를 문자열로 비교하면 공백 때문에 틀리게 나오니 `shasum`으로 본다.
+- **`a2-report` 재현은 커밋 `d41e1dd`(또는 `bd53331`)에서 한다.** 확인 세트 동결 해시에 `app/services/evidence/*.py`·`lab/evidence/*.py`가 들어 있어, 그 뒤 `lab/evidence/__main__.py`(PR #23 리뷰 수정)와 P6(PR #24) 제품 코드가 바뀐 HEAD에서는 `holdout freeze mismatch: ['code_sha256']`로 거부되는 것이 정상이다. 그 커밋에서 다시 만든 `a2-check.json`·`evidence-a2-report.md`가 커밋본과 바이트 동일해야 한다.
+- A-1 `stage1-report`도 같은 이유로 HEAD에서는 거부된다(재현은 `5f228fe`). A-1 `stage0-report`는 HEAD에서도 커밋본 `stage0.json`과 같아야 한다.
+- 저장·API 테스트는 빈 PostgreSQL이 필요하다: 일회용 `postgres:16-alpine` 컨테이너와 네트워크를 만들어 `EVIDENCE_TEST_DATABASE_URL`로 넘기고, 앱 이미지에서 `pip install -r requirements-dev.txt` 후 `python -m pytest -p no:cacheprovider -o addopts='' -q`. skip 수까지 확인한다.
+- 화면 e2e: `uv run --with playwright python tests/e2e/evidence_views.py`를 로컬에서 **두 번** 돌린다(클라우드에서 통과해도 타이밍 차이로 로컬에서만 실패한 적이 있다).
+
 ## 비용 없이 볼 수 있는 실패 경로
 
 - 세션 간격: 직전 세션 마지막 호출 후 2시간 안에 `--session 2` → 경과 시간과 함께 거부(exit 1).
