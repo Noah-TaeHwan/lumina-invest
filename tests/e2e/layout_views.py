@@ -1,0 +1,107 @@
+"""브라우저 E2E: 상단 GNB가 모바일에서 문서 폭을 넘기지 않는지(가로 스크롤 없음) 확인한다.
+
+375·768·1280px × 상담 화면(#agent-chat)·판단 일지(#journal)에서 documentElement.scrollWidth == clientWidth.
+375px에서는 GNB 탭 줄이 보이면서(폭 > 0) 가로로 스크롤되는지, 더보기 패널이 화면 안에 열리는지도 본다.
+앱 서버·DB 없이 돈다. public/을 정적 서버로 띄우고 /api/** 는 가짜 응답(journal_views.JournalApi)을 준다.
+외부 CDN 요청은 끊는다. 시세(/api/stocks/market)는 로컬처럼 지수 4개를 채워 우측 영역 폭을 실제와 맞춘다.
+pytest 수집 대상이 아니다(파일명이 test_* 가 아님). evidence_views.py와 같은 수동 실행 스크립트다.
+    pip install playwright        # 브라우저가 없으면 playwright install chromium
+    python tests/e2e/layout_views.py
+    # 375px 화면 저장: LAYOUT_SCREENSHOT_DIR=/tmp/shots python tests/e2e/layout_views.py
+종료 코드 0 = 모든 확인 통과, 1 = 실패 있음.
+"""
+import asyncio
+import os
+import sys
+
+from playwright.async_api import async_playwright
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import evidence_views as ev  # noqa: E402  정적 서버·Checks·브라우저 경로를 그대로 쓴다
+import journal_views as jv  # noqa: E402  일지 기능 확인까지 상태로 기다리는 open_app을 쓴다
+
+WIDTHS = (375, 768, 1280)
+HASHES = ("agent-chat", "journal")
+INDICES = [{"name": "KOSPI", "price": 2734.56, "change_pct": 0.42},
+           {"name": "KOSDAQ", "price": 868.12, "change_pct": -0.37},
+           {"name": "S&P 500", "price": 5612.34, "change_pct": 0.18},
+           {"name": "NASDAQ", "price": 17890.45, "change_pct": -0.21}]
+
+
+class LayoutApi(jv.JournalApi):
+    def respond(self, method, path, query, body):
+        if path == "/api/stocks/market":
+            self.calls.append((method, path, body))
+            return 200, {"indices": INDICES}
+        return super().respond(method, path, query, body)
+
+
+async def overflow(page) -> dict:
+    return await page.evaluate("""() => {
+      const de = document.documentElement, tabs = document.querySelector('.gnb-tabs');
+      return {sw: de.scrollWidth, cw: de.clientWidth,
+              tabs_cw: tabs.clientWidth, tabs_sw: tabs.scrollWidth};
+    }""")
+
+
+async def s_view(browser, base, ck: ev.Checks, width: int, hash_: str):
+    tag = f"{width}px #{hash_}"
+    print(f"[layout] {tag}")
+    ctx, page = await jv.open_app(browser, base, LayoutApi(), hash_=hash_, width=width, height=740)
+    # 시세가 그려진 뒤에 잰다(우측 영역이 가장 넓은 상태)
+    await page.wait_for_function("document.querySelectorAll('#market-ticker .ticker-item').length > 0")
+    if hash_ == "journal":
+        await page.wait_for_function("document.querySelector('.view.active')?.dataset.view === 'journal'")
+    m = await overflow(page)
+    ck.ok(m["sw"] == m["cw"], f"{tag}: 가로 스크롤 없음 scrollWidth={m['sw']} clientWidth={m['cw']}")
+    if width == 375:
+        ck.ok(m["tabs_cw"] >= 120, f"{tag}: GNB 탭 줄이 보인다(폭 {m['tabs_cw']}px)")
+        ck.ok(m["tabs_sw"] > m["tabs_cw"], f"{tag}: GNB 탭 줄이 가로로 스크롤된다 {m['tabs_sw']}>{m['tabs_cw']}")
+        before = await page.evaluate("document.querySelector('.gnb-tabs').scrollLeft")
+        await page.evaluate("document.querySelector('.gnb-tabs').scrollLeft = 10000")
+        after = await page.evaluate("document.querySelector('.gnb-tabs').scrollLeft")
+        ck.ok(after > before, f"{tag}: 탭 줄을 끝까지 밀 수 있다 scrollLeft {before}→{after}")
+        await page.evaluate("document.querySelector('.gnb-tabs').scrollLeft = 0")
+        shot = os.environ.get("LAYOUT_SCREENSHOT_DIR")
+        if shot:
+            os.makedirs(shot, exist_ok=True)
+            await page.screenshot(path=os.path.join(shot, f"375_{hash_}.png"))
+        ck.ok(await page.is_visible("#gnb-more-btn"), f"{tag}: 더보기 버튼이 보인다")
+        btn = await page.evaluate("(() => { const r = document.querySelector('#gnb-more-btn').getBoundingClientRect();"
+                                  " return [r.left, r.right, window.innerWidth]; })()")
+        ck.ok(btn[0] >= 0 and btn[1] <= btn[2], f"{tag}: 더보기 버튼이 화면 안에 있다 {btn}")
+        await page.click("#gnb-more-btn")
+        await page.wait_for_selector("#gnb-offcanvas.open")
+        # right 전환(0.22s)이 끝날 때까지 상태로 기다린다
+        await page.wait_for_function("document.querySelector('#gnb-offcanvas').getBoundingClientRect().right"
+                                     " <= window.innerWidth + 0.5")
+        r = await page.evaluate("(() => { const r = document.querySelector('#gnb-offcanvas').getBoundingClientRect();"
+                                " return [r.left, r.right, window.innerWidth]; })()")
+        ck.ok(r[0] >= 0 and r[1] <= r[2] + 0.5, f"{tag}: 더보기 패널이 화면 안에 열린다 {r}")
+        m2 = await overflow(page)
+        ck.ok(m2["sw"] == m2["cw"], f"{tag}: 더보기 연 뒤에도 가로 스크롤 없음 {m2['sw']}/{m2['cw']}")
+        if shot:
+            await page.screenshot(path=os.path.join(shot, f"375_{hash_}_more.png"))
+    ck.ok(not page.errors, f"{tag}: 페이지 오류 없음 {page.errors[:2]}")
+    await ctx.close()
+
+
+async def main() -> int:
+    srv, base = ev._serve()
+    ck = ev.Checks()
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(executable_path=ev._chromium())
+        for width in WIDTHS:
+            for hash_ in HASHES:
+                try:
+                    await s_view(browser, base, ck, width, hash_)
+                except Exception as exc:  # noqa: BLE001 — 한 조합이 죽어도 나머지를 본다
+                    ck.ok(False, f"{width}px #{hash_}: 예외 {type(exc).__name__}: {str(exc)[:300]}")
+        await browser.close()
+    srv.shutdown()
+    print(f"checks passed={ck.passed} failed={len(ck.failures)}")
+    return 1 if ck.failures else 0
+
+
+if __name__ == "__main__":
+    sys.exit(asyncio.run(main()))

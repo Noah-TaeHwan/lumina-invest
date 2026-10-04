@@ -135,6 +135,7 @@
       border-left: 1px solid var(--border);
       flex-shrink: 0;
     }
+    #logout-btn .gnb-label { margin-left: 4px; }
 
     /* ── Market Ticker ───────────────────────────────── */
     #market-ticker {
@@ -621,6 +622,13 @@
       #lnb { display: none; }
       #lnb.mobile-open { display: flex; position: fixed; top: var(--gnb-h); left: 0; bottom: 0; z-index: 99; }
       #main-content { padding: 14px; }
+      /* GNB: 우측 영역(flex-shrink:0)이 문서 폭을 넘기지 않게 아이콘만 남기고, 남는 폭은 탭 줄(가로 스크롤)에 준다 */
+      .gnb-logo { padding: 0 12px; }
+      .gnb-logo-text, #market-ticker, #sync-badge-text, #user-name, #logout-btn .gnb-label { display: none; }
+      .gnb-right { gap: 8px; padding: 0 8px; }
+      .gnb-item { padding: 0 12px; font-size: 14px; }
+      /* 푸터 줄(인라인 flex)도 375px에서 넘친다 — 줄을 바꾼다 */
+      #app-footer > div { flex-wrap: wrap; min-width: 0; }
     }
 
     /* ── 공시 근거 모드(A-2): 토글·회사 선택·고지, 문장 배지·근거 문단 (js/evidence.js) ── */
