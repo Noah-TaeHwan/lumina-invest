@@ -305,8 +305,9 @@ async def get_changes(entry_id: str, user=Depends(get_current_user_any), db: Asy
 
     gone 문단의 대체 본문은 돌려주지 않는다(새 근거는 새 질문으로만 본다).
     """
-    entry = await _owned_entry(db, entry_id, user)
-    return await chg.compare(passage_store, entry.snapshot)
+    snapshot = (await _owned_entry(db, entry_id, user)).snapshot
+    await db.rollback()  # 읽기만 했다. 저장소가 최대 STORE_TIMEOUT_S를 끄는 동안 PG 연결을 쥐고 있지 않게 풀에 돌려준다
+    return await chg.compare(passage_store, snapshot)
 
 
 @router.post("/{entry_id}/updates", status_code=201, summary="다시 보기 기록 덧붙이기")

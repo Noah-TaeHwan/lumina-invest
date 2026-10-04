@@ -278,19 +278,66 @@ def test_changes_api_compares_without_saving(pg, journal):
     assert before == after == (1, 1) and stored == snapshot  # 결정 6-2: 비교 결과를 저장하지 않는다
 
 
-def test_changes_api_unavailable_without_store(pg, journal, monkeypatch):
-    """근거 모드가 꺼져 저장소가 연결되지 않았으면 unavailable(수용 기준 9)."""
-    monkeypatch.setattr(settings, "EVIDENCE_CHAT_ENABLED", False)
+@pytest.fixture
+def unwired():
+    def reset():
+        evidence_routes.set_passage_store(None)
+        store._wired = None
+    reset()
+    yield
+    reset()
+
+
+@pytest.mark.parametrize("evidence_on", [False, True])
+def test_changes_api_follows_evidence_flag_through_wire(pg, journal, monkeypatch, unwired, evidence_on):
+    """수용 기준 9: 의존성을 덮어쓰지 않고 앱 시작 경로(store.wire → get_passage_store)를 그대로 거친다.
+    근거 모드가 꺼져 있으면 저장소가 연결되지 않아 unavailable, 켜져 있으면 연결된 저장소로 비교한다."""
+    monkeypatch.setattr(settings, "EVIDENCE_CHAT_ENABLED", evidence_on)
+    ps = _passages()
+    s = _store()
+
+    async def go():
+        await s.load(SAMSUNG, ps)
+        wired = await store.wire(s)
+        async with database(pg) as factory:
+            seed = await seed_user(factory)
+            eid = await _entry(factory, seed, _snapshot(ps))
+            async with client(make_app(factory, Who(seed["user"]))) as c:
+                return wired, await c.get(f"/api/journal/{eid}/changes")
+
+    wired, r = asyncio.run(go())
+    assert wired is evidence_on and (evidence_routes.get_passage_store() is s) is evidence_on
+    assert r.status_code == 200
+    if evidence_on:
+        assert r.json()["status"] == "ok" and {p["status"] for p in r.json()["passages"]} == {"same"}
+    else:
+        assert r.json() == UNAVAILABLE
+
+
+def test_changes_api_releases_db_connection_before_store(pg, journal):
+    """저장소가 느리게(최대 5초) 응답해도 PG 연결을 쥐고 있지 않는다: 비교 시점에 이 요청의 트랜잭션이 끝나 있어야 한다."""
+    from sqlalchemy import text
+
+    seen = {}
+
+    class Probe(Broken):
+        async def exists(self):
+            async with database(pg) as other, other() as db:
+                seen["idle_in_tx"] = await db.scalar(text(
+                    "SELECT count(*) FROM pg_stat_activity WHERE datname = current_database() "
+                    "AND pid <> pg_backend_pid() AND state LIKE 'idle in transaction%'"))
+            return False
 
     async def go():
         async with database(pg) as factory:
             seed = await seed_user(factory)
             eid = await _entry(factory, seed, _snapshot(_passages()))
-            async with client(_app(factory, Who(seed["user"]), None)) as c:
+            async with client(_app(factory, Who(seed["user"]), Probe("none"))) as c:
                 return await c.get(f"/api/journal/{eid}/changes")
 
     r = asyncio.run(go())
     assert (r.status_code, r.json()) == (200, UNAVAILABLE)
+    assert seen == {"idle_in_tx": 0}
 
 
 def test_changes_api_unavailable_without_collection(pg, journal):
