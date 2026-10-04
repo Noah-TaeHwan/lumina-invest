@@ -1,0 +1,6 @@
+{"qid": "00127875-q1", "true_text": "삼익제약이 다루는 의약품은 2025년 말 현재 모두 117개 품목이다.", "variant_text": "삼익제약이 다루는 의약품은 2019년 말 현재 모두 117개 품목이다.", "variant_type": "기간 바꾸기", "source_passage": 4}
+{"qid": "00127875-q2", "true_text": "삼익제약 순환기용제를 대표하는 품목으로 세자르정과 카덴자정 등이 꼽힌다.", "variant_text": "삼익제약 순환기용제를 대표하는 품목으로 아토젠정과 카덴자정 등이 꼽힌다.", "variant_type": "주체 교체", "source_passage": 3}
+{"qid": "00127875-q3", "true_text": "삼익제약 전체 매출의 46.8%는 고혈압·고지혈증 치료제인 순환기용제에서 나온다.", "variant_text": "삼익제약 전체 매출의 46.8%는 고혈압·고지혈증 치료제인 순환기용제에서 나오지 않는다.", "variant_type": "부정", "source_passage": 8}
+{"qid": "00127875-q4", "true_text": "삼익제약 인천공장은 타정기 9대를 갖추고 정제를 생산한다.", "variant_text": "셀트리온은 인천 송도 공장에서 바이오시밀러를 생산한다.", "variant_type": "다른 기업 사실", "source_passage": 5}
+{"qid": "00127875-q5", "true_text": "삼익제약은 CMO 사업에서 44곳의 거래처와 거래하고 있다.", "variant_text": "삼익제약은 CMO 사업에서 57곳의 거래처와 거래하고 있다.", "variant_type": "숫자 변경", "source_passage": 7}
+{"qid": "00127875-q6", "true_text": "삼익제약 중앙연구소는 1995년 인천 부평에서 문을 열었다.", "variant_text": "삼익제약 중앙연구소는 1988년 인천 부평에서 문을 열었다.", "variant_type": "기간 바꾸기", "source_passage": 7}
