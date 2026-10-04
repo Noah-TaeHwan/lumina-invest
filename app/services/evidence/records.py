@@ -22,8 +22,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.lib import jev
 from app.models import EvidenceClaim, EvidenceRun
 from app.services.evidence.claims import claim_spans, is_not_claim
-from app.services.evidence.runner import (A2_PROVISIONAL, A2_PROVISIONAL_1, A2_V1, DEFAULT_POLICY, ClaimResult,
-                                          Policy, RunResult, rejudge)
+from app.services.evidence.runner import (A2_PROVISIONAL, A2_PROVISIONAL_1, A2_V1, A3_SUBJECT, DEFAULT_POLICY,
+                                          ClaimResult, Policy, RunResult, rejudge)
 
 STALE_AFTER_S = 60
 ACTIVE = ("pending", "running")
@@ -33,7 +33,7 @@ POLL_INTERVAL_MS = 500
 POLL_MARGIN_S = 4  # 마감 뒤 취소 정리·저장 여유
 CLAIM_STATUSES = ("supported", "contradicted", "no_evidence", "not_claim", "unjudged", "pending")
 PASSAGE_FIELDS = ("passage_id", "section", "idx", "sha256", "text")
-POLICIES = {p.version: p for p in (A2_V1, A2_PROVISIONAL, A2_PROVISIONAL_1)}  # 확신도 라벨에 쓰는 정책별 τ_s(새 정책을 넣으면 여기에도)
+POLICIES = {p.version: p for p in (A2_V1, A2_PROVISIONAL, A2_PROVISIONAL_1, A3_SUBJECT)}  # 확신도 라벨에 쓰는 정책별 τ_s(새 정책을 넣으면 여기에도)
 # 재판정 버튼을 보이는 이전 정책(spec 6.4: a2-v1이 정해진 뒤 사용자가 연 스레드에서만, 자동 일괄 재판정은 없다).
 # 재판정은 문장을 다시 나누지 않으므로 a2-v1과 비주장 규칙이 같은 a2-provisional-2만 대상이다.
 # a2-provisional(목록 머리말 비주장 규칙 이전) 실행에 a2-v1을 붙이면 비주장 규칙 출처가 실제와 어긋난다
