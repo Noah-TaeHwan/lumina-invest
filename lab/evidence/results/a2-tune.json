@@ -1,0 +1,328 @@
+{
+ "tau_s": 0.9,
+ "tau_c": 0.35,
+ "theta_low": null,
+ "theta_high": 0.95,
+ "tau_s_fallback": false,
+ "n": 256,
+ "jev_failed_excluded": 0,
+ "supported_labels": 159,
+ "kappa_r1": 0.9669720468286801,
+ "boundary_share": 0.0703125,
+ "operating_point": {
+  "supported_precision": 0.9328859060402684,
+  "supported_recall": 0.8742138364779874,
+  "coverage": 0.58203125,
+  "contradiction_false_positive_rate": 0.0163265306122449
+ },
+ "tau_s_candidates": [
+  {
+   "tau_s": 0.55,
+   "predicted": 178,
+   "correct": 148,
+   "precision": 0.8314606741573034
+  },
+  {
+   "tau_s": 0.6,
+   "predicted": 177,
+   "correct": 148,
+   "precision": 0.8361581920903954
+  },
+  {
+   "tau_s": 0.65,
+   "predicted": 174,
+   "correct": 147,
+   "precision": 0.8448275862068966
+  },
+  {
+   "tau_s": 0.7,
+   "predicted": 170,
+   "correct": 146,
+   "precision": 0.8588235294117647
+  },
+  {
+   "tau_s": 0.75,
+   "predicted": 166,
+   "correct": 145,
+   "precision": 0.8734939759036144
+  },
+  {
+   "tau_s": 0.8,
+   "predicted": 162,
+   "correct": 143,
+   "precision": 0.8827160493827161
+  },
+  {
+   "tau_s": 0.85,
+   "predicted": 157,
+   "correct": 142,
+   "precision": 0.9044585987261147
+  },
+  {
+   "tau_s": 0.9,
+   "predicted": 149,
+   "correct": 139,
+   "precision": 0.9328859060402684
+  },
+  {
+   "tau_s": 0.95,
+   "predicted": 140,
+   "correct": 134,
+   "precision": 0.9571428571428572
+  }
+ ],
+ "theta_low_candidates": [
+  {
+   "theta": 0.05,
+   "band": 41,
+   "supported": 5,
+   "rate": 0.12195121951219512
+  },
+  {
+   "theta": 0.1,
+   "band": 43,
+   "supported": 7,
+   "rate": 0.16279069767441862
+  },
+  {
+   "theta": 0.15,
+   "band": 45,
+   "supported": 8,
+   "rate": 0.17777777777777778
+  },
+  {
+   "theta": 0.2,
+   "band": 48,
+   "supported": 8,
+   "rate": 0.16666666666666666
+  },
+  {
+   "theta": 0.25,
+   "band": 52,
+   "supported": 9,
+   "rate": 0.17307692307692307
+  },
+  {
+   "theta": 0.3,
+   "band": 55,
+   "supported": 9,
+   "rate": 0.16363636363636364
+  },
+  {
+   "theta": 0.35,
+   "band": 65,
+   "supported": 10,
+   "rate": 0.15384615384615385
+  },
+  {
+   "theta": 0.4,
+   "band": 72,
+   "supported": 13,
+   "rate": 0.18055555555555555
+  },
+  {
+   "theta": 0.45,
+   "band": 76,
+   "supported": 14,
+   "rate": 0.18421052631578946
+  },
+  {
+   "theta": 0.5,
+   "band": 84,
+   "supported": 16,
+   "rate": 0.19047619047619047
+  },
+  {
+   "theta": 0.55,
+   "band": 96,
+   "supported": 25,
+   "rate": 0.2604166666666667
+  },
+  {
+   "theta": 0.6,
+   "band": 107,
+   "supported": 31,
+   "rate": 0.2897196261682243
+  },
+  {
+   "theta": 0.65,
+   "band": 122,
+   "supported": 41,
+   "rate": 0.3360655737704918
+  },
+  {
+   "theta": 0.7,
+   "band": 130,
+   "supported": 47,
+   "rate": 0.36153846153846153
+  },
+  {
+   "theta": 0.75,
+   "band": 138,
+   "supported": 51,
+   "rate": 0.3695652173913043
+  },
+  {
+   "theta": 0.8,
+   "band": 149,
+   "supported": 60,
+   "rate": 0.40268456375838924
+  },
+  {
+   "theta": 0.85,
+   "band": 162,
+   "supported": 69,
+   "rate": 0.42592592592592593
+  },
+  {
+   "theta": 0.9,
+   "band": 186,
+   "supported": 92,
+   "rate": 0.4946236559139785
+  },
+  {
+   "theta": 0.95,
+   "band": 218,
+   "supported": 121,
+   "rate": 0.555045871559633
+  }
+ ],
+ "theta_high_candidates": [
+  {
+   "theta": 0.05,
+   "band": 101,
+   "correct": 88,
+   "precision": 0.8712871287128713
+  },
+  {
+   "theta": 0.1,
+   "band": 101,
+   "correct": 88,
+   "precision": 0.8712871287128713
+  },
+  {
+   "theta": 0.15,
+   "band": 101,
+   "correct": 88,
+   "precision": 0.8712871287128713
+  },
+  {
+   "theta": 0.2,
+   "band": 101,
+   "correct": 88,
+   "precision": 0.8712871287128713
+  },
+  {
+   "theta": 0.25,
+   "band": 101,
+   "correct": 88,
+   "precision": 0.8712871287128713
+  },
+  {
+   "theta": 0.3,
+   "band": 101,
+   "correct": 88,
+   "precision": 0.8712871287128713
+  },
+  {
+   "theta": 0.35,
+   "band": 101,
+   "correct": 88,
+   "precision": 0.8712871287128713
+  },
+  {
+   "theta": 0.4,
+   "band": 101,
+   "correct": 88,
+   "precision": 0.8712871287128713
+  },
+  {
+   "theta": 0.45,
+   "band": 101,
+   "correct": 88,
+   "precision": 0.8712871287128713
+  },
+  {
+   "theta": 0.5,
+   "band": 100,
+   "correct": 87,
+   "precision": 0.87
+  },
+  {
+   "theta": 0.55,
+   "band": 98,
+   "correct": 85,
+   "precision": 0.8673469387755102
+  },
+  {
+   "theta": 0.6,
+   "band": 94,
+   "correct": 82,
+   "precision": 0.8723404255319149
+  },
+  {
+   "theta": 0.65,
+   "band": 88,
+   "correct": 78,
+   "precision": 0.8863636363636364
+  },
+  {
+   "theta": 0.7,
+   "band": 88,
+   "correct": 78,
+   "precision": 0.8863636363636364
+  },
+  {
+   "theta": 0.75,
+   "band": 85,
+   "correct": 78,
+   "precision": 0.9176470588235294
+  },
+  {
+   "theta": 0.8,
+   "band": 83,
+   "correct": 77,
+   "precision": 0.927710843373494
+  },
+  {
+   "theta": 0.85,
+   "band": 75,
+   "correct": 72,
+   "precision": 0.96
+  },
+  {
+   "theta": 0.9,
+   "band": 62,
+   "correct": 59,
+   "precision": 0.9516129032258065
+  },
+  {
+   "theta": 0.95,
+   "band": 37,
+   "correct": 37,
+   "precision": 1.0
+  }
+ ],
+ "not_claim_audit": {
+  "flagged": 16,
+  "claim": 0,
+  "claim_share": 0.0,
+  "over_limit": false,
+  "by_reason": {
+   "lead": {
+    "n": 16,
+    "claim": 0
+   }
+  },
+  "drop_phrases": []
+ },
+ "generation_latency": {
+  "n": 119,
+  "cold_excluded": 1,
+  "p50_ms": 14571.3,
+  "p95_ms": 23353.889999999992,
+  "max_ms": 26614.4,
+  "timeout_s": 46.707779999999985
+ },
+ "note": "θ는 AI 참조 라벨과 어휘 점수로만 골랐다(MCA 2.3(b)). 확인 세트 결과를 보고 다시 고르지 않는다."
+}

@@ -45,3 +45,5 @@
 {"at": "2026-10-04T05:22:19.078337+00:00", "event": "claims", "study": "a2", "split": "tune", "answers": 120, "sentences": 330, "rows": 321, "not_claim_rule": 17, "capped": 9}
 {"at": "2026-10-04T05:24:04.196359+00:00", "event": "controlled-check", "study": "a2", "accepted": 117, "rejected": 3}
 {"at": "2026-10-04T06:50:13.748888+00:00", "event": "labels-merge", "study": "a2", "split": "tune", "labeled": 555, "disputed": 11, "kappa_binary_r1": 0.967}
+{"at": "2026-10-04T06:51:27.517604+00:00", "event": "judge", "study": "a2", "tag": "tune", "split": "tune", "claims": 256, "failed": 0, "used_tokens": 1128877}
+{"at": "2026-10-04T06:51:33.788923+00:00", "event": "a2-tune", "study": "a2", "tau_s": 0.9, "tau_c": 0.35, "theta_low": null, "theta_high": 0.95, "tau_s_fallback": false, "n": 256}
