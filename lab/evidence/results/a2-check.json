@@ -1,0 +1,128 @@
+{
+ "tuned": {
+  "tau_s": 0.9,
+  "tau_c": 0.35,
+  "theta_low": null,
+  "theta_high": 0.95,
+  "tau_s_fallback": false
+ },
+ "n": 257,
+ "supported_labels": 146,
+ "jev_failed_excluded": 0,
+ "gates": {
+  "h_prec": {
+   "predicted": 144,
+   "precision": 0.9027777777777778,
+   "ci": [
+    0.8285714285714286,
+    0.9612903225806452
+   ],
+   "descriptive_only": true,
+   "pass": false
+  },
+  "h_low": {
+   "status": "not_tested",
+   "pass": false
+  },
+  "h_high": {
+   "status": "tested",
+   "theta_high": 0.95,
+   "band": 50,
+   "correct": 50,
+   "precision": 1.0,
+   "tier_precision": 0.9047619047619048,
+   "sys_precision": 0.9027777777777778,
+   "pass": true
+  },
+  "h_tier": {
+   "status": "tested",
+   "adopted": [
+    "high"
+   ],
+   "auc_diff": {
+    "point": 0.013852893989880433,
+    "lo": 0.000643354687120698,
+    "hi": 0.043916774376600715
+   },
+   "call_reduction": 0.16883116883116883,
+   "tier_precision": 0.9047619047619048,
+   "pass": false
+  }
+ },
+ "policy_a2_v1": {
+  "version": "a2-v1",
+  "tau_s": 0.85,
+  "tau_c": 0.35,
+  "theta_low": null,
+  "theta_high": 0.95,
+  "precision_target_confirmed": false
+ },
+ "boundary_share": 0.0622568093385214,
+ "operating_point": {
+  "supported_precision": 0.9027777777777778,
+  "supported_recall": 0.8904109589041096,
+  "coverage": 0.5603112840466926,
+  "contradiction_false_positive_rate": 0.044534412955465584
+ },
+ "sys_minus_lex": {
+  "point": -0.01215599160804648,
+  "lo": -0.06055704076863843,
+  "hi": 0.034362509532710264,
+  "verdict": {
+   "statistical": "inconclusive",
+   "practically_equivalent": false
+  }
+ },
+ "controlled_accuracy_by_variant": {
+  "기간 바꾸기": 1.0,
+  "다른 기업 사실": 1.0,
+  "부정": 1.0,
+  "숫자 변경": 1.0,
+  "의역": 0.9304347826086956,
+  "주체 교체": 0.5714285714285714
+ },
+ "not_claim_audit": {
+  "flagged": 27,
+  "claim": 1,
+  "claim_share": 0.037037037037037035,
+  "over_limit": false,
+  "by_reason": {
+   "question": {
+    "n": 1,
+    "claim": 0
+   },
+   "lead": {
+    "n": 22,
+    "claim": 0
+   },
+   "phrase:알 수 없": {
+    "n": 2,
+    "claim": 1
+   },
+   "phrase:문단에": {
+    "n": 2,
+    "claim": 0
+   }
+  },
+  "drop_phrases": []
+ },
+ "generation_latency": {
+  "tune": {
+   "n": 119,
+   "cold_excluded": 1,
+   "p50_ms": 14571.3,
+   "p95_ms": 23353.889999999992,
+   "max_ms": 26614.4,
+   "timeout_s": 46.707779999999985
+  },
+  "check": {
+   "n": 119,
+   "cold_excluded": 1,
+   "p50_ms": 15348.1,
+   "p95_ms": 26138.14,
+   "max_ms": 28738.0,
+   "timeout_s": 52.27628
+  }
+ },
+ "check_answers": 120
+}
