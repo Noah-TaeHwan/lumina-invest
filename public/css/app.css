@@ -694,3 +694,100 @@
       .ev-msg { max-width: 100% !important; }
       .ev-company { max-width: none; }
     }
+
+    /* ── 판단 일지(모듈 C): 요약줄 버튼·기록 양식·일지 탭 (js/journal.js) ── */
+    /* 기능 확인(GET /api/journal) 전·꺼짐에는 메뉴를 숨긴다. 다시 볼 날짜가 지난 기록이 있으면 점 */
+    .lnb-item[data-view="journal"] { display: none; }
+    body.jr-on .lnb-item[data-view="journal"] { display: flex; }
+    body.jr-due .lnb-item[data-view="journal"] span::after {
+      content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 6px; border-radius: 50%;
+      background: var(--accent); vertical-align: middle;
+    }
+    .view[data-view="journal"] .hidden, .ev-extra .hidden { display: none !important; }
+    .ev-journal-wrap { display: inline-flex; }
+    .ev-journal:disabled { opacity: 0.55; cursor: not-allowed; }
+    .ev-journal-link { color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+    .ev-extra:empty { display: none; }
+    .ev-extra { margin-top: 8px; }
+
+    .jr-form { display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 1px solid var(--border);
+               border-radius: 10px; background: var(--surf2); font-size: 13px; min-width: 0; }
+    .jr-notice, .jr-form-notice { font-size: 12px; line-height: 1.6; color: var(--text-dim); background: var(--surf);
+                                  border: 1px solid var(--border); border-left: 3px solid var(--brand);
+                                  border-radius: 6px; padding: 8px 10px; overflow-wrap: anywhere; }
+    .jr-field { border: 0; padding: 0; margin: 0; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .jr-field > legend, .jr-field-name { font-weight: 600; color: var(--text); padding: 0; margin-bottom: 2px; }
+    .jr-req, .jr-optional { font-weight: 400; font-size: 11px; color: var(--text-mute); margin-left: 4px; }
+    .jr-opts { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+    .jr-opts label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+    .jr-relied-list { display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow-y: auto; }
+    .jr-relied-list label { display: flex; align-items: flex-start; gap: 6px; cursor: pointer; overflow-wrap: anywhere; }
+    .jr-relied-list input { margin-top: 3px; flex-shrink: 0; }
+    .jr-memo-input { width: 100%; font-size: 13px; resize: vertical; }
+    .jr-memo-count, .jr-hint { font-size: 11px; color: var(--text-mute); }
+    .jr-review-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .jr-review { padding: 5px 8px; font-size: 13px; }
+    .jr-quick { padding: 3px 10px !important; }
+    .jr-form-msg:empty { display: none; }
+    .jr-form-msg { color: var(--red); font-size: 12px; }
+    .jr-form-actions { display: flex; justify-content: flex-end; gap: 8px; }
+    .jr-save:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .jr-card { min-width: 0; }
+    .jr-list, .jr-updates, .jr-ch-list, .jr-relied-list { list-style: none; margin: 0; padding: 0; }
+    .jr-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .jr-head-title { flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+    .jr-head-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+    .jr-help { margin-top: 10px; font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+    .jr-help summary { cursor: pointer; color: var(--accent); }
+    .jr-help p { margin-top: 4px; }
+    .jr-due-banner { margin-top: 10px; padding: 8px 10px; border-radius: 8px; background: var(--accent-glow);
+                     color: var(--accent); font-size: 13px; font-weight: 600; }
+    .jr-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 12px 0 8px; font-size: 13px; }
+    .jr-f-due-label { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+    .jr-select { padding: 5px 8px; font-size: 13px; max-width: 100%; }
+    .jr-f-decision { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+    .jr-f-decision button { padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); font-size: 12px;
+                            color: var(--text-dim); background: var(--surf); }
+    .jr-f-decision button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+    .jr-list { display: flex; flex-direction: column; gap: 6px; }
+    .jr-row { width: 100%; text-align: left; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px;
+              padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surf);
+              font-size: 13px; color: var(--text); min-width: 0; }
+    .jr-row:hover, .jr-row:focus-visible { border-color: var(--accent); }
+    .jr-row-main { flex: 1 1 240px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .jr-row-company { font-weight: 600; }
+    .jr-row-q { color: var(--text-dim); overflow-wrap: anywhere; }
+    .jr-row-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 12px; color: var(--text-dim); }
+    .jr-due-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+    /* 판단 칩은 세 가지 모두 같은 모양이다(색으로 판단을 끌지 않는다, spec 결정 4-1) */
+    .jr-chip { display: inline-block; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--border2, var(--border));
+               background: var(--surf2); color: var(--text); font-size: 12px; font-weight: 600; }
+    .jr-empty { padding: 18px 4px; color: var(--text-dim); font-size: 13px; }
+    #jr-more { margin-top: 8px; }
+
+    .jr-detail-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin: 12px 0; }
+    .jr-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+    .jr-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: start; }
+    .jr-col { min-width: 0; border: 1px solid var(--border); border-radius: 10px; padding: 12px; background: var(--surf);
+              font-size: 13px; display: flex; flex-direction: column; gap: 8px; overflow-wrap: anywhere; }
+    .jr-col > h3 { font-weight: 700; font-size: 14px; }
+    .jr-src { display: inline-block; padding: 0 6px; border-radius: 4px; font-size: 11px; font-weight: 600;
+              color: var(--text-dim); background: var(--surf2); border: 1px solid var(--border); margin-right: 4px; }
+    .jr-updates { display: flex; flex-direction: column; gap: 8px; }
+    .jr-update { border-left: 3px solid var(--border); padding: 4px 0 4px 10px; display: flex; flex-direction: column; gap: 4px; }
+    .jr-update-head { font-size: 12px; color: var(--text-mute); }
+    .jr-memo { white-space: pre-wrap; color: var(--text); }
+    .jr-relied ul { margin: 2px 0 0; padding-left: 16px; list-style: disc; }
+    .jr-snap-head { font-size: 12px; color: var(--text-dim); }
+    .jr-nojudge { padding: 6px 10px; border-radius: 6px; background: var(--surf2); color: var(--text-dim);
+                  border: 1px solid var(--border); font-size: 12px; font-weight: 600; }
+    .jr-source-gone, .jr-snap-foot, .jr-ch-help { font-size: 11px; color: var(--text-mute); }
+    .jr-ch-list { display: flex; flex-direction: column; gap: 4px; }
+    .jr-ch-passage { font-size: 12px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); }
+    .jr-ch-passage[data-status="gone"] { border-color: rgba(217,119,6,0.35); background: var(--brand-dim); }
+    .jr-ch-tag { font-size: 11px; color: var(--text-mute); }
+    .jr-unavailable { color: var(--text-dim); font-weight: 600; }
+    @media (max-width: 900px) {
+      .jr-cols { grid-template-columns: minmax(0, 1fr); }
+    }

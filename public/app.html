@@ -156,6 +156,56 @@
       </div>
     </div>
 
+    <!-- 1-1b. 판단 일지(모듈 C): 기능이 꺼져 있으면(API 404) 메뉴를 숨기고 이 화면에 들어오면 상담 화면으로 돌린다. js/journal.js -->
+    <div class="view" data-view="journal">
+      <div class="card jr-card">
+        <div class="jr-head">
+          <div class="jr-head-title">
+            <h2 class="text-lg font-semibold">📓 판단 일지</h2>
+            <!-- 고정 고지(spec 결정 4-2). 접지 않는다 -->
+            <p id="jr-view-notice" class="jr-notice">판단 일지는 내가 쓴 기록입니다. 답변과 배지는 AI가 만든 것으로, 배지는 검색된 공시 문단 기준 AI 판정(TypeSafe의 JEV 모델)이며 사실 여부를 보증하지 않습니다. 이 서비스는 투자 권유나 수익 예측을 하지 않으며, 투자 판단과 그 결과는 본인에게 있습니다. 이 프로젝트는 TypeSafe와 제휴 관계가 아닙니다.</p>
+          </div>
+          <div class="jr-head-actions">
+            <button id="jr-export" type="button" class="btn-secondary text-xs"><i class="fa-solid fa-file-arrow-down"></i> 내보내기(JSON)</button>
+            <button id="jr-delete-all" type="button" class="btn-secondary text-xs">전체 삭제</button>
+          </div>
+        </div>
+        <details class="jr-help">
+          <summary>도움말</summary>
+          <p>판단 기록은 공시 근거 모드 답변의 요약줄에서 <b>판단 기록</b>을 눌러 만듭니다. 기록에는 그때 본 질문·AI 답변·배지·근거 문단이 그대로 복사됩니다.</p>
+          <p>판단은 고치지 않고 <b>다시 보기 기록</b>으로 덧붙입니다. 다시 볼 날짜 알림은 이 탭 안에서만 보입니다(메모는 어디로도 보내지 않습니다).</p>
+          <p>대화를 지워도 일지 기록은 남습니다. 지우려면 일지에서 지우세요. 지운 기록은 복구할 수 없으니, 필요하면 먼저 내보내기로 보관하세요.</p>
+          <p>그 뒤 바뀐 것: 이 비교는 이 앱에 적재된 사업보고서 문단만 봅니다. 그 밖의 새 공시는 확인하지 않습니다.</p>
+        </details>
+        <div id="jr-due-banner" class="jr-due-banner hidden" role="status"></div>
+        <div id="jr-list-wrap">
+          <div class="jr-toolbar">
+            <label class="jr-f-due-label"><input type="checkbox" id="jr-f-due" /> 다시 볼 때 된 것만</label>
+            <select id="jr-f-company" class="input jr-select" aria-label="회사로 거르기"><option value="">전체 회사</option></select>
+            <div class="jr-f-decision" role="group" aria-label="최근 판단으로 거르기">
+              <button type="button" data-decision="" aria-pressed="true">전체</button>
+              <button type="button" data-decision="consider_buy" aria-pressed="false">매수 검토</button>
+              <button type="button" data-decision="watch" aria-pressed="false">관망</button>
+              <button type="button" data-decision="exclude" aria-pressed="false">제외</button>
+            </div>
+          </div>
+          <ul id="jr-list" class="jr-list" aria-label="판단 기록 목록"></ul>
+          <p id="jr-empty" class="jr-empty hidden"></p>
+          <button id="jr-more" type="button" class="btn-secondary text-xs hidden">더 보기</button>
+        </div>
+        <div id="jr-detail" class="jr-detail hidden"></div>
+      </div>
+      <dialog id="jr-confirm" class="ev-notice jr-confirm" aria-labelledby="jr-confirm-title">
+        <h3 id="jr-confirm-title">판단 기록 삭제</h3>
+        <p id="jr-confirm-text"></p>
+        <input id="jr-confirm-input" class="input hidden" type="text" autocomplete="off" aria-label="확인 문구 입력" />
+        <div class="ev-notice-actions">
+          <button id="jr-confirm-cancel" type="button" class="btn-secondary text-xs">취소</button>
+          <button id="jr-confirm-ok" type="button" class="btn-primary text-xs">지우기</button>
+        </div>
+      </dialog>
+    </div>
+
     <!-- 1-2. 신용 리스크 분석 -->
     <div class="view" data-view="agent-cb">
       <div class="card">

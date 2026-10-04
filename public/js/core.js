@@ -8,6 +8,8 @@ const GNB_MENUS = {
     label: "<i class='fa-solid fa-robot'></i> 로보 어드바이저",
     items: [
       { key: "agent-chat",      icon: "fa-solid fa-comments",              label: "AI 투자 상담" },
+      // 판단 일지(모듈 C). 기능이 꺼져 있으면 CSS로 숨긴다(body.jr-on일 때만 보임, js/journal.js)
+      { key: "journal",         icon: "fa-solid fa-book",                  label: "판단 일지" },
       { key: "robo-portfolio",  icon: "fa-solid fa-chart-pie",             label: "자산배분·최적화" },
       { key: "robo-rebalance",  icon: "fa-solid fa-rotate",                label: "리밸런싱 엔진" },
       { key: "robo-screening",  icon: "fa-solid fa-magnifying-glass-chart",label: "패턴 인식·종목 스크리닝" },
