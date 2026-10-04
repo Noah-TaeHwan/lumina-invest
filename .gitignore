@@ -54,3 +54,6 @@ aws-work/ansible/inventories/*/group_vars/secrets.yml
 
 # JEV Gate Lab 원본 데이터·캐시
 lab/data/
+
+# e2e 실패 기록(trace·스크린샷·DOM 상태, tests/e2e/evidence_views.py)
+tests/e2e/_artifacts/

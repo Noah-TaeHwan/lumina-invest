@@ -7,6 +7,8 @@ pytest 수집 대상이 아니다(파일명이 test_* 가 아님). smoke_views.p
     python tests/e2e/evidence_views.py
     # 브라우저를 직접 지정: CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome
 종료 코드 0 = 모든 확인 통과, 1 = 실패 있음.
+실패한 시나리오는 tests/e2e/_artifacts/<시각>-<시나리오>/에 trace.zip·screenshot.png·state.json·error.txt를 남긴다
+(gitignore). trace는 npx playwright show-trace trace.zip 으로 본다.
 """
 import asyncio
 import datetime
@@ -17,6 +19,7 @@ import os
 import re
 import sys
 import threading
+import traceback
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 from playwright.async_api import async_playwright
@@ -199,12 +202,108 @@ class Checks:
             print("  FAIL", label)
 
 
+# ── 실패 기록 ────────────────────────────────────────────────────────────────
+# 간헐 실패(로컬 약 25회 중 1회 s_agent_thread의 Page.fill 10초 초과)의 원인을 다음 실패에서 가릴 수 있게,
+# 시나리오가 실패하면 그때 열려 있던 컨텍스트마다 Playwright trace·스크린샷·DOM 상태를 _artifacts/(gitignore)에 남긴다.
+# 앱은 #chat-input을 비활성·읽기 전용으로 만들지 않으므로(js/agent.js·evidence.js) fill이 막히는 경우는 채팅 화면이
+# 보이지 않을 때다: 부트(main.js boot: /api/me → navigate)가 끝나지 않았거나(모듈 하나라도 못 받으면 main.js가
+# 돌지 않고 pageerror도 없다), boot 예외로 /login.html로 갔거나. state.json의 view·href·requestfailed가 이를 가른다.
+ARTIFACTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_artifacts")
+_OPEN: list[dict] = []  # 열린 컨텍스트 {ctx, page, fake, orig_close, fails_at_open}
+_CK: "Checks | None" = None  # main()의 Checks. 컨텍스트를 닫을 때 그 사이 확인 실패가 있었는지 본다
+
+_STATE_JS = """() => {
+  const i = document.getElementById('chat-input');
+  const cs = i && getComputedStyle(i);
+  return {
+    href: location.href, ready: document.readyState,
+    active_view: document.querySelector('.view.active')?.dataset.view ?? null,
+    jr_probe: document.body?.dataset.jrProbe ?? null,
+    chat_input: i ? {disabled: i.disabled, readOnly: i.readOnly, display: cs.display, visibility: cs.visibility,
+                     rect: i.getBoundingClientRect().toJSON(), value: i.value} : null,
+    chat_send_disabled: document.getElementById('chat-send')?.disabled ?? null,
+    ev_bar_hidden: document.getElementById('ev-bar')?.classList.contains('hidden') ?? null,
+    open_dialogs: [...document.querySelectorAll('dialog[open]')].map(d => d.id),
+    offcanvas_open: !!document.querySelector('#gnb-offcanvas.open'),
+    toast: document.getElementById('_toast_el')?.innerText ?? null,
+    ai_labels: document.querySelectorAll('#chat-messages .ai-label').length,
+    thinking: document.querySelectorAll('#thinking, .ev-thinking').length,
+  };
+}"""
+
+
+async def _save_artifacts(entry: dict, label: str, error: str = "") -> str:
+    """컨텍스트 하나의 실패 기록을 남기고 그 폴더를 돌려준다. 페이지가 이미 죽었어도 남길 수 있는 것은 남긴다."""
+    stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+    out = os.path.join(ARTIFACTS, f"{stamp}-{re.sub(r'[^0-9A-Za-z_-]', '_', label)}")
+    os.makedirs(out, exist_ok=True)
+    page, ctx, fake = entry["page"], entry["ctx"], entry["fake"]
+    state: dict = {"label": label}
+    try:
+        state["dom"] = await asyncio.wait_for(page.evaluate(_STATE_JS), 5)
+    except Exception as exc:  # noqa: BLE001 — 페이지가 닫혔거나 멈췄다
+        state["dom_error"] = f"{type(exc).__name__}: {exc}"
+    state["page_url"] = page.url
+    state["navigations"] = page.navs
+    state["page_errors"] = page.errors
+    state["console"] = page.console[-50:]
+    state["request_failed"] = page.failed
+    state["api_calls"] = [f"{m} {p}" for m, p, _ in fake.calls][-40:] if fake is not None else None
+    with open(os.path.join(out, "state.json"), "w", encoding="utf-8") as f:
+        json.dump(state, f, ensure_ascii=False, indent=2)
+    if error:
+        with open(os.path.join(out, "error.txt"), "w", encoding="utf-8") as f:
+            f.write(error)  # Playwright 오류 전문(Call log에 not visible/not enabled/not editable이 나온다)
+    try:
+        await asyncio.wait_for(page.screenshot(path=os.path.join(out, "screenshot.png"), full_page=True), 10)
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        await ctx.tracing.stop(path=os.path.join(out, "trace.zip"))  # npx playwright show-trace trace.zip
+    except Exception:  # noqa: BLE001
+        pass
+    return os.path.relpath(out, ROOT)
+
+
+async def save_open_contexts(label: str, error: str = "") -> list[str]:
+    """시나리오가 예외로 끝났을 때: 열린 컨텍스트를 모두 기록하고 닫는다(다음 시나리오로 새지 않게)."""
+    dirs = []
+    while _OPEN:
+        entry = _OPEN.pop()
+        dirs.append(await _save_artifacts(entry, label, error))
+        try:
+            await entry["orig_close"]()
+        except Exception:  # noqa: BLE001 — 이미 닫혔다
+            pass
+    return dirs
+
+
 async def open_app(browser, base: str, fake: FakeApi, *, width=1280, height=900, init_script=None):
     ctx = await browser.new_context(viewport={"width": width, "height": height})
     ctx.set_default_timeout(WAIT_MS)
+    # 실패했을 때만 파일로 남긴다(성공한 컨텍스트는 stop 없이 닫혀 버려진다)
+    await ctx.tracing.start(screenshots=True, snapshots=True)
     page = await ctx.new_page()
-    page.errors = []
+    page.errors, page.console, page.failed, page.navs = [], [], [], []
     page.on("pageerror", lambda e: page.errors.append(str(e)))
+    page.on("console", lambda m: page.console.append(f"{m.type}: {m.text}"))
+    page.on("requestfailed", lambda r: page.failed.append(f"{r.method} {r.url} {r.failure}")
+            if r.url.startswith(base) else None)
+    page.on("framenavigated", lambda fr: page.navs.append(fr.url) if fr == page.main_frame else None)
+    entry = {"ctx": ctx, "page": page, "fake": fake, "orig_close": ctx.close,
+             "fails_at_open": len(_CK.failures) if _CK else 0}
+    _OPEN.append(entry)
+
+    async def close(**kw):
+        # 시나리오가 직접 닫을 때: 이 컨텍스트를 연 뒤 확인 실패가 생겼으면 기록을 남긴다
+        if entry in _OPEN:
+            _OPEN.remove(entry)
+            if _CK and len(_CK.failures) > entry["fails_at_open"]:
+                where = await _save_artifacts(entry, "check-" + _CK.failures[-1].split(":")[0])
+                print("  기록:", where)
+        return await entry["orig_close"](**kw)
+
+    ctx.close = close
 
     async def handle(route):
         url = route.request.url
@@ -233,12 +332,21 @@ async def open_app(browser, base: str, fake: FakeApi, *, width=1280, height=900,
     if init_script:
         await page.add_init_script(init_script)
     await page.goto(f"{base}/app.html#agent-chat")
-    await page.wait_for_timeout(600)
+    await wait_ready(page)
     return ctx, page
 
 
+async def wait_ready(page):
+    """고정 대기(600ms) 대신 상태로 기다린다: 부트가 채팅 화면을 열고(navigate) 근거 모드 기능 확인(probe)이 끝날 때까지.
+    부트가 멈추면 여기서 선택자 이름과 함께 실패해, 뒤의 fill('#chat-input') 10초 초과로 번지지 않는다."""
+    await page.wait_for_selector('.view.active[data-view="agent-chat"] #chat-input', state="visible")
+    # initEvidence()는 같은 약속을 돌려준다(onChatViewActivated가 이미 시작했다) — 끝나면 토글 표시가 확정된다
+    await asyncio.wait_for(page.evaluate("async () => { await (await import('/js/evidence.js')).initEvidence(); }"),
+                           WAIT_MS / 1000)
+
+
 async def turn_on(page, *, confirm=True):
-    # #ev-bar는 기능 확인(probe) 응답 뒤에 보인다. open_app의 고정 대기(600ms)만으로는 간헐적으로 모자랐다
+    # #ev-bar는 기능 확인(probe) 응답 뒤에 보인다. open_app(wait_ready)이 probe를 기다리지만 표시도 상태로 한 번 더 본다
     await page.wait_for_selector("#ev-bar:not(.hidden)", timeout=WAIT_MS)
     await page.click("#ev-mode")
     await page.wait_for_timeout(200)
@@ -865,8 +973,9 @@ async def s_mobile(browser, base, ck: Checks):
 
 
 async def main() -> int:
+    global _CK
     srv, base = _serve()
-    ck = Checks()
+    ck = _CK = Checks()
     async with async_playwright() as p:
         browser = await p.chromium.launch(executable_path=_chromium())
         for scenario in (s_pure, s_flag_off, s_agent_thread, s_clear_race, s_notice, s_done, s_double_send, s_states, s_timeout, s_restore,
@@ -874,7 +983,9 @@ async def main() -> int:
             try:
                 await scenario(browser, base, ck)
             except Exception as exc:  # noqa: BLE001 — 한 시나리오가 죽어도 나머지를 본다
-                ck.ok(False, f"{scenario.__name__}: 예외 {type(exc).__name__}: {str(exc)[:300]}")
+                err = f"{type(exc).__name__}: {exc}\n\n{traceback.format_exc()}"
+                where = await save_open_contexts(scenario.__name__, err)
+                ck.ok(False, f"{scenario.__name__}: 예외 {type(exc).__name__}: {str(exc)[:300]} (기록: {', '.join(where)})")
         await browser.close()
     srv.shutdown()
     print(f"checks passed={ck.passed} failed={len(ck.failures)}")
