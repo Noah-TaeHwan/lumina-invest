@@ -50,3 +50,4 @@
 {"at": "2026-10-04T07:29:13.903142+00:00", "event": "claims", "study": "a2", "split": "check", "answers": 120, "sentences": 338, "rows": 335, "not_claim_rule": 27, "capped": 3}
 {"at": "2026-10-04T07:31:03.578018+00:00", "event": "controlled-check", "study": "a2", "accepted": 116, "rejected": 4}
 {"at": "2026-10-04T11:30:55.051086+00:00", "event": "labels-merge", "study": "a2", "split": "check", "labeled": 567, "disputed": 16, "kappa_binary_r1": 0.9396}
+{"at": "2026-10-04T11:31:13.350245+00:00", "event": "freeze-holdout", "study": "a2", "claims": 567}
