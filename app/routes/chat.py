@@ -7,6 +7,8 @@
 - 대화 스레드 updated_at / message_count 갱신
 - JWT Bearer 또는 쿠키 세션 모두 허용 (get_current_user_any)
 """
+import json
+import logging
 import uuid
 from typing import Optional
 
@@ -27,6 +29,7 @@ from app.services.langgraph_agent import run_agent
 from app.services.rag_pipeline import rag_search
 
 router = APIRouter(prefix="/api")
+log = logging.getLogger("app.chat")
 
 
 class ChatBody(BaseModel):
@@ -75,13 +78,13 @@ async def chat(
     rag_context = ""
     if body.use_rag:
         try:
-            docs = await rag_search(body.question, top_k=settings.TOP_K)
+            docs = await rag_search(body.question, top_k=settings.TOP_K, viewer_user_id=user_id)
             if docs:
                 rag_context = "\n\n".join(
                     f"[{d['title']}] {d['text'][:500]}" for d in docs
                 )
         except Exception:
-            pass
+            pass  # 검색 실패는 rag_pipeline이 로그로 남긴다. 채팅은 참고 문서 없이 이어 간다
 
     # LangGraph 에이전트 실행
     try:
@@ -122,8 +125,12 @@ async def chat(
         if conv:
             conv.message_count += 1
         await db.commit()
-    except Exception:
+    except Exception as exc:
+        # 답변은 이미 만들었으므로 응답 계약(200·본문)은 그대로 둔다. 이 대화를 다시 열면 이 메시지는 없다.
+        # 질문 본문·예외 메시지는 남기지 않는다(근거 경로 로그와 같은 모양).
         await db.rollback()
+        log.error(json.dumps({"event": "chat_save_failed", "path": "sync", "conversation_id": conversation_id,
+                              "error": type(exc).__name__}))
 
     # Redis 사용자 상태 갱신 (활성 대화 + 마지막 활동 시각)
     try:
@@ -159,16 +166,17 @@ async def chat_async(
     rag_context = ""
     if body.use_rag:
         try:
-            docs = await rag_search(body.question, top_k=settings.TOP_K)
+            docs = await rag_search(body.question, top_k=settings.TOP_K, viewer_user_id=user_id)
             if docs:
                 rag_context = "\n\n".join(
                     f"[{d['title']}] {d['text'][:500]}" for d in docs
                 )
         except Exception:
-            pass
+            pass  # 검색 실패는 rag_pipeline이 로그로 남긴다. 채팅은 참고 문서 없이 이어 간다
 
     task = run_agent_task.delay(
         user_id=user_id,
+        client_id=user.get("client_id", ""),
         conversation_id=conversation_id,
         question=body.question,
         history=history,

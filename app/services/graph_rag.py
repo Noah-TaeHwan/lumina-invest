@@ -13,6 +13,7 @@ async def graph_rag_search(
     query: str,
     top_k: int = 5,
     collection: str | None = None,
+    viewer_user_id: str | None = None,
 ) -> dict:
     """
     벡터 검색 결과에 그래프 컨텍스트를 추가해 반환한다.
@@ -24,8 +25,11 @@ async def graph_rag_search(
             "combined_context": str,   # LLM 프롬프트용 합성 텍스트
         }
     """
-    # 1) 벡터 검색 (Qdrant)
-    vector_results = await rag_search(query, top_k=top_k, collection=collection)
+    # 1) 벡터 검색 (Qdrant). 실패하면 그래프 결과만 돌려준다(로그는 rag_pipeline이 남긴다)
+    try:
+        vector_results = await rag_search(query, top_k=top_k, collection=collection, viewer_user_id=viewer_user_id)
+    except Exception:
+        vector_results = []
 
     # 2) 쿼리 + 벡터 결과에서 종목 심볼 추출
     all_text = query + " " + " ".join(r.get("text", "") for r in vector_results)
@@ -80,14 +84,15 @@ async def graph_rag_search(
     }
 
 
-async def graph_rag_answer(query: str, top_k: int = 5, collection: str | None = None) -> str:
+async def graph_rag_answer(query: str, top_k: int = 5, collection: str | None = None,
+                           viewer_user_id: str | None = None) -> str:
     """GraphRAG 컨텍스트로 LLM 답변을 생성한다."""
     from langchain_ollama import ChatOllama
     from langchain_core.prompts import ChatPromptTemplate
     from langchain_core.output_parsers import StrOutputParser
     from app.config import settings
 
-    result = await graph_rag_search(query, top_k=top_k, collection=collection)
+    result = await graph_rag_search(query, top_k=top_k, collection=collection, viewer_user_id=viewer_user_id)
     context = result["combined_context"]
 
     if not context:

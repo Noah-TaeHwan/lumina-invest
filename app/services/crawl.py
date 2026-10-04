@@ -1,4 +1,5 @@
 """크롤링 서비스: GitHub docs, 금융 포털, Qdrant RAG 구축."""
+import hashlib
 import httpx
 import re
 from html.parser import HTMLParser
@@ -82,6 +83,14 @@ def _chunk_text(text: str) -> list[str]:
     return chunks
 
 
+def _point_id(url: str, i: int) -> int:
+    """URL·청크 번호로 정한 Qdrant point ID. 다시 크롤링하면 같은 점을 덮어쓴다.
+
+    str hash()는 프로세스마다(PYTHONHASHSEED) 달라 같은 청크가 중복으로 쌓였다. sha256 앞 8바이트를 쓴다."""
+    digest = hashlib.sha256(f"{url}-{i}".encode("utf-8")).digest()
+    return int.from_bytes(digest[:8], "big") % (2 ** 63)
+
+
 async def _store_qdrant(chunks: list[str], meta: dict, ollama: OllamaClient) -> int:
     """Qdrant에 임베딩 저장 (Qdrant 미연결 시 스킵)."""
     try:
@@ -109,7 +118,7 @@ async def _store_qdrant(chunks: list[str], meta: dict, ollama: OllamaClient) -> 
             emb = await ollama.embed(settings.EMBED_MODEL, chunk)
             if not emb:
                 continue
-            point_id = abs(hash(f"{meta.get('url', '')}-{i}")) % (2 ** 63)
+            point_id = _point_id(meta.get("url", ""), i)
             points.append(PointStruct(
                 id=point_id,
                 vector=emb,
@@ -117,6 +126,16 @@ async def _store_qdrant(chunks: list[str], meta: dict, ollama: OllamaClient) -> 
             ))
 
         if points:
+            # 같은 URL의 기존 점(예전 hash() ID, 문서가 짧아져 남은 꼬리 청크)을 지우고 새로 쓴다.
+            # 새 청크를 만들지 못했으면 기존 점은 그대로 둔다. 업로드 점(owner_user_id 있음)은 건드리지 않는다.
+            if meta.get("url"):
+                from qdrant_client.http.models import (
+                    FieldCondition, Filter, IsEmptyCondition, MatchValue, PayloadField,
+                )
+                await client.delete(collection_name=collection, points_selector=Filter(must=[
+                    FieldCondition(key="url", match=MatchValue(value=meta["url"])),
+                    IsEmptyCondition(is_empty=PayloadField(key="owner_user_id")),
+                ]))
             await client.upsert(collection_name=collection, points=points)
         await client.close()
         return len(points)
