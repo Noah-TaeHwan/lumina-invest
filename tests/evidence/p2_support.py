@@ -82,9 +82,9 @@ def fake_search(passages=PASSAGES):
 
 
 class FakeJev:
-    """모든 주장에 같은 확률을 돌려주는 ServiceJevClient 대역."""
+    """모든 주장에 같은 확률을 돌려주는 ServiceJevClient 대역. 기본 s=0.9는 기본 정책 τ_s(a2-v1 0.85) 이상이다."""
 
-    def __init__(self, s: float = 0.8, c: float = 0.05, delay: float = 0.0):
+    def __init__(self, s: float = 0.9, c: float = 0.05, delay: float = 0.0):
         self.s, self.c, self.delay = s, c, delay
         self.calls = 0
 

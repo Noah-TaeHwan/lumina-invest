@@ -3,6 +3,7 @@
   POST /api/evidence/chat                   – 공시 문단 검색 → 답변 생성 → 저장 → 판정 작업 등록
   GET  /api/evidence/runs/{run_id}          – 판정 실행과 문장 목록(소유자만, 아니면 404)
   POST /api/evidence/runs/{run_id}/retry    – 다시 판정(failed·partial만), 새 실행(trigger=retry)
+  POST /api/evidence/runs/{run_id}/rejudge  – 이전 정책 실행을 현재 정책으로 재판정(저장된 확률만, 호출 없음, trigger=rejudge)
   GET  /api/conversations/{cid}/evidence    – 스레드의 판정 실행 타임라인(기본 메시지별 최신, all=true면 전체)
   GET  /api/evidence/companies              – 회사 선택 후보(문단이 적재된 회사만, q가 있으면 KRX 검색과 교집합)
   GET  /api/evidence/notice                 – 외부 전송 고지를 확인했는가(spec 8절, Redis user_state)
@@ -50,7 +51,9 @@ PassageSearch = Callable[[str, str], Awaitable[list[dict]]]
 CompanyList = Callable[[], Awaitable[list[dict]]]
 KrxSearch = Callable[..., Awaitable[list[dict]]]
 KRX_SEARCH_LIMIT = 50
-GENERATE_TIMEOUT_S = 60.0  # spec 7.1: 측정 전 잠정값. P5에서 생성 지연 p95의 2배로 다시 정한다
+# spec 7.1: 생성 지연 p95의 2배. A-2 확인 세트(서비스 생성기, 첫 호출 제외 119건) p95 26,138ms × 2 = 52.276초
+# (lab/evidence/results/a2-check.json generation_latency.check.timeout_s)를 초 단위로 올림. 생성기를 바꾸면 다시 잰다(spec 6.5)
+GENERATE_TIMEOUT_S = 53.0
 CITATION_FIELDS = ("passage_id", "rcept_no", "section", "idx", "sha256")
 NOTICE_VERSION = "a2-notice-v1"  # 고지 문구가 바뀌면 올린다(다시 확인을 받는다)
 
@@ -308,6 +311,32 @@ async def retry_run(
         raise HTTPException(500, "판정 실행을 저장하지 못했습니다.")
     await _launch(db, new, runner, factory)
     return await _started(db, new, chat.answer)
+
+
+@router.post("/evidence/runs/{run_id}/rejudge", status_code=201, summary="이전 정책 실행을 현재 정책으로 재판정")
+async def rejudge_run(run_id: str, user=Depends(get_current_user_any), db: AsyncSession = Depends(get_pg_session)):
+    """spec 6.4·7.4: 사용자가 연 스레드에서 이전 정책 a2-provisional-2 실행만 재판정한다(records.REJUDGE_FROM).
+    a2-provisional 실행은 비주장 규칙이 달라 제외한다(재판정은 문장을 다시 나누지 않는다).
+    저장된 s·c로 SYS 규칙만 다시 적용하므로 JEV를 부르지 않고 한도도 쓰지 않는다. 결과 실행을 바로 돌려준다."""
+    run = await _owned_run(db, run_id, user)
+    if await records.expire_stale(db, [run], records.now()):
+        await db.commit()
+    latest = run.id in await records.latest_run_ids(db, [run.chat_id])
+    if not records.is_rejudgeable(run, latest):
+        raise HTTPException(409, "이 판정은 새 기준으로 재판정할 수 없습니다.")
+    claims = (await records.load_claims(db, [run.id]))[run.id]
+    try:
+        new = records.rejudge_run(run, claims)
+        db.add(new)
+        await db.commit()
+    except Exception as exc:  # noqa: BLE001
+        await db.rollback()
+        log.error(json.dumps({"event": "evidence_rejudge_save_failed", "error": type(exc).__name__}))
+        raise HTTPException(500, "재판정 결과를 저장하지 못했습니다.")
+    log.info(json.dumps({"event": "run_rejudged", "run_id": str(new.id), "from_run_id": str(run.id),
+                         "from_policy": run.policy_version, "policy_version": new.policy_version,
+                         "status": new.status}))
+    return records.serialize_run(new, (await records.load_claims(db, [new.id]))[new.id])
 
 
 @router.get("/conversations/{cid}/evidence", summary="스레드의 판정 실행 타임라인")

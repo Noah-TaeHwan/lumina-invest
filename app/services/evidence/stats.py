@@ -1,6 +1,9 @@
 # app/services/evidence/stats.py
 """관리자 판정 통계(A-2 spec 7.5절). 지표 수집기 없이 판정 기록 표에서 계산한다. 조회 기간은 최대 30일.
 
+재판정(trigger=rejudge) 실행은 같은 답변을 한 번 더 담으므로 모든 집계에서 빼고 개수(rejudge_runs)만 따로 준다
+(JEV를 부르지 않아 호출·토큰·지연에도 보탤 것이 없다).
+
 DB에 없는 값은 근사한다:
 - JEV 지연은 문장 행의 latency_ms(마지막 시도)다. 첫 시도만의 지연은 따로 남기지 않는다.
 - 첫 시도 실패율은 "재시도했거나 끝내 실패한 JEV 문장 / 실제 호출한 JEV 문장"이다.
@@ -36,10 +39,13 @@ def _ms(col_end, col_start):
 
 async def evidence_stats(db: AsyncSession, days: int) -> dict:
     since = now() - timedelta(days=days)
-    in_window = EvidenceRun.created_at >= since
+    recent = EvidenceRun.created_at >= since
+    in_window = and_(recent, EvidenceRun.trigger != "rejudge")
     kst_day = func.to_char(func.timezone("Asia/Seoul", EvidenceRun.created_at), "YYYY-MM-DD")
 
     runs = await db.scalar(select(func.count()).select_from(EvidenceRun).where(in_window)) or 0
+    rejudge_runs = await db.scalar(select(func.count()).select_from(EvidenceRun)
+                                   .where(recent, EvidenceRun.trigger == "rejudge")) or 0
     status = dict((await db.execute(select(EvidenceRun.status, func.count()).where(in_window)
                                     .group_by(EvidenceRun.status))).all())
 
@@ -104,7 +110,7 @@ async def evidence_stats(db: AsyncSession, days: int) -> dict:
         "global_tokens_over_80pct": today_tokens > 0.8 * settings.EVIDENCE_DAILY_GLOBAL_TOKENS,
     }
     return {
-        "days": days, "since": since.isoformat(), "runs": runs,
+        "days": days, "since": since.isoformat(), "runs": runs, "rejudge_runs": rejudge_runs,
         "status": status, "claim_status": claim_status, "routes": routes, "unjudged_reasons": reasons,
         "run_duration_ms": {"p50": _round(timing[0]), "p95": run_p95},
         "start_delay_ms": {"p50": _round(timing[2]), "p95": delay_p95},

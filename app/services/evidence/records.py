@@ -7,6 +7,8 @@
 - stale: 앱 시작 시 pending·running 전부, 조회 시 생성 후 60초가 지난 pending·running을 failed(stale)로 바꾼다.
 - 실패 처리는 fail_runs 한 곳에서 한다: 실행을 failed(code)로, 그 실행의 pending 문장을 unjudged(reason=code)로.
 - 판정 결과 저장은 실행이 아직 running일 때만 한다(조건부 UPDATE). stale로 바뀐 실행은 되살리지 않는다.
+- 재판정(rejudge, spec 6.4·7.4): 이전 정책(a2-provisional-2) 실행의 저장된 문장 행(s·c·경로)에 현재 정책을 다시 적용해
+  종결 상태의 새 실행을 바로 만든다. JEV를 부르지 않으므로 pending·백그라운드 작업을 거치지 않는다.
 """
 from __future__ import annotations
 
@@ -20,7 +22,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.lib import jev
 from app.models import EvidenceClaim, EvidenceRun
 from app.services.evidence.claims import claim_spans, is_not_claim
-from app.services.evidence.runner import A2_PROVISIONAL, A2_PROVISIONAL_1, Policy, RunResult
+from app.services.evidence.runner import (A2_PROVISIONAL, A2_PROVISIONAL_1, A2_V1, DEFAULT_POLICY, ClaimResult,
+                                          Policy, RunResult, rejudge)
 
 STALE_AFTER_S = 60
 ACTIVE = ("pending", "running")
@@ -30,7 +33,12 @@ POLL_INTERVAL_MS = 500
 POLL_MARGIN_S = 4  # 마감 뒤 취소 정리·저장 여유
 CLAIM_STATUSES = ("supported", "contradicted", "no_evidence", "not_claim", "unjudged", "pending")
 PASSAGE_FIELDS = ("passage_id", "section", "idx", "sha256", "text")
-POLICIES = {p.version: p for p in (A2_PROVISIONAL, A2_PROVISIONAL_1)}  # 확신도 라벨에 쓰는 정책별 τ_s(새 정책을 넣으면 여기에도)
+POLICIES = {p.version: p for p in (A2_V1, A2_PROVISIONAL, A2_PROVISIONAL_1)}  # 확신도 라벨에 쓰는 정책별 τ_s(새 정책을 넣으면 여기에도)
+# 재판정 버튼을 보이는 이전 정책(spec 6.4: a2-v1이 정해진 뒤 사용자가 연 스레드에서만, 자동 일괄 재판정은 없다).
+# 재판정은 문장을 다시 나누지 않으므로 a2-v1과 비주장 규칙이 같은 a2-provisional-2만 대상이다.
+# a2-provisional(목록 머리말 비주장 규칙 이전) 실행에 a2-v1을 붙이면 비주장 규칙 출처가 실제와 어긋난다
+REJUDGE_FROM = frozenset({A2_PROVISIONAL.version})
+REJUDGEABLE = ("done", "partial")  # 저장된 확률이 있는 종결 상태. failed·limited·skipped는 다시 판정으로
 CONFIDENCE_BAND = 0.15  # spec 3.3: τ_s 이상 0.15 구간 안이면 "보통"
 
 
@@ -47,7 +55,7 @@ def preview_claims(answer: str) -> list[dict]:
 
 def new_run(*, chat_id: uuid.UUID, conversation_id: uuid.UUID, user_id: uuid.UUID, answer: str, company: str,
             corp_code: str, passages: list[dict], generator_model: str, trigger: str = "auto",
-            policy: Policy = A2_PROVISIONAL) -> EvidenceRun:
+            policy: Policy = DEFAULT_POLICY) -> EvidenceRun:
     """pending 실행 행과 문장 행을 만든다(세션에 넣고 커밋하는 것은 호출자). passages는 검색 결과 또는 이전 실행의 스냅샷."""
     run = EvidenceRun(
         id=uuid.uuid4(), chat_id=chat_id, conversation_id=conversation_id, user_id=user_id, status="pending",
@@ -87,6 +95,36 @@ async def save_result(db: AsyncSession, run: EvidenceRun, result: RunResult) -> 
             input_tokens=c.input_tokens,
         ))
     return True
+
+
+def is_rejudgeable(run: EvidenceRun, latest: bool) -> bool:
+    """이전 정책으로 끝난 그 메시지의 최신 실행이면 참(재판정 버튼·API가 같은 조건을 쓴다)."""
+    return latest and run.status in REJUDGEABLE and run.policy_version in REJUDGE_FROM
+
+
+def rejudge_run(run: EvidenceRun, claims: list[EvidenceClaim], policy: Policy = DEFAULT_POLICY) -> EvidenceRun:
+    """저장된 문장 행에 policy를 다시 적용한 종결 실행 행(trigger=rejudge). 세션에 넣고 커밋하는 것은 호출자.
+
+    문장은 다시 나누지 않고 저장된 오프셋을 그대로 옮긴다(당시 비주장 규칙으로 나눈 문장). 확률·문단 스냅샷도 옮기고,
+    호출 수·토큰·시도 수는 0으로 둔다(이 실행은 JEV를 부르지 않았다 — 관리자 통계에서 두 번 세지 않게).
+    """
+    result = rejudge([ClaimResult(c.idx, c.text, c.start, c.end, c.status, route=c.route, reason=c.reason,
+                                  source_idx=c.source_idx, s=c.s, c=c.c, lex=c.lex, number_ok=c.number_ok,
+                                  jev_request_key=c.jev_request_key) for c in claims], policy)
+    at = now()
+    new = EvidenceRun(
+        id=uuid.uuid4(), chat_id=run.chat_id, conversation_id=run.conversation_id, user_id=run.user_id,
+        status=result.status, error_code=result.error_code, trigger=result.trigger, company=run.company,
+        corp_code=run.corp_code, rcept_no=run.rcept_no, passages=[dict(p) for p in run.passages],
+        policy_version=result.policy_version, jev_model=run.jev_model, generator_model=run.generator_model,
+        calls=0, cache_hits=0, input_tokens=0, created_at=at, finished_at=at,  # started_at 없음: 판정 작업을 돌리지 않았다
+    )
+    new.claims = [EvidenceClaim(idx=c.idx, text=c.text, start=c.start, end=c.end, status=c.status, route=c.route,
+                                reason=c.reason, source_idx=c.source_idx, s=c.s, c=c.c, lex=c.lex,
+                                number_ok=c.number_ok, jev_request_key=c.jev_request_key, attempts=0,
+                                latency_ms=0.0, cached=False, input_tokens=0)
+                  for c in result.claims]
+    return new
 
 
 async def fail_runs(db: AsyncSession, where: list, code: str, at: datetime | None = None) -> list[uuid.UUID]:
@@ -134,7 +172,7 @@ async def latest_run_ids(db: AsyncSession, chat_ids: list[uuid.UUID]) -> set[uui
     return {r[0] for r in rows}
 
 
-def poll_until_s(ahead: int, policy: Policy = A2_PROVISIONAL) -> int:
+def poll_until_s(ahead: int, policy: Policy = DEFAULT_POLICY) -> int:
     """서버가 권하는 폴링 상한(실행 생성 시각 기준 초). 같은 사용자의 실행은 한 번에 하나씩 돌므로
     앞에 진행 중인 실행 수만큼 마감이 더해진다(두 번째 실행 최악 약 16초). stale 기준을 넘지 않는다."""
     return min(STALE_AFTER_S, math.ceil((ahead + 1) * policy.deadline_s + POLL_MARGIN_S))
@@ -197,6 +235,7 @@ def serialize_run(run: EvidenceRun, claims: list[EvidenceClaim], poll_until: int
         "id": str(run.id), "chat_id": str(run.chat_id), "conversation_id": str(run.conversation_id),
         "status": run.status, "trigger": run.trigger, "error_code": run.error_code,
         "retryable": latest and run.status in RETRYABLE and run.error_code not in NO_RETRY_CODES,
+        "rejudgeable": is_rejudgeable(run, latest),
         "company": run.company, "corp_code": run.corp_code, "rcept_no": run.rcept_no, "passages": run.passages,
         "policy_version": run.policy_version, "jev_model": run.jev_model, "generator_model": run.generator_model,
         "calls": run.calls, "cache_hits": run.cache_hits, "input_tokens": run.input_tokens,

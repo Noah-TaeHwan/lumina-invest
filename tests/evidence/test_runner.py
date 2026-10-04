@@ -80,6 +80,72 @@ def test_provisional_policy_values():
     assert (p.max_claims, p.concurrency, p.deadline_s) == (8, 3, 8.0)
 
 
+def test_a2_v1_policy_values_match_preregistered_result():
+    """P6: 사전등록 결과(lab/evidence/results/a2-check.json의 policy_a2_v1) 그대로. 다시 고르지 않는다."""
+    p = rn.A2_V1
+    assert (p.version, p.tau_s, p.tau_c, p.theta_low, p.theta_high) == ("a2-v1", 0.85, 0.35, None, 0.95)
+    assert (p.max_claims, p.concurrency, p.deadline_s) == (8, 3, 8.0)
+    assert rn.DEFAULT_POLICY is rn.A2_V1
+    # 이전 정책 상수는 이력 표시용으로 남는다
+    assert (rn.A2_PROVISIONAL.version, rn.A2_PROVISIONAL_1.version) == ("a2-provisional-2", "a2-provisional")
+
+
+def test_a2_v1_policy_matches_committed_result_file():
+    import pathlib
+    root = pathlib.Path(__file__).resolve().parents[2]
+    want = json.loads((root / "lab/evidence/results/a2-check.json").read_text(encoding="utf-8"))["policy_a2_v1"]
+    p = rn.A2_V1
+    assert (p.version, p.tau_s, p.tau_c, p.theta_low, p.theta_high) == (
+        want["version"], want["tau_s"], want["tau_c"], want["theta_low"], want["theta_high"])
+
+
+def test_default_policy_lex_high_is_supported_without_jev():
+    """1차 필터 상단 구간: 문단을 그대로 옮긴 주장(lex ≥ 0.95, 숫자·회사명 통과)은 JEV 없이 ✅."""
+    client = FakeClient()
+
+    async def go():
+        quota = jev_service.Quota(_Room(), now=lambda: NOW)
+        return await rn.Runner(client, quota).run(company=CO, answer=PASSAGES[1], passages=PASSAGES, user_id="u1")
+
+    res = asyncio.run(go())
+    c = res.claims[0]
+    assert res.policy_version == "a2-v1" and client.calls == []
+    assert (c.status, c.route, c.source_idx, c.s, c.c) == ("supported", "lex_high", 1, None, None)
+    assert c.lex >= 0.95 and res.calls == 0 and res.status == "done" and res.counts["lex_high"] == 1
+
+
+def test_default_policy_other_company_name_goes_to_jev():
+    """회사명 조건(lexical.names_in_passage): 문단에 없는 회사명이 있으면 겹침이 높아도 JEV로 넘긴다."""
+    client = FakeClient()
+    tail = " 국내외에서 메모리 반도체와 스마트폰, 태블릿, 디스플레이 패널, 가전제품을 생산하고 판매한다."
+    passages = ["삼성전자는" + tail]
+    same = _run(FakeClient(), "삼성전자는" + tail, policy=rn.DEFAULT_POLICY, passages=passages)
+    res = _run(client, "엘지는" + tail, policy=rn.DEFAULT_POLICY, passages=passages)
+    assert same.claims[0].route == "lex_high"
+    assert res.claims[0].lex >= 0.95 and res.claims[0].route == "jev" and len(client.calls) == 1
+
+
+def test_default_policy_tau_s_085():
+    """JEV 경로는 τ_s 0.85: 0.84는 ✅가 아니고 0.85는 ✅."""
+    low = _run(FakeClient(lambda claim, n: ("probs", [(0.84, 0.0)] * n)), "회사는 반도체를 만든다.",
+               policy=rn.DEFAULT_POLICY)
+    hit = _run(FakeClient(lambda claim, n: ("probs", [(0.85, 0.0)] * n)), "회사는 반도체를 만든다.",
+               policy=rn.DEFAULT_POLICY)
+    assert (low.claims[0].route, low.claims[0].status) == ("jev", "no_evidence")
+    assert (hit.claims[0].route, hit.claims[0].status) == ("jev", "supported")
+
+
+def test_rejudge_provisional_run_with_a2_v1():
+    """이전 정책(τ_s 0.70) 실행을 a2-v1로 재판정: 저장된 확률만 쓰고 호출하지 않는다. JEV 경로 주장은 jev로 남는다."""
+    client = FakeClient(lambda claim, n: ("probs", [(0.80, 0.0)] * n))
+    res = _run(client, f"{PASSAGES[1]} 회사는 반도체를 만든다.", policy=rn.A2_PROVISIONAL)
+    assert [(c.route, c.status) for c in res.claims] == [("jev", "supported"), ("jev", "supported")]
+    n_calls = len(client.calls)
+    again = rn.rejudge(res.claims, rn.A2_V1)
+    assert len(client.calls) == n_calls and again.policy_version == "a2-v1" and again.trigger == "rejudge"
+    assert [(c.route, c.status) for c in again.claims] == [("jev", "no_evidence"), ("jev", "no_evidence")]
+
+
 def test_concurrency_limit_is_respected():
     client = FakeClient(delay=0.02)
     res = _run(client, _answer(7))
