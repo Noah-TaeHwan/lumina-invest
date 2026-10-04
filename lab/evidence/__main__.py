@@ -51,7 +51,6 @@ class Paths:
             self.split_json = self.ev / "split_a3.json"
             self.prereg = self.ev / "prereg_a3.json"
             self.prereg_holdout = self.ev / "prereg_a3_check.json"
-            self.tune_json = self.ev / "results/a3-tune.json"  # 쓰지 않는다(조정 세트 없음)
             self.sealed = "check"
             self.groups = {"dev": set(), "all": {"check"}}
         else:
@@ -327,10 +326,26 @@ def _corp_list(P: Paths, client, key) -> tuple[bytes, list]:
     return raw, dart.parse_corp_codes(raw)
 
 
-def _take(P: Paths, client, key, corp, source: str, check=None) -> tuple[str, dict | None, str]:
+def dart_self_aliases(info: dict, corp_name: str) -> list[str]:
+    """DART 기업개황(company.json)의 종목명·영문명 중 회사명과 다른 것(A-3 자기 회사 별칭, 근거 있는 소스만)."""
+    out = []
+    for k in ("stock_name", "corp_name_eng"):
+        v = (info.get(k) or "").strip()
+        if v and v != corp_name and v not in out:
+            out.append(v)
+    return out
+
+
+def self_names(P: Paths) -> dict[str, tuple[str, ...]]:
+    """회사별 자기 회사 표기(회사명 + 추첨 때 남긴 DART 별칭). 별칭이 없는 분할(A-2)은 회사명만."""
+    return {c["corp_code"]: (c["corp_name"], *c.get("self_aliases", ())) for c in load_split(P)["companies"]}
+
+
+def _take(P: Paths, client, key, corp, source: str, check=None, aliases: bool = False) -> tuple[str, dict | None, str]:
     """사업보고서를 받아 문단으로 나누고 추첨 조건을 본다. (결과, 회사 행 또는 None, 지정 절 본문).
 
     check(corp, text)가 사유 문자열을 돌려주면 그 사유로 뺀다(A-2 교차 언급 제외).
+    aliases=True(A-3)면 기업개황의 종목명·영문명을 회사 행 self_aliases에 남긴다.
     """
     from app.services.evidence import dart, passages
     from lab.evidence import split as sp
@@ -338,7 +353,8 @@ def _take(P: Paths, client, key, corp, source: str, check=None) -> tuple[str, di
     rep = dart.pick_annual_report(dart.list_annual_reports(client, key, corp.corp_code))
     if rep is None:
         return "no_annual_report", None, ""
-    if source == "random" and sp.is_finance(dart.company_info(client, key, corp.corp_code).get("induty_code", "")):
+    info = dart.company_info(client, key, corp.corp_code) if source == "random" or aliases else {}
+    if source == "random" and sp.is_finance(info.get("induty_code", "")):
         return "finance", None, ""
     try:  # 공시 원문이 없으면(DART status 014 등) 사업보고서가 없는 것과 같이 뺀다
         path = dart.download_document(client, key, rep["rcept_no"], P.priv / "docs", P.jsonl("dart_ledger.jsonl"))
@@ -357,8 +373,10 @@ def _take(P: Paths, client, key, corp, source: str, check=None) -> tuple[str, di
     why = check(corp, text) if check else None
     if why:
         return why, None, text
-    return "ok", {**asdict(corp), "rcept_no": rep["rcept_no"], "report_nm": rep["report_nm"],
-                  "source": source, "chars": chars}, text
+    row = {**asdict(corp), "rcept_no": rep["rcept_no"], "report_nm": rep["report_nm"], "source": source, "chars": chars}
+    if aliases:
+        row["self_aliases"] = dart_self_aliases(info, corp.corp_name)
+    return "ok", row, text
 
 
 def cmd_split(P: Paths, args) -> None:
@@ -455,7 +473,7 @@ def a1_texts(P: Paths) -> tuple[dict[str, str], dict[str, str]]:
 
 
 def _draw_random(P: Paths, prior_names: dict[str, str], prior_body: dict[str, str], *, seed: int, n: int,
-                 check_cap: int, tag: str, meta: dict) -> None:
+                 check_cap: int, tag: str, meta: dict, aliases: bool = False) -> None:
     """무작위 n개사(앞 연구 회사·교차 언급 10회 이상 제외), 군집 단위 확인 ≤ check_cap / 나머지 조정. A-2·A-3 공용.
 
     원장 제외 사유는 {tag}_company·{tag}_mention:<코드>(A-2는 tag a1)."""
@@ -484,7 +502,7 @@ def _draw_random(P: Paths, prior_names: dict[str, str], prior_body: dict[str, st
         if skip:
             result = skip.replace("a1_", f"{tag}_")
         else:
-            result, row, text = _take(P, client, key, corp, "random", linked)
+            result, row, text = _take(P, client, key, corp, "random", linked, aliases=aliases)
             if row is not None:
                 chosen.append(row)
                 texts[corp.corp_code] = text
@@ -532,7 +550,7 @@ def _split_a3(P: Paths) -> None:
     names, body = prior_texts(P, ("a1", "a2"))
     _draw_random(P, names, body, seed=a3.SEED, n=a3.RANDOM_N, check_cap=a3.RANDOM_N, tag="prior",
                  meta={"a1_split_sha256": _file_sha(Paths(P.root).split_json),
-                       "a2_split_sha256": _file_sha(Paths(P.root, "a2").split_json)})
+                       "a2_split_sha256": _file_sha(Paths(P.root, "a2").split_json)}, aliases=True)
 
 
 def cmd_passages(P: Paths, args) -> None:
@@ -874,7 +892,7 @@ def _controlled_a3(P: Paths, codes: set[str], text: dict, ret: dict, names: tupl
             skip_c3 = r.get("notation_text") is None and nt == "영문·약칭"
             checks = [("swap", (r.get("swap_subtype") == sub, "swap subtype mismatch")),
                       ("notation", (r.get("notation_type") == nt, "notation type mismatch")),
-                      ("swap", a3.check_swap(r["true_text"], r["swap_text"], ps, names)),
+                      ("swap", a3.check_swap(r["true_text"], r["swap_text"], ps, names, subtype=sub)),
                       ("notation", (True, "ok") if skip_c3 else
                        a3.check_notation(r["true_text"], r.get("notation_text") or "", nt, ps))]
             bad = next(((k, why) for k, (ok, why) in checks if not ok), None)
@@ -1584,6 +1602,7 @@ def _a2_inputs(P: Paths):
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(P.jsonl("retrieval.jsonl"))}
     names = _corp_names(P)
     cluster = {c["corp_code"]: c["cluster"] for c in load_split(P)["companies"]}
+    selves = self_names(P)
 
     def feats(c: dict) -> dict:
         corp = c["qid"].split("-q")[0]
@@ -1591,12 +1610,12 @@ def _a2_inputs(P: Paths):
         f = lex_features(c["text"], ps, names[corp])
         row = {"cid": c["cid"], "qid": c["qid"], "cluster": cluster[corp], "lex": f.lex, "high_ok": f.high_ok,
                "valid": [number_check(c["text"], p) for p in ps]}
-        if P.study == "a3":  # 주체 확인(제품과 같은 subject_valid)과 감사용 못 찾은 이름
+        if P.study == "a3":  # 주체 확인(제품과 같은 subject_valid)과 감사용 못 찾은 이름. 자기 회사는 DART 별칭까지
             from app.services.evidence import subject
 
-            alias = subject.aliases(ps)
-            row.update(best=f.best, text=c["text"], subj=subject.subject_valid(c["text"], ps, names[corp]),
-                       missing=[subject.missing_subjects(c["text"], p, names[corp], alias) for p in ps])
+            me, alias = selves[corp], subject.aliases(ps)
+            row.update(best=f.best, text=c["text"], subj=subject.subject_valid(c["text"], ps, me),
+                       missing=[subject.missing_subjects(c["text"], p, me, alias) for p in ps])
         return row
     return feats
 
@@ -1822,9 +1841,12 @@ def a3_report_md(res: dict) -> str:
              f"| H-recall | ✅ 재현율 a2-v1 {_pct(rc['base_recall'])} → a3 {_pct(rc['exp_recall'])}, 손실 {_pct(rc['loss'])} "
              f"({_ci(rc['ci'])}) | {'통과' if rc['pass'] else '실패'} |",
              f"| H-prec | ✅ 예측 {pr['predicted']}건, 정밀도 {_pct(pr['precision'])} ({_ci(pr['ci'])}), a2-v1 "
-             f"{pr['base_predicted']}건 {_pct(pr['base_precision'])}"
+             f"{pr['base_predicted']}건 {_pct(pr['base_precision'])}, 차이 {_pct(pr['diff']['point'])} "
+             f"(95% {_pct(pr['diff']['lo'])}~{_pct(pr['diff']['hi'])})"
              f"{', 기술 통계만(150건 미만)' if pr['descriptive_only'] else ''} | {'통과' if pr['pass'] else '실패'} |",
              "", "## 권고(사전등록 규칙)", "", f"- {rec['note']}", "", "## 보조 결과", "",
+             f"- 문단 안 교체(관문 밖, 주체 확인이 원리상 못 잡음) {g['in_passage_swap']['n']}건: 정확도 a2-v1 "
+             f"{_pct(g['in_passage_swap']['base_accuracy'])}, a3 {_pct(g['in_passage_swap']['exp_accuracy'])}",
              f"- 표기 변형 오탐(a2-v1 ✅인 c3 중 a3에서 ✅ 아님): {nf['lost']}/{nf['n_base_supported']}"
              f" (비율 {_pct(nf['rate'])}), 유형별 {json.dumps(nf['by_type'], ensure_ascii=False)}",
              f"- 통제 주장 변형별 정확도 a2-v1: {json.dumps(ctl['accuracy']['base'], ensure_ascii=False)}",
@@ -1865,12 +1887,13 @@ def cmd_a3_report(P: Paths, args) -> None:
     doc.write_text(a3_report_md(res))
     log_attempt(P, "a3-report", h_swap=g["h_swap"]["pass"], h_recall=g["h_recall"]["pass"], h_prec=g["h_prec"]["pass"],
                 switch_default=res["recommendation"]["switch_default"])
-    print(json.dumps({k: v["pass"] for k, v in g.items()}))
+    print(json.dumps({k: g[k]["pass"] for k in ("h_swap", "h_recall", "h_prec")}))
 
 
 def cmd_a3_explore(P: Paths, args) -> None:
     """A-3 사전등록 확정 전 탐색(prereg_a3.json order 0): A-2 조정 세트(탐색 허용)의 저장된 JEV 확률로 a2-v1 대
-    a3-subject-exp를 비교하고, a2-v1 ✅인데 a3에서 빠지는 자연 주장과 못 찾은 이름을 비공개 파일에 쓴다. 추가 호출 없음.
+    a3-subject-exp를 비교하고, 재현율 손실률(AI 라벨 지지됨이고 a2-v1 ✅인 것 중 a3가 빼는 비율)·진행 여부(≤ 1.5%)와
+    빠지는 자연 주장·못 찾은 이름을 비공개 파일에 쓴다. 추가 호출 없음.
     A-2 확인 세트는 읽지 않는다(조정 세트만 연다). 확정(registered) 뒤에는 거부한다."""
     from app.services.evidence import subject
     from app.services.evidence.lexical import lex_best
@@ -1881,7 +1904,7 @@ def cmd_a3_explore(P: Paths, args) -> None:
     A2 = Paths(P.root, "a2")
     text = _passage_text(A2)
     ret = {r["qid"]: r["passage_ids"] for r in read_jsonl(A2.jsonl("retrieval.jsonl"))}
-    names = _corp_names(A2)
+    names = self_names(A2)  # A-2 추첨 행에는 DART 별칭이 없어 회사명만(A-3보다 보수적)
     rows, failed = a2_rows(A2, "tune")
     claim_text = {c["cid"]: c["text"] for c in _judgeable(A2, "tune")}
     for r in rows:
@@ -1889,19 +1912,15 @@ def cmd_a3_explore(P: Paths, args) -> None:
         alias = subject.aliases(ps)
         r.update(best=lex_best(claim, ps)[1], text=claim, subj=subject.subject_valid(claim, ps, co),
                  missing=[subject.missing_subjects(claim, p, co, alias) for p in ps])
-    d = a3.annotate(rows)
+    summary = a3.explore_summary(rows)
     removed = a3.removed_audit(rows)
-    pos = [r for r in d if r["y"]]
-    out = {"split": "tune (A-2)", "n": len(rows), "positive": len(pos), "jev_failed_excluded": failed,
-           "base_supported_true": sum(r["base"] == "supported" for r in pos),
-           "exp_supported_true": sum(r["exp"] == "supported" for r in pos),
+    out = {"split": "tune (A-2)", "n": len(rows), "jev_failed_excluded": failed, **summary,
            "removed": removed, "generic_extra": list(subject.SUBJECT_GENERIC)}
     path = P.priv / "a3_explore_tune.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n")
-    log_attempt(P, "a3-explore", source="a2-tune", n=len(rows), positive=len(pos),
-                lost_true=out["base_supported_true"] - out["exp_supported_true"], removed=len(removed))
-    print(json.dumps({k: out[k] for k in ("n", "positive", "base_supported_true", "exp_supported_true")}))
+    log_attempt(P, "a3-explore", source="a2-tune", n=len(rows), **summary, removed=len(removed))
+    print(json.dumps({k: out[k] for k in ("n", "positive", "base_supported_true", "lost", "loss_rate", "proceed")}))
 
 
 COMMANDS.update({"a3-report": cmd_a3_report, "a3-explore": cmd_a3_explore})

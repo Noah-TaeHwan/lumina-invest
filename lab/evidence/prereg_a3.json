@@ -2,7 +2,7 @@
   "version": 1,
   "study": "a3",
   "status": "draft",
-  "status_note": "초안이다. 로컬 사전 탐색(order 0단계, A-2 조정 세트만)으로 subject_check 일반명사 목록을 고칠 수 있다. 고친 뒤 code_sha256을 다시 계산하고 status를 registered로 바꿔 커밋한다. registered 커밋 뒤에는 이 파일을 고치지 않는다(변경은 attempts.jsonl에 study a3 줄로). status가 registered가 아니면 split·데이터 명령이 거부한다.",
+  "status_note": "초안이다. 로컬 사전 탐색(exploration, A-2 조정 세트만)의 진행 기준을 통과하고 허용 범위 안에서만 고친 뒤 code_sha256을 다시 계산하고 status를 registered로 바꿔 커밋한다. registered 커밋 뒤에는 이 파일을 고치지 않는다(변경은 attempts.jsonl에 study a3 줄로). status가 registered가 아니면 split·데이터 명령이 거부한다.",
   "spec": "docs/superpowers/specs/2026-10-04-subject-swap-a3-design.md 5절",
   "authored_by": "AI(Claude Code)가 작성한 사전등록 초안. 결정권자는 노아.",
   "registered_at": null,
@@ -31,9 +31,9 @@
     }
   },
   "hypotheses": {
-    "h_swap": "a3-subject-exp가 통제 주체 교체 주장을 ✅로 두지 않는다. 관문: 정확도(✅ 아님 비율) 점추정 ≥ 0.90, 2단 군집 부트스트랩 95% 하한 ≥ 0.80, 같은 주장에서 a3 − a2-v1 정확도 차이 95% 하한 > 0. 주체 교체 주장이 150건 미만이면 기술 통계만(실패).",
+    "h_swap": "a3-subject-exp가 통제 주체 교체 주장('문단 안 교체' 제외)을 ✅로 두지 않는다. 관문: 정확도(✅ 아님 비율) 점추정 ≥ 0.90, 2단 군집 부트스트랩 95% 하한 ≥ 0.80, 같은 주장에서 a3 − a2-v1 정확도 차이 95% 하한 > 0. 해당 주장이 150건 미만이면 기술 통계만(실패).",
     "h_recall": "주체 확인이 진짜 지지 주장을 거의 ❔로 만들지 않는다(비열등). 관문: AI 라벨 지지됨 자연 주장의 ✅ 재현율 손실(a2-v1 − a3) 95% 상한 ≤ 0.05. 지지됨 자연 주장이 150건 미만이면 기술 통계만(실패).",
-    "h_prec": "a3-subject-exp의 자연 주장 ✅ 정밀도가 0.90 이상이다. 관문: 점추정 ≥ 0.90, 95% 하한 ≥ 0.80. ✅ 예측이 150건 미만이면 기술 통계만(실패)."
+    "h_prec": "a3-subject-exp의 자연 주장 ✅ 정밀도가 a2-v1보다 실질적으로 낮지 않다(비열등). 관문: 같은 주장에서 정밀도 차이(a3 − a2-v1) 95% 하한 ≥ −0.02. a3 ✅ 예측이 150건 미만이면 기술 통계만(실패). 절대 정밀도(목표 0.90)는 함께 보고하되 관문으로 쓰지 않는다."
   },
   "gates": {
     "h_swap": {
@@ -47,16 +47,15 @@
       "min_positive": 150
     },
     "h_prec": {
-      "precision_min": 0.9,
-      "ci_lo_min": 0.8,
+      "diff_lo_min": -0.02,
       "min_predicted": 150
     }
   },
   "gate_measure": {
     "natural_rows": "자연 주장 중 비주장 규칙 통과, 주장 상한 8 안, 최종 AI 라벨이 disputed·non_claim이 아니고 JEV 호출이 성공한 것. y = 라벨 supported.",
-    "swap_rows": "통제 c2(주체 교체, 기대 지지 안 됨) 중 JEV 호출이 성공한 것. 라벨과 무관하게 기대값으로 센다(A-1·A-2와 같음).",
+    "swap_rows": "통제 c2(주체 교체, 기대 지지 안 됨) 중 JEV 호출이 성공한 것. 라벨과 무관하게 기대값으로 센다(A-1·A-2와 같음). '문단 안 교체' 하위 유형은 H-swap에서 빼고 in_passage_swap으로 따로 보고한다.",
     "decision": "판정·경로는 제품과 같은 app.services.evidence.subject.route_claim·decide_claim. base는 runner.A2_V1, exp는 runner.A3_SUBJECT. 주체 확인은 subject.subject_valid(문단 k개의 괄호 약칭 정의를 함께 본다).",
-    "pure_restriction": "a3의 반박 규칙은 숫자 확인만 본 S_V를 쓰므로 ⚠️는 a2-v1과 같고, a3 ✅ ⊆ a2-v1 ✅이다. 그래서 차이는 모두 'a2-v1 ✅ → a3 ❔'로 바뀐 주장에서 나온다.",
+    "pure_restriction": "JEV 경로에서는 a3의 반박 규칙이 숫자 확인만 본 S_V를 쓰므로 ⚠️가 a2-v1과 같다. 예외: a2-v1에서 1차 필터 상단 구간(lex_high)으로 JEV 없이 ✅였던 주장이 a3에서 주체 확인에 실패하면 JEV 경로로 가며, 거기서 ⚠️가 될 수 있고 그 주장에 JEV 호출이 생긴다. 어느 경우든 a3 ✅ ⊆ a2-v1 ✅이다. 평가는 모든 주장을 JEV로 판정해 두므로 이 경로도 같은 확률로 잰다. 경로별 ⚠️ 변화 수를 보고한다.",
     "bootstrap_stat": "정확도·재현율 손실·정밀도 모두 같은 2단 군집(교차 언급 군집 → 질문) 부트스트랩으로 구간을 낸다. 차이 통계는 같은 표본 안에서 두 정책 값을 뺀다(짝)."
   },
   "secondary": {
@@ -64,19 +63,20 @@
     "paraphrase": "통제 c1(의역 참) ✅ 비율, 두 정책.",
     "swap_subtypes": "주체 교체 하위 유형별 정확도, 두 정책.",
     "removed_audit": "a2-v1 ✅ → a3 ❔로 바뀐 자연 주장 전부와 a2-v1 출처 문단에서 못 찾은 이름. 원인 분류(표기 차이·의역·일반명사 오인·실제 주체 불일치)는 리포트 뒤 해석 문서에서 AI가 하고 AI 작성임을 밝힌다.",
-    "auc": "자연 주장 AUC(점수: a2-v1 S_V, a3 S_VS, 반박 0, 상단 구간 1), 기술 통계."
+    "auc": "자연 주장 AUC(점수: a2-v1 S_V, a3 S_VS, 반박 0, 상단 구간 1), 기술 통계.",
+    "in_passage_swap": "'문단 안 교체'(같은 문단 묶음에 있는 다른 이름으로 바꿈) 정확도, 두 정책. 주체 확인은 원리상 이 교체를 못 잡으므로 관문 밖에서 약점으로 보고한다."
   },
   "expectations": {
     "h_swap": "회사·거래상대 교체는 대부분 잡는다고 예상한다. 부문·제품 교체 중 이름이 일반명사 앞 수식어가 아니거나 조사 없이 쓰인 경우(예: '건설사업 확대')는 놓칠 수 있다.",
     "h_recall": "가장 큰 위험이다. 8B 생성기가 문단의 이름을 바꿔 쓰거나(약칭·음역), 일반명사를 이름 후보로 잘못 잡으면 진짜 지지 주장이 ❔가 된다. 설계상 재현율 손실이 약 2% 이하일 때만 관문을 넘는다(sample_size).",
-    "h_prec": "a2-v1 ✅에서 빼기만 하므로 정밀도는 a2-v1보다 낮아지지 않는다고 예상한다."
+    "h_prec": "✅를 빼기만 하므로 빠지는 ✅가 오답이면 정밀도가 오르고 정답이면 내려간다. 교체 오답이 주로 빠질 것으로 예상하지만, 재현율 손실만큼 정답도 빠지므로 정밀도가 내려갈 수 있다. 그래서 비열등 관문으로 잰다."
   },
   "sample_size": {
     "basis": "A-2 조정 세트(커밋된 lab/evidence/results/a2-tune.json, 탐색 허용) 120질문: 판정 가능 자연 주장 256, AI 라벨 지지됨 159, τ_s 0.85 ✅ 예측 157·정답 142. 통제 주장 120질문 중 117 채택. A-2 확인 세트 수치는 쓰지 않았다.",
-    "projection_240_questions": "자연 주장 약 510, 지지됨 약 320, a2-v1 ✅ 예측 약 310, 주체 교체 약 230, 표기 변형 참 약 150~230(영문·약칭 배정 중 문단에 약칭이 없으면 빠진다).",
-    "h_recall_power": "지지됨 약 320에서 실제 손실 2%면 표준오차 약 0.008, 군집 설계효과 약 1.5를 곱해 약 0.012, 95% 상한 약 0.043으로 0.05 안. 실제 손실 3%면 상한 약 0.055로 실패한다. 즉 이 설계는 손실 2% 안팎을 가려낸다.",
-    "h_swap_power": "주체 교체 약 230에서 실제 정확도 0.95면 95% 하한 약 0.92. a2-v1 정확도(A-1 0.45, A-2 0.57)와의 차이는 넉넉히 0보다 크다.",
-    "h_prec_min": "✅ 예측 약 300으로 하한 150(A-2에서 모자랐던 조건)을 넘는다."
+    "projection_240_questions": "자연 주장 약 510, 지지됨 약 320, a2-v1 ✅ 예측 약 310, 주체 교체 약 230(그중 '문단 안 교체' 약 45, 관문 대상 약 185), 표기 변형 참 약 150~230(영문·약칭 배정 중 문단에 약칭이 없으면 빠진다).",
+    "h_swap_power": "관문 대상 주체 교체 약 185에서 실제 정확도 0.95면 95% 하한 약 0.91. a2-v1 정확도(A-1 0.45, A-2 0.57)와의 차이는 넉넉히 0보다 크다.",
+    "h_prec_min": "a3 ✅ 예측 약 300으로 하한 150을 넘는다. 짝 차이라 a2-v1과 공유하는 ✅가 대부분이어서 구간이 좁다(손실 2%·빠진 것이 모두 정답이면 차이 약 −0.002).",
+    "h_recall_power": "지지됨 약 320에서 실제 손실 2%면 표준오차 약 0.008, 군집 설계효과 약 1.5를 곱해 약 0.012, 95% 상한 약 0.043으로 0.05 안. 실제 손실 3%면 상한 약 0.055로 실패한다. 이 2%는 측정값이 아니라 가정이다. 확정 전 탐색(exploration)에서 A-2 조정 세트 손실률을 실제로 재고 1.5%를 넘으면 확정하지 않는다."
   },
   "draw": {
     "seed": 20261204,
@@ -96,7 +96,8 @@
     "a1_split_sha256": "a93cd93b85b65c1d1d6adeca9311e9f99fd8c6bc0011f6ef2991397d1872ba66",
     "a2_split_sha256": "bd243c7cb7d0759cca44329238f8fb126287c3d48a7ed028f5344b73bfe1e1b6",
     "prior_passages": "교차 언급 제외에는 lab/data/evidence/passages.jsonl과 lab/data/evidence_a2/passages.jsonl(로컬)이 모두 있어야 한다. 없으면 split이 멈춘다.",
-    "ledger": "lab/evidence/study_a3/draw_ledger.jsonl"
+    "ledger": "lab/evidence/study_a3/draw_ledger.jsonl",
+    "self_aliases": "추첨 때 DART 기업개황(company.json)의 stock_name(종목명)·corp_name_eng(영문명) 중 회사명과 다른 것을 회사 행 self_aliases에 남긴다(_take aliases=True). 자기 회사 판별에는 회사명과 이 별칭만 쓴다."
   },
   "split": {
     "rule": "40개사 전부 확인 세트(check). 고르는 값이 없으므로 조정 세트를 두지 않는다. 군집(교차 언급, A-1 규칙)은 부트스트랩 단위로만 쓴다.",
@@ -213,27 +214,29 @@
       "회사",
       "부문·사업",
       "제품·브랜드",
-      "거래상대·자회사"
+      "거래상대·자회사",
+      "문단 안 교체"
     ],
     "notation_types": [
       "법인 표기",
       "띄어쓰기",
       "영문·약칭"
     ],
-    "assignment": "전체 질문을 qid 순으로 정렬한 순번 i로 하위 유형 SWAP_SUBTYPES[i mod 4], 표기 유형 NOTATION_TYPES[i mod 3](lab.evidence.a3.assigned)",
+    "assignment": "전체 질문을 qid 순으로 정렬한 순번 i로 하위 유형 SWAP_SUBTYPES[i mod 5], 표기 유형 NOTATION_TYPES[i mod 3](lab.evidence.a3.assigned)",
     "prompt": "lab/evidence/prompts/controlled_writer_a3.md",
-    "prompt_sha256": "aa09d2b3796c10d25d09136757de4064d28855a57dcb935615a6b4584ac36fdb",
+    "prompt_sha256": "6689c80c50017165525cab28f1bf93d8652430c534b36bf9c892bef7ee8e1e14",
     "checks": {
-      "swap": "참 문장과 다름, 숫자 토큰 같음, 참 문장에 없던 토큰의 핵심(앞뒤 부호·법인 표지·뒤 조사 제거)이 법인 표지·공백·대소문자를 지운 문단 8개에 부분 문자열로도 없음, 회사명 검사(claims.new_values_absent). 주체 확인 후보 추출(subject_groups)과 독립(lab.evidence.a3.check_swap).",
+      "swap": "참 문장과 다름, 숫자 토큰 같음, 참 문장에 없던 토큰의 핵심(앞뒤 부호·법인 표지·뒤 조사 제거)이 법인 표지·공백·대소문자를 지운 문단 8개에 부분 문자열로도 없음, 회사명 검사(claims.new_values_absent). '문단 안 교체'는 반대로 새 이름이 문단 묶음에 있어야 한다. 주체 확인 후보 추출(subject_groups)과 독립(lab.evidence.a3.check_swap).",
       "notation": "참 문장과 다름, 숫자 토큰 같음. 법인 표기·띄어쓰기: 법인 표지·공백·대소문자를 지우면 참 문장과 같음. 영문·약칭: 새 표기가 문단 8개에 토큰 경계로 있음(lab.evidence.a3.check_notation).",
       "reject": "질문의 검사 하나라도 실패하면 그 질문의 통제 주장을 모두 뺀다(controlled_rejected.jsonl)."
-    }
+    },
+    "known_limits": "'문단 안 교체'가 아닌 교체는 새 이름이 문단 8개 어디에도 없어야 해서, 같은 문단에 여러 부문이 있을 때의 부문 간 실적 교체 같은 어려운 교체는 H-swap에 들어가지 않는다. 그 몫은 '문단 안 교체'로 따로 잰다."
   },
   "subject_check": {
     "function": "app.services.evidence.subject.subject_valid → subject_decision(SYS 위 ✅만 좁힘), 상단 구간은 subject_high_ok",
     "rule": "주장의 이름 후보 묶음이 모두 문단에 토큰 경계로 있어야 그 문단이 ✅ 출처가 될 수 있다. 묶음 안 대안 중 하나만 있으면 된다.",
-    "candidates": "토큰마다 lexical.name_candidates 규칙(법인 표지·라틴 대문자·조사 붙은 2자 이상 한글 명사형)으로 이름을 잡고, 앞 토큰이 맨 이름꼴이면 붙인 형태를 대안으로 더한다. 머리명사(heads)·법인 표지만 있는 토큰 앞의 맨 수식어도 후보다. 따옴표 안 이름(20자 이하).",
-    "excluded": "선택 회사 자신(정규화 후 같거나 3자 이상 접두 관계, 괄호 별칭 포함), lexical.GENERIC_NOUNS + generic_extra, 조사 하나 더 뗀 어간이 일반명사, '-적' 꼴",
+    "candidates": "토큰마다 lexical.name_candidates 규칙(법인 표지·라틴 대문자·조사 붙은 2자 이상 한글 명사형)으로 이름을 잡되 서술형 활용(받침 있는 어간 + '다': 늘린다·올렸다; 3자 이하 동사 어간 끝 음절 + '는': 늘리는)은 뺀다. 앞 토큰이 맨 이름꼴이면 붙인 형태를 대안으로 더한다. 머리명사(heads)·법인 표지만 있는 토큰 앞의 맨 수식어도 후보다. 부문명은 꼬리 변형(부문·사업부문·사업부·사업본부·본부·사업)을 대안으로 본다. 따옴표 안 이름(20자 이하).",
+    "excluded": "선택 회사 자신: 회사명과 DART 별칭(종목명·영문명)을 주장에서 먼저 '당사'로 바꾸고, 남은 후보도 정규화 후 정확히 같으면(문단 괄호 별칭 포함) 뺀다. 접두만 같은 이름(포스코 ↔ 포스코인터내셔널, 현대건설 ↔ 현대건설기계)은 계열사이므로 빼지 않는다. 그 밖에 lexical.GENERIC_NOUNS + generic_extra, 조사 하나 더 뗀 어간이 일반명사, '-적' 꼴.",
     "generic_extra": [
       "기준",
       "거래",
@@ -377,7 +380,20 @@
       "트렌드",
       "전망",
       "평균",
-      "사업부문"
+      "사업부문",
+      "성과",
+      "절감",
+      "개선",
+      "확대",
+      "축소",
+      "강화",
+      "확보",
+      "효율",
+      "효율성",
+      "공정",
+      "배터리",
+      "음반",
+      "철광석"
     ],
     "heads": [
       "계열사",
@@ -398,8 +414,8 @@
       "지분"
     ],
     "notation": "법인 표지(㈜·(주)·주식회사·Co., Ltd.·Ltd.·Inc.·Corp.)를 지우고, 글자 사이 공백을 허용하고, 라틴 대소문자를 무시하고, 문단 k개 안의 괄호 약칭 정의(X(Y), X(이하 'Y'))를 같은 이름으로 본다.",
-    "known_limits": "문단에 정의가 없는 약칭·음역(SK ↔ 에스케이, LG엔솔 ↔ LG에너지솔루션), 조사 없이 쓴 이름(예: '건설사업 확대'), 일반명사 목록에 없는 흔한 낱말을 후보로 잘못 잡는 것. c3 표기 변형 오탐과 removed 감사로 잰다.",
-    "pre_registration_exploration": "order 0단계: 확정 전에 로컬에서 A-2 조정 세트(탐색 허용) 자연 주장 중 AI 라벨 지지됨이고 a2-v1 ✅인 것에 주체 확인을 적용해(저장된 JEV 확률, 추가 호출 없음) 못 찾은 후보를 본다. 고유명이 아닌 일반명사만 generic_extra에 더한다(이름을 빼서 손실을 줄이는 것은 금지). 결과(손실 건수, 더한 낱말)를 attempts.jsonl에 study a3 줄로 남긴다. A-2 확인 세트는 열지 않는다."
+    "known_limits": "문단에 정의가 없는 약칭·음역(SK ↔ 에스케이), DART 별칭에 없는 자기 회사 표기(네이버 ↔ NAVER, SM엔터테인먼트 ↔ 에스엠, DART 약식명보다 긴 본명 에프엔씨엔터테인먼트 ↔ 에프엔씨엔터), 조사 없이 쓴 이름, 일반명사 목록에 없는 흔한 낱말의 오인, 같은 문단 안의 다른 이름으로 바꾼 교체. 제품 실행기는 아직 회사명만 넘긴다(DART 별칭 저장 없음) — 기본값 전환 때 별칭을 함께 넘겨야 평가와 같아진다. c3 표기 변형 오탐·removed 감사·in_passage_swap으로 잰다.",
+    "generic_extra_authorship": "AI(Claude Code)가 사업보고서 일반 어휘로 초안을 쓰고, A-2 조정 세트 자연 주장 문장(문단 없이, 탐색 허용)에서 잡힌 후보를 보고 더했으며, 독립 리뷰가 짚은 낱말(성과·절감·개선·배터리·음반·철광석)과 같은 꼴을 더했다. A-2 확인 세트는 보지 않았다."
   },
   "labels": {
     "name": "AI 참조 라벨",
@@ -447,16 +463,17 @@
     "확인 세트 판정은 동결(prereg_a3_check.json) 뒤 --tag check로 한 번만. 다시 열지 않는다. 결과를 보고 후보 규칙·일반명사 목록을 고쳐 다시 재지 않는다(고치려면 새 데이터로 새 사전등록)."
   ],
   "product_mapping": {
-    "all_pass": "a3-subject-exp를 기본 정책으로 바꾸자고 제안한다. 전환은 노아가 별도 PR로 결정한다(이 연구는 제품 기본값을 바꾸지 않는다). 전환하면 문장 행에 subject_ok 열을 더하는 마이그레이션이 필요하다.",
-    "h_swap_pass_h_recall_fail": "a2-v1 유지. removed 감사로 원인을 나눠 spec 2절 ②(JEV 질문 추가) 또는 ③을 다음 연구로 검토한다.",
-    "h_swap_fail": "a2-v1 유지. 주체 확인 후보 추출로는 부족하다는 뜻이므로 ②를 검토한다.",
-    "note": "어느 경우든 결과가 부정이어도 리포트를 공개한다."
+    "all_pass": "a3-subject-exp를 기본 정책으로 바꾸자고 제안한다. 전환은 노아가 별도 PR로 결정한다(이 연구는 제품 기본값을 바꾸지 않는다). 전환하면 문장 행 subject_ok 열 마이그레이션과 DART 별칭 전달이 필요하다.",
+    "h_swap_fail": "a2-v1 유지. 주체 확인 후보 추출로는 부족하다는 뜻이므로 ②(JEV 주체 질문)를 검토한다.",
+    "h_recall_fail": "a2-v1 유지. removed 감사로 원인을 나눠 ①b(부드러운 확인) 또는 ②를 다음 연구로 검토한다.",
+    "h_prec_fail_only": "a2-v1 유지. 교체는 막고 재현율도 지켰지만 정밀도 비열등을 확인하지 못했다(✅ 예측 부족 또는 빠진 ✅가 정답). 새 데이터로 다시 잰다.",
+    "note": "판정 순서는 h_swap → h_recall → h_prec(lab.evidence.a3.recommendation). 어느 경우든 결과가 부정이어도 리포트를 공개한다."
   },
   "a2_fallback_rule_note": "A-2 원장 ruling 줄이 '다음 사전등록에서 max(조정값, 폴백)으로 고친다'고 했다. A-3은 임계값을 고르지 않으므로(조정 세트 없음) 그 규칙이 적용될 자리가 없다. 다음에 τ_s를 고르는 연구의 사전등록에서 고친다.",
   "not_reused": "A-2 확인 세트의 회사·질문·답변·주장·라벨·JEV 점수·결과는 쓰지 않는다. A-2 조정 세트는 order 0단계 탐색에만 쓴다.",
-  "mca_2_3b": "JEV 출력으로 어떤 모델도 학습·증류하지 않는다. 주체 확인 규칙은 JEV 확률을 읽지 않는 코드 규칙이고, 후보 목록은 AI 참조 라벨과 문장 형태로만 정한다.",
+  "mca_2_3b": "JEV 출력으로 어떤 모델도 학습·증류하지 않는다. 주체 확인 규칙은 JEV 확률을 읽지 않는 코드 규칙이다. 다만 확정 전 탐색은 손실을 셀 대상을 'a2-v1이 ✅로 둔 주장'으로 거르며, 이 판정은 JEV 확률에서 나온다. 손실 여부의 정답은 AI 참조 라벨이고, JEV 출력을 정답으로 삼거나 JEV 판정을 흉내 내도록 규칙을 맞추지 않는다(허용 수정은 일반명사·서술형 필터뿐).",
   "order": [
-    "0. (로컬, 확정 전) A-2 조정 세트로 subject_check 일반명사 목록 탐색 → 필요하면 subject.py 수정, 단위 테스트, code_sha256 재계산",
+    "0. (로컬, 확정 전) a3-explore로 A-2 조정 세트 손실률을 재고 exploration 규칙대로 진행·중단을 정한다. 허용 범위 안에서 고쳤으면 단위 테스트, code_sha256 재계산",
     "1. status를 registered로, registered_at을 적고 이 파일 커밋(A-3 데이터·호출 전)",
     "2. 추첨 → lab/evidence/split_a3.json 커밋(JEV 호출 전)",
     "3. passages → embed → question-packets/questions-merge → retrieve → generate → claims → controlled-packets/controlled-check → label-packets/labels-merge(1·2차)",
@@ -465,7 +482,7 @@
     "변경은 lab/evidence/attempts.jsonl에 study a3 표시로 이유와 함께 덧붙인다(기존 줄은 고치지 않는다)"
   ],
   "code_sha256": {
-    "app/services/evidence/subject.py": "e91fd5550827bb087205c2d01cdb65d475d2700f48bd0879f8433d19c20c0596",
+    "app/services/evidence/subject.py": "6eebde27ce2fe4c1e9ef2c9c6be9a36aaf9072b8b65006719503bd6364d434cf",
     "app/services/evidence/lexical.py": "40366b29426cd6ec8f7baeca373458f062844c1f515142e03bcf368627e82408",
     "app/services/evidence/claims.py": "b273c3e5b7a27901356181dd1641abf3e8003b351f0891de699f1bd6731d65e7",
     "app/services/evidence/numbers.py": "b440370b1e21d5e7f308406d3f6f3369f741edba15778236d2eeb68e48276f41",
@@ -473,6 +490,16 @@
     "app/services/evidence/generate.py": "7926f48679f1e870a580ba189a9406ea700a6126de559ca23a9deb6575908d75",
     "lab/evidence/split.py": "891db73b398bb0959c57b5c81c72e1c53924f7a8376ae83f80de208de14f964d",
     "lab/evidence/a2.py": "24d4458eea725c4d20f2250b86dfc630ba8f071c86506c067135833153cff57e",
-    "lab/evidence/a3.py": "185b4afc447742167bf2877840eb5c0631b959f71ef4ee1af4d66072c2333057"
+    "lab/evidence/a3.py": "ee826ab2145957bed2ed9ff0bccb1ea301cb0fd21714cea5c7e1acec711ddd17"
+  },
+  "revisions": [
+    "2026-10-04 독립 리뷰 반영(초안 단계, A-3 데이터·호출 전): 서술형 활용·흔한 명사 필터, 자기 회사는 정확 일치 + DART 종목명·영문명만(접두 규칙 삭제, 계열사 교체를 자기 회사로 보던 문제), 부문명 변형, '문단 안 교체' 하위 유형(관문 밖), H-prec를 a2-v1 대비 비열등으로, 확정 전 탐색 손실률 기준(≤ 1.5%)과 허용 수정 범위, 순수 제한 예외(상단 구간 → JEV 경로 ⚠️·호출 증가) 문구 정정"
+  ],
+  "exploration": {
+    "command": "python -m lab.evidence --study a3 a3-explore(초안일 때만 동작, A-2 조정 세트만 읽음, 추가 호출 없음)",
+    "measure": "A-2 조정 세트 판정 가능 자연 주장 중 AI 라벨 지지됨이고 a2-v1이 ✅로 둔 것 가운데 a3-subject-exp가 ✅로 두지 않는 비율(loss_rate). 자기 회사는 회사명만 쓴다(A-2 추첨 행에 DART 별칭이 없어 A-3보다 보수적).",
+    "max_loss": 0.015,
+    "proceed_rule": "loss_rate ≤ 0.015면 확정할 수 있다. 넘으면 허용 범위 안에서만 고치고 다시 잰다. 그래도 넘으면 확정하지 않는다.",
+    "allowed_changes": "탐색 단계에서 허용하는 수정은 두 가지뿐이다. (1) subject.SUBJECT_GENERIC에 고유명이 아닌 일반명사를 더한다. (2) subject._is_predicate의 서술형 판별 규칙(어미·어간 끝 음절 목록)을 넓혀 동사·형용사 활용형을 더 거른다(필터 코드 수정 포함). 그 밖의 것(이름을 후보에서 빼는 예외 목록, 머리명사·부문 꼬리, 표기 정규화, 자기 회사 규칙, 판정 규칙, 관문, 표본)은 고치지 않는다. 고칠 때마다 실패 테스트를 먼저 쓰고 a3-explore를 다시 돌려 손실률과 고친 내용을 attempts.jsonl에 study a3 줄로 남긴다. 손실률이 1.5% 이하가 되지 않으면 사전등록을 확정하지 않고 A-3를 멈춘다(spec 2절 ①b·②로 넘어간다)."
   }
 }

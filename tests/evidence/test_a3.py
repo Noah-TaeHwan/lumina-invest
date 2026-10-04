@@ -18,7 +18,8 @@ def test_policies_are_the_product_constants():
 def test_assignment_cycles_subtypes_by_sorted_qid():
     qids = [f"c-q{i}" for i in range(1, 7)] + ["a-q1"]
     got = [a3.assigned(q, qids) for q in sorted(qids)]
-    assert [g[0] for g in got] == [a3.SWAP_SUBTYPES[i % 4] for i in range(7)]
+    assert len(a3.SWAP_SUBTYPES) == 5 and a3.SWAP_SUBTYPES[-1] == a3.IN_PASSAGE
+    assert [g[0] for g in got] == [a3.SWAP_SUBTYPES[i % 5] for i in range(7)]
     assert [g[1] for g in got] == [a3.NOTATION_TYPES[i % 3] for i in range(7)]
 
 
@@ -35,6 +36,16 @@ PS = ["당사는 2006년 품질경영시스템 인증을 획득하였습니다."
 ])
 def test_check_swap(true, variant, ok):
     assert a3.check_swap(true, variant, PS, ("고려제강",))[0] is ok
+
+
+@pytest.mark.parametrize("true,variant,ok", [
+    ("커피 부문은 커피머신을 판매한다.", "커피 부문은 커피머신을 판매한다.", False),
+    ("대원산업은 2006년 인증을 획득했다.", "에프엔씨엔터테인먼트는 2006년 인증을 획득했다.", True),   # 문단에 있는 다른 이름
+    ("대원산업은 2006년 인증을 획득했다.", "고려제강은 2006년 인증을 획득했다.", False),            # 문단에 없는 이름
+])
+def test_check_swap_in_passage(true, variant, ok):
+    """'문단 안 교체': 같은 문단 묶음에 있는 다른 이름으로 바꾼다. 주체 확인을 통과하므로 JEV만 막을 수 있다(약점 측정)."""
+    assert a3.check_swap(true, variant, PS, ("고려제강",), subtype=a3.IN_PASSAGE)[0] is ok
 
 
 def test_check_swap_does_not_use_subject_candidates():
@@ -72,7 +83,7 @@ def test_decide_uses_shared_product_functions():
 
 
 def _swaps(n, caught):
-    return [_row(f"k{i}-q1-c2", cluster=i, variant="주체 교체", expected="not_supported", subj=(i >= caught,))
+    return [_row(f"k{i}-q1-c2", cluster=i, variant="주체 교체:회사", expected="not_supported", subj=(i >= caught,))
             for i in range(n)]
 
 
@@ -88,7 +99,33 @@ def test_gates_pass_when_swaps_caught_and_recall_kept():
     assert g["h_swap"]["exp_accuracy"] == pytest.approx(155 / 160) and g["h_swap"]["base_accuracy"] == 0
     assert g["h_swap"]["pass"] and g["h_recall"]["pass"] and g["h_prec"]["pass"]
     assert g["h_recall"]["loss"] == pytest.approx(2 / 200)
-    assert g["h_prec"]["predicted"] == 198 + 5
+    assert g["h_prec"]["predicted"] == 198 + 5 and g["h_prec"]["diff"]["point"] < 0  # 정답 ✅ 2건이 빠져 조금 내려간다
+
+
+def test_precision_gate_is_non_inferiority_against_a2_v1():
+    """H-prec는 절대 0.90이 아니라 a2-v1 대비 비열등(차이 95% 하한 ≥ −0.02). 빠지는 ✅가 정답이면 정밀도가 내려간다."""
+    nat = _natural(200, 0, n_neg=40, neg_supported=40)  # a2-v1 정밀도 200/240
+    lost = [dict(r, subj=[False]) for r in nat[:60]]   # a3가 정답 ✅ 60건을 뺀다 → 140/180
+    g = a3.check_gates(lost + nat[60:], _swaps(160, 160), n_boot=200)
+    assert g["h_prec"]["precision"] == pytest.approx(140 / 180) and g["h_prec"]["base_precision"] == pytest.approx(200 / 240)
+    assert g["h_prec"]["diff"]["point"] < 0 and not g["h_prec"]["pass"]
+    assert a3.GATES["h_prec"] == {"diff_lo_min": -0.02, "min_predicted": 150}
+
+
+def test_in_passage_swaps_are_reported_but_not_gated():
+    sw = _swaps(160, 155) + [_row(f"z{i}-q1-c2", cluster=500 + i, variant=f"주체 교체:{a3.IN_PASSAGE}",
+                                  expected="not_supported") for i in range(30)]
+    g = a3.check_gates(_natural(200, 2), sw, n_boot=100)
+    assert g["h_swap"]["n"] == 160 and g["in_passage_swap"]["n"] == 30
+    assert g["in_passage_swap"]["exp_accuracy"] == 0.0 == g["in_passage_swap"]["base_accuracy"]
+
+
+def test_explore_loss_rate_and_criterion():
+    ok = a3.explore_summary(_natural(200, 2))
+    assert ok["loss_rate"] == pytest.approx(2 / 200) and ok["proceed"] is True
+    bad = a3.explore_summary(_natural(200, 4))
+    assert bad["loss_rate"] == pytest.approx(0.02) and bad["proceed"] is False
+    assert a3.EXPLORE_MAX_LOSS == 0.015
 
 
 def test_gates_fail_on_recall_loss_and_small_swap_sample():

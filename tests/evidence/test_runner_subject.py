@@ -81,3 +81,16 @@ def test_route_and_decide_helpers_are_shared_with_eval():
     assert rn.decide_claim(rn.A2_V1, [0.9], [0.0], [True], None) == ("supported", 0, 0.9)
     assert rn.decide_claim(rn.A3_SUBJECT, [0.9], [0.0], [True], [False]) == ("no_evidence", None, 0.0)
 
+
+
+def test_lex_high_claim_can_become_contradicted_under_a3():
+    """순수 제한의 예외(리뷰 반영): a2-v1 상단 구간 ✅가 a3에서 주체 확인 실패로 JEV 경로로 가면 ⚠️가 될 수 있고,
+    그 주장에는 JEV 호출이 하나 더 생긴다. a3 ✅ ⊆ a2-v1 ✅는 그대로다."""
+    claim = "건설 부문은 커피와 커피머신 등 상품을 판매하는 사업을 영위합니다."
+    loose = rn.Policy("tier", 0.85, 0.35, theta_high=0.8)
+    contra = lambda c, n: ("probs", [(0.1, 0.9)] * n)  # noqa: E731
+    a2 = _run(FakeClient(contra), claim, policy=loose, passages=PASSAGES)
+    client = FakeClient(contra)
+    a3 = _run(client, claim, policy=replace(loose, subject_check=True), passages=PASSAGES)
+    assert (a2.claims[0].route, a2.claims[0].status, a2.calls) == ("lex_high", "supported", 0)
+    assert (a3.claims[0].route, a3.claims[0].status) == ("jev", "contradicted") and len(client.calls) == 1

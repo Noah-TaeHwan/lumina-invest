@@ -48,10 +48,70 @@ def test_generic_and_self_are_not_candidates(claim):
     assert groups(claim) == []
 
 
-def test_self_prefix_alias():
-    """DART 약식 회사명(에프엔씨엔터)과 본문 전체 이름(에프엔씨엔터테인먼트)은 같은 회사로 본다(3자 이상 접두)."""
-    assert groups("에프엔씨엔터테인먼트는 2006년 설립되었다.", "에프엔씨엔터") == []
-    assert groups("에프엔씨엔터는 2006년 설립되었다.", "에프엔씨엔터테인먼트") == []
+def test_self_names_are_exact_or_dart_aliases():
+    """자기 회사는 정규화 후 정확히 같은 이름만: DART 회사명·종목명(stock_name)·영문명(corp_name_eng).
+    접두만 같은 이름은 자기 회사가 아니다(계열사 교체를 놓치지 않게, 리뷰 반영)."""
+    hmc = ("현대자동차", "현대차", "Hyundai Motor Company")
+    assert groups("현대차는 2006년 설립되었다.", hmc) == []
+    assert groups("현대자동차는 2006년 설립되었다.", hmc) == []
+    assert groups("Hyundai Motor Company는 2006년 설립되었다.", hmc) == []
+    assert groups("포스코인터는 2006년 설립되었다.", ("포스코인터내셔널", "포스코인터")) == []
+
+
+@pytest.mark.parametrize("claim,company,name", [
+    ("포스코인터내셔널은 철강을 판다.", "포스코", "포스코인터내셔널"),       # 계열사 교체는 자기 회사가 아니다
+    ("현대건설기계는 굴착기를 만든다.", "현대건설", "현대건설기계"),
+    ("삼성전자서비스는 수리를 맡는다.", "삼성전자", "삼성전자서비스"),
+    ("포스코는 철강을 판다.", "포스코인터내셔널", "포스코"),
+])
+def test_affiliate_is_not_self(claim, company, name):
+    assert any(name in g for g in groups(claim, company)), groups(claim, company)
+
+
+@pytest.mark.parametrize("claim,company", [
+    ("네이버는 검색 광고를 판다.", ("NAVER", "NAVER", "NAVER Corp.")),          # 음역: DART에 근거 없음
+    ("SM엔터테인먼트는 음원을 판다.", ("에스엠", "에스엠", "SM Entertainment Co., Ltd.")),  # 혼합 표기
+    ("에프엔씨엔터테인먼트는 2006년 설립되었다.", "에프엔씨엔터"),               # DART 약식명보다 긴 본명
+])
+def test_self_alias_known_limits(claim, company):
+    """근거 있는 별칭 소스(DART 회사명·종목명·영문명)에 없는 자기 회사 표기는 후보로 남는다(알려진 한계, c3·감사로 잰다)."""
+    assert groups(claim, company) != []
+
+
+@pytest.mark.parametrize("claim", [
+    "회사는 생산능력을 두 배로 늘린다.",
+    "수출 비중은 40%에 이른다.",
+    "회사는 판매 가격을 올렸다.",
+    "전방 수요가 높아진다.",
+    "회사는 자동차 시트를 만든다.",
+    "회사는 설비 투자를 늘리는 중이다.",
+    "원가 절감과 공정 개선으로 성과를 냈다.",
+    "배터리와 음반, 철광석을 다룬다.",
+])
+def test_predicates_and_common_nouns_are_not_candidates(claim):
+    """서술형 활용(받침 있는 어간 + '다', 짧은 동사 어간 + '는')과 흔한 일반명사는 이름이 아니다(리뷰 반영)."""
+    bad = {"늘린", "이른", "올렸", "높아진", "만든", "늘리", "절감", "개선", "성과", "배터리", "음반", "철광석"}
+    got = {n for g in groups(claim, "케이산업") for n in g}
+    assert not (bad & got), got
+
+
+@pytest.mark.parametrize("claim,name", [
+    ("주요 매출처는 삼성전자다.", "삼성전자"),        # 받침 없는 명사 + 서술격 '다'는 이름
+    ("주요 고객은 현대모비스이다.", "현대모비스"),
+    ("주요 고객은 코오롱인더스트리는 아니다.", "코오롱인더스트리"),  # 긴 이름 + '는'은 동사로 보지 않는다
+])
+def test_copula_names_are_kept(claim, name):
+    assert any(name in g for g in groups(claim, "케이산업"))
+
+
+@pytest.mark.parametrize("claim,passage,ok", [
+    ("건설 부문은 아파트를 짓는다.", "건설사업부문은 아파트를 시공합니다.", True),    # 부문명 변형
+    ("건설사업부문은 아파트를 짓는다.", "건설 부문은 아파트를 시공합니다.", True),
+    ("선재사업부문은 서울사무소에서 판다.", "선재사업부는 서울사무소에서 판매합니다.", True),
+    ("단조사업부문은 서울사무소에서 판다.", "선재사업부문은 서울사무소에서 판매합니다.", False),
+])
+def test_division_name_variants(claim, passage, ok):
+    assert sj.subject_ok(claim, passage, "케이산업") is ok
 
 
 # --- 교체 문장은 주체 확인에서 떨어진다 --------------------------------------------------------------------------
@@ -152,3 +212,4 @@ def test_high_ok_requires_subject_on_best_passage():
     assert not sj.subject_high_ok(True, 0, [False, True])
     assert not sj.subject_high_ok(False, 1, [True, True])
     assert not sj.subject_high_ok(True, None, [True])
+    assert not sj.subject_high_ok(True, 0, [])  # 주체 확인 결과가 없으면 상단 구간이 아니다(IndexError 아님)

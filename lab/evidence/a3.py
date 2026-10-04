@@ -5,7 +5,8 @@
   그래서 조정 세트가 없고 새 무작위 40개사 전부가 확인 세트다.
 - 판정·경로는 제품과 같은 함수(app subject.route_claim·decide_claim)로 정한다. 정책 상수는 제품 runner의 것을 쓰고,
   사전등록 파일의 값과 같은지 a3-report가 대조한다.
-- 통제 주장: 질문마다 c1 의역 참, c2 주체 교체(하위 유형 순환), c3 표기 변형 참(유형 순환). 외부 호출 없음.
+- 통제 주장: 질문마다 c1 의역 참, c2 주체 교체(하위 유형 5종 순환, '문단 안 교체'는 관문 밖 보조), c3 표기 변형 참
+  (유형 순환). 외부 호출 없음.
 - 값은 lab/evidence/prereg_a3.json과 같아야 한다(tests/evidence/test_a3_cli.py가 대조한다).
 """
 from __future__ import annotations
@@ -25,13 +26,15 @@ KAPPA_MIN = a2.KAPPA_MIN
 BASE: Policy = A2_V1
 EXP: Policy = A3_SUBJECT
 POLICY_FIELDS = ("version", "tau_s", "tau_c", "theta_low", "theta_high", "subject_check")
-SWAP_SUBTYPES = ("회사", "부문·사업", "제품·브랜드", "거래상대·자회사")
+IN_PASSAGE = "문단 안 교체"  # 문단 묶음에 있는 다른 이름으로 바꿈: 주체 확인을 통과하므로 JEV만 막는다(관문 밖, 약점 측정)
+SWAP_SUBTYPES = ("회사", "부문·사업", "제품·브랜드", "거래상대·자회사", IN_PASSAGE)
 NOTATION_TYPES = ("법인 표기", "띄어쓰기", "영문·약칭")
 GATES = {
     "h_swap": {"accuracy_min": 0.90, "ci_lo_min": 0.80, "diff_lo_min_exclusive": 0.0, "min_n": 150},
     "h_recall": {"loss_hi_max": 0.05, "min_positive": 150},
-    "h_prec": {"precision_min": 0.90, "ci_lo_min": 0.80, "min_predicted": 150},
+    "h_prec": {"diff_lo_min": -0.02, "min_predicted": 150},
 }
+EXPLORE_MAX_LOSS = 0.015  # 확정 전 탐색(A-2 조정 세트) 재현율 손실률 상한: 넘으면 사전등록을 확정하지 않는다
 
 
 def policy_fields(p: Policy) -> dict:
@@ -56,8 +59,10 @@ def _new_cores(text: str, base: str) -> list[str]:
     return [c for c in (_core(t) for t in text.split() if t not in old) if c]
 
 
-def check_swap(true: str, variant: str, passages: list[str], names: tuple[str, ...]) -> tuple[bool, str]:
+def check_swap(true: str, variant: str, passages: list[str], names: tuple[str, ...],
+               subtype: str | None = None) -> tuple[bool, str]:
     """주체 교체 검사: 참 문장과 다르고, 숫자는 그대로이며, 새로 넣은 이름이 문단 8개 어디에도 없다.
+    '문단 안 교체'는 반대로 새 이름이 문단 묶음에 있어야 한다(같은 문단의 다른 부문·제품으로 바꾼 교체).
 
     후보 추출(subject_groups)과 독립인 토큰 차이로 본다. 후보 추출로 거르면 추출이 놓친 교체가 빠져 정확도가 부풀려진다.
     """
@@ -69,6 +74,8 @@ def check_swap(true: str, variant: str, passages: list[str], names: tuple[str, .
     new = _new_cores(variant, true)
     if not new:
         return False, "no new name"
+    if subtype == IN_PASSAGE:
+        return (True, "ok") if all(subject.normalize(c) in blob for c in new) else (False, "new name not in passages")
     if any(subject.normalize(c) in blob for c in new) or not new_values_absent(variant, true, passages, names):
         return False, "new name present in passages"
     return True, "ok"
@@ -131,14 +138,20 @@ def _diff(f, g):
     return stat
 
 
+def _acc(key: str):
+    return lambda rs: _rate(rs, lambda r: r[key] != "supported")
+
+
 def check_gates(natural: list[dict], swaps: list[dict], n_boot: int = BOOTSTRAP_N, seed: int = SEED) -> dict:
-    """A-3 관문(spec 5.3). natural: 판정 가능 자연 주장(y 라벨), swaps: 통제 주체 교체 주장. 둘 다 같은 JEV 확률."""
+    """A-3 관문(spec 5.1). natural: 판정 가능 자연 주장(y 라벨), swaps: 통제 주체 교체 주장. 둘 다 같은 JEV 확률.
+    '문단 안 교체'는 H-swap에서 빼고 따로 보고한다(주체 확인이 원리상 못 잡는 교체)."""
     from lab.evidence.metrics import cluster_bootstrap
 
     G = GATES
-    nat, sw = annotate(natural), annotate(swaps)
-
-    acc = lambda key: (lambda rs: _rate(rs, lambda r: r[key] != "supported"))  # noqa: E731
+    nat = annotate(natural)
+    inside = annotate([r for r in swaps if (r.get("variant") or "").endswith(IN_PASSAGE)])
+    sw = annotate([r for r in swaps if not (r.get("variant") or "").endswith(IN_PASSAGE)])
+    acc = _acc
     p_acc, lo, hi = cluster_bootstrap(sw, acc("exp"), n=n_boot, seed=seed)
     d, dlo, dhi = cluster_bootstrap(sw, _diff(acc("exp"), acc("base")), n=n_boot, seed=seed)
     small = len(sw) < G["h_swap"]["min_n"]
@@ -159,21 +172,42 @@ def check_gates(natural: list[dict], swaps: list[dict], n_boot: int = BOOTSTRAP_
 
     pred = sum(r["exp"] == "supported" for r in nat)
     prec, plo, phi = cluster_bootstrap(nat, lambda rs: _precision(rs, "exp"), n=n_boot, seed=seed)
+    pd, pdlo, pdhi = cluster_bootstrap(nat, _diff(lambda rs: _precision(rs, "exp"), lambda rs: _precision(rs, "base")),
+                                       n=n_boot, seed=seed)
     desc = pred < G["h_prec"]["min_predicted"]
-    gp = G["h_prec"]
     h_prec = {"predicted": pred, "precision": prec, "ci": [plo, phi], "base_precision": _precision(nat, "base"),
-              "base_predicted": sum(r["base"] == "supported" for r in nat), "descriptive_only": desc,
-              "pass": (not desc and prec is not None and plo is not None
-                       and prec >= gp["precision_min"] and plo >= gp["ci_lo_min"])}
-    return {"h_swap": h_swap, "h_recall": h_recall, "h_prec": h_prec}
+              "base_predicted": sum(r["base"] == "supported" for r in nat),
+              "diff": {"point": pd, "lo": pdlo, "hi": pdhi}, "descriptive_only": desc,
+              "pass": not desc and pdlo is not None and pdlo >= G["h_prec"]["diff_lo_min"]}
+    in_passage = {"n": len(inside), "exp_accuracy": acc("exp")(inside), "base_accuracy": acc("base")(inside)}
+    return {"h_swap": h_swap, "h_recall": h_recall, "h_prec": h_prec, "in_passage_swap": in_passage}
+
+
+def explore_summary(natural: list[dict]) -> dict:
+    """확정 전 탐색(A-2 조정 세트): AI 라벨 지지됨이고 a2-v1 ✅인 자연 주장 중 a3가 ✅로 두지 않는 비율(손실률)과
+    진행 기준(손실률 ≤ EXPLORE_MAX_LOSS). 정답은 AI 참조 라벨이고, a2-v1 ✅(JEV 확률로 판정)는 대상을 고르는 데만 쓴다."""
+    d = annotate(natural)
+    kept = [r for r in d if r["y"] and r["base"] == "supported"]
+    lost = [r for r in kept if r["exp"] != "supported"]
+    rate = len(lost) / len(kept) if kept else None
+    return {"positive": sum(r["y"] for r in d), "base_supported_true": len(kept), "lost": len(lost), "loss_rate": rate,
+            "max_loss": EXPLORE_MAX_LOSS, "proceed": rate is not None and rate <= EXPLORE_MAX_LOSS}
 
 
 def recommendation(gates: dict) -> dict:
-    """세 관문을 모두 통과해야 기본값 전환을 '제안'한다. 전환 자체는 노아가 별도 PR로 결정한다(이 함수는 제품을 바꾸지 않는다)."""
-    ok = all(gates[k]["pass"] for k in ("h_swap", "h_recall", "h_prec"))
-    return {"switch_default": ok,
-            "note": "a3-subject-exp를 기본 정책으로 바꾸자고 제안(별도 PR, 결정권자 노아)" if ok else
-                    "a2-v1 유지. 실패한 관문과 감사 목록으로 다음 방법(spec 2절 ②·③)을 정한다"}
+    """사전등록 반영 규칙(product_mapping). 세 관문을 모두 통과해야 기본값 전환을 '제안'한다.
+    전환 자체는 노아가 별도 PR로 결정한다(이 함수는 제품을 바꾸지 않는다)."""
+    sw, rc, pr = (gates[k]["pass"] for k in ("h_swap", "h_recall", "h_prec"))
+    if sw and rc and pr:
+        case, note = "all_pass", "a3-subject-exp를 기본 정책으로 바꾸자고 제안(별도 PR, 결정권자 노아)"
+    elif not sw:
+        case, note = "h_swap_fail", "a2-v1 유지. 후보 추출로는 교체를 막지 못하므로 ②(JEV 주체 질문)를 검토"
+    elif not rc:
+        case, note = "h_recall_fail", "a2-v1 유지. 감사 목록으로 손실 원인을 나눠 ①b(부드러운 확인) 또는 ②를 검토"
+    else:
+        case, note = "h_prec_fail_only", ("a2-v1 유지. 교체는 막고 재현율도 지켰지만 정밀도 비열등을 확인하지 못했다"
+                                          "(✅ 예측 부족 또는 빠진 ✅가 정답). 새 데이터로 다시 잰다")
+    return {"switch_default": case == "all_pass", "case": case, "note": note}
 
 
 def controlled_summary(rows: list[dict]) -> dict:

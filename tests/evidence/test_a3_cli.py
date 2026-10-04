@@ -171,6 +171,10 @@ def test_committed_prereg_a3_matches_code():
     assert pre["labels"]["kappa_stop"] == a3.KAPPA_MIN
     assert {"app/services/evidence/subject.py", "lab/evidence/a3.py", "lab/evidence/a2.py",
             "app/services/evidence/lexical.py", "app/services/evidence/judge.py"} <= set(pre["code_sha256"])
+    assert pre["exploration"]["max_loss"] == a3.EXPLORE_MAX_LOSS
+    assert {"all_pass", "h_swap_fail", "h_recall_fail", "h_prec_fail_only"} <= set(pre["product_mapping"])
+    spec = (REPO / "docs/superpowers/specs/2026-10-04-subject-swap-a3-design.md").read_text()
+    assert pre["exploration"]["allowed_changes"] in spec  # 탐색 허용 범위 문구가 spec과 같다
     for rel, sha in pre["code_sha256"].items():
         assert _sha(rel) == sha, rel
 
@@ -248,9 +252,45 @@ def test_a3_explore_reads_a2_tune_only(tmp_path):
                                                     for c in ("t-q1-n1", "t-q1-n2")])
     cli.cmd_a3_explore(P, None)
     out = json.loads((P.priv / "a3_explore_tune.json").read_text())
-    assert (out["positive"], out["base_supported_true"], out["exp_supported_true"]) == (2, 2, 1)
+    assert (out["positive"], out["base_supported_true"], out["lost"]) == (2, 2, 1)
+    assert out["loss_rate"] == 0.5 and out["proceed"] is False and out["max_loss"] == a3.EXPLORE_MAX_LOSS
     assert [r["missing"] for r in out["removed"]] == [["고려제강"]]
-    assert json.loads(P.attempts.read_text().splitlines()[-1])["study"] == "a3"
+    last = json.loads(P.attempts.read_text().splitlines()[-1])
+    assert last["study"] == "a3" and last["loss_rate"] == 0.5 and last["proceed"] is False
     _P(tmp_path, "registered")
     with pytest.raises(SystemExit, match="draft"):
         cli.cmd_a3_explore(P, None)
+
+
+
+def test_dart_self_aliases_from_company_info():
+    """자기 회사 별칭은 DART 기업개황(company.json)의 종목명·영문명만 쓴다(근거 있는 소스)."""
+    info = {"corp_name": "현대자동차", "stock_name": "현대차", "corp_name_eng": "Hyundai Motor Company"}
+    assert cli.dart_self_aliases(info, "현대자동차") == ["현대차", "Hyundai Motor Company"]
+    assert cli.dart_self_aliases({"stock_name": "현대자동차", "corp_name_eng": ""}, "현대자동차") == []
+
+
+def test_self_names_use_split_aliases(tmp_path):
+    P = _P(tmp_path, "registered")
+    comps = [dict(COMPS[0], self_aliases=["케이", "K Industry Co., Ltd."]), COMPS[1]]
+    P.split_json.write_text(json.dumps({"companies": comps}))
+    assert cli.self_names(P) == {"k": ("케이산업", "케이", "K Industry Co., Ltd."), "m": ("엠소재",)}
+
+
+def test_take_records_dart_aliases_only_when_asked(tmp_path, monkeypatch):
+    from app.services.evidence import dart, passages
+
+    P = _P(tmp_path, "registered")
+    monkeypatch.setattr(dart, "list_annual_reports", lambda *a: [])
+    monkeypatch.setattr(dart, "pick_annual_report", lambda items: {"rcept_no": "1", "report_nm": "사업보고서 (2025.12)"})
+    monkeypatch.setattr(dart, "company_info", lambda *a: {"induty_code": "264", "stock_name": "케이",
+                                                          "corp_name_eng": "K Co., Ltd."})
+    doc = tmp_path / "d.xml"
+    doc.write_text("x")
+    monkeypatch.setattr(dart, "download_document", lambda *a: doc)
+    monkeypatch.setattr(passages, "build_passages", lambda *a: [type("Pa", (), {"text": "가" * 4000})()])
+    corp = dart.Corp("k", "케이산업", "000001")
+    _, row, _ = cli._take(P, None, "key", corp, "random", aliases=True)
+    assert row["self_aliases"] == ["케이", "K Co., Ltd."]
+    _, row, _ = cli._take(P, None, "key", corp, "random")
+    assert "self_aliases" not in row  # A-2 추첨 행은 그대로
