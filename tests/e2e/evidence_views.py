@@ -234,6 +234,8 @@ async def open_app(browser, base: str, fake: FakeApi, *, width=1280, height=900,
 
 
 async def turn_on(page, *, confirm=True):
+    # #ev-bar는 기능 확인(probe) 응답 뒤에 보인다. open_app의 고정 대기(600ms)만으로는 간헐적으로 모자랐다
+    await page.wait_for_selector("#ev-bar:not(.hidden)", timeout=10000)
     await page.click("#ev-mode")
     await page.wait_for_timeout(200)
     if confirm and await page.is_visible("#ev-notice"):
