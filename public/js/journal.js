@@ -24,6 +24,7 @@ const PAGE = 50;
 const ACTIVE = new Set(["pending", "running"]);
 const NO_JUDGE = { failed: "실패", limited: "한도 초과로 생략", skipped: "개인정보로 보여 생략" };
 const REPORT_STATES = new Set(["same", "replaced", "company_gone"]);
+const RULE_ROUTES = new Set(["lex_high", "lex_low"]);  // JEV를 부르지 않은 규칙 판정(evidence.js RULE_TOOLTIPS)
 const FIELD_NAMES = { decision: "내 판단", conviction: "내 확신", memo: "내 메모", relied_claims: "기댄 문장",
                       review_on: "다시 볼 날짜", run_id: "판정 기록" };
 
@@ -31,6 +32,7 @@ const MSG = {
   saveFail: "저장하지 못했습니다. 입력은 그대로 있습니다.",
   runGone: "원래 판정 기록을 찾을 수 없어 기록할 수 없습니다",
   notDone: "판정이 끝난 뒤 기록할 수 있습니다",
+  existsNoId: "이 판정에는 이미 기록이 있습니다. 판단 일지 목록을 새로고침해 확인해 주세요.",
   entryGone: "기록을 찾을 수 없습니다(지워졌을 수 있습니다).",
   empty: "아직 기록한 판단이 없습니다. 근거 모드 답변에서 판단 기록을 눌러 시작합니다.",
   emptyFiltered: "조건에 맞는 기록이 없습니다.",
@@ -90,6 +92,21 @@ export function snapshotHead(snap) {
   return `당시 판정 정책 ${r.policy_version || "-"} · ${kstDate(r.finished_at || r.created_at)} 판정`;
 }
 
+/** 기록에 남은 배지의 툴팁: 머리에 "당시"를 붙인다(spec 결정 4-1). 규칙 판정 문장은 "당시 규칙 판정"으로 써
+ *  뒤의 "규칙 판정(… JEV 호출 없음)"과 출처가 어긋나지 않게 한다. 나머지는 evidence.js badgeTitle 문구 그대로. */
+export function pastBadgeTitle(kind, claim, run) {
+  const head = RULE_ROUTES.has(claim?.route) ? "당시 규칙 판정" : "당시 AI 판정";
+  return `${head} — ${badgeTitle(kind, claim, run)}`;
+}
+
+/** 기록에 남은 배지(펼치기 없는 표시용). evidence.js 판정 중 배지처럼 role=img·aria-label. */
+function pastBadgeSpan(kind, claim, run) {
+  const mark = kind ? badgeMark(kind) : null;
+  if (!mark) return "";
+  const t = escHtml(pastBadgeTitle(kind, claim, run));
+  return ` <span class="ev-badge ${mark.cls}" role="img" aria-label="${t}" title="${t}">${mark.glyph}</span>`;
+}
+
 /** 입력 확인. 문제가 있으면 사용자에게 보일 문구, 없으면 null. */
 export function validateJudgment(v) {
   if (!DECISIONS.includes(v?.decision)) return "내 판단을 고르세요.";
@@ -103,9 +120,12 @@ export function validateJudgment(v) {
 export function changesModel(raw, snap) {
   const UN = { status: "unavailable" };
   if (!raw || raw.status !== "ok" || !raw.report || !REPORT_STATES.has(raw.report.status)
-      || !Array.isArray(raw.passages)) return UN;
+      || !Array.isArray(raw.passages) || !Array.isArray(snap?.passages)) return UN;
   for (const p of raw.passages) {
     if (!p || !Number.isInteger(p.passage_idx) || (p.status !== "same" && p.status !== "gone")) return UN;
+    // passage_idx는 스냅샷 문단 배열 위치다. 그 자리 문단의 본문 해시와 다르면 짝이 틀린 응답이라 믿지 않는다
+    const sha = snap.passages[p.passage_idx]?.sha256;
+    if (typeof sha !== "string" || sha !== p.sha256) return UN;
   }
   const rank = new Map();
   for (const c of [...(snap?.claims || [])].sort((a, b) => a.idx - b.idx)) {
@@ -169,42 +189,47 @@ function setDue(n) {
   banner.classList.toggle("hidden", !(n > 0));
 }
 
-/** 앱 시작 때 한 번: GET /api/journal?limit=1로 기능을 확인하고 탭·요약줄 버튼을 켠다. 결과(bool) 약속을 돌려준다. */
+/** 기능 확인: GET /api/journal?limit=1. 결과 "on" | "off"(404, 기능 꺼짐) | "error"(5xx·네트워크·모양 불일치).
+ *  on·off만 기억한다. error는 기억하지 않아 다음 진입 때 다시 묻는다 — 일시 오류로 사용자가 자기 기록을
+ *  지우거나 내보낼 수단을 잃지 않게(spec 결정 7-3). */
 export function initJournal() {
   jr.probe ??= (async () => {
     const { status, data } = await call("/api/journal?limit=1");
-    jr.enabled = status === 200 && isListShape(data);
+    const result = status === 200 && isListShape(data) ? "on" : status === 404 ? "off" : "error";
+    jr.enabled = result === "on";
     document.body.classList.toggle("jr-on", jr.enabled);
     if (jr.enabled) {
       setDue(data.due_count);
       setSummaryExtension(SUMMARY_EXT);
     }
-    return jr.enabled;
+    if (result === "error") jr.probe = null;
+    return result;
   })();
   return jr.probe;
 }
 
-/** 근거 모드를 쓸 수 있는가(같은 질문 다시 묻기 표시용). 일지를 열 때만 묻는다. */
+/** 근거 모드를 쓸 수 있는가(같은 질문 다시 묻기 표시용). 일지를 열 때만 묻는다. 200·404만 기억한다. */
 function evidenceAvailable() {
-  jr.evidence ??= call("/api/evidence/notice").then(r => r.status === 200);
+  jr.evidence ??= call("/api/evidence/notice").then(({ status }) => {
+    if (status !== 200 && status !== 404) jr.evidence = null;  // 일시 오류: 다음 상세 열기 때 다시 확인
+    return status === 200;
+  });
   return jr.evidence;
 }
 
 // ── 기록 양식(답변 아래·다시 보기 공용) ────────────────────────────
 let formSeq = 0;
 
-function reliedOptions(claims, runStatus) {
+function reliedOptions(claims, run) {
   const picks = (claims || []).filter(c => c.status !== "not_claim");
   if (!picks.length) return `<p class="jr-hint">고를 수 있는 문장이 없습니다.</p>`;
   return `<ul class="jr-relied-list">${picks.map(c => {
-    const kind = badgeKind(runStatus, c.status);
-    const mark = kind ? badgeMark(kind) : null;
-    const badge = mark ? ` <span class="ev-badge ${mark.cls}" title="${escHtml(`당시 AI 판정 — ${mark.label}`)}">${mark.glyph}</span>` : "";
+    const badge = pastBadgeSpan(badgeKind(run.status, c.status), c, run);
     return `<li><label><input type="checkbox" class="jr-relied" value="${c.idx}" /><span>${escHtml(c.text)}${badge}</span></label></li>`;
   }).join("")}</ul>`;
 }
 
-function formHtml(claims, runStatus) {
+function formHtml(claims, run) {
   const n = `jrf${++formSeq}`;
   return `<form class="jr-form" novalidate>
     <p class="jr-form-notice">${escHtml(JOURNAL_NOTICE)}</p>
@@ -212,7 +237,7 @@ function formHtml(claims, runStatus) {
       <div class="jr-opts">${DECISIONS.map(d => `<label class="jr-decision-opt"><input type="radio" class="jr-decision" name="${n}-d" value="${d}" />${escHtml(DECISION_LABELS[d])}</label>`).join("")}</div>
     </fieldset>
     <fieldset class="jr-field"><legend>기댄 문장<span class="jr-optional">선택 · 문장 옆은 당시 AI 판정</span></legend>
-      ${reliedOptions(claims, runStatus)}
+      ${reliedOptions(claims, run)}
     </fieldset>
     <label class="jr-field"><span class="jr-field-name">내 메모<span class="jr-optional">선택 · 어디로도 보내지 않습니다</span></span>
       <textarea class="jr-memo-input input" rows="3" maxlength="${MEMO_MAX}"></textarea>
@@ -248,11 +273,12 @@ function readForm(form) {
 }
 
 /** host 안에 양식을 그린다. submit(payload) → {msg?, lock?} 또는 null(성공: 호출자가 양식을 치운다). */
-function mountForm(host, { claims, runStatus, submit, cancel }) {
-  host.innerHTML = formHtml(claims, runStatus);
+function mountForm(host, { claims, run, submit, cancel }) {
+  host.innerHTML = formHtml(claims, run);
   const form = host.querySelector(".jr-form");
   const msgEl = form.querySelector(".jr-form-msg");
   const save = form.querySelector(".jr-save");
+  const cancelBtn = form.querySelector(".jr-cancel");
   const memo = form.querySelector("textarea.jr-memo-input");
   const count = form.querySelector(".jr-memo-count");
   memo.addEventListener("input", () => {
@@ -262,17 +288,18 @@ function mountForm(host, { claims, runStatus, submit, cancel }) {
   form.querySelectorAll(".jr-quick").forEach(b => b.addEventListener("click", () => {
     form.querySelector("input.jr-review").value = addMonths(todayKst(), Number(b.dataset.months));
   }));
-  form.querySelector(".jr-cancel").addEventListener("click", cancel);
+  cancelBtn.addEventListener("click", cancel);
   save.addEventListener("click", async () => {
     const v = readForm(form);
     const bad = validateJudgment(v);
     msgEl.textContent = bad || "";
     if (bad) return;
-    save.disabled = true;
+    save.disabled = cancelBtn.disabled = true;  // 저장 중에는 취소도 막는다(응답이 닫힌 양식에 오지 않게)
     const res = await submit(v);
     if (!res) return;
     msgEl.textContent = res.msg || "";
     save.disabled = !!res.lock;
+    cancelBtn.disabled = false;
   });
   form.querySelector("input.jr-decision")?.focus();
   return form;
@@ -325,7 +352,7 @@ function toggleRecordForm(msg) {
   const run = msg.run;
   msg.extraEl.dataset.runId = run.id;
   mountForm(msg.extraEl, {
-    claims: run.claims, runStatus: run.status,
+    claims: run.claims, run,
     cancel: () => closeRecordForm(msg),
     submit: async v => {
       const { status, data } = await call("/api/journal", { method: "POST", body: { run_id: run.id, ...v } });
@@ -343,6 +370,10 @@ function toggleRecordForm(msg) {
         patchRun(msg, { journal_entry_id: data.entry_id });
         setToast("이 판정에는 이미 기록이 있습니다 · 일지에서 보기");
         return null;
+      }
+      if (status === 409 && data && Object.hasOwn(data, "entry_id")) {
+        // 기록이 먼저 저장됐는데 id를 못 받았다(동시 저장). 실행이 사라진 것이 아니므로 잠그지 않는다
+        return { msg: MSG.existsNoId };
       }
       if (status === 409 && String(data?.detail ?? "").includes("판정이 끝난 뒤")) return { msg: MSG.notDone };
       if (status === 409) return { msg: MSG.runGone, lock: true };
@@ -430,11 +461,10 @@ function showList() {
 function updateHtml(u, snap) {
   const claims = new Map((snap.claims || []).map(c => [c.idx, c]));
   const relied = (u.relied_claims || []).map(i => claims.get(i)).filter(Boolean);
+  const run = snapshotRun(snap);
   const reliedHtml = relied.length
     ? `<div class="jr-relied"><span class="jr-src">기댄 문장</span><ul>${relied.map(c => {
-        const kind = badgeKind(snap.run?.status, c.status);
-        const mark = kind ? badgeMark(kind) : null;
-        return `<li>${escHtml(c.text)}${mark ? ` <span class="ev-badge ${mark.cls}" title="${escHtml(`당시 AI 판정 — ${mark.label}`)}">${mark.glyph}</span>` : ""}</li>`;
+        return `<li>${escHtml(c.text)}${pastBadgeSpan(badgeKind(run.status, c.status), c, run)}</li>`;
       }).join("")}</ul></div>`
     : "";
   return `<li class="jr-update">
@@ -459,7 +489,7 @@ function snapshotAnswerHtml(snap) {
     const span = `<span class="ev-claim${muted}" data-idx="${seg.claim.idx}">${escHtml(seg.text)}</span>`;
     if (!kind) return span;
     const m = badgeMark(kind);
-    const title = escHtml(`당시 AI 판정 — ${badgeTitle(kind, seg.claim, run)}`);
+    const title = escHtml(pastBadgeTitle(kind, seg.claim, run));
     return `${span}<button type="button" class="ev-badge ${m.cls}" data-idx="${seg.claim.idx}" data-kind="${kind}"
       aria-expanded="false" aria-label="${title}" title="${title}">${m.glyph}</button>`;
   }).join("");
@@ -566,7 +596,7 @@ function toggleRevisit() {
   const d = jr.detail;
   const id = d.id;
   mountForm(host, {
-    claims: d.snapshot.claims, runStatus: d.snapshot.run?.status,
+    claims: d.snapshot.claims, run: snapshotRun(d.snapshot),
     cancel: () => { host.innerHTML = ""; },
     submit: async v => {
       const { status, data } = await call(`/api/journal/${encodeURIComponent(id)}/updates`, { method: "POST", body: v });
@@ -726,6 +756,20 @@ function wire() {
   });
 }
 
+/** 기능 확인이 일시 오류로 끝났을 때: 꺼짐으로 보지 않고 다시 시도를 안내한다. */
+function showProbeError() {
+  const view = document.querySelector('.view[data-view="journal"]');
+  view.querySelector(".jr-card").classList.add("hidden");
+  if ($("jr-probe-error")) return;
+  const box = document.createElement("div");
+  box.id = "jr-probe-error";
+  box.className = "card jr-empty";
+  box.innerHTML = `<p>지금은 판단 일지를 확인할 수 없습니다(일시 오류). 잠시 뒤 다시 시도해 주세요.</p>
+    <button id="jr-retry" type="button" class="btn-secondary text-xs">다시 시도</button>`;
+  view.prepend(box);
+  $("jr-retry").addEventListener("click", () => onJournalViewActivated());
+}
+
 /** 요약줄 '기록됨' 링크에서: 일지 탭으로 옮겨 그 기록을 연다. */
 function openEntry(id) {
   if (!id) return;
@@ -735,8 +779,11 @@ function openEntry(id) {
 
 /** 일지 탭이 열릴 때마다. 기능이 꺼져 있으면 상담 화면으로 돌린다(탭 없음, spec 3.2). */
 export async function onJournalViewActivated() {
-  const ok = await initJournal();
-  if (!ok) { navigate("agent-chat"); return; }
+  const state = await initJournal();
+  if (state === "off") { navigate("agent-chat"); return; }
+  if (state === "error") { showProbeError(); return; }
+  $("jr-probe-error")?.remove();
+  document.querySelector('.view[data-view="journal"] .jr-card').classList.remove("hidden");
   if (!jr.wired) wire();
   const pending = jr.pendingOpen;
   jr.pendingOpen = null;

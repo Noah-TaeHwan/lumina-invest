@@ -33,6 +33,9 @@ Q2 = "SK하이닉스의 2025년 사업부문별 매출 구성과 주요 고객�
 CLAIM_KEYS = ("idx", "text", "start", "end", "status", "route", "reason", "source_idx", "number_ok", "confidence")
 # 가격·수익률·성과 표시가 없어야 한다(결정 4-1·4-3)
 FORBIDDEN_WORDS = ("수익률", "적중", "주가", "근거 점수", "신뢰도 합계")
+# 스냅샷 문단마다 다른 본문 해시(변화 응답의 sha256을 스냅샷과 맞춰 본다)
+JR_PASSAGES = [{**p, "sha256": f"{i + 1:064x}"} for i, p in enumerate(ev.PASSAGES)]
+TIP = "검색된 공시 문단 기준이며 사실 여부를 보증하지 않습니다"  # spec 4-1 그대로
 
 
 def today_kst() -> datetime.date:
@@ -49,7 +52,7 @@ def snapshot(status="done", statuses=None, extra=None, *, policy="a2-v1", compan
                     "finished_at": created},
             "company": company, "corp_code": corp, "rcept_no": "20260312000123", "question": question,
             "answer": ev.ANSWER, "claims": [{k: c[k] for k in CLAIM_KEYS} for c in r["claims"]],
-            "passages": ev.PASSAGES}
+            "passages": JR_PASSAGES}
 
 
 def upd(uid, kind, decision, conviction, memo="", relied=None, review_on=None, created="2026-10-03T16:30:00+00:00"):
@@ -93,16 +96,23 @@ def changes_ok():
     return {"status": "ok",
             "report": {"status": "replaced", "snapshot_rcept_no": "20260312000123",
                        "current_rcept_nos": ["20260315000999"]},
-            "passages": [{"passage_idx": i, "passage_id": f"p{i}", "sha256": "x" * 8,
+            "passages": [{"passage_idx": i, "passage_id": f"p{i}", "sha256": JR_PASSAGES[i]["sha256"],
                           "status": "gone" if i == 1 else "same"} for i in range(8)],
             "policy": {"snapshot": "a2-provisional-2", "current": "a2-v1"}}
+
+
+def changes_bad_sha():
+    """passage_idx 3의 해시가 스냅샷과 어긋난 응답: 짝이 틀렸으니 확인 불가여야 한다."""
+    c = changes_ok()
+    c["passages"][3]["sha256"] = "f" * 64
+    return c
 
 
 CHANGES_SAME = {"status": "ok",
                 "report": {"status": "same", "snapshot_rcept_no": "20260312000123",
                            "current_rcept_nos": ["20260312000123"]},
-                "passages": [{"passage_idx": i, "passage_id": f"p{i}", "sha256": "x" * 8, "status": "same"}
-                             for i in range(8)],
+                "passages": [{"passage_idx": i, "passage_id": f"p{i}", "sha256": JR_PASSAGES[i]["sha256"],
+                              "status": "same"} for i in range(8)],
                 "policy": {"snapshot": "a2-v1", "current": "a2-v1"}}
 
 
@@ -110,8 +120,10 @@ class JournalApi(ev.FakeApi):
     """판정 가짜 API(evidence_views.FakeApi)에 일지 경로를 더한다. 일지 경로가 먼저다."""
 
     def __init__(self, *, journal=200, entries=None, create=None, changes=None, changes_delay_s=0.0,
-                 update_status=201, **kw):
+                 update_status=201, journal_seq=None, create_delay_s=0.0, **kw):
         super().__init__(**kw)
+        self.journal_seq = list(journal_seq or [])  # GET /api/journal 응답 상태를 차례로(빈 뒤로는 정상)
+        self.create_delay_s = create_delay_s
         self.journal = journal
         self.entries = dict(entries if entries is not None else fixtures())
         self.create = create or (201, None)
@@ -130,6 +142,10 @@ class JournalApi(ev.FakeApi):
         today = today_kst()
         if path == "/api/journal" and method == "GET":
             self.queries.append(q)
+            if self.journal_seq:
+                st = self.journal_seq.pop(0)
+                if st != 200:
+                    return st, {"detail": "일시 오류"}
             items = [list_item(e, today) for e in sorted(self.entries.values(), key=lambda e: e["created_at"],
                                                           reverse=True)]
             due_count = sum(i["due"] for i in items)
@@ -211,6 +227,8 @@ async def open_app(browser, base, fake: JournalApi, *, hash_="agent-chat", width
                 body = None
         if re.fullmatch(r"/api/journal/[^/]+/changes", path) and fake.changes_delay_s:
             await asyncio.sleep(fake.changes_delay_s)
+        if path == "/api/journal" and route.request.method == "POST" and fake.create_delay_s:
+            await asyncio.sleep(fake.create_delay_s)
         if path == "/api/evidence/chat" and fake.chat_delay_s:
             await asyncio.sleep(fake.chat_delay_s)
         status, payload = fake.respond(route.request.method, path, query, body)
@@ -269,9 +287,23 @@ async def s_pure(browser, base, ck):
                  m.changesModel({status:'ok', report:{status:'same', current_rcept_nos:[]}, passages:[{passage_idx:0,status:'odd'}]})
                 ].map(x => x.status),
         order: m.changesModel({status:'ok', report:{status:'same', snapshot_rcept_no:'1', current_rcept_nos:['1']},
-                 passages:[0,1,2,3].map(i => ({passage_idx:i, status:'same'})), policy:{snapshot:'a', current:'a'}},
+                 passages:[0,1,2,3].map(i => ({passage_idx:i, sha256:'h'+i, status:'same'})), policy:{snapshot:'a', current:'a'}},
                 {claims:[{idx:0,status:'no_evidence',source_idx:0},{idx:1,status:'supported',source_idx:3},
-                         {idx:2,status:'contradicted',source_idx:2}], passages:[{},{},{},{}]}).passages.map(p => p.passage_idx),
+                         {idx:2,status:'contradicted',source_idx:2}],
+                 passages:[0,1,2,3].map(i => ({sha256:'h'+i}))}).passages.map(p => p.passage_idx),
+        sha: (() => {
+          const snap = {claims: [], passages: [{sha256:'a'}, {sha256:'b'}]};
+          const mk = ps => ({status:'ok', report:{status:'same', snapshot_rcept_no:'1', current_rcept_nos:['1']}, passages: ps});
+          return [mk([{passage_idx:0, sha256:'a', status:'same'}, {passage_idx:1, sha256:'b', status:'gone'}]),
+                  mk([{passage_idx:0, sha256:'b', status:'same'}]),            // 짝이 바뀐 해시
+                  mk([{passage_idx:0, status:'same'}]),                        // 해시 없음
+                  mk([{passage_idx:5, sha256:'a', status:'same'}]),            // 범위 밖
+                 ].map(r => m.changesModel(r, snap).status)
+                 .concat([m.changesModel(mk([{passage_idx:0, sha256:'a', status:'same'}]), null).status]);
+        })(),
+        tips: [m.pastBadgeTitle('supported', {status:'supported', route:'jev', confidence:'높음'}, {policy_version:'a2-v1'}),
+               m.pastBadgeTitle('supported', {status:'supported', route:'lex_high'}, {policy_version:'a2-v1'}),
+               m.pastBadgeTitle('no_evidence', {status:'no_evidence', route:'lex_low'}, {policy_version:'a2-v1'})],
         trunc: m.truncate('가'.repeat(45), 40),
         validate: [m.validateJudgment({}), m.validateJudgment({decision:'watch'}),
                    m.validateJudgment({decision:'watch', conviction:3, memo:'x'.repeat(2001)}),
@@ -291,6 +323,14 @@ async def s_pure(browser, base, ck):
     ck.ok(res["head"] == "당시 판정 정책 a2-v1 · 2026-10-04 판정", f"pure: 스냅샷 머리 {res['head']}")
     ck.ok(res["ch_bad"] == ["unavailable"] * 6, f"pure: 모양이 어긋난 변화 응답은 확인 불가(변화 없음 아님) {res['ch_bad']}")
     ck.ok(res["order"] == [3, 2, 0, 1], f"pure: ✅·⚠️ 근거 문단을 맨 위에 {res['order']}")
+    ck.ok(res["sha"] == ["ok", "unavailable", "unavailable", "unavailable", "unavailable"],
+          f"pure: 변화 응답 문단 해시가 스냅샷 같은 위치 문단과 다르면 확인 불가 {res['sha']}")
+    t_jev, t_hi, t_lo = res["tips"]
+    ck.ok(t_jev.startswith("당시 AI 판정 — ") and "AI 판정(JEV 모델)" in t_jev and TIP in t_jev,
+          f"pure: JEV 배지 툴팁은 당시 AI 판정 {t_jev}")
+    ck.ok(all(t.startswith("당시 규칙 판정 — ") and "규칙 판정(" in t and "JEV 호출 없음" in t and TIP in t
+              and "AI 판정" not in t for t in (t_hi, t_lo)),
+          f"pure: 규칙 판정 배지 툴팁은 출처가 앞뒤로 같다 {t_hi} / {t_lo}")
     ck.ok(res["trunc"] == "가" * 40 + "…", "pure: 질문 앞 40자")
     v = res["validate"]
     ck.ok(v[0] and "내 판단" in v[0] and v[1] and "내 확신" in v[1] and v[2] and "2,000" in v[2] and v[3] is None,
@@ -325,6 +365,77 @@ async def s_flag_off(browser, base, ck):
     fake.respond = lambda m, p, q, b: (200, {}) if p == "/api/journal" else fake.respond_orig(m, p, q, b)
     ctx, page = await open_app(browser, base, fake)
     ck.ok(not await page.is_visible('.lnb-item[data-view="journal"]'), "flag-off: 모양이 다른 200 응답은 꺼짐으로 본다")
+    await ctx.close()
+
+
+async def s_probe_retry(browser, base, ck):
+    print("[probe-retry] 기능 확인 5xx·네트워크 오류는 꺼짐으로 굳히지 않고 다음 진입 때 다시 확인한다")
+    fake = JournalApi(journal_seq=[500])
+    ctx, page = await open_app(browser, base, fake)
+    ck.ok(not await page.is_visible('.lnb-item[data-view="journal"]'), "probe-retry: 첫 확인 500이면 탭은 아직 없다")
+    await page.evaluate("location.hash = 'journal'")
+    await page.wait_for_selector("#jr-list .jr-row")
+    ck.ok(await page.locator(".view.active").get_attribute("data-view") == "journal",
+          "probe-retry: 다시 들어오면 다시 확인해 일지를 연다")
+    ck.ok(await page.is_visible('.lnb-item[data-view="journal"]'), "probe-retry: 확인되면 탭이 보인다")
+    ck.ok(not page.errors, f"probe-retry: JS 오류 없음 {page.errors}")
+    await ctx.close()
+
+    # 네트워크 오류: 첫 GET /api/journal을 끊는다
+    srv_fake = JournalApi()
+    ctx2 = await browser.new_context(viewport={"width": 1280, "height": 900})
+    ctx2.set_default_timeout(WAIT_MS)
+    page = await ctx2.new_page()
+    page.errors = []
+    page.on("pageerror", lambda e: page.errors.append(str(e)))
+    cut = {"n": 0}
+
+    async def handle(route):
+        url = route.request.url
+        if not url.startswith(base):
+            return await route.abort()
+        path, _, query = url[len(base):].partition("?")
+        if not path.startswith("/api/"):
+            return await route.continue_()
+        if path == "/api/journal" and route.request.method == "GET" and cut["n"] == 0:
+            cut["n"] += 1
+            return await route.abort()
+        status, payload = srv_fake.respond(route.request.method, path, query, None)
+        await route.fulfill(status=status, content_type="application/json", body=json.dumps(payload))
+
+    await page.route("**/*", handle)
+    await page.goto(f"{base}/app.html#journal")
+    await page.wait_for_selector("#jr-retry")
+    ck.ok("다시" in await page.locator('.view[data-view="journal"]').inner_text()
+          and await page.locator(".view.active").get_attribute("data-view") == "journal",
+          "probe-retry: 네트워크 오류면 상담 화면으로 돌리지 않고 다시 시도 안내")
+    await page.click("#jr-retry")
+    await page.wait_for_selector("#jr-list .jr-row")
+    ck.ok(True, "probe-retry: 다시 시도로 일지를 연다")
+    ck.ok(not page.errors, f"probe-retry: JS 오류 없음 {page.errors}")
+    await ctx2.close()
+
+    print("[probe-404-cached] 404는 꺼짐으로 굳힌다(다시 묻지 않는다)")
+    fake = JournalApi(journal=404)
+    ctx, page = await open_app(browser, base, fake)
+    await page.evaluate("location.hash = 'journal'")
+    await page.wait_for_function("document.querySelector('.view.active')?.dataset.view === 'agent-chat' && location.hash !== '#journal'")
+    await page.wait_for_timeout(200)
+    ck.ok(len(fake.journal_calls()) == 1, f"probe-404-cached: 404 뒤로는 다시 묻지 않는다 {len(fake.journal_calls())}")
+    await ctx.close()
+
+    print("[evidence-retry] 근거 모드 확인 5xx는 굳히지 않는다(다음 상세 열기 때 다시 확인)")
+    fake = JournalApi(notice_status=500, changes={"e1": (200, CHANGES_SAME)})
+    ctx, page = await open_app(browser, base, fake, hash_="journal")
+    await page.click('#jr-list .jr-row[data-id="e1"]')
+    await page.wait_for_function("!document.querySelector('#jr-detail .jr-col-changes').innerText.includes('확인하는 중')")
+    ck.ok(await page.locator("#jr-detail .jr-reask").count() == 0, "evidence-retry: 확인 실패면 다시 묻기 숨김")
+    fake.notice_status = 200
+    await page.click("#jr-back")
+    await page.click('#jr-list .jr-row[data-id="e1"]')
+    await page.wait_for_selector("#jr-detail .jr-actions .jr-reask")
+    ck.ok(fake.n("GET", "/api/evidence/notice") == 2, f"evidence-retry: 다시 확인 {fake.n('GET', '/api/evidence/notice')}")
+    ck.ok(not page.errors, f"evidence-retry: JS 오류 없음 {page.errors}")
     await ctx.close()
 
 
@@ -387,6 +498,10 @@ async def s_form(browser, base, ck):
     ck.ok(relied == [0, 1, 2, 4], f"form: 기댄 문장 후보(비주장 제외) {relied}")
     rb = [t.strip() for t in await form.locator(".jr-relied-list .ev-badge").all_inner_texts()]
     ck.ok(rb == ["✅", "✅", "⚠️", "❔"], f"form: 문장 옆 당시 배지 {rb}")
+    attrs = await form.locator(".jr-relied-list .ev-badge").evaluate_all(
+        "els => els.map(e => [e.getAttribute('role'), e.getAttribute('aria-label'), e.title])")
+    ck.ok(all(r == "img" and a == t and t.startswith("당시 AI 판정 — ") and TIP in t for r, a, t in attrs),
+          f"form: 기댄 문장 배지는 role=img·aria-label·spec 4-1 문구 {attrs[:1]}")
     ck.ok("확신도" not in await form.locator(".jr-conviction-row").inner_text(),
           "form: 내 확신 줄에 AI 판정 확신도를 두지 않는다")
     for w in FORBIDDEN_WORDS:
@@ -412,7 +527,11 @@ async def s_form(browser, base, ck):
     want1 = await page.evaluate("async () => { const m = await import('/js/journal.js'); return m.addMonths(m.todayKst(), 1); }")
     ck.ok(await form.locator("input.jr-review").input_value() == want1, "form: 1개월 뒤 빠른 선택")
     ext0, calls0 = len(page.external), len(fake.calls)
+    fake.create_delay_s = 0.8
     await form.locator(".jr-save").click()
+    await page.wait_for_timeout(200)
+    ck.ok(await form.locator(".jr-save").is_disabled() and await form.locator(".jr-cancel").is_disabled(),
+          "form: 저장 중에는 저장·취소 모두 비활성")
     await page.wait_for_selector(".ev-msg .ev-journal-link")
     body = fake.bodies("POST", "/api/journal")[0]
     ck.ok(body == {"run_id": "r1", "decision": "watch", "conviction": 3, "memo": "고객 집중이 걱정된다",
@@ -449,7 +568,8 @@ async def s_form_errors(browser, base, ck):
           "form-500: 저장 실패 문구")
     ck.ok(await form.locator("textarea.jr-memo-input").input_value() == "남겨야 할 메모"
           and await form.locator('input.jr-decision[value="exclude"]').is_checked(), "form-500: 입력 그대로")
-    ck.ok(await form.locator(".jr-save").is_enabled(), "form-500: 다시 저장할 수 있다")
+    ck.ok(await form.locator(".jr-save").is_enabled() and await form.locator(".jr-cancel").is_enabled(),
+          "form-500: 다시 저장·취소할 수 있다")
     await ctx.close()
 
     print("[form-network] 네트워크 오류도 같은 문구")
@@ -482,6 +602,14 @@ async def s_form_errors(browser, base, ck):
     ck.ok((await page.locator(".ev-msg .ev-journal-link").inner_text()).strip() == "기록됨 · 일지에서 보기",
           "form-409-exists: 기존 기록으로 링크")
     ck.ok(await page.locator(".ev-msg .jr-form").count() == 0, "form-409-exists: 양식을 닫는다")
+    await ctx.close()
+
+    print("[form-409-null] 이미 기록 있음(entry_id 없음) → 잠그지 않고 목록 새로고침 안내")
+    ctx, page, fake, form = await _form_error(browser, base, ck, "form-409-null", 409,
+                                              {"detail": "이 판정에는 이미 기록이 있습니다.", "entry_id": None})
+    m = (await form.locator(".jr-form-msg").inner_text()).strip()
+    ck.ok("이미" in m and "새로고침" in m and "찾을 수 없어" not in m, f"form-409-null: 안내 {m}")
+    ck.ok(await form.locator(".jr-save").is_enabled(), "form-409-null: 저장 버튼을 잠그지 않는다")
     await ctx.close()
 
     print("[form-422] 검증 오류: 칸 이름만 안내, 입력 유지")
@@ -595,6 +723,10 @@ async def s_detail(browser, base, ck):
     ck.ok("처음 판단" in u0 and "매수 검토" in u0 and "내 확신 4" in u0, f"detail: 처음 판단 {u0}")
     ck.ok("<script>x</script>" in u0, "detail: 메모는 이스케이프해 그대로")
     ck.ok("📈 삼성전자의 주요 제품은 메모리 반도체입니다." in u0 and "2025년 DX 부문" in u0, "detail: 기댄 문장 본문")
+    ja = await page.locator("#jr-detail .jr-col-judgment .ev-badge").evaluate_all(
+        "els => els.map(e => [e.getAttribute('role'), e.getAttribute('aria-label'), e.title])")
+    ck.ok(len(ja) == 2 and all(r == "img" and a == t and t.startswith("당시 AI 판정 — ") and TIP in t for r, a, t in ja),
+          f"detail: 판단 칸 기댄 문장 배지 role=img·aria-label·spec 4-1 문구 {ja[:1]}")
     u1 = await ups.nth(1).inner_text()
     ck.ok("다시 보기" in u1 and "관망" in u1, f"detail: 다시 보기 줄이 시간순 아래 {u1}")
     ck.ok("확신도" not in j, "detail: 내 확신 칸에 AI 판정 확신도를 섞지 않는다")
@@ -652,7 +784,8 @@ async def s_detail(browser, base, ck):
 
     print("[detail-nojudge] 판정 없이 기록·원 대화 삭제됨·변화 확인 불가")
     for label, resp in (("unavailable", (200, {"status": "unavailable"})), ("404", (404, {"detail": "Not Found"})),
-                        ("500", (500, {"detail": "err"})), ("malformed", (200, {"status": "ok"}))):
+                        ("500", (500, {"detail": "err"})), ("malformed", (200, {"status": "ok"})),
+                        ("sha-mismatch", (200, changes_bad_sha()))):
         fake = JournalApi(flag=404, changes={"e2": resp})
         ctx, page = await open_app(browser, base, fake, hash_="journal")
         await page.click('#jr-list .jr-row[data-id="e2"]')
@@ -824,7 +957,7 @@ async def main() -> int:
     ck = ev.Checks()
     async with async_playwright() as p:
         browser = await p.chromium.launch(executable_path=ev._chromium())
-        for scenario in (s_pure, s_flag_off, s_button, s_form, s_form_errors, s_list, s_detail, s_revisit,
+        for scenario in (s_pure, s_flag_off, s_probe_retry, s_button, s_form, s_form_errors, s_list, s_detail, s_revisit,
                          s_delete_export, s_mobile):
             try:
                 await scenario(browser, base, ck)
