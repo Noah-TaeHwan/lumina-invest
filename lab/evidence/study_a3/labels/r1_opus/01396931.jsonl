@@ -1,0 +1,40 @@
+{"lid": "d7c8b30001", "label": "supported", "passage": 6, "reason": "문단 6이 유엑스엔 AGMS를 효소 대신 나노다공성 백금을 쓴 세계 최초 제품이라고 명시"}
+{"lid": "5cdbbf6b6e", "label": "supported", "passage": 5, "reason": "문단 5가 당사가 무효소 연속혈당측정기 AGMS를 개발하고 있다고 명시"}
+{"lid": "c0793a70d8", "label": "supported", "passage": 6, "reason": "문단 6에 같은 문장이 있음"}
+{"lid": "bea4812621", "label": "no_evidence", "passage": null, "reason": "문단에 아이센스가 나오지 않음(AGMS는 유엑스엔 제품으로만 서술), 주체가 달라 지지도 반박도 아님"}
+{"lid": "783d6da4f0", "label": "contradicted", "passage": 4, "reason": "문단 4는 AGMS가 4개 구성품의 시스템이고 탐침을 삽입·부착하는 장치는 구성품인 삽입기라고 함, AGMS 자체를 그 장치로 서술한 것과 다름"}
+{"lid": "c8e03fc347", "label": "supported", "passage": 6, "reason": "문단 6이 유엑스엔 AGMS를 효소 대신 나노다공성 백금을 쓴 세계 최초 제품이라고 명시"}
+{"lid": "8f7de709b0", "label": "supported", "passage": 6, "reason": "문단 6이 나노다공성 백금을 사용한 세계 최초의 제품이라고 명시(기술·제품 표현 차이만 있음)"}
+{"lid": "9f3a61570b", "label": "supported", "passage": 6, "reason": "문단 6에 센서 기판 제조 라인도 내재화하였다고 명시"}
+{"lid": "94214f7574", "label": "supported", "passage": 6, "reason": "문단 6에 센서 기판 제조 라인도 내재화하였다고 명시"}
+{"lid": "7ce4245db4", "label": "supported", "passage": 4, "reason": "문단 4 주요 제품 표가 AGMS를 센서·트랜스미터·삽입기·앱으로 구성된다고 명시"}
+{"lid": "c2750c0023", "label": "no_evidence", "passage": null, "reason": "배터리 팩 제조 라인에 대한 언급이 어느 문단에도 없음"}
+{"lid": "be4562295b", "label": "supported", "passage": 6, "reason": "문단 6이 A2 모델 시제품 개발을 마무리하고 확증 임상 승인을 기다린다고 명시"}
+{"lid": "4baff75525", "label": "supported", "passage": 6, "reason": "문단 6에 같은 문장이 있음"}
+{"lid": "f400d6419a", "label": "non_claim", "passage": null, "reason": "제공 문단에 정보가 없다는 메타 진술로 회사에 대한 사실 주장이 아님"}
+{"lid": "62dc8db54a", "label": "supported", "passage": 7, "reason": "문단 7이 무효소식 연속혈당측정기 AGMS를 센서·트랜스미터·삽입기·앱으로 구성된다고 명시"}
+{"lid": "e23c256c78", "label": "supported", "passage": 7, "reason": "문단 7이 AGMS를 센서·트랜스미터·삽입기·앱으로 구성된다고 명시"}
+{"lid": "10bfd2e931", "label": "no_evidence", "passage": null, "reason": "프리스타일 리브레는 어느 문단에도 나오지 않음"}
+{"lid": "50a81cec47", "label": "supported", "passage": 7, "reason": "문단 7 표에 해외 판권 우선 협상권 계약이 중국 제외, 인허가 후 3개월 우선협상 기간이라고 명시"}
+{"lid": "5799d588a7", "label": "supported", "passage": 7, "reason": "문단 7 표에 해외 판권 우선 협상권 계약이 중국 제외, 인허가 후 3개월 우선협상 기간이라고 명시"}
+{"lid": "9ead847a9a", "label": "non_claim", "passage": null, "reason": "정보를 찾을 수 없어 답할 수 없다는 면책 문장"}
+{"lid": "35903e884e", "label": "non_claim", "passage": null, "reason": "제공 문단에 정보가 없다는 메타 진술"}
+{"lid": "dda3a51a2e", "label": "non_claim", "passage": null, "reason": "제공 문단의 내용을 요약한 메타 진술로 회사에 대한 사실 주장이 아님"}
+{"lid": "0859719136", "label": "no_evidence", "passage": null, "reason": "문단 7은 계약 상대방을 밝히지 않으며 한독은 어느 문단에도 없음"}
+{"lid": "afc3f16957", "label": "non_claim", "passage": null, "reason": "값이 없는 표 머리 조각으로 사실 주장이 아님"}
+{"lid": "0e355b2f27", "label": "contradicted", "passage": 5, "reason": "문단 5는 전류 신호를 앱으로 보내는 피부 패치형 무선 장치를 트랜스미터로, 삽입기는 센서 탐침을 삽입·부착하는 장치로 설명"}
+{"lid": "38059d771e", "label": "supported", "passage": 5, "reason": "문단 5가 트랜스미터를 전류 신호를 측정해 앱으로 전송하는 피부 패치형 소형 무선 장치로 설명"}
+{"lid": "a5d5b5af2c", "label": "non_claim", "passage": null, "reason": "값이 없는 표 머리 조각으로 사실 주장이 아님"}
+{"lid": "b962226ee1", "label": "non_claim", "passage": null, "reason": "값이 없는 표 머리 조각으로 사실 주장이 아님"}
+{"lid": "d3fe65619a", "label": "no_evidence", "passage": null, "reason": "파생상품 거래 여부를 말하는 문단이 없음, 언급 부재로부터의 추론"}
+{"lid": "4c74164511", "label": "supported", "passage": 5, "reason": "문단 5가 트랜스미터를 전류 신호를 측정해 앱으로 전송하는 피부 패치형 소형 무선 장치로 설명"}
+{"lid": "7f3031a530", "label": "non_claim", "passage": null, "reason": "내용 없는 도입 문장으로 사실 주장이 아님"}
+{"lid": "306cede0f5", "label": "supported", "passage": 5, "reason": "문단 5 연구개발실적 표에 용역연구개발 과제로 무효소식 연속 혈당 측정 시스템 개발이 있음"}
+{"lid": "18bcd9d793", "label": "supported", "passage": 4, "reason": "문단 4가 나노다공성 백금 제조·무효소 글루코스 센서 2대 원천기술로 무효소 연속혈당측정기를 개발 중이라고 명시"}
+{"lid": "586fa4b562", "label": "supported", "passage": 5, "reason": "문단 5 표에 같은 내용이 있음"}
+{"lid": "806d381208", "label": "non_claim", "passage": null, "reason": "내용 없는 도입 문장으로 사실 주장이 아님"}
+{"lid": "7dfc1d7487", "label": "supported", "passage": 5, "reason": "문단 5 표에 창업도약 패키지 지원사업, 혁신형 기술개발사업과 도금 원천 기술 개발 결과가 있음"}
+{"lid": "67a76ab7ce", "label": "supported", "passage": 4, "reason": "문단 4가 2대 원천 핵심기술을 바탕으로 AGMS를 개발 중이라고 명시"}
+{"lid": "10aed848f6", "label": "no_evidence", "passage": null, "reason": "바디텍메드는 어느 문단에도 나오지 않음"}
+{"lid": "c90bf80933", "label": "supported", "passage": 5, "reason": "문단 5 표에 같은 연구결과가 있음"}
+{"lid": "dc148b5411", "label": "supported", "passage": 5, "reason": "문단 5 표에 연구기관 A社가 있음"}

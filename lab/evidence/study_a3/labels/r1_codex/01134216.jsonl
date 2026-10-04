@@ -1,0 +1,37 @@
+{"lid": "c56e258553", "label": "supported", "passage": 4, "reason": "문단 4가 조달사업 부문의 관공서 중심 고객과 공공 방범 조달시장용 제품 개발·공급을 명시한다."}
+{"lid": "5f1d7ec7e7", "label": "no_evidence", "passage": null, "reason": "문단 4의 설명은 조달사업 부문에 관한 것이며 렌탈사업 부문의 고객과 제품은 제시되지 않는다."}
+{"lid": "1ca08bceef", "label": "supported", "passage": 7, "reason": "문단 7이 공공기관·공기업 SI 사업 참여와 사업에 적합한 모델 제안을 뒷받침하며 잘린 끝부분에 추가로 완결된 사실은 없다."}
+{"lid": "04f9865c71", "label": "supported", "passage": 4, "reason": "문단 4가 고객지향 판매 전략과 개발·판매·운영 과정에서의 고객 요구 및 피드백 반영을 모두 명시한다."}
+{"lid": "60d49c5034", "label": "supported", "passage": 1, "reason": "문단 1이 하드웨어·펌웨어 기술 보유와 SoC·센서·렌즈를 최적으로 설계하여 경쟁사보다 빠르게 신제품을 개발하는 역량을 명시한다."}
+{"lid": "bd4262a069", "label": "supported", "passage": 1, "reason": "문단 1이 베이비 모니터링 카메라의 해킹 안전성 평가, 호흡 모니터링 특허 및 온도·습도 기능 적용을 모두 명시한다."}
+{"lid": "029ceb0ee6", "label": "supported", "passage": 1, "reason": "문단 1이 설립 이후 IP 기반 영상감시시스템 분야에서 축적한 기술과 관련 제품 개발을 설명한다."}
+{"lid": "ef7108febc", "label": "supported", "passage": 4, "reason": "문단 4가 조달사업 부문의 관공서 중심 고객과 공공 방범 조달시장용 제품 개발·공급을 명시한다."}
+{"lid": "67954f9185", "label": "no_evidence", "passage": null, "reason": "문단 6의 판매경로 표에 해당 품목들은 있으나 이들을 IoT 브랜드 제품군으로 규정하지 않는다."}
+{"lid": "3808215a83", "label": "supported", "passage": 3, "reason": "문단 3이 EGLOO IoT 기기·모바일 앱·클라우드 서비스를 모두 자체 개발하고 직접 운영한다고 명시한다."}
+{"lid": "17b01e4784", "label": "no_evidence", "passage": null, "reason": "자체 개발·운영이 명시된 브랜드는 EGLOO이며 헤이홈 솔루션에 대한 근거는 없다."}
+{"lid": "5cb8af9a67", "label": "no_evidence", "passage": null, "reason": "문단 1의 영상 저장·스트리밍과 다른 문단의 보안 설명을 합쳐야 하며 세 용도를 모두 지지하는 단일 문단은 없다."}
+{"lid": "3ff3fda482", "label": "supported", "passage": 3, "reason": "문단 3이 트루엔의 EGLOO IoT 기기·모바일 앱·클라우드 서비스 자체 개발 및 직접 운영을 명시한다."}
+{"lid": "12c7c1c178", "label": "supported", "passage": 7, "reason": "문단 7이 한국정보통신기술협회인 TTA의 국내 공공보안 성능·보안 인증 제정에 적극 참여했다고 명시한다."}
+{"lid": "19f73cde1d", "label": "non_claim", "passage": null, "reason": "뒤따를 매출 금액·비중의 제시를 안내할 뿐 구체적인 사실값을 주장하지 않는 도입 문장이다."}
+{"lid": "654c349730", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 IP 카메라 매출 1,143억 원이나 전년 대비 증가율 12.6%가 없다."}
+{"lid": "fbba62e14c", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 IP 카메라 매출 비중 93.1%나 전년 대비 1.1%p 증가가 없다."}
+{"lid": "36e63087e1", "label": "supported", "passage": 7, "reason": "문단 7이 국내 공공보안 요구사항인 TTA 성능·보안 인증 제정에 적극 참여했다고 명시한다."}
+{"lid": "822ddd5a31", "label": "no_evidence", "passage": null, "reason": "문단 7은 TTA 인증 제정 참여를 설명하며 한국인터넷진흥원 인증 제정 참여는 제시하지 않는다."}
+{"lid": "0f83ec62f1", "label": "non_claim", "passage": null, "reason": "제공 자료에서 답을 찾을 수 없다는 응답 한계 안내이며 원재료 매입 구성 자체를 주장하지 않는다."}
+{"lid": "c1bed8780e", "label": "supported", "passage": 1, "reason": "문단 1의 부채비율 표에 전기말 6.44%, 당기말 4.62%가 명시되어 감소 방향이 일치한다."}
+{"lid": "c1bd09998b", "label": "supported", "passage": 3, "reason": "문단 3이 기능통화인 원화 외 통화로 표시된 판매·구매의 환위험 노출을 명시한다."}
+{"lid": "98bcb45f9f", "label": "non_claim", "passage": null, "reason": "뒤따를 계산 방법을 소개하는 안내 문장이며 구체적인 계산식이나 손익 금액을 제시하지 않는다."}
+{"lid": "7d61fe97d1", "label": "no_evidence", "passage": null, "reason": "문단 3은 외화 화폐성자산·부채 장부금액을 언급하지만 장부금액에 변동률을 곱한다는 계산식은 제시하지 않는다."}
+{"lid": "4e45cfd470", "label": "non_claim", "passage": null, "reason": "계산에 필요한 정확한 금액이 없다는 자료 부족 안내이며 기업의 구체적인 재무 수치를 주장하지 않는다."}
+{"lid": "a1f44061d9", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 당기말 외화 화폐성자산·부채 장부금액에 10%를 곱한다는 환위험 노출액 계산식이 없다."}
+{"lid": "ce2e37f1f2", "label": "no_evidence", "passage": null, "reason": "문단 1의 부채비율은 트루엔에 관한 수치이며 아이디스의 부채비율은 제시되지 않는다."}
+{"lid": "60d36d4127", "label": "supported", "passage": 1, "reason": "문단 1의 부채비율 표가 전기말 6.44%에서 당기말 4.62%로의 감소를 뒷받침한다."}
+{"lid": "5f78039d66", "label": "non_claim", "passage": null, "reason": "문단 번호와 잘린 절 제목만 있어 사실 주장을 구성하지 않는다."}
+{"lid": "39347cfeb4", "label": "supported", "passage": 5, "reason": "문단 5가 사업에 적합한 모델 제안을 위해 고객 수요를 계속 파악하고 맞춤 제품군을 개발한다고 명시한다."}
+{"lid": "e5c69123ff", "label": "supported", "passage": 5, "reason": "문단 5가 공공기관·공기업의 SI 사업이 스마트시티·국방·교통·재난재해로 확장된다고 명시한다."}
+{"lid": "3a8f511ef3", "label": "non_claim", "passage": null, "reason": "문단 번호와 잘린 절 제목만 있어 사실 주장을 구성하지 않는다."}
+{"lid": "0eb43dbb26", "label": "supported", "passage": 5, "reason": "문단 5가 공공기관·공기업 SI 사업에 적합한 모델 제안과 고객 수요에 맞춘 제품군 개발을 함께 명시한다."}
+{"lid": "895c40d7c0", "label": "no_evidence", "passage": null, "reason": "문단 5는 시스템 통합 사업을 설명하며 공공기관·공기업의 스마트팩토리 사업용 제품군 개발은 제시하지 않는다."}
+{"lid": "5ba0631114", "label": "supported", "passage": 5, "reason": "문단 5가 SI 사업에 적합한 모델 제안을 위해 고객 수요에 맞춘 제품군을 개발한다고 명시한다."}
+{"lid": "0b572e850d", "label": "supported", "passage": 5, "reason": "문단 5가 SI 사업자와의 국방·교통 사업 협력 및 관제 프로그램·NVR 연동을 통한 카메라 적용 노력을 모두 명시한다."}
+{"lid": "674989d98a", "label": "supported", "passage": 4, "reason": "문단 4가 이사회의 중요계약 검토·승인과 승인 정책에 따른 재무부서의 위험관리 주관을 명시하며 잘린 후속 협조 내용도 일치한다."}

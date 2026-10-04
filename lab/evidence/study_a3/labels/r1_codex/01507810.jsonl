@@ -1,0 +1,34 @@
+{"lid": "a45a077042", "label": "supported", "passage": 7, "reason": "문단 7은 당사의 하악재건술 가이드가 2021년 4월 신의료기술로 승인되었다고 명시한다."}
+{"lid": "02626d52ab", "label": "no_evidence", "passage": null, "reason": "정밀의료와 맞춤형 의료기술의 산업적 배경은 설명하지만 이를 회사의 설립 배경으로 밝힌 문단은 없다."}
+{"lid": "d434dea853", "label": "supported", "passage": 8, "reason": "문단 8은 환자의 조영 CT 영상정보로 맞춤형 신장암 수술 가이드를 제작하여 부분절제술을 지원한다고 설명한다."}
+{"lid": "8ca386b551", "label": "no_evidence", "passage": null, "reason": "문단 7의 승인 대상은 당사의 하악재건술 가이드이며 세브란스병원 가이드의 승인 여부는 제시되지 않는다."}
+{"lid": "c4a502cc77", "label": "supported", "passage": 7, "reason": "문단 7은 애니메디솔루션의 하악재건술 가이드가 2021년 4월 신의료기술로 승인되었다고 명시한다."}
+{"lid": "111533e0ee", "label": "supported", "passage": 1, "reason": "문단 1은 환자의 의료영상을 분석하고 해당 데이터에 기반하여 유방암 부분절제술 가이드를 삼차원 프린팅으로 제작한다고 설명한다."}
+{"lid": "7d1462383e", "label": "supported", "passage": 4, "reason": "문단 4는 코 수술 솔루션 설계에 CT에서 잘 드러나지 않는 연부 조직을 성별과 나이에 맞게 추정하여 반영한다고 명시한다."}
+{"lid": "19cc3d6d4d", "label": "supported", "passage": 4, "reason": "문단 4는 두 수술 가이드에 수술 후 해부학적 형태 예측에 따른 모델링과 조직 박리 손실을 최소화하는 설계 기술을 적용한다고 명시한다."}
+{"lid": "2cc0a0e7d4", "label": "no_evidence", "passage": null, "reason": "문단 4는 선천성 심장질환 시뮬레이터의 영상 분할 기술을 설명하지만 환자 맞춤형 3D 프린팅 제작까지 밝히지는 않는다."}
+{"lid": "a9aa8f1069", "label": "supported", "passage": 1, "reason": "문단 1은 유방암 부분절제술 가이드가 세계 최초의 연조직 수술 가이드이며 2021년 8월 혁신의료기술로 선정되었다고 명시한다."}
+{"lid": "6e56e35870", "label": "no_evidence", "passage": null, "reason": "문단 1의 세계 최초 및 2021년 8월 선정 설명은 유방암 부분절제술 가이드에 관한 것이며 견관절치환술가이드에 관한 근거는 없다."}
+{"lid": "da40f0bd88", "label": "no_evidence", "passage": null, "reason": "모든 해당 제품의 의료영상 기반 맞춤형 제작과 수술 결과 향상을 한 문단에서 함께 확인할 수 없다."}
+{"lid": "80d4294406", "label": "supported", "passage": 4, "reason": "문단 4는 의료영상 기반 맞춤형 설계 기술 개발의 적용제품으로 심장질환 시뮬레이터, 여러 수술 가이드와 코 수술 솔루션을 묶어 열거한다."}
+{"lid": "9f824c73f2", "label": "supported", "passage": 1, "reason": "문단 1은 유방암부분절제술가이드를 세계 최초의 연조직 수술 가이드로 설명하고 2021년 8월 혁신의료기술 선정을 명시한다."}
+{"lid": "dfaa0ce78f", "label": "contradicted", "passage": 5, "reason": "문단 5의 2025년 코스메틱AI 매출 소계는 966,732천원으로 96,673.2만원이며 주장한 103,600만원과 다르다."}
+{"lid": "10bde95608", "label": "supported", "passage": 5, "reason": "문단 5의 2025년 코스메틱AI 소계 966,732천원이 메디컬AI 소계 750,088천원보다 크다."}
+{"lid": "5453cc7f7f", "label": "supported", "passage": 3, "reason": "문단 3은 제품개발센터가 신제품 개발, 제품설계 및 생산, 공정관리와 제품 인허가를 담당한다고 명시한다."}
+{"lid": "a32f7e240e", "label": "non_claim", "passage": null, "reason": "가동률 수치를 제시하겠다는 도입 문장으로 구체적인 가동률에 관한 사실 주장은 없다."}
+{"lid": "218ed22835", "label": "supported", "passage": 3, "reason": "문단 3은 애니메디솔루션 제품개발센터의 업무로 신제품 개발, 설계 및 생산, 공정관리와 인허가를 열거한다."}
+{"lid": "6394b6930f", "label": "no_evidence", "passage": null, "reason": "문단 3에 열거된 업무의 담당은 제품개발센터이며 품질보증센터의 업무는 제시되지 않는다."}
+{"lid": "3e4bb34f3b", "label": "no_evidence", "passage": null, "reason": "문단 4는 2025년 시뮬레이터 생산능력 1,944개만 제시하며 생산실적 1,944개나 가동률 100%는 제시하지 않는다."}
+{"lid": "10ff2fa94c", "label": "no_evidence", "passage": null, "reason": "시뮬레이터 생산능력은 제시되지만 실제 생산실적이나 가동률 및 생산능력과의 일치 여부는 확인되지 않는다."}
+{"lid": "744e5b4314", "label": "supported", "passage": 1, "reason": "문단 1은 2021년에 당사의 미용성형 보형물 이노핏을 런칭했다고 명시한다."}
+{"lid": "f8173508e9", "label": "no_evidence", "passage": null, "reason": "30%는 연구개발비 대 매출액 비율이고 552,411천원은 연구개발비용이며 부채비율과 차입금 규모는 제시되지 않는다."}
+{"lid": "960c327962", "label": "no_evidence", "passage": null, "reason": "문단 1은 이노핏의 2021년 런칭을 설명하지만 코어핏의 출시 여부나 시기는 제시하지 않는다."}
+{"lid": "c3dfe7b095", "label": "no_evidence", "passage": null, "reason": "문단 5는 고정 환율 계약을 환율 변동 위험 대응으로 설명하며 이를 유동성위험 관리와 연결하는 근거는 없다."}
+{"lid": "a19359a8e1", "label": "supported", "passage": 1, "reason": "문단 1은 애니메디솔루션이 2021년에 미용성형 보형물 이노핏을 런칭했다고 명시한다."}
+{"lid": "d9622b28ad", "label": "supported", "passage": 1, "reason": "문단 1의 3차원 인공의안 생성 방법 특허 권리자 목록에 울산대학교 산학협력단과 애니메디솔루션이 함께 기재되어 있다."}
+{"lid": "5260d8c1cf", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단 1~8에는 2024년 연구개발비용, 매출액과 연구개발비 비율을 확인할 수 있는 수치가 없다."}
+{"lid": "feec1c003e", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단 1~8에는 2022년 연구개발비용, 매출액과 연구개발비 비율에 관한 수치가 없다."}
+{"lid": "333b0d001c", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단 1~8에는 2023년 연구개발비용, 매출액과 연구개발비 비율에 관한 수치가 없다."}
+{"lid": "1ed020d646", "label": "contradicted", "passage": 1, "reason": "문단 1의 해당 특허 권리자 목록은 울산대학교 산학협력단, 애니메디솔루션과 아산사회복지재단으로 기재되어 부산대학교라는 권리자 주장과 다르다."}
+{"lid": "e9909fb638", "label": "no_evidence", "passage": null, "reason": "이 질문에 제시된 문단에는 연도별 연구개발비 비율이나 그 증가 추이를 확인할 자료가 없다."}
+{"lid": "40a433aeff", "label": "non_claim", "passage": null, "reason": "최근 3년의 비용과 비율을 제시하겠다는 도입 문장으로 구체적인 수치나 변화 방향을 주장하지 않는다."}

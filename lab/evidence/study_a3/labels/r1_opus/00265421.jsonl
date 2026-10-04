@@ -1,0 +1,34 @@
+{"lid": "72e0f91e50", "label": "contradicted", "passage": 8, "reason": "문단 8의 2021년 디스플레이 연구과제는 도장강판을 이용한 Chassis 성형공법이지 브래킷이 아니다"}
+{"lid": "4aace293ed", "label": "supported", "passage": 1, "reason": "문단 1이 사업부별로 디스플레이 사업부와 자동차 사업부를 나눠 설명한다"}
+{"lid": "e54f5605d6", "label": "supported", "passage": 8, "reason": "문단 8: 기술연구소(디스플레이), 도장강판을 이용한 Chassis 성형공법 개발, 2021년"}
+{"lid": "04ff31f05a", "label": "supported", "passage": 8, "reason": "문단 8: 기술연구소(디스플레이), 도장강판을 이용한 Chassis 성형공법 개발, 2021년"}
+{"lid": "8a3745ca26", "label": "no_evidence", "passage": null, "reason": "디스플레이 사업부가 '디스플레이 제품'을, 자동차 사업부가 자동차 부품을 생산한다고 한 문단에서 말하지 않는다"}
+{"lid": "7f05e4d922", "label": "no_evidence", "passage": null, "reason": "문단 6은 현대/기아자동차 등과의 계약만 말하고 KG모빌리티는 어느 문단에도 없다"}
+{"lid": "cb100355e6", "label": "supported", "passage": 8, "reason": "문단 8: 당사의 주 제품은 자동차 엔진/변속기 알루미늄 다이캐스팅 부품"}
+{"lid": "41ce5cd8b6", "label": "supported", "passage": 6, "reason": "문단 6: 현대/기아자동차 등과의 공급계약은 기본거래조건이며 기간·품명·금액은 별도로 체결하지 않는다"}
+{"lid": "075667fdbc", "label": "supported", "passage": 6, "reason": "문단 6: 현대/기아자동차 등과의 공급계약은 기본거래조건이며 기간·품명·금액은 별도로 체결하지 않는다"}
+{"lid": "c14a615319", "label": "supported", "passage": 6, "reason": "문단 6이 현대/기아자동차와 자동차 부품회사 등과의 공급계약을 언급한다"}
+{"lid": "07ce4e20fe", "label": "non_claim", "passage": null, "reason": "뒤에 나올 내용을 안내하는 도입 문장이다"}
+{"lid": "86cf60a166", "label": "supported", "passage": 7, "reason": "문단 7: 해외사업부 CHASSIS 류 412,868백만원, 59.31%"}
+{"lid": "e130f63484", "label": "contradicted", "passage": 7, "reason": "문단 7에서 412,868백만원·59.31%는 해외사업부이고, 자동차사업부는 자동차 부품류 248,264백만원·35.66%다"}
+{"lid": "57a7eed74d", "label": "supported", "passage": 7, "reason": "문단 7: 해외사업부 CHASSIS 류 412,868백만원, 59.31%"}
+{"lid": "2022f19402", "label": "contradicted", "passage": 1, "reason": "문단 1의 37,476은 백만원 단위(약 375억원)인데 주장은 37,476억원이라고 한다"}
+{"lid": "63e9ffacef", "label": "non_claim", "passage": null, "reason": "출처 문단을 안내하는 문장이다"}
+{"lid": "972c6f4e2f", "label": "contradicted", "passage": 1, "reason": "문단 1의 413,939는 백만원 단위(약 4,139억원)인데 주장은 413,939억원이라고 한다"}
+{"lid": "2d3a560232", "label": "no_evidence", "passage": null, "reason": "총매출액 7,218억원은 문단 1에 있지만 영업이익 1,213억원은 어느 문단에도 없다"}
+{"lid": "7da4c82ab8", "label": "non_claim", "passage": null, "reason": "제공된 자료에 정보가 없다는 면책 성격의 문장이다"}
+{"lid": "5e760f4771", "label": "non_claim", "passage": null, "reason": "어느 문단을 보라고 안내하는 문장이다"}
+{"lid": "2c2d548e5d", "label": "supported", "passage": 1, "reason": "문단 1: 당사는 당기 중 시설, 설비, 부동산, 전산시스템 등에 512억원을 투자했다"}
+{"lid": "635cd123d4", "label": "no_evidence", "passage": null, "reason": "문단 1은 당사의 투자를 말하고 삼보모터스는 어느 문단에도 없다"}
+{"lid": "afdad16e08", "label": "supported", "passage": 1, "reason": "문단 1: 당사는 당기 중 시설, 설비, 부동산, 전산시스템 등에 512억원을 투자했다"}
+{"lid": "33c2a6d0e9", "label": "supported", "passage": 6, "reason": "문단 6: 디스플레이 사업부 1일 작업시간은 16시간(주/야간 각 8시간)"}
+{"lid": "ddf4012e8e", "label": "supported", "passage": 6, "reason": "문단 6: 디스플레이 사업부 1일 작업시간은 16시간(주/야간 각 8시간)"}
+{"lid": "dc3c711ee2", "label": "supported", "passage": 4, "reason": "문단 4: 금융기관과의 선도 거래로 미래예상거래 및 인식된 자산·부채의 외환위험을 관리한다"}
+{"lid": "4eea65e53c", "label": "no_evidence", "passage": null, "reason": "16시간 기준은 디스플레이 사업부의 것이고 반도체 사업부는 어느 문단에도 없다"}
+{"lid": "ddf574de3a", "label": "no_evidence", "passage": null, "reason": "문단 6은 소재기술팀이 있다는 것만 말하고 그 업무는 보여 준 문단에 없다"}
+{"lid": "6cdec1eeed", "label": "no_evidence", "passage": null, "reason": "문단 6은 공정기술팀이 있다는 것만 말하고 그 업무는 보여 준 문단에 없다"}
+{"lid": "ec5af22a9c", "label": "supported", "passage": 8, "reason": "문단 8: TV 부품 및 자동차부품 생산설비, 공정기술 관련 특허와 실용신안을 취득했다"}
+{"lid": "39eeb8ddd6", "label": "supported", "passage": 6, "reason": "문단 6의 PM팀 업무 설명과 일치한다"}
+{"lid": "bd39a2aad9", "label": "supported", "passage": 6, "reason": "문단 6: 자동차사업 연구소는 PM팀, 소재기술팀, 공정기술팀으로 나뉜다"}
+{"lid": "8bc9f15c28", "label": "contradicted", "passage": 8, "reason": "문단 8은 냉장고 부품이 아니라 TV 부품과 자동차부품 관련 특허·실용신안이라고 한다"}
+{"lid": "1bbaf7d4e0", "label": "supported", "passage": 8, "reason": "문단 8: TV 부품 및 자동차부품 생산설비, 공정기술 관련 특허와 실용신안을 취득했다"}

@@ -1,0 +1,25 @@
+{"lid": "b2dd316f05", "label": "supported", "passage": 3, "reason": "문단 3은 제품을 체계업체에 공급하고 최종적으로 군과 발전소에 납품한다고 명시한다."}
+{"lid": "8f9c62f5ed", "label": "supported", "passage": 3, "reason": "문단 3은 솔디펜스가 측정·제어 장치를 연구개발·생산하여 체계업체를 거쳐 군과 발전소에 납품한다고 명시한다."}
+{"lid": "d8bccf0e66", "label": "no_evidence", "passage": null, "reason": "문단 3의 개발·생산 및 납품 주체는 솔디펜스이며, 한화시스템의 해당 활동은 제시되지 않는다."}
+{"lid": "932cbf800c", "label": "supported", "passage": 3, "reason": "문단 3은 솔디펜스의 측정·제어 장치 개발·생산, 체계업체 공급 및 군·발전소 최종 납품을 모두 지지한다."}
+{"lid": "62ee6949e5", "label": "supported", "passage": 3, "reason": "문단 3은 솔디펜스의 산업을 기기용 자동 측정 및 제어 장치 제조업으로 명시한다."}
+{"lid": "92d4aaa78e", "label": "no_evidence", "passage": null, "reason": "문단 4의 회로카드 조립체 5종은 무인기용이며, 다연장로켓용 핵심 부품이라는 사실은 제시되지 않는다."}
+{"lid": "3e0df7cbfb", "label": "no_evidence", "passage": null, "reason": "문단 3은 솔디펜스의 자체 개발·생산·납품을 설명하며, 빅텍에 대한 해당 사실은 제시하지 않는다."}
+{"lid": "8c04d31e59", "label": "supported", "passage": 3, "reason": "문단 3은 솔디펜스가 유도무기 및 항공전자 관련 제어 장치 부품을 자체 개발·생산하여 납품한다고 명시한다."}
+{"lid": "38166cb1dd", "label": "supported", "passage": 3, "reason": "솔 디펜스는 솔디펜스의 띄어쓰기 변형이며, 문단 3은 해당 제어 장치 부품의 자체 개발·생산·납품을 명시한다."}
+{"lid": "ee04330ffd", "label": "no_evidence", "passage": null, "reason": "문단 8에는 방산 부문 실적만 있고 다른 사업부문 매출과의 비교나 최대 부문이라는 정보는 없다."}
+{"lid": "979326c800", "label": "no_evidence", "passage": null, "reason": "문단 8의 21,890,741천원은 구미사업장 방산 부문 실적이며, 창원사업장의 실적은 제시되지 않는다."}
+{"lid": "5d1a0140ef", "label": "supported", "passage": 8, "reason": "문단 8은 2025년 방산 부문 생산실적을 21,890,741천원으로 제시하고 이를 구미사업장의 제품매출액이라고 명시한다."}
+{"lid": "0b67138bec", "label": "supported", "passage": 8, "reason": "문단 8은 구미사업장 방산 부문의 2025년 생산실적 21,890,741천원과 제품매출액이라는 설명을 모두 제시한다."}
+{"lid": "3998e50f77", "label": "no_evidence", "passage": null, "reason": "문단 5에는 화력발전소 통합감시 제어 시스템용 제어보드가 기재되어 있으나 전원공급모듈의 개발·생산은 제시되지 않는다."}
+{"lid": "dbc0bfbc7f", "label": "no_evidence", "passage": null, "reason": "문단 8은 2025년 가동률 86.8%만 제시하며, 2024년 가동률이나 전년 대비 1.8% 증가를 제시하지 않는다."}
+{"lid": "184104f8a5", "label": "supported", "passage": 5, "reason": "문단 5는 솔디펜스가 화력발전소용 통합감시 제어 시스템에 공급되는 제어보드를 개발·생산한다고 명시한다."}
+{"lid": "f7a681dd03", "label": "supported", "passage": 5, "reason": "문단 5는 주식회사 솔디펜스의 화력발전소용 통합감시 제어 시스템 제어보드 개발·생산을 명시한다."}
+{"lid": "fd29b90ea4", "label": "supported", "passage": 8, "reason": "문단 8은 구미사업장의 생산실적과 함께 2025년 평균 가동률을 86.8%로 명시한다."}
+{"lid": "93ded983c5", "label": "contradicted", "passage": 8, "reason": "문단 8은 같은 무인기 항법제어용 회로카드 조립체 5종의 납품 경유 업체를 LIG넥스원이 아닌 (주)한화로 명시한다."}
+{"lid": "caa4b2c9c3", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 재무위험 관리를 위한 내부 관리체계 구축에 관한 정보가 없다."}
+{"lid": "f9a9cef3d3", "label": "supported", "passage": 8, "reason": "문단 8은 무인기 항법제어용 컴퓨터의 제어보드 등 회로카드 조립체 5종을 (주)한화를 통하여 납품한다고 명시한다."}
+{"lid": "b13f8ed078", "label": "supported", "passage": 8, "reason": "문단 8은 해당 무인기용 회로카드 조립체 5종의 (주)한화 경유 납품을 명시하며 띄어쓰기 차이는 의미를 바꾸지 않는다."}
+{"lid": "f20f539545", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 솔디펜스의 현재 파생상품 계약 체결 여부가 없다."}
+{"lid": "1c24fad7fd", "label": "contradicted", "passage": 1, "reason": "문단 1은 0.12%를 매출액 대비 연구개발비 비율로 제시하고 연구개발비용 계는 30,342천원으로 기재하므로 총액까지 0.12%라는 주장과 다르다."}
+{"lid": "675c12f4ca", "label": "contradicted", "passage": 1, "reason": "문단 4는 177,018천원을 제시하지만 문단 1은 동일한 2025년 연구개발비용 계를 30,342천원으로 기재하여 서로 상충한다."}

@@ -1,0 +1,40 @@
+{"lid": "676b74a2ee", "label": "supported", "passage": 1, "reason": "문단 1이 한국도로전산㈜과 ㈜와이티테크놀로지 등의 기술용역업 부문이 보고부문 요건 미달로 기타 부문에 포함됐다고 명시"}
+{"lid": "34c8f71e6d", "label": "contradicted", "passage": 1, "reason": "문단 1은 기타 부문 기술용역업의 발생 회사를 한국도로전산㈜으로 적어 에스트래픽㈜과 다름"}
+{"lid": "59f1fd128f", "label": "supported", "passage": 7, "reason": "문단 7이 ITS 사업, 모바일 관련 부품 공급업, 임대사업 등을 주요 사업으로 영위한다고 명시하고 ITS 정의도 포함"}
+{"lid": "e5e16eb196", "label": "supported", "passage": 1, "reason": "문단 1 내용과 일치"}
+{"lid": "f1b495c6f6", "label": "contradicted", "passage": 1, "reason": "문단 1은 주요 사업을 철도신호가 아닌 ITS 사업으로 명시"}
+{"lid": "fc2ad75ba1", "label": "supported", "passage": 8, "reason": "문단 8 국내 장비 납품현황에 교통량 측정기 176차로 기재"}
+{"lid": "d6fc5ec694", "label": "supported", "passage": 1, "reason": "문단 1이 ITS 사업, 모바일 관련 부품 공급업, 임대사업 등을 주요 사업으로 명시"}
+{"lid": "ceb130c49f", "label": "no_evidence", "passage": null, "reason": "문단 8은 주요 부품인 축중검출판의 국산화를 말할 뿐 나열된 장비들이 주요 부품으로 국산화됐다고 하지 않음(다차선용 자동축중기 상용화만 지지)"}
+{"lid": "56d2772056", "label": "supported", "passage": 8, "reason": "문단 8 납품현황에 고정식 축중기 510차로 기재"}
+{"lid": "30dea4025c", "label": "non_claim", "passage": null, "reason": "목록을 여는 도입 문장"}
+{"lid": "dcb4f686cd", "label": "supported", "passage": 8, "reason": "문단 8 납품현황에 고속 축중기 4차로 기재"}
+{"lid": "93857dd974", "label": "supported", "passage": 1, "reason": "문단 1 내용과 일치"}
+{"lid": "282d987a6f", "label": "supported", "passage": 8, "reason": "문단 8 납품현황에 이동식 축중기 28 SET 기재"}
+{"lid": "6b4d7a1363", "label": "supported", "passage": 7, "reason": "문단 7이 ITS에서 스마트 축중기와 고속 축중기를 자체 기술로 개발해 고도화 중이라고 명시"}
+{"lid": "da0fb3a8c1", "label": "contradicted", "passage": 7, "reason": "문단 7은 스마트 신호제어기가 아니라 스마트 축중기를 자체 개발했다고 명시"}
+{"lid": "64141d63bf", "label": "supported", "passage": 7, "reason": "문단 7 내용과 일치"}
+{"lid": "e27d8ac1b6", "label": "non_claim", "passage": null, "reason": "목록을 여는 도입 문장"}
+{"lid": "f2d458d86c", "label": "supported", "passage": 4, "reason": "문단 4 문장을 그대로 인용"}
+{"lid": "e21e5ead5c", "label": "supported", "passage": 5, "reason": "문단 5 문장을 그대로 인용"}
+{"lid": "68729ede99", "label": "supported", "passage": 7, "reason": "문단 7 문장을 그대로 인용"}
+{"lid": "fb1f1ac93e", "label": "no_evidence", "passage": null, "reason": "어느 문단에도 부문별 매출 비중이나 최대 부문이 나오지 않음"}
+{"lid": "a36b20acbe", "label": "supported", "passage": 8, "reason": "문단 8이 나노테크의 국내 원재료 조달·삼성전자 등 원청 신제품 대응 제약으로 당사가 원재료를 공급·판매한다고 명시"}
+{"lid": "d97c5925dc", "label": "supported", "passage": 8, "reason": "문단 8 내용과 일치(삼성전자㈜ 표기 차이만)"}
+{"lid": "79832e5e3e", "label": "non_claim", "passage": null, "reason": "자료 제공 여부에 대한 면책성 안내"}
+{"lid": "b2d63d8ef5", "label": "non_claim", "passage": null, "reason": "자료 제공 여부에 대한 면책성 안내"}
+{"lid": "a0946f45c0", "label": "contradicted", "passage": 8, "reason": "문단 8은 원청업체를 LG전자가 아니라 삼성전자 등으로 명시"}
+{"lid": "02234f5735", "label": "supported", "passage": 2, "reason": "문단 2가 나노테크는 삼성전자의 1차 협력사라고 명시"}
+{"lid": "167326d2f5", "label": "no_evidence", "passage": null, "reason": "어느 문단에도 파생상품 거래 여부나 시장위험 공시가 없음"}
+{"lid": "2ae4711189", "label": "contradicted", "passage": 2, "reason": "문단 2는 나노테크를 삼성디스플레이가 아니라 삼성전자의 1차 협력사로 명시"}
+{"lid": "35c06c561b", "label": "supported", "passage": 2, "reason": "문단 2 내용과 일치"}
+{"lid": "7b32f7916a", "label": "supported", "passage": 8, "reason": "문단 8이 군포시 소재 에스에이티 기술연구소가 ITS개발팀·영상개발팀·하드웨어개발 3개팀으로 구성됐다고 명시"}
+{"lid": "26448f3089", "label": "non_claim", "passage": null, "reason": "목록을 여는 도입 문장"}
+{"lid": "c5ce7e8f6b", "label": "contradicted", "passage": 8, "reason": "문단 8은 군포시 소재 연구소를 에스트래픽이 아니라 에스에이티 기술연구소로 명시"}
+{"lid": "c13dc85b7c", "label": "no_evidence", "passage": null, "reason": "문단 8에 제28기 161,313천원은 있으나 2022년 대응 연도는 어느 문단에도 없음"}
+{"lid": "fc7e183649", "label": "no_evidence", "passage": null, "reason": "제26기 267,853천원은 문단 8에 있으나 2020년 대응 연도는 문단에 없음"}
+{"lid": "c58715e116", "label": "no_evidence", "passage": null, "reason": "제27기 91,215천원은 문단 8에 있으나 2021년 대응 연도는 문단에 없음"}
+{"lid": "16c67ec6e0", "label": "no_evidence", "passage": null, "reason": "제28기 161,313천원은 문단 8에 있으나 2022년 대응 연도는 문단에 없음"}
+{"lid": "b951cfa183", "label": "no_evidence", "passage": null, "reason": "제27기 91,215천원은 문단 8에 있으나 2021년 대응 연도는 문단에 없음"}
+{"lid": "68db590fab", "label": "non_claim", "passage": null, "reason": "목록을 여는 도입 문장"}
+{"lid": "33a94e7310", "label": "no_evidence", "passage": null, "reason": "제26기 267,853천원은 문단 8에 있으나 2020년 대응 연도는 문단에 없음"}

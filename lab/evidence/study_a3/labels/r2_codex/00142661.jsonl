@@ -1,0 +1,4 @@
+{"lid": "9ddf09e22a", "label": "contradicted", "passage": 3, "reason": "문단 3은 연결회사 전체의 제조시설을 설명하지만 회사별 표에서는 (주)우성의 사업을 판매업 등으로, 배합사료 제조업을 (주)우성사료의 사업으로 구분한다."}
+{"lid": "d7dcec030d", "label": "contradicted", "passage": 4, "reason": "문단 4의 회사별 표는 가축용 배합사료와 양어·반려동물 사료 제조업을 (주)우성사료에 귀속시키고 (주)우성의 사업은 판매업 등으로 구분한다."}
+{"lid": "fba62c9181", "label": "non_claim", "passage": null, "reason": "계약 상대방이나 기간에 관한 사실을 제시하지 않고 문단의 정보 유무를 설명하는 메타 진술이다."}
+{"lid": "1097532a76", "label": "non_claim", "passage": null, "reason": "회사에 관한 사실을 제시하지 않고 정보가 있다는 문단 위치를 안내하는 메타 진술이다."}

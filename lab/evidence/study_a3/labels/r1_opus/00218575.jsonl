@@ -1,0 +1,32 @@
+{"lid": "b25ed4a33a", "label": "supported", "passage": 7, "reason": "문단 7이 유에스티와 인터컨스텍의 주된 영업을 그대로 기술한다"}
+{"lid": "0a1d190498", "label": "contradicted", "passage": 7, "reason": "문단 7은 열연·냉연 판과 특수강을 생산·판매하는 사업을 알루미늄이 아니라 스테인리스 사업이라 한다"}
+{"lid": "cb83c66208", "label": "supported", "passage": 7, "reason": "문단 7의 주요 사업 내용 문장과 같다"}
+{"lid": "c175e8b0f8", "label": "supported", "passage": 7, "reason": "문단 7이 스테인리스 열연·냉연 판, 특수강 생산·판매의 스테인리스 사업을 명시한다"}
+{"lid": "a4caa3e85a", "label": "supported", "passage": 7, "reason": "문단 7이 스테인리스 열연·냉연 판, 특수강 생산·판매의 스테인리스 사업을 명시한다"}
+{"lid": "7dbb5a0056", "label": "supported", "passage": 6, "reason": "문단 6: 인터컨스텍은 자체 개발한 IPC거더 제작 기술로 교량 설계·시공"}
+{"lid": "ad4a066117", "label": "contradicted", "passage": 6, "reason": "문단 6은 자체 개발 기술을 PSC거더가 아니라 IPC거더라 한다"}
+{"lid": "5001d9c71f", "label": "supported", "passage": 6, "reason": "문단 6에 인터컨스텍이 자체 개발한 교량(IPC거더) 제작 기술이 나온다"}
+{"lid": "1d1fad4385", "label": "supported", "passage": 6, "reason": "문단 6: 인터컨스텍은 자체 개발한 IPC거더 제작 기술로 교량 설계·시공"}
+{"lid": "bb130f0fbd", "label": "supported", "passage": 7, "reason": "문단 7: 연결 주요종속회사 유에스티의 스테인리스 파이프·철강재 제조·판매, 수출"}
+{"lid": "7d170c370a", "label": "no_evidence", "passage": null, "reason": "세아제강을 다루는 문단이 없다(문단 7은 해당 영업을 유에스티의 것으로 기술)"}
+{"lid": "42221cae83", "label": "non_claim", "passage": null, "reason": "정보가 없다는 면책 문장"}
+{"lid": "bc0f4a1c7a", "label": "contradicted", "passage": 1, "reason": "문단 1은 경기 둔감·계절 변동 작음을 철강부문 특성으로, 건설부문은 경기 영향을 많이 받는다고 한다"}
+{"lid": "fff6e07c26", "label": "supported", "passage": 4, "reason": "사실 부분(철강부문의 시장 변동성 영향)은 문단 4가 지지하고 나머지는 정보 부재 면책"}
+{"lid": "67c21e0824", "label": "non_claim", "passage": null, "reason": "문서 구성에 대한 안내 문장"}
+{"lid": "256366f454", "label": "non_claim", "passage": null, "reason": "정보가 없다는 면책 문장"}
+{"lid": "6b8699bf41", "label": "non_claim", "passage": null, "reason": "문서 구성에 대한 안내 문장"}
+{"lid": "facfee418a", "label": "supported", "passage": 1, "reason": "문단 1: 철강부문은 기초소재 특성상 경기변동에 크게 민감하지 않고 계절적 변동성도 작다"}
+{"lid": "aaa5943241", "label": "supported", "passage": 1, "reason": "문단 1: 철강부문은 기초소재 특성상 경기변동에 크게 민감하지 않고 계절적 변동성도 작다"}
+{"lid": "461134d282", "label": "supported", "passage": 1, "reason": "문단 1의 문장과 같다"}
+{"lid": "491749ce43", "label": "supported", "passage": 1, "reason": "문단 1: 니켈 등 원소재 가격과 환율변동에 대응하는 외환관리팀 운용"}
+{"lid": "0446d8ce0b", "label": "supported", "passage": 1, "reason": "문단 1의 탄력적 구매 전략 문장과 같다"}
+{"lid": "7d1ab8f521", "label": "supported", "passage": 1, "reason": "문단 1: 외환관리팀 운용, 주거래 은행 자문으로 파생상품 거래"}
+{"lid": "17064ba936", "label": "no_evidence", "passage": null, "reason": "현대비앤지스틸을 다루는 문단이 없다(문단 1의 주체는 당사)"}
+{"lid": "b904e16001", "label": "no_evidence", "passage": null, "reason": "당기 파생상품거래 손익 금액을 말하는 문단이 없다"}
+{"lid": "14e49ea05f", "label": "supported", "passage": 1, "reason": "문단 1: 외환관리팀 운용, 주거래 은행 자문으로 파생상품 거래"}
+{"lid": "16c6232c41", "label": "non_claim", "passage": null, "reason": "문단 번호 조각으로 사실 주장이 아니다"}
+{"lid": "22ecbd5af9", "label": "non_claim", "passage": null, "reason": "머리표 조각으로 사실 주장이 아니다"}
+{"lid": "809935e12d", "label": "no_evidence", "passage": null, "reason": "에너지부문을 다루는 문단이 없다(문단 2의 설비 자체개발은 철강부문 경쟁요소)"}
+{"lid": "996a442e5d", "label": "non_claim", "passage": null, "reason": "질문 문장"}
+{"lid": "36b39481db", "label": "supported", "passage": 2, "reason": "문단 2: 철강부문 경쟁요소로 생산설비 자체개발·제작을 통한 생산성·품질 우위"}
+{"lid": "1a9ce9fdd3", "label": "supported", "passage": 5, "reason": "문단 5: 신용평가 등급 A, 평가일자 2026.03.09"}

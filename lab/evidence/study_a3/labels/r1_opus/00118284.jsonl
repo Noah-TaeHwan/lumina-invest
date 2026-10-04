@@ -1,0 +1,27 @@
+{"lid": "2827e5c73a", "label": "contradicted", "passage": 2, "reason": "문단 2는 80톤용 아이들러·트랙스프링 어셈블리를 현대중공업에 공급한다고 함(삼성중공업 아님)"}
+{"lid": "cf87ac571d", "label": "no_evidence", "passage": null, "reason": "문단 2는 건설기계산업을 굴삭기의 전방산업으로만 언급하며 회사가 건설기계 산업을 주력으로 한다는 진술은 없음"}
+{"lid": "27e2c72e1e", "label": "supported", "passage": 2, "reason": "2008년 11월 개발 완료한 초대형 80톤용 아이들러·트랙스프링 어셈블리를 현대중공업에 공급"}
+{"lid": "a0620f25ea", "label": "supported", "passage": 2, "reason": "문단 2의 현대중공업 공급과 동일(㈜ 표기 차이뿐)"}
+{"lid": "1bb4eb2baf", "label": "contradicted", "passage": 1, "reason": "문단 1은 주력 생산품이 크롤러 크레인용 트랙슈 어셈블리라고 함(굴삭기용 부품 아님)"}
+{"lid": "a554418727", "label": "supported", "passage": 6, "reason": "굴삭기용 부품을 국내 완성차 3사(HD현대건설기계·볼보건설기계 코리아·HD현대인프라코어)와 일본 2사·미국 2사와 거래"}
+{"lid": "a09e022d08", "label": "supported", "passage": 8, "reason": "히타치건기 6개 모델 중 180·250·360·550·800톤급 트랙슈 공급"}
+{"lid": "bc76028926", "label": "supported", "passage": 1, "reason": "주력 생산품이 크롤러 크레인용 트랙슈 어셈블리 부품이라고 명시"}
+{"lid": "d09ab8e597", "label": "contradicted", "passage": 8, "reason": "6개 모델 중 5개 모델에 트랙슈를 공급하는 대상은 히타치건기이며 고마츠건기는 경쟁 생산사로만 언급"}
+{"lid": "f5a198514c", "label": "supported", "passage": 8, "reason": "히타치건기 6개 모델 중 180·250·360·550·800톤급 트랙슈 공급"}
+{"lid": "ae259e1576", "label": "supported", "passage": 7, "reason": "내수 17.5% 증가, 수출 20.9% 감소, 전체 13.7% 감소 그대로 기재"}
+{"lid": "7890643bac", "label": "no_evidence", "passage": null, "reason": "문단 7의 619억·717억·13.7%는 동일금속(당사) 수치이며 진성티이씨에 대한 문단은 없음"}
+{"lid": "e5b9fa0cf9", "label": "supported", "passage": 7, "reason": "2025년 매출 619억 원, 전년 717억 원 대비 13.7% 감소"}
+{"lid": "b6d3dadd4d", "label": "supported", "passage": 7, "reason": "2025년 매출 619억 원, 전년 717억 원 대비 13.7% 감소"}
+{"lid": "77105fa9c2", "label": "supported", "passage": 4, "reason": "사업현황 표에서 모든 동일금속 제품의 원재료가 고철·합금철"}
+{"lid": "a5e6edd402", "label": "supported", "passage": 4, "reason": "크롤러 크레인용 부품은 미국·일본으로 전량 수출"}
+{"lid": "15b66c7207", "label": "no_evidence", "passage": null, "reason": "문단 4의 전량 수출은 크롤러 크레인용 부품이며 타워 크레인용 부품은 언급 없음"}
+{"lid": "6ba83ad01f", "label": "supported", "passage": 4, "reason": "크롤러 크레인용 부품은 미국·일본으로 전량 수출"}
+{"lid": "36aa7b86e1", "label": "supported", "passage": 7, "reason": "크롤러크레인용 트랙슈 고철 비중이 2025·2024·2023년 모두 98%"}
+{"lid": "833497ab69", "label": "supported", "passage": 7, "reason": "크롤러크레인용 트랙슈 고철 비중이 2025·2024·2023년 모두 98%"}
+{"lid": "945ef0001a", "label": "no_evidence", "passage": null, "reason": "문단 7에 휠로더용 버킷은 없고 98%는 크롤러크레인용 트랙슈 값"}
+{"lid": "1655ab9543", "label": "contradicted", "passage": 5, "reason": "314,132,664원은 두 번째(전기) 열 값이며 당기 USD 10% 하락 시 효과는 402,323,881원 감소"}
+{"lid": "e36f2a893f", "label": "non_claim", "passage": null, "reason": "뒤 내용을 예고하는 도입 문장으로 사실 주장이 아님"}
+{"lid": "032f6beb72", "label": "contradicted", "passage": 5, "reason": "314,132,664원은 두 번째(전기) 열 값이며 당기 USD 10% 상승 시 효과는 402,323,881원 증가"}
+{"lid": "02b2f4419b", "label": "supported", "passage": 6, "reason": "(주)현대티엠씨: 굴삭기용 BOOM·ARM, 원재료 철판, 주요고객 볼보"}
+{"lid": "d995783e69", "label": "contradicted", "passage": 6, "reason": "(주)현대티엠씨의 주요고객은 볼보로 기재됨(얀마 아님)"}
+{"lid": "072ac69608", "label": "non_claim", "passage": null, "reason": "정보 부재를 알리는 면책성 문장"}

@@ -1,0 +1,5 @@
+{"lid": "42221cae83", "label": "non_claim", "passage": null, "reason": "공사수익 금액과 비중을 제시할 근거가 없다는 정보 부재 면책 문장이다."}
+{"lid": "6b8699bf41", "label": "supported", "passage": 4, "reason": "문단 4의 위험관리 및 파생거래에서 스테인리스 시장의 가격 등락과 변동성을 명시한다."}
+{"lid": "256366f454", "label": "non_claim", "passage": null, "reason": "생산능력 대비 생산실적과 가동률 정보를 제공할 수 없다는 정보 부재 면책 문장이다."}
+{"lid": "67c21e0824", "label": "no_evidence", "passage": null, "reason": "문단 2의 산업의 특성은 스테인리스 특성을, 문단 5의 산업의 성장성은 성장성을 설명하므로 한 문단이 전체 진술을 지지하지 않는다."}
+{"lid": "fff6e07c26", "label": "supported", "passage": 4, "reason": "문단 4가 시장 변동성의 원재료 매입가격·판매단가 등에 대한 영향을 지지하며, 생산실적·가동률 정보 부재 부분은 면책이다."}

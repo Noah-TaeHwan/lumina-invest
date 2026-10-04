@@ -1,0 +1,25 @@
+{"lid": "1f92735494", "label": "supported", "passage": 7, "reason": "문단 7: 전문의약품사업 주요제품 라이넥주, 주요 목표시장은 국내 영양수액 시장 및 만성 간질환 시장"}
+{"lid": "00628ea9ab", "label": "supported", "passage": 8, "reason": "문단 8: 현재 당사에서 영위 중인 전문의약품과 건강기능식품"}
+{"lid": "88db342af2", "label": "supported", "passage": 7, "reason": "문단 7: 라이넥주의 주요 목표시장은 국내 영양수액 시장 및 만성 간질환 시장"}
+{"lid": "283ac63261", "label": "contradicted", "passage": 7, "reason": "문단 7은 전문의약품 주요제품을 멜스몬주가 아니라 라이넥주로 적음"}
+{"lid": "11a4480386", "label": "supported", "passage": 7, "reason": "문단 7: 영양주사제 제품군의 주요거래처는 전국에 산재한 약 1만여개 병의원"}
+{"lid": "ac6a649595", "label": "no_evidence", "passage": null, "reason": "태반의 생리적 역할은 어느 문단에도 없음(세상 지식)"}
+{"lid": "c7693dc5c0", "label": "no_evidence", "passage": null, "reason": "태반주사제가 인체에서 태반 역할을 한다는 내용은 문단에 없음"}
+{"lid": "ef74e86c77", "label": "supported", "passage": 5, "reason": "문단 5: 생산·판매하는 영양주사제 제품군의 주요거래처는 전국 약 1만여개 병의원"}
+{"lid": "c3f4190a34", "label": "supported", "passage": 5, "reason": "문단 5: 영양주사제 제품군 주요거래처는 전국 약 1만여개 병의원(띄어쓰기만 다름)"}
+{"lid": "70145b8a9a", "label": "contradicted", "passage": 5, "reason": "문단 5는 주요거래처를 약국이 아니라 병의원으로 적음"}
+{"lid": "7f89373630", "label": "no_evidence", "passage": null, "reason": "태반 기능 모방·태반 역할 수행 내용은 문단에 없음"}
+{"lid": "68ad96a36c", "label": "no_evidence", "passage": null, "reason": "2,994억원/5,793억원 비중은 문단에 없는 계산값이며 전문의약품 제품·상품 매출도 문단에 없음"}
+{"lid": "19c74d1987", "label": "contradicted", "passage": 5, "reason": "문단 5: 지씨웰빙이부프로펜주 출시 예정일은 2027년 12월"}
+{"lid": "971de0eea3", "label": "supported", "passage": 5, "reason": "문단 5: 지씨웰빙나이아신주 자사개발, 출시 예정일 2026년 12월"}
+{"lid": "0ac33a5588", "label": "contradicted", "passage": 2, "reason": "문단 2의 판매비와 관리비는 5,793백만원(약 58억원)이고 1,662·1,342는 개발비·기타 연구개발비로 전문의약품 판관비가 아님"}
+{"lid": "8717891bd4", "label": "non_claim", "passage": null, "reason": "정보가 제공되지 않았다는 답변 불가 안내로 회사에 대한 사실 주장이 아님"}
+{"lid": "d1d25259c1", "label": "supported", "passage": 4, "reason": "문단 4: 2024년 5월 2일을 기해 일반건강기능식품 부문을 물적분할"}
+{"lid": "1e0d0cef56", "label": "no_evidence", "passage": null, "reason": "전환사채나 조기상환청구권·매도청구권은 어느 문단에도 없음"}
+{"lid": "61858d4ce6", "label": "supported", "passage": 4, "reason": "문단 4: 2024년 5월 2일을 기해 일반건강기능식품 부문을 물적분할"}
+{"lid": "f2552684c2", "label": "contradicted", "passage": 4, "reason": "문단 4는 같은 날 물적분할한 부문을 원료의약품이 아니라 일반건강기능식품으로 적음"}
+{"lid": "9ee93715ec", "label": "supported", "passage": 5, "reason": "문단 5: 인태반주사제 라이넥주는 국내 유일하게 2005년 MFDS 품목허가를 받은 태반제제"}
+{"lid": "9bec38961b", "label": "contradicted", "passage": 5, "reason": "문단 5는 2005년 허가받은 국내 유일 인태반주사제를 큐어센타주가 아니라 라이넥주로 적음"}
+{"lid": "7f2cdd1a9c", "label": "no_evidence", "passage": null, "reason": "정맥투여 임상 3상 내용은 보여 준 문단에 없음"}
+{"lid": "202d4d5475", "label": "supported", "passage": 5, "reason": "문단 5: 라이넥주는 국내 유일 2005년 식품의약품안전청 품목허가 태반제제"}
+{"lid": "367b16406c", "label": "no_evidence", "passage": null, "reason": "임상 성공 시 기대효과는 문단에 없음"}

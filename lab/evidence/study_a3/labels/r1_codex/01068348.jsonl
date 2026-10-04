@@ -1,0 +1,29 @@
+{"lid":"bda98abe5a","label":"supported","passage":8,"reason":"문단 8은 러셀과 종속회사의 사업부문을 반도체장비와 무인자동화시스템으로 명시한다."}
+{"lid":"69cce6c724","label":"supported","passage":8,"reason":"문단 8은 (주)러셀의 사업 개요에서 2025년 매출 비중을 반도체장비 62%, 무인자동화시스템 38%로 명시한다."}
+{"lid":"b2abbc9e12","label":"supported","passage":8,"reason":"문단 8에 러셀의 2025년 매출 구성비가 반도체장비 62%, 무인자동화시스템 38%로 제시되어 있다."}
+{"lid":"dc87b9eb43","label":"no_evidence","passage":null,"reason":"문단 8의 매출 비중은 러셀에 관한 것이며, 제시된 문단에는 원익IPS의 2025년 사업부문별 매출 비중이 없다."}
+{"lid":"d6f6690602","label":"supported","passage":8,"reason":"문단 8이 2025년 매출 중 반도체장비 62%와 무인자동화시스템 38%를 함께 명시한다."}
+{"lid":"3ba9879984","label":"no_evidence","passage":null,"reason":"PR 자동 충진 설비는 일부 지적재산권의 적용제품으로 나오지만, 종속회사가 개발·상용화한 무인자동화 물류로봇 제품군이라는 근거는 없다."}
+{"lid":"ae703cc6a3","label":"supported","passage":6,"reason":"문단 6은 반도체 장비 리퍼비시의 국내 판매가 SK하이닉스·매그나칩 등 대형 제조업체 대상 직접영업 및 판매라고 명시한다."}
+{"lid":"85c3862c0c","label":"no_evidence","passage":null,"reason":"문단 6의 직접영업 및 판매 설명은 반도체장비 부문에 관한 것이며, 디스플레이 장비 부문의 판매 방식은 제시되지 않았다."}
+{"lid":"3714bffe2f","label":"supported","passage":6,"reason":"문단 6에 반도체 장비 리퍼비시를 국내 SK하이닉스·매그나칩 등 대형 제조업체에 직접 영업해 판매한다는 내용이 있다."}
+{"lid":"c0d37b9bb8","label":"no_evidence","passage":null,"reason":"제시된 8개 문단에는 러셀의 2025년과 2024년 매출액 또는 전년 대비 매출 증감이 없다."}
+{"lid":"1c88f467d6","label":"no_evidence","passage":null,"reason":"문단 5는 해당 시장 규모 전망을 SEMI에 귀속하며, 가트너가 같은 전망을 내놓았다는 근거는 없다."}
+{"lid":"7f084030c5","label":"supported","passage":5,"reason":"문단 5는 SEMI에 따르면 2026년 글로벌 반도체 장비 시장 규모가 약 1,380억 달러로 전망된다고 명시한다."}
+{"lid":"eecaeb9529","label":"contradicted","passage":3,"reason":"문단 3의 116.8과 142.5는 생산능력이며, 생산실적은 2025년 127과 2024년 89로 주장과 다르다."}
+{"lid":"928b4143f2","label":"contradicted","passage":5,"reason":"시장 규모 전망은 일치하지만 문단 5는 SEMI를 국제 반도체 장비 산업 협회로 소개하여 주식회사라는 표기와 다르다."}
+{"lid":"0c956df320","label":"supported","passage":3,"reason":"문단 3은 가동률을 2025년 109%, 2024년 62%로 명시하여 전년보다 높다는 설명을 지지한다."}
+{"lid":"27e401c78f","label":"supported","passage":6,"reason":"문단 6에 러셀의 2025년 매출액 기준 반도체장비 부문 비중이 62%라고 명시되어 있다."}
+{"lid":"335595cb17","label":"no_evidence","passage":null,"reason":"문단 1에는 10% 하락시 음수 금액이 있으나 원화·외화의 변동 방향과 세후이익이라는 열 제목이 없어 주장 전체를 확인할 수 없다."}
+{"lid":"d2572ff84b","label":"supported","passage":6,"reason":"문단 6은 러셀의 반도체 장비 부문이 2025년 매출액의 62%를 차지한다고 명시한다."}
+{"lid":"bf10c39dff","label":"contradicted","passage":6,"reason":"문단 6에 러셀의 2025년 무인자동화시스템 부문 매출 비중은 38%로 명시되어 있어 62%라는 주장과 다르다."}
+{"lid":"7e398875dd","label":"no_evidence","passage":null,"reason":"문단 6의 반응챔버 특허는 권리자가 (주)러셀로 기재되어 있으며, 주성엔지니어링의 특허 등록과 적용에 관한 근거는 없다."}
+{"lid":"9e195c1deb","label":"no_evidence","passage":null,"reason":"해당 질문의 8개 문단에는 2020~2022년 연구개발비용이나 주장에 제시된 금액이 없다."}
+{"lid":"bffcd7c2a8","label":"non_claim","passage":null,"reason":"연구개발비용 항목을 소개하는 제목으로, 구체적인 사실을 주장하지 않는다."}
+{"lid":"b039603c16","label":"no_evidence","passage":null,"reason":"해당 질문의 문단에는 최근 3개 사업연도의 연구개발비용 추이나 매출액 대비 4.5~4.6%라는 비율이 없다."}
+{"lid":"ed57ab8ccb","label":"non_claim","passage":null,"reason":"매출액 대비 연구개발비 비율이라는 항목 제목이며, 수치나 변화를 주장하지 않는다."}
+{"lid":"d02cc330f7","label":"no_evidence","passage":null,"reason":"해당 질문의 8개 문단에는 2020년 매출액 대비 연구개발비 비율 4.6%를 확인할 근거가 없다."}
+{"lid":"806ac65f8d","label":"no_evidence","passage":null,"reason":"해당 질문의 8개 문단에는 2021년 매출액 대비 연구개발비 비율 4.6%를 확인할 근거가 없다."}
+{"lid":"8e109d02f7","label":"no_evidence","passage":null,"reason":"해당 질문의 8개 문단에는 2022년 매출액 대비 연구개발비 비율 4.5%를 확인할 근거가 없다."}
+{"lid":"c184e5676d","label":"non_claim","passage":null,"reason":"뒤에 이어질 연구개발비용과 비율 설명을 소개하는 안내 문장으로, 구체적인 변화 내용 자체는 주장하지 않는다."}
+{"lid":"6d15186946","label":"supported","passage":6,"reason":"문단 6은 반응챔버 특허의 권리자를 (주)러셀, 등록일을 2009/10/30, 적용제품을 Film 증착장비로 명시한다."}

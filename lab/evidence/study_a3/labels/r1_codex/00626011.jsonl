@@ -1,0 +1,31 @@
+{"lid": "4fa36d6d11", "label": "supported", "passage": 6, "reason": "문단 6은 국내 시스템 반도체 테스트 대표 업체 네 곳에 아이텍을 명시한다."}
+{"lid": "b2ac9c4a27", "label": "supported", "passage": 6, "reason": "문단 6의 대표 업체 목록에 아이텍이 있으며 법인 표기는 같은 주체를 가리킨다."}
+{"lid": "1bcd9ce60f", "label": "no_evidence", "passage": null, "reason": "반도체 테스트 부문은 문단 4, 인프라 운영 및 콜드체인 부문은 문단 7에 나뉘어 있어 한 문단이 모두 지지하지 않는다."}
+{"lid": "35e5aa9189", "label": "no_evidence", "passage": null, "reason": "네 대표 업체 목록은 시스템 반도체 테스트 분야에 관한 것으로 배터리 안전 관리 시스템 분야의 대표 업체 목록은 없다."}
+{"lid": "c14182e651", "label": "supported", "passage": 2, "reason": "문단 2는 에이티세미콘, 테스나, 지엠테스트, 아이텍을 국내 시스템 반도체 테스트 대표 업체로 열거한다."}
+{"lid": "8c65bb7606", "label": "no_evidence", "passage": null, "reason": "문단 2의 대표 업체 목록에는 아이텍이 기재되어 있으며 한미반도체에 관한 설명은 없다."}
+{"lid": "f82fc7ffce", "label": "no_evidence", "passage": null, "reason": "문단 2는 테스트 산업의 일반적 개발 능력 요건을 설명하며 아이텍이 해당 능력을 보유한다는 개별 사실은 명시하지 않는다."}
+{"lid": "6b1aa5f694", "label": "supported", "passage": 2, "reason": "문단 2는 아이텍을 에이티세미콘, 테스나, 지엠테스트와 함께 국내 시스템 반도체 테스트 대표 업체로 명시한다."}
+{"lid": "2dff20e975", "label": "supported", "passage": 2, "reason": "문단 2는 개발자의 기술과 경험이 테스트 품질에 영향을 주며 핵심 테스트 인력 보유가 큰 경쟁력이라고 설명한다."}
+{"lid": "d576ee93f0", "label": "supported", "passage": 7, "reason": "문단 7은 동우텍의 주요 사업으로 반도체 인프라 운영, 자재 공급 및 IoT 센서 기술을 접목한 콜드체인 솔루션을 명시한다."}
+{"lid": "a01287d77e", "label": "supported", "passage": 2, "reason": "문단 2의 2025년 반도체 테스트 매출은 37,637,224천원이고 비율은 77.6%이다."}
+{"lid": "dd811de8ff", "label": "no_evidence", "passage": null, "reason": "문단 7은 IoT 센서를 접목한 콜드체인 솔루션을 설명하며 스마트팜 솔루션 사업에 관한 근거는 없다."}
+{"lid": "1aa77046f3", "label": "supported", "passage": 5, "reason": "문단 5의 매출 합계에 2025년 48,517,802천원이 명시되어 있다."}
+{"lid": "abb36133c6", "label": "supported", "passage": 7, "reason": "문단 7은 동우텍이 반도체 인프라 운영과 자재 공급 및 IoT 센서 기술을 접목한 콜드체인 솔루션을 주요 사업으로 영위한다고 설명한다."}
+{"lid": "6b1c53984d", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에는 2021년과 2022년 패키지 테스트 가동률 및 감소 수치가 없다."}
+{"lid": "bcc7c50402", "label": "supported", "passage": 6, "reason": "문단 6은 비에이에너지의 배터리 세이프티 박스가 IP55 방진·방수 등급 인증을 받았다고 명시한다."}
+{"lid": "73fd249f3d", "label": "supported", "passage": 6, "reason": "문단 6은 ㈜비에이에너지의 배터리 세이프티 박스에 대한 IP55 방진·방수 등급 인증을 명시한다."}
+{"lid": "2715b32430", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에는 2021년과 2022년 웨이퍼 테스트 가동률 및 감소 수치가 없다."}
+{"lid": "803d5a72c7", "label": "non_claim", "passage": null, "reason": "다음 내용을 소개하는 도입문으로 구체적인 가동률이나 변화 내용을 주장하지 않는다."}
+{"lid": "c0a782420a", "label": "no_evidence", "passage": null, "reason": "문단 6의 IP55 인증 대상은 배터리 세이프티 박스이며 배터리 쿨링 캐비닛의 인증에 관한 설명은 없다."}
+{"lid": "58d07890ce", "label": "no_evidence", "passage": null, "reason": "문단 4는 경쟁수단을 열거할 뿐 가동률 감소 및 그 원인과의 인과관계는 제시하지 않는다."}
+{"lid": "3af423f669", "label": "supported", "passage": 3, "reason": "문단 3은 칩 설계 업체로부터 의뢰받은 제품의 웨이퍼·패키지 테스트 후 전량 해당 업체에 직접 납품한다고 명시한다."}
+{"lid": "cdfe0758ff", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 위험관리 및 파생거래 내용을 사업보고서 어느 항목에서 설명하는지에 대한 근거가 없다."}
+{"lid": "f5e124710f", "label": "no_evidence", "passage": null, "reason": "문단 3은 칩 설계 업체의 의뢰와 직접 납품을 설명하며 완성차 업체의 의뢰 및 납품에 관한 근거는 없다."}
+{"lid": "145d6a1013", "label": "supported", "passage": 3, "reason": "문단 3은 칩 설계 업체가 의뢰한 제품의 웨이퍼와 패키지 테스트를 마친 뒤 그 업체에 전량 직접 납품한다고 설명한다."}
+{"lid": "41010e3a1e", "label": "no_evidence", "passage": null, "reason": "기타 참고사항 문단들에는 질문의 위험관리 및 파생거래 내용을 해당 부분에서 설명한다는 근거가 없다."}
+{"lid": "18e653a619", "label": "supported", "passage": 6, "reason": "문단 6은 고객사의 의뢰로 연간 100여 건의 테스트 프로그램을 개발한다고 명시한다."}
+{"lid": "640d60d211", "label": "supported", "passage": 6, "reason": "문단 6의 고객사 의뢰에 따른 연간 100여 건의 테스트 프로그램 개발과 같은 내용이며 Program은 프로그램과 같은 뜻이다."}
+{"lid": "00fe3a8794", "label": "no_evidence", "passage": null, "reason": "문단 6의 연간 100여 건은 테스트 프로그램 개발 건수이며 배터리 안전 관리 시스템 개발 건수는 제시되지 않는다."}
+{"lid": "1198f75366", "label": "supported", "passage": 6, "reason": "문단 6의 연구개발 담당조직 업무 영역에 전수 검사 프로그램, 온도·DC/AC 검토 프로그램, 양산 데이터 분석, 자체 분석 프로그램 및 특이 사항 분석이 모두 명시되어 있다."}
+{"lid": "641475402f", "label": "supported", "passage": 6, "reason": "문단 6은 고객사의 의뢰에 따라 연간 100여 건의 테스트 프로그램을 개발한다고 명시한다."}

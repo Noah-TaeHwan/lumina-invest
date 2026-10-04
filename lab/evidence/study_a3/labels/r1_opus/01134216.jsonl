@@ -1,0 +1,37 @@
+{"lid": "c56e258553", "label": "supported", "passage": 4, "reason": "문단 4가 관공서를 주 고객으로 하는 조달사업 부문이 공공 방범 조달 시장에 적합한 제품을 개발·공급한다고 적음"}
+{"lid": "5f1d7ec7e7", "label": "contradicted", "passage": 4, "reason": "문단 4는 관공서를 주 고객으로 하는 부문을 조달사업 부문으로 적음. 트루엔의 해당 부문 명칭이 다름(트루엔의 X 형태 교체는 contradicted로 통일)"}
+{"lid": "1ca08bceef", "label": "supported", "passage": 7, "reason": "잘린 문장이지만 남은 사실(공공기관·공기업 SI 사업 수행, 적합한 모델 제안 노력)을 문단 7이 지지"}
+{"lid": "04f9865c71", "label": "supported", "passage": 4, "reason": "문단 4의 판매 전략 핵심 고객지향, 개발초기 요구 반영, 피드백 수렴 내용과 일치"}
+{"lid": "60d49c5034", "label": "supported", "passage": 1, "reason": "문단 1이 하드웨어 설계·펌웨어 개발 기술 보유와 핵심 부품 출시 시 경쟁사보다 빠른 신제품 개발 기술력을 적음"}
+{"lid": "bd4262a069", "label": "supported", "passage": 1, "reason": "문단 1의 베이비 모니터링 평가, 호흡 모니터링 특허, 온습도 기능 적용 내용과 일치"}
+{"lid": "029ceb0ee6", "label": "supported", "passage": 1, "reason": "문단 1이 설립 이후 IP 기반 영상감시시스템 분야에서 기술을 축적해 왔다고 적음"}
+{"lid": "ef7108febc", "label": "supported", "passage": 4, "reason": "문단 4가 관공서를 주 고객으로 하는 조달사업 부문이 공공 방범 조달 시장에 적합한 제품을 개발·공급한다고 적음"}
+{"lid": "67954f9185", "label": "no_evidence", "passage": null, "reason": "IoT 브랜드 제품군을 IP카메라·Zoom Block·영상스트리밍 솔루션으로 구성한다는 문단 없음(문단 6은 품목별 판매경로일 뿐)"}
+{"lid": "3808215a83", "label": "supported", "passage": 3, "reason": "문단 3이 EGLOO IoT 솔루션의 기기·모바일 앱·클라우드 서비스를 모두 자체 개발해 직접 운영한다고 적음"}
+{"lid": "17b01e4784", "label": "contradicted", "passage": 3, "reason": "문단 3은 트루엔이 자체 개발·운영하는 IoT 솔루션을 EGLOO로 적음. 솔루션명이 다름"}
+{"lid": "5cb8af9a67", "label": "no_evidence", "passage": null, "reason": "보안 강화·영상 감시·스트리밍 용도를 한 문단이 모두 지지하지 않음(문단 1과 6을 합쳐야 함)"}
+{"lid": "3ff3fda482", "label": "supported", "passage": 3, "reason": "트루 엔은 트루엔 표기 변형. 문단 3이 EGLOO IoT 솔루션의 기기·앱·클라우드를 자체 개발·직접 운영한다고 적음"}
+{"lid": "12c7c1c178", "label": "supported", "passage": 7, "reason": "문단 7이 국내 공공보안 요구사항인 TTA(한국정보통신기술협회)의 성능 및 보안 인증 제정에 적극 참여했다고 적음"}
+{"lid": "19f73cde1d", "label": "non_claim", "passage": null, "reason": "다음과 같다는 도입 문장으로 사실 주장이 아님"}
+{"lid": "654c349730", "label": "no_evidence", "passage": null, "reason": "IP 카메라 매출 1,143억 원과 12.6% 증가는 어느 문단에도 없음"}
+{"lid": "fbba62e14c", "label": "no_evidence", "passage": null, "reason": "IP 카메라 매출 비중 93.1%와 1.1%p 증가는 어느 문단에도 없음"}
+{"lid": "36e63087e1", "label": "supported", "passage": 7, "reason": "문단 7이 TTA의 성능 및 보안 인증 제정에 적극 참여했다고 적음"}
+{"lid": "822ddd5a31", "label": "contradicted", "passage": 7, "reason": "문단 7은 해당 성능·보안 인증 주체를 TTA(한국정보통신기술협회)로 적음. 한국인터넷진흥원이 아님"}
+{"lid": "0f83ec62f1", "label": "non_claim", "passage": null, "reason": "정보를 찾을 수 없다는 면책 문장"}
+{"lid": "c1bed8780e", "label": "supported", "passage": 1, "reason": "트루 엔은 트루엔 표기 변형. 문단 1 표의 부채비율 전기말 6.44%, 당기말 4.62%와 일치"}
+{"lid": "c1bd09998b", "label": "supported", "passage": 3, "reason": "문단 3이 기능통화인 원화 외 통화로 표시되는 판매·구매에 대해 환위험에 노출되어 있다고 적음"}
+{"lid": "98bcb45f9f", "label": "non_claim", "passage": null, "reason": "다음과 같이 계산할 수 있다는 절차 안내 문장"}
+{"lid": "7d61fe97d1", "label": "no_evidence", "passage": null, "reason": "환위험 노출액 계산식은 어느 문단에도 없음"}
+{"lid": "4e45cfd470", "label": "non_claim", "passage": null, "reason": "정확한 금액이 제공되지 않았다는 면책 문장"}
+{"lid": "a1f44061d9", "label": "no_evidence", "passage": null, "reason": "장부금액에 10%를 곱하는 계산식은 어느 문단에도 없음"}
+{"lid": "ce2e37f1f2", "label": "no_evidence", "passage": null, "reason": "문단의 부채비율은 당사(트루엔) 수치이며 아이디스에 대한 문단은 없음"}
+{"lid": "60d36d4127", "label": "supported", "passage": 1, "reason": "문단 1 표의 부채비율 전기말 6.44%, 당기말 4.62%와 일치"}
+{"lid": "5f78039d66", "label": "non_claim", "passage": null, "reason": "문단 표지 조각으로 사실 주장이 아님"}
+{"lid": "39347cfeb4", "label": "supported", "passage": 5, "reason": "문단 5의 문장과 동일"}
+{"lid": "e5c69123ff", "label": "supported", "passage": 5, "reason": "문단 5가 공공기관·공기업 SI 사업이 스마트시티·국방·교통·재난재해로 확장되고 있다고 적음"}
+{"lid": "3a8f511ef3", "label": "non_claim", "passage": null, "reason": "문단 표지 조각으로 사실 주장이 아님"}
+{"lid": "0eb43dbb26", "label": "supported", "passage": 5, "reason": "문단 5가 공공기관·공기업 시스템 통합 사업에 적합한 모델 제안을 위해 고객 수요에 맞는 제품군을 개발한다고 적음"}
+{"lid": "895c40d7c0", "label": "contradicted", "passage": 5, "reason": "문단 5는 해당 사업을 시스템 통합(SI) 사업으로 적음. 스마트팩토리 사업이 아님"}
+{"lid": "5ba0631114", "label": "supported", "passage": 5, "reason": "문단 5가 공공기관·공기업 SI 사업에 적합한 모델 제안을 위해 고객 수요에 맞는 제품군을 개발한다고 적음"}
+{"lid": "0b572e850d", "label": "supported", "passage": 5, "reason": "문단 5의 문장과 동일"}
+{"lid": "674989d98a", "label": "supported", "passage": 4, "reason": "잘린 문장이지만 남은 사실(이사회 검토·승인, 재무부서 주관, 영업부서와 협조)을 문단 4가 지지"}

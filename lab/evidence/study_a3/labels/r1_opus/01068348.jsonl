@@ -1,0 +1,29 @@
+{"lid": "bda98abe5a", "label": "supported", "passage": 8, "reason": "문단 8이 사업부문을 반도체장비와 무인자동화시스템으로 제시"}
+{"lid": "69cce6c724", "label": "supported", "passage": 8, "reason": "문단 8: 당사((주)러셀) 2025년 매출액 기준 반도체장비 62%, 무인자동화시스템 38%"}
+{"lid": "b2abbc9e12", "label": "supported", "passage": 8, "reason": "문단 8: 2025년 매출액 기준 반도체장비 62%, 무인자동화시스템 38%"}
+{"lid": "dc87b9eb43", "label": "no_evidence", "passage": null, "reason": "문단은 러셀의 비중을 말하며 원익IPS에 관한 문단은 없음"}
+{"lid": "d6f6690602", "label": "supported", "passage": 8, "reason": "문단 8: 2025년 매출액 기준 반도체장비 62%, 무인자동화시스템 38%"}
+{"lid": "3ba9879984", "label": "no_evidence", "passage": null, "reason": "문단에 종속회사의 물류로봇 제품군 언급 없음; PR 자동 충진 설비는 (주)러셀 특허 적용제품일 뿐"}
+{"lid": "ae703cc6a3", "label": "supported", "passage": 6, "reason": "문단 6: 반도체 장비 리퍼비시 국내 판매는 SK하이닉스, 매그나칩 등 대형 반도체 제조업체 중심 직접영업"}
+{"lid": "85c3862c0c", "label": "no_evidence", "passage": null, "reason": "디스플레이 장비 부문은 문단에 없음; 문단 6은 반도체 장비 부문에 관한 내용"}
+{"lid": "3714bffe2f", "label": "supported", "passage": 6, "reason": "문단 6: 반도체 장비 리퍼비시 국내 판매는 SK하이닉스, 매그나칩 등 대상 직접영업·판매"}
+{"lid": "c0d37b9bb8", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 2024·2025년 매출액 비교 정보 없음"}
+{"lid": "1c88f467d6", "label": "no_evidence", "passage": null, "reason": "문단 5는 SEMI의 전망이라 하며 가트너의 전망은 문단에 없음"}
+{"lid": "7f084030c5", "label": "supported", "passage": 5, "reason": "문단 5: SEMI에 따르면 2026년 글로벌 반도체 장비 시장 약 1,380억 달러 전망"}
+{"lid": "eecaeb9529", "label": "contradicted", "passage": 3, "reason": "116.8·142.5는 생산능력 수치이고, 생산실적/생산능력(가동율)은 2025년 109%로 2024년 62%보다 높음"}
+{"lid": "928b4143f2", "label": "no_evidence", "passage": null, "reason": "문단 5의 SEMI는 국제 반도체 장비 산업 협회이며 (주)SEMI라는 주체는 문단에 없음"}
+{"lid": "0c956df320", "label": "supported", "passage": 3, "reason": "문단 3: 가동율 2025년 109%, 2024년 62%"}
+{"lid": "27e401c78f", "label": "supported", "passage": 6, "reason": "문단 6: 2025년 매출액 기준 반도체장비 부문 62%"}
+{"lid": "335595cb17", "label": "no_evidence", "passage": null, "reason": "문단 1에 10% 하락시 (1,875,899,862) 수치는 있으나 표 머리(원화/외화 방향, 세후이익 여부)가 보이지 않아 확인 불가"}
+{"lid": "d2572ff84b", "label": "supported", "passage": 6, "reason": "문단 6: 2025년 매출액 기준 반도체장비 부문 62%"}
+{"lid": "bf10c39dff", "label": "contradicted", "passage": 6, "reason": "문단 6: 무인자동화시스템 부문은 38%, 62%는 반도체장비 부문"}
+{"lid": "7e398875dd", "label": "no_evidence", "passage": null, "reason": "문단 6의 해당 특허 권리자는 (주)러셀이며 주성엔지니어링은 문단에 없음"}
+{"lid": "9e195c1deb", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 연도별 연구개발비용 금액 없음"}
+{"lid": "bffcd7c2a8", "label": "non_claim", "passage": null, "reason": "항목 제목일 뿐 사실 주장 아님"}
+{"lid": "b039603c16", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 연구개발비용 추이나 매출액 대비 비율 없음"}
+{"lid": "ed57ab8ccb", "label": "non_claim", "passage": null, "reason": "항목 제목일 뿐 사실 주장 아님"}
+{"lid": "d02cc330f7", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 2020년 연구개발비 비율 없음"}
+{"lid": "806ac65f8d", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 2021년 연구개발비 비율 없음"}
+{"lid": "8e109d02f7", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 2022년 연구개발비 비율 없음"}
+{"lid": "c184e5676d", "label": "non_claim", "passage": null, "reason": "뒤 내용을 예고하는 도입 문장"}
+{"lid": "6d15186946", "label": "supported", "passage": 6, "reason": "문단 6: 화학기상증착장치의반응챔버 특허, 권리자 (주)러셀, 등록일 2009/10/30, 적용제품 Film 증착장비"}

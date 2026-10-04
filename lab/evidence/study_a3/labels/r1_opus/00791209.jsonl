@@ -1,0 +1,44 @@
+{"lid": "9e2985748c", "label": "supported", "passage": 2, "reason": "사업부문 현황 표에서 의료서비스 컨설팅 부문 회사로 모모랩스·모모부산·모모대구·모모수원을 적었다"}
+{"lid": "0ff4f37269", "label": "no_evidence", "passage": null, "reason": "표는 주요 제품을 'MSO 등'이라고만 적고 '메디컬 서비스 오퍼레이터'라는 풀이는 어느 문단에도 없다"}
+{"lid": "efbfeb9bda", "label": "supported", "passage": 2, "reason": "표에서 부동산개발사업의 주요 제품 및 서비스가 비거주용 건물 임대 및 관리 등이다"}
+{"lid": "234ec51140", "label": "supported", "passage": 2, "reason": "사업부문 현황 표에 의약품·메디컬·부동산개발사업·의료서비스 컨설팅 네 부문이 나온다"}
+{"lid": "f2415a3825", "label": "contradicted", "passage": 7, "reason": "2024년 8월에 주식 전량을 인수한 회사는 태영프라퍼티가 아니라 (주)메타프라임이다"}
+{"lid": "333d50e6df", "label": "supported", "passage": 7, "reason": "헬스케어사업 인프라 확대를 위해 2024년 8월 (주)메타프라임 주식 전량을 인수했다"}
+{"lid": "2e22849a32", "label": "supported", "passage": 2, "reason": "표에서 의약품 부문의 주요 제품이 의약품이다"}
+{"lid": "1ca2e0d43c", "label": "supported", "passage": 2, "reason": "표에서 메디컬 부문의 주요 제품이 의료기기와 의료용품이다"}
+{"lid": "5cfbc6d525", "label": "supported", "passage": 7, "reason": "헬스케어사업 인프라 확대를 위해 2024년 8월 (주)메타프라임 주식 전량을 인수했다"}
+{"lid": "4563bcdbe1", "label": "supported", "passage": 8, "reason": "메디컬사업부문이 정형외과 병원에 맞춘 공급시스템을 갖추고 인공관절을 주로 납품한다"}
+{"lid": "ec607a159f", "label": "supported", "passage": 8, "reason": "메디컬사업부문이 정형외과 병원에 맞춘 공급시스템을 갖추고 인공관절을 주로 납품한다"}
+{"lid": "665b1abf78", "label": "contradicted", "passage": 1, "reason": "표에서 의약품 부문의 주요 제품은 의약품이고, 인공관절 납품은 메디컬사업부문의 일이다(문단 8)"}
+{"lid": "0aa9db09b0", "label": "non_claim", "passage": null, "reason": "'다음과 같습니다'로 끝나는 깨진 도입문이라 사실을 주장하지 않는다"}
+{"lid": "ee4cd8d0ec", "label": "supported", "passage": 8, "reason": "메디컬사업부문은 인공관절을 주로 납품한다"}
+{"lid": "dfa1e8084b", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 부문별 매출액이나 비중이 없다"}
+{"lid": "39ff00beca", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 부문별 매출 비중이 없다"}
+{"lid": "fd7e243669", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 부문별 매출 비중이 없다"}
+{"lid": "123e6b3248", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 부문별 매출 비중이 없다"}
+{"lid": "a8d2d1025c", "label": "non_claim", "passage": null, "reason": "'다음과 같습니다'로 끝나는 도입문이다"}
+{"lid": "8159318ff6", "label": "supported", "passage": 4, "reason": "의약품·메디컬·부동산개발사업 부문으로 구성된다는 본문 서술이 있고, 표는 회사를 (주)메타케어로 적었다"}
+{"lid": "2cf65d7f9b", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 부문별 매출 비중이 없다"}
+{"lid": "3d03a116d3", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 부문별 매출액이나 비중이 없다"}
+{"lid": "9d59123cbd", "label": "non_claim", "passage": null, "reason": "'다음과 같습니다'로 끝나는 도입문이다"}
+{"lid": "11f7c3b7b5", "label": "no_evidence", "passage": null, "reason": "문단에는 지오영에 관한 내용이 없고, 세 부문 구성은 (주)메타케어(당사)의 이야기다"}
+{"lid": "4a890d6508", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 부문별 매출액이나 비중이 없다"}
+{"lid": "e0beb9fefc", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 부문별 매출액이나 비중이 없다"}
+{"lid": "3963c93d8e", "label": "supported", "passage": 5, "reason": "부동산개발사업부문으로 다각화했고, 메타프라임·모모랩스·모모부산·모모대구·모모수원 등 비상장 종속회사 다섯 곳을 둔다"}
+{"lid": "207d0328a7", "label": "supported", "passage": 5, "reason": "부동산개발사업부문으로 다각화했고, 메타프라임을 포함한 비상장 종속회사 다섯 곳을 둔다"}
+{"lid": "d3cbb53298", "label": "contradicted", "passage": 5, "reason": "사업 다각화는 호텔레저사업부문이 아니라 부동산개발사업부문으로 했다"}
+{"lid": "421ea8b059", "label": "non_claim", "passage": null, "reason": "정보가 없다는 면책성 문장이다"}
+{"lid": "1c6599ffd0", "label": "non_claim", "passage": null, "reason": "문단 표지 조각이라 사실 주장이 아니다"}
+{"lid": "b78444654a", "label": "non_claim", "passage": null, "reason": "목차 표지 조각이라 사실 주장이 아니다"}
+{"lid": "3c2b46226f", "label": "supported", "passage": 5, "reason": "화성본사 거점, 서울·잠원·서초지점 구성, 부동산개발사업부문을 통한 다각화가 원문 그대로 있다"}
+{"lid": "4494ddacf3", "label": "contradicted", "passage": 2, "reason": "표에서 1% 하락 시 순자산(이자비용) 영향은 +160,000이다(상승 시 (160,000)). 부호가 반대다"}
+{"lid": "76d9d96d31", "label": "contradicted", "passage": 2, "reason": "표에서 1% 상승 시 영향은 (160,000), 즉 음수다. 부호가 반대다"}
+{"lid": "837e4dfafb", "label": "non_claim", "passage": null, "reason": "'다음과 같습니다'로 끝나는 도입문이다"}
+{"lid": "c72c61589d", "label": "supported", "passage": 2, "reason": "종속기업 메타프라임의 변동금리부 차입금은 이자율스왑으로 헷지되어 이자율 변동위험에 노출되지 않는다"}
+{"lid": "5b159690a7", "label": "supported", "passage": 2, "reason": "종속기업(메타프라임)의 변동금리부 차입금은 이자율스왑으로 헷지되어 이자율 변동위험에 노출되지 않는다"}
+{"lid": "19665c420f", "label": "contradicted", "passage": 2, "reason": "헤지 수단은 통화스왑이 아니라 이자율스왑이다"}
+{"lid": "1261de9549", "label": "supported", "passage": 2, "reason": "메타프라임의 변동금리부 차입금은 이자율스왑으로 헷지되어 이자율 변동위험에 노출되지 않는다(띄어쓰기 차이만 있음)"}
+{"lid": "eabf122332", "label": "supported", "passage": 7, "reason": "의료기기시장 주도권을 얻으려고 2021년 3월 (주)에이치바이오앤컴퍼니 주식 전량을 인수했다"}
+{"lid": "ea2bc514e6", "label": "supported", "passage": 7, "reason": "2021년 3월 (주)에이치바이오앤컴퍼니 주식 전량을 인수했다"}
+{"lid": "d19b230ca1", "label": "non_claim", "passage": null, "reason": "문단 표지 조각이라 사실 주장이 아니다"}
+{"lid": "5dc6a5eab3", "label": "contradicted", "passage": 7, "reason": "2021년 3월에 인수한 회사는 메디플러스솔루션이 아니라 (주)에이치바이오앤컴퍼니다"}

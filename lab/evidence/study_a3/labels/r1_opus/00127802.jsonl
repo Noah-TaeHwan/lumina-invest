@@ -1,0 +1,25 @@
+{"lid": "dbebe298b5", "label": "supported", "passage": 1, "reason": "문단 1이 1989년 9월 26일 유가증권시장 상장을 명시한다."}
+{"lid": "f27c09b218", "label": "contradicted", "passage": 1, "reason": "문단 1은 설립 목적을 LM가이드가 아니라 수공용 줄 생산·판매로 적는다."}
+{"lid": "6c1be18dad", "label": "supported", "passage": 1, "reason": "문단 1이 1965년 10월 5일 설립과 수공용 줄 생산·판매 목적을 명시한다."}
+{"lid": "3260d1c9db", "label": "supported", "passage": 1, "reason": "문단 1이 1965년 수공용 줄 생산·판매 목적 설립을 명시하고 약칭 삼익THK(주)도 적는다."}
+{"lid": "4792e920cf", "label": "supported", "passage": 1, "reason": "문단 1이 1965년 수공용 줄 생산·판매 목적 설립을 명시한다."}
+{"lid": "ea88a6ebd7", "label": "supported", "passage": 7, "reason": "문단 7이 솔루션 부문(스마트 팩토리 및 로봇 기술), 현장 적용 경험 기반 최적 설계, 로봇 기술 초격차 유지를 모두 적는다."}
+{"lid": "8e328128c5", "label": "no_evidence", "passage": null, "reason": "문단은 삼익THK에 관한 것이며 현대위아의 솔루션사업부문에 대한 내용은 없다."}
+{"lid": "c9241d50d4", "label": "supported", "passage": 3, "reason": "문단 3 표가 솔루션사업부문 주요제품을 트랜스퍼 로봇, 빅데이터 기반 이력 관리시스템, 스마트 팩토리로 적는다."}
+{"lid": "64205831b0", "label": "supported", "passage": 3, "reason": "문단 3 표가 솔루션사업부문 주요제품을 트랜스퍼 로봇, 빅데이터 기반 이력 관리시스템, 스마트 팩토리로 적는다."}
+{"lid": "5cc6138b92", "label": "no_evidence", "passage": null, "reason": "문단 5는 주요제품 명칭만 나열할 뿐 품목별 매출 비중이나 최대 품목은 말하지 않는다."}
+{"lid": "8fd722c81a", "label": "supported", "passage": 5, "reason": "문단 5가 2025년 매출 2,222억원 달성을 명시한다."}
+{"lid": "2b49376bc6", "label": "contradicted", "passage": 7, "reason": "문단 7 표에서 원재료 매입액의 97.28%는 리니어모터가 아니라 LM시스템 품목이다."}
+{"lid": "6d7049703a", "label": "supported", "passage": 8, "reason": "문단 8 표가 계약 주요내용 순매출액×2% 로얄티 지급, 대금수수방법 매반기 지불을 적는다."}
+{"lid": "b01af16433", "label": "supported", "passage": 7, "reason": "문단 7 표에서 원재료 LM시스템 품목 비율이 97.28%다."}
+{"lid": "37cf6316c8", "label": "no_evidence", "passage": null, "reason": "문단 7 표 비고에 'THK 외'가 있을 뿐 LM가이드 원소재를 주로 THK에서 조달한다는 진술은 없다."}
+{"lid": "38a271ca92", "label": "supported", "passage": 7, "reason": "문단 7 표에서 원재료 LM시스템 품목 비율이 97.28%다."}
+{"lid": "b38ab8c47a", "label": "supported", "passage": 4, "reason": "문단 4가 일본 THK사와의 합작을 통해 LM시스템 제품군을 국산화했다고 적는다."}
+{"lid": "78c143f75c", "label": "contradicted", "passage": 4, "reason": "문단 4는 합작 상대를 NSK사가 아니라 일본 THK사로 적는다."}
+{"lid": "ee21cd9544", "label": "supported", "passage": 4, "reason": "문단 4가 일본 THK사와의 합작을 통해 LM시스템 제품군을 국산화했다고 적는다."}
+{"lid": "e40b4659d1", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에는 환위험 관리용 파생상품 계약 유무에 대한 내용이 없다."}
+{"lid": "41e703b576", "label": "supported", "passage": 5, "reason": "문단 5 표가 모션사업부문 주요제품을 LM가이드, 볼나사, 줄로 적는다."}
+{"lid": "0ba895eabe", "label": "contradicted", "passage": 5, "reason": "문단 5 표에서 LM가이드·볼나사·줄은 모션사업부문 제품이고 솔루션사업부문 주요제품은 트랜스퍼 로봇 등이다."}
+{"lid": "3ef7023e5f", "label": "non_claim", "passage": null, "reason": "정보가 제공되지 않았다는 면책성 문장으로 회사에 대한 사실 주장이 아니다."}
+{"lid": "853ce27132", "label": "supported", "passage": 5, "reason": "문단 5 표가 모션사업부문 주요제품을 LM가이드, 볼나사, 줄로 적으며 SAMICK THK CO., LTD는 당사의 영문 명칭이다."}
+{"lid": "d31682e5e6", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에는 기술도입계약 상대방이 없고 문단 5의 THK사 합작은 LM가이드·볼나사 기술도입계약과 다른 사실이다."}

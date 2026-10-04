@@ -1,0 +1,44 @@
+{"lid": "4fd503bd57", "label": "supported", "passage": 6, "reason": "사업의 개요 표에 (주)팬에프앤비의 주요 사업이 외식 사업으로 적혀 있다."}
+{"lid": "1b80a81bbd", "label": "contradicted", "passage": 2, "reason": "문단은 과거 투자에 참여한 박찬욱 감독 영화를 「아가씨」로 적었는데, 주장은 「올드보이」로 바꿨다."}
+{"lid": "1d08e99da1", "label": "supported", "passage": 2, "reason": "과거 박찬욱 감독의 영화 「아가씨」 투자에 참여했다고 적혀 있다."}
+{"lid": "881a3a67a9", "label": "supported", "passage": 6, "reason": "부가사업으로 음반·영화 등 방송영상물제작사업과 기타 외식사업이 있다고 적혀 있다."}
+{"lid": "f2b8b18608", "label": "supported", "passage": 6, "reason": "연결실체의 주요 제품이 드라마콘텐츠이고 이를 방송국·미디어 플랫폼·해외시장에 공급한다고 적혀 있다."}
+{"lid": "f6d2400001", "label": "supported", "passage": 2, "reason": "당사가 과거 박찬욱 감독의 영화 「아가씨」 투자에 참여했다고 적혀 있다."}
+{"lid": "fe9be6d5a3", "label": "supported", "passage": 6, "reason": "사업의 개요 표에 (주)미디어캐슬의 주요 사업이 영화 배급으로 적혀 있다."}
+{"lid": "6f89704815", "label": "non_claim", "passage": null, "reason": "뒤 내용을 소개하는 연결 문장이라 사실 주장이 아니다."}
+{"lid": "768eccd204", "label": "supported", "passage": 6, "reason": "연도별 방영 드라마 표에 2002년 KBS 미니시리즈 「겨울연가」가 20회로 적혀 있다."}
+{"lid": "9dda028317", "label": "no_evidence", "passage": null, "reason": "오지영 작가 작품은 계약작가 목록에만 나오고, 당기 매출 출처를 밝힌 문단은 없다."}
+{"lid": "39594f8f65", "label": "supported", "passage": 6, "reason": "연도별 방영 드라마 표에 2002년 KBS 미니시리즈 「겨울연가」가 20회로 적혀 있다."}
+{"lid": "1fa5ddaed0", "label": "contradicted", "passage": 6, "reason": "표에는 「겨울연가」 방송사가 KBS로 적혀 있는데, 주장은 MBC라고 했다."}
+{"lid": "206dacc3e3", "label": "supported", "passage": 2, "reason": "[1. 사업의 개요]에 주요 제품이 드라마콘텐츠이고 방송국·미디어 플랫폼·해외시장에 공급한다고 적혀 있다."}
+{"lid": "93c4940689", "label": "no_evidence", "passage": null, "reason": "내용은 [2. 주요 제품 및 서비스](문단 5)에 있다. 주장은 이를 위험관리 및 파생거래 절의 내용이라고 했지만 그 절(문단 3·4)에는 이 내용이 없다."}
+{"lid": "729b91d6be", "label": "non_claim", "passage": null, "reason": "뒤 내용을 소개하는 연결 문장이다."}
+{"lid": "d60f30f9ec", "label": "no_evidence", "passage": null, "reason": "수출 매출을 어떻게 정의하는지나 수출 매출 금액을 적은 문단이 없다."}
+{"lid": "6f31a2d384", "label": "supported", "passage": 2, "reason": "(주)미디어캐슬이 해외영화와 애니메이션을 수입해 배급한다고 적혀 있다."}
+{"lid": "757e9a6d57", "label": "no_evidence", "passage": null, "reason": "당기 매출을 수출과 내수로 나눈 내용을 적은 문단이 없다."}
+{"lid": "ba0ccd54f6", "label": "no_evidence", "passage": null, "reason": "내용은 [2. 주요 제품 및 서비스](문단 5)에 있다. 주장은 이를 사업의 개요 절의 내용이라고 했지만 그 절(문단 2)에는 이 문장이 없다."}
+{"lid": "9ae8a1391b", "label": "contradicted", "passage": 2, "reason": "해외 영화·애니메이션 수입 배급은 (주)미디어캐슬의 사업이고, (주)팬에프앤비의 사업은 외식 사업으로 적혀 있다."}
+{"lid": "67945e1738", "label": "no_evidence", "passage": null, "reason": "내수 매출을 어떻게 정의하는지나 내수 매출 금액을 적은 문단이 없다."}
+{"lid": "703e9bb0b7", "label": "supported", "passage": 2, "reason": "[1. 사업의 개요]에 드라마콘텐츠를 기획·제작해 공급하는 방송영상물제작사업이 적혀 있다."}
+{"lid": "3ad42fc4a0", "label": "supported", "passage": 3, "reason": "당사가 드라마 OST 제작을 중심으로 음반 사업을 한다고 적혀 있다."}
+{"lid": "231edd1fb1", "label": "no_evidence", "passage": null, "reason": "문단들은 당사(팬엔터테인먼트)만 다루고, 삼화네트웍스 이야기는 없다."}
+{"lid": "46a6c605e7", "label": "no_evidence", "passage": null, "reason": "제작 인력 급여 같은 제작 비용 구조를 적은 문단이 없다."}
+{"lid": "361e27a948", "label": "supported", "passage": 3, "reason": "당사가 드라마 OST 제작을 중심으로 음반 사업을 한다고 적혀 있다."}
+{"lid": "84cb2f6ef0", "label": "non_claim", "passage": null, "reason": "주어진 정보로는 답할 수 없다고 밝히는 면책 문장이다."}
+{"lid": "839af05ef1", "label": "supported", "passage": 8, "reason": "음반사업의 OST는 드라마와 함께 노출되므로 대규모 홍보비 없이도 홍보 효과를 볼 수 있다고 적혀 있다."}
+{"lid": "1095377fd8", "label": "supported", "passage": 8, "reason": "음반사업의 OST는 드라마와 함께 노출되므로 대규모 홍보비 없이도 홍보 효과를 볼 수 있다고 적혀 있다."}
+{"lid": "1f6e1a54d5", "label": "contradicted", "passage": 8, "reason": "문단은 OST 홍보 효과를 음반사업의 특성으로 적었는데, 주장은 게임사업이라고 했다."}
+{"lid": "6a5a72d1fc", "label": "non_claim", "passage": null, "reason": "주어진 정보로는 답할 수 없다고 밝히는 면책 문장이다."}
+{"lid": "3017678098", "label": "non_claim", "passage": null, "reason": "뒤 내용을 소개하는 연결 문장이다."}
+{"lid": "f876e49cf9", "label": "no_evidence", "passage": null, "reason": "방송영상·음반·영화 세 사업을 한 문단이 함께 적고 있지 않다. 문단 1, 3, 8을 합쳐야 한다."}
+{"lid": "3eebd4b54e", "label": "no_evidence", "passage": null, "reason": "문단 6은 정부가 콘텐츠 산업을 지원한다는 내용만 있고, 당사가 이 정책에 참여한다는 말은 없다."}
+{"lid": "ce346ceda0", "label": "supported", "passage": 2, "reason": "방송사·OTT 플랫폼과 협력해 콘텐츠를 공급하고, 글로벌 OTT·해외 유통사를 통해 해외에 드라마를 공급한다고 적혀 있다."}
+{"lid": "2ca1d24e25", "label": "supported", "passage": 3, "reason": "당사가 영화 제작, 투자 및 배급 등 영화 관련 사업을 추진한다고 적혀 있다."}
+{"lid": "9892068ffe", "label": "supported", "passage": 3, "reason": "OST 중심 음반 사업과 신인 아티스트 발굴을 통한 영역 확대 계획이 그대로 적혀 있다."}
+{"lid": "ac6eaa2919", "label": "supported", "passage": 1, "reason": "방송영상사업을 기획 단계 제작 계획 수립과 제작·공급 계약으로 콘텐츠를 만드는 사업이라고 설명한다."}
+{"lid": "331bca54da", "label": "non_claim", "passage": null, "reason": "뒤 내용을 소개하는 연결 문장이다."}
+{"lid": "7e596a6f12", "label": "supported", "passage": 3, "reason": "극장 중심에서 OTT 공급으로 바뀌는 흐름에 맞춰 다양한 플랫폼으로 영화 콘텐츠 공급을 추진한다고 적혀 있다."}
+{"lid": "58c81a2899", "label": "no_evidence", "passage": null, "reason": "오지영 주요작품 목록에 「미스터 션샤인」이 없다. 다만 목록이 '등'으로 끝나 반박으로 보기는 어렵다."}
+{"lid": "e8fc9b90be", "label": "no_evidence", "passage": null, "reason": "연구개발활동이나 경영상 주요계약을 다룬 문단이 없다."}
+{"lid": "5596eaf30e", "label": "supported", "passage": 1, "reason": "작가·감독·배우 등 제작 인력 확보에 주력하고 여러 작가·창작자와 협력 관계를 맺고 있다고 적혀 있다."}
+{"lid": "a9bf594e9f", "label": "supported", "passage": 1, "reason": "계약작가 오지영의 주요작품에 「쇼핑왕루이」가 있다."}

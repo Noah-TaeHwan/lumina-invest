@@ -1,0 +1,24 @@
+{"lid": "aae23ba2dc", "label": "supported", "passage": 3, "reason": "문단 3이 주력 전기차 배터리 케이스 사업의 미국 법인 통한 LG에너지솔루션·SK온 수주와 유럽·북미 확장을 그대로 말한다."}
+{"lid": "e5d5c54c61", "label": "contradicted", "passage": 3, "reason": "문단 3은 주력 사업을 전기차 배터리 케이스라고 하나 주장은 전기차 충전기라고 한다."}
+{"lid": "06b97d7cd8", "label": "supported", "passage": 3, "reason": "문단 3이 주력 배터리 케이스 사업의 미국 법인 통한 대형 프로젝트 수주와 유럽·북미 확장을 지지한다."}
+{"lid": "9eee2083b1", "label": "supported", "passage": 3, "reason": "문단 3에 주력 사업인 전기차 배터리 케이스 사업이라고 적혀 있다."}
+{"lid": "20e9143fef", "label": "supported", "passage": 3, "reason": "문단 3에 금형-주조-압출-가공-시공 원스탑시스템을 갖춘 국내 유일 알루미늄 소재 전문업체라고 적혀 있다."}
+{"lid": "ad4480fa14", "label": "supported", "passage": 8, "reason": "문단 8이 미국 현지 법인을 통한 LG에너지솔루션·SK온 대형 프로젝트 수주와 유럽·북미 확장을 말한다."}
+{"lid": "ee3f6bcbbc", "label": "supported", "passage": 8, "reason": "문단 8이 미국 현지 법인을 통한 LG에너지솔루션·SK온 대형 프로젝트 수주와 유럽·북미 확장을 말한다."}
+{"lid": "8d136a0c38", "label": "supported", "passage": 8, "reason": "문단 8 표에서 디스플레이,EVC영업의 주요제품이 TV, 자동차배터리 알루미늄 부품 자재다."}
+{"lid": "867d09802b", "label": "contradicted", "passage": 8, "reason": "문단 8은 수주 상대를 LG에너지솔루션과 SK온이라 하나 주장은 삼성SDI라고 한다."}
+{"lid": "28c7fcea32", "label": "supported", "passage": 8, "reason": "문단 8에 시판영업부가 전국 100여개 대리점을 지역 영업소에서 관리하며 대리점을 통해 매출을 낸다고 적혀 있다."}
+{"lid": "4b4c2c3408", "label": "contradicted", "passage": 8, "reason": "문단 8에서 대리점 관리는 시판영업부이고 직판영업부는 건설사·시공업체 직·간접 영업을 한다."}
+{"lid": "fc2a730bb0", "label": "no_evidence", "passage": null, "reason": "내수·수출 매출 금액을 담은 문단이 없다."}
+{"lid": "011d09161d", "label": "supported", "passage": 7, "reason": "문단 7에 해외영업부가 태양광 모듈 프레임·사다리를 북미에 판매하며 점유율이 지속 상승한다고 적혀 있다."}
+{"lid": "88b3b0c7ef", "label": "no_evidence", "passage": null, "reason": "96.89%는 문단 2에서 1년 이내 만기 차입금 비율이며 가동률을 담은 문단은 없다."}
+{"lid": "d4df0c7cad", "label": "no_evidence", "passage": null, "reason": "문단 7은 당사(알루코) 해외영업부 이야기이고 남선알미늄에 대한 문단은 없다."}
+{"lid": "dad0bb9749", "label": "supported", "passage": 7, "reason": "문단 7에 해외영업부가 태양광 모듈 프레임·사다리를 북미에 판매하며 점유율이 지속 상승한다고 적혀 있다."}
+{"lid": "85f55a4398", "label": "no_evidence", "passage": null, "reason": "문단 8의 19,200시간·6,864시간·35.75%는 대전공장(압출) 수치이며 아산공장에 대한 문단은 없다."}
+{"lid": "ae3ae3dfac", "label": "no_evidence", "passage": null, "reason": "1,769,356천원은 문단 1에서 이자율 1% 변동 민감도이며 환율 5% 민감도를 담은 문단은 없다."}
+{"lid": "d26ca1bb7c", "label": "supported", "passage": 8, "reason": "문단 8 표에 알루코 대전공장(압출) 가동가능 19,200시간, 실제 6,864시간, 평균가동률 35.75%가 있다."}
+{"lid": "09f0e44873", "label": "supported", "passage": 8, "reason": "문단 8 표에 알루코 대전공장(압출) 가동가능 19,200시간, 실제 6,864시간, 평균가동률 35.75%가 있다."}
+{"lid": "3352379d10", "label": "supported", "passage": 7, "reason": "문단 7 표에 부설기술연구소의 발코니 공간 차음성능 향상 과제가 발코니 창으로 제품생산중이라고 있다."}
+{"lid": "aa88674f65", "label": "non_claim", "passage": null, "reason": "구체 사실 없이 뒤 내용을 안내하는 도입 문장이다."}
+{"lid": "f8ab9138e5", "label": "contradicted", "passage": 7, "reason": "문단 7에서 차음성능 향상 과제로 생산 중인 제품은 발코니 창이며 방화문이 아니다."}
+{"lid": "5c0769729c", "label": "no_evidence", "passage": null, "reason": "연구개발비용·매출액 대비 비율을 담은 문단이 없다."}

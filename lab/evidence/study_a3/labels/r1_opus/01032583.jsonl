@@ -1,0 +1,29 @@
+{"lid": "3654c8e4de", "label": "supported", "passage": 4, "reason": "문단 4가 보고 부문 결정 기준과 시멘트·레저 부문을 그대로 서술"}
+{"lid": "a799313a6a", "label": "supported", "passage": 4, "reason": "문단 4 표에 레저사업부문 주요품목 골프장, 콘도 운영업"}
+{"lid": "a87e84110b", "label": "contradicted", "passage": 4, "reason": "문단 4는 레저사업부문 주요품목을 스키장이 아닌 골프장, 콘도 운영업으로 기재"}
+{"lid": "f84ef9fda7", "label": "supported", "passage": 4, "reason": "문단 4 표에 시멘트부문 시멘트, 레저부문 골프장·콘도 운영업"}
+{"lid": "3d3b337166", "label": "supported", "passage": 4, "reason": "문단 4 표에 레저사업부문 주요품목 골프장, 콘도 운영업"}
+{"lid": "a0330149ed", "label": "supported", "passage": 7, "reason": "문단 7: 관수는 수요기관이 조달청 납품지시에 의해 공장 상차도와 하치장 대리점을 통해 직접 판매"}
+{"lid": "3133b8c972", "label": "supported", "passage": 7, "reason": "문단 7: 관수는 수요기관이 조달청 납품지시에 의해 공장 상차도와 하치장 대리점을 통해 직접 판매"}
+{"lid": "99a087d102", "label": "no_evidence", "passage": null, "reason": "레저 서비스가 고객 니즈 맞춤형으로 제공된다는 내용은 문단에 없음(맞춤형은 특수시멘트에 대한 서술)"}
+{"lid": "f35a2f34e7", "label": "no_evidence", "passage": null, "reason": "골프장 이용권 판매에 대한 서술 없음"}
+{"lid": "5ef3024018", "label": "contradicted", "passage": 7, "reason": "문단 7은 납품지시 주체를 한국토지주택공사가 아닌 조달청으로 기재"}
+{"lid": "a92d3511d1", "label": "no_evidence", "passage": null, "reason": "콘도 임대권 판매에 대한 서술 없음"}
+{"lid": "cb6ed06d03", "label": "supported", "passage": 3, "reason": "문단 3 표에 레저사업부문 주요품목 골프장, 콘도 운영업"}
+{"lid": "64424f0574", "label": "non_claim", "passage": null, "reason": "뒤 내용을 안내하는 도입 문장으로 사실 주장이 아님"}
+{"lid": "60cf944539", "label": "contradicted", "passage": 7, "reason": "문단 7: 제12기 시멘트는 34,338(48.12%)이고 37,021(51.88%)은 레저"}
+{"lid": "ffb7f40a63", "label": "supported", "passage": 7, "reason": "문단 7: 제12기 레저 37,021, 비율 51.88"}
+{"lid": "60c165b7c9", "label": "supported", "passage": 7, "reason": "문단 7: 제12기 시멘트 34,338, 레저 37,021"}
+{"lid": "67c6db4752", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 총매출 71,359가 직접 없고 부문 합산 계산값임"}
+{"lid": "9242017b39", "label": "supported", "passage": 7, "reason": "문단 7: 목포공장 2023.1.9 준공 및 고로슬래그시멘트(96만톤/년) 생산시설 가동개시"}
+{"lid": "0f729e546b", "label": "no_evidence", "passage": null, "reason": "문단은 당사(강동씨앤엘) 목포공장 서술이며 한일시멘트에 대한 내용 없음"}
+{"lid": "268c6d8118", "label": "supported", "passage": 7, "reason": "문단 7 문장과 동일"}
+{"lid": "a2dfe0022f", "label": "supported", "passage": 7, "reason": "문단 7: 목포공장 2023.1.9 준공 및 고로슬래그시멘트(96만톤/년) 생산시설 가동개시"}
+{"lid": "522e7e521f", "label": "contradicted", "passage": 4, "reason": "문단 4는 보고 부문을 건자재가 아닌 시멘트 및 레저사업으로 결정"}
+{"lid": "9284ca4ea6", "label": "supported", "passage": 4, "reason": "문단 4: 영업부문 기준 등을 고려해 시멘트 및 레저사업 보고 부문으로 결정"}
+{"lid": "7f1ecb469a", "label": "no_evidence", "passage": null, "reason": "부채비율 수치나 증감은 문단에 없음(차입금 장부금액만 있음)"}
+{"lid": "99c28f8e5b", "label": "supported", "passage": 4, "reason": "문단 4: 영업부문 기준 등을 고려해 시멘트 및 레저사업 보고 부문으로 결정"}
+{"lid": "958be20f91", "label": "supported", "passage": 4, "reason": "문단 4: 연구개발 담당조직은 품질관리팀"}
+{"lid": "2c3a8c55d8", "label": "supported", "passage": 4, "reason": "문단 4: 연구개발비/매출액 비율 0.00, 연구개발비용 계 없음"}
+{"lid": "700e4ba905", "label": "supported", "passage": 3, "reason": "문단 3: 1973년 생산개시 이후 고려시멘트 상표로 영업"}
+{"lid": "48e2426e1d", "label": "contradicted", "passage": 3, "reason": "문단 3은 상표를 한라시멘트가 아닌 고려시멘트로 기재"}

@@ -1,0 +1,25 @@
+{"lid": "b2dd316f05", "label": "supported", "passage": 3, "reason": "문단 3: 장치를 체계업체에 공급하고 최종적으로 군과 발전소에 납품"}
+{"lid": "8f9c62f5ed", "label": "supported", "passage": 3, "reason": "문단 3: 주식회사 솔디펜스가 자동 측정·제어 장치를 연구개발·생산해 체계업체에 공급, 최종적으로 군과 발전소에 납품"}
+{"lid": "d8bccf0e66", "label": "no_evidence", "passage": null, "reason": "한화시스템이 이런 장치를 공급·납품한다는 문단 없음(문단 8은 한화시스템을 매출처로만 언급)"}
+{"lid": "932cbf800c", "label": "supported", "passage": 3, "reason": "문단 3: 솔디펜스가 장치를 연구개발·생산해 체계업체에 공급, 최종적으로 군과 발전소에 납품"}
+{"lid": "62ee6949e5", "label": "supported", "passage": 3, "reason": "문단 3: 한국표준산업분류상 기기용 자동 측정 및 제어 장치 제조업에 속함"}
+{"lid": "92d4aaa78e", "label": "contradicted", "passage": 4, "reason": "문단 4는 항법제어용 컴퓨터 제어보드 등 회로카드 조립체 5종을 무인기용으로 서술, 다연장로켓용이 아님"}
+{"lid": "3e0df7cbfb", "label": "no_evidence", "passage": null, "reason": "빅텍에 관한 문단 없음, 해당 사업은 솔디펜스의 것으로 서술됨"}
+{"lid": "8c04d31e59", "label": "supported", "passage": 3, "reason": "문단 3: 유도무기 및 항공전자 관련 제어 장치를 부품으로 자체 개발·생산해 납품"}
+{"lid": "38166cb1dd", "label": "supported", "passage": 3, "reason": "띄어쓰기만 다른 같은 주체, 문단 3: 유도무기·항공전자 제어 장치 부품 자체 개발·생산·납품"}
+{"lid": "ee04330ffd", "label": "no_evidence", "passage": null, "reason": "문단 8은 방산 부문 하나만 제시하고 사업부문별 매출 비교가 없음"}
+{"lid": "979326c800", "label": "contradicted", "passage": 8, "reason": "문단 8: 방산 부문 2025년 생산실적 21,890,741천원은 구미사업장의 것, 창원사업장이 아님"}
+{"lid": "5d1a0140ef", "label": "supported", "passage": 8, "reason": "문단 8: 방산 부문 2025년도 21,890,741천원, 생산실적은 제품매출액이라 명시"}
+{"lid": "0b67138bec", "label": "supported", "passage": 8, "reason": "문단 8: 구미사업장 방산 부문 2025년 21,890,741천원, 생산실적은 구미사업장 제품매출액"}
+{"lid": "3998e50f77", "label": "contradicted", "passage": 5, "reason": "문단 5는 화력발전소용 통합감시 제어 시스템에 공급되는 부품을 제어보드로 서술, 전원공급모듈이 아님"}
+{"lid": "dbc0bfbc7f", "label": "no_evidence", "passage": null, "reason": "문단 8에 2025년 86.8%만 있고 2024년 가동률·증감 없음"}
+{"lid": "184104f8a5", "label": "supported", "passage": 5, "reason": "문단 5: 화력발전소용 통합감시 제어 시스템에 공급되는 제어보드 개발·생산"}
+{"lid": "f7a681dd03", "label": "supported", "passage": 5, "reason": "문단 5: 주식회사 솔디펜스가 화력발전소용 통합감시 제어 시스템 제어보드 개발·생산"}
+{"lid": "fd29b90ea4", "label": "supported", "passage": 8, "reason": "문단 8: 구미사업장 생산설비 항목에서 2025년도 평균 가동률 86.8%"}
+{"lid": "93ded983c5", "label": "contradicted", "passage": 8, "reason": "문단 8: 회로카드 조립체 5종은 (주)한화를 통해 납품, LIG넥스원이 아님"}
+{"lid": "caa4b2c9c3", "label": "no_evidence", "passage": null, "reason": "재무위험 관리체계에 관한 문단 없음"}
+{"lid": "f9a9cef3d3", "label": "supported", "passage": 8, "reason": "문단 8: (주)한화를 통해 무인기 항법제어용 컴퓨터 제어보드 등 회로카드 조립체 5종 납품"}
+{"lid": "b13f8ed078", "label": "supported", "passage": 8, "reason": "문단 8: (주)한화를 통해 무인기 항법제어용 컴퓨터 제어보드 등 회로카드 조립체 5종 납품"}
+{"lid": "f20f539545", "label": "no_evidence", "passage": null, "reason": "파생상품 계약 여부를 다루는 문단 없음"}
+{"lid": "1c24fad7fd", "label": "supported", "passage": 1, "reason": "문단 1: 2025년 연구개발비/매출액 비율 0.12%"}
+{"lid": "675c12f4ca", "label": "supported", "passage": 4, "reason": "문단 4: 2025년 연구개발비용 계 177,018천원; 문단 1의 30,342는 정부보조금 146,676 차감 후 값이라 상충 아님"}

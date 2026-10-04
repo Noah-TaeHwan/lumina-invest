@@ -1,0 +1,30 @@
+{"lid": "4c51062d2b", "label": "supported", "passage": 7, "reason": "문단 7이 한솔케미칼의 정밀화학 제품으로 과산화수소, 차아황산소다, BPO를 모두 명시한다."}
+{"lid": "dec72fc76b", "label": "supported", "passage": 7, "reason": "문단 7이 제지용 라텍스와 제지약품, 폐수처리용 고분자응집제 생산을 명시한다."}
+{"lid": "a17381cb34", "label": "supported", "passage": 7, "reason": "문단 7이 과산화수소의 반도체·디스플레이·제지·섬유 용도, 차아황산소다의 섬유 용도와 BPO 생산을 모두 명시한다."}
+{"lid": "aa0ddc7f39", "label": "supported", "passage": 7, "reason": "문단 7이 한솔케미칼의 정밀화학 제품으로 과산화수소, 차아황산소다, BPO를 명시한다."}
+{"lid": "a6cd6e08a2", "label": "no_evidence", "passage": null, "reason": "제시 문단은 한솔케미칼의 생산 제품을 설명하며 효성화학의 해당 제품 생산은 제시하지 않는다."}
+{"lid": "9fcb1903fb", "label": "supported", "passage": 7, "reason": "문단 7이 한솔케미칼의 정밀화학 제품과 제지/환경 제품을 구분하여 설명한다."}
+{"lid": "4c62dd1ee4", "label": "supported", "passage": 1, "reason": "문단 1이 전자 및 이차전지소재 제품으로 반도체 박막 형성용 Precursor를 생산한다고 명시한다."}
+{"lid": "ceb8f10b48", "label": "supported", "passage": 3, "reason": "문단 3이 삼성전자·SK하이닉스·TSMC에 판매하며 대만·중국·미국으로 판매를 확대한다고 명시한다."}
+{"lid": "755d7022e8", "label": "contradicted", "passage": 1, "reason": "문단 1은 반도체 박막 형성용 Precursor를 농화학사업이 아닌 전자 및 이차전지소재 제품으로 분류한다."}
+{"lid": "1c51a47b4b", "label": "supported", "passage": 1, "reason": "문단 1이 전자 및 이차전지소재 제품으로 반도체 박막 형성용 Precursor를 생산한다고 명시한다."}
+{"lid": "d5d8560e12", "label": "supported", "passage": 8, "reason": "문단 8이 반도체 공정에서 박막을 형성하는 데 사용하는 박막소재 생산을 명시한다."}
+{"lid": "9117a07d41", "label": "supported", "passage": 8, "reason": "문단 8이 2025년 누적 전자 및 이차전지소재 매출 324,714백만원과 전년 대비 37.1% 증가를 명시한다."}
+{"lid": "a46d49b0e6", "label": "no_evidence", "passage": null, "reason": "박막소재 Precursor 생산은 명시되지만 포토레지스트의 생산이나 용도는 제시 문단에 없다."}
+{"lid": "ae023c48c1", "label": "supported", "passage": 8, "reason": "문단 8이 반도체 박막 형성에 사용하는 박막소재를 Precursor로 명시하고 생산한다고 설명한다."}
+{"lid": "fa7d275a27", "label": "supported", "passage": 6, "reason": "문단 6이 테이팩스를 한솔케미칼의 주요종속회사로 명시하고 주요 매출처에 LG에너지솔루션을 열거한다."}
+{"lid": "c7bde25d30", "label": "supported", "passage": 2, "reason": "문단 2가 제지용 라텍스와 제지약품, 폐수처리용 고분자응집제 생산을 명시한다."}
+{"lid": "7992e1e281", "label": "no_evidence", "passage": null, "reason": "테이팩스의 주요 매출처 목록에 파나소닉은 없으며 파나소닉과의 거래 여부를 밝힌 문단도 없다."}
+{"lid": "562e8eb740", "label": "supported", "passage": 2, "reason": "인용한 문단 2가 과산화수소의 각 산업 용도, 차아황산소다의 섬유 용도 및 BPO 생산을 모두 명시한다."}
+{"lid": "cddc8b2470", "label": "supported", "passage": 6, "reason": "문단 6이 주요종속회사 테이팩스의 주요 매출처로 LG에너지솔루션을 명시한다."}
+{"lid": "62e1f2f72e", "label": "supported", "passage": 6, "reason": "문단 6이 2025년 누적 정밀화학 매출 217,726백만원과 전년 대비 8.9% 증가를 명시한다."}
+{"lid": "f4f526763a", "label": "no_evidence", "passage": null, "reason": "문단 3은 신용등급의 정의이며 제시 문단에는 주요 시장위험·파생상품 거래 현황이나 그 확인 위치가 없다."}
+{"lid": "4aea46bcac", "label": "contradicted", "passage": 6, "reason": "문단 6의 2025년 누적 제지/환경 매출은 110,064백만원, 증가율은 1.8%로 주장과 다르다."}
+{"lid": "d3a13186cb", "label": "supported", "passage": 6, "reason": "문단 6이 2025년 누적 정밀화학 매출 217,726백만원과 전년 대비 8.9% 증가를 명시한다."}
+{"lid": "c8dab8f03b", "label": "no_evidence", "passage": null, "reason": "제시 문단에는 최근 3년 연구개발비 비율이나 21% 유지 여부를 확인할 자료가 없다."}
+{"lid": "ab4b39226f", "label": "supported", "passage": 7, "reason": "문단 7의 라텍스 시장점유율 표에 한솔케미칼의 제46기 점유율이 44%로 명시된다."}
+{"lid": "2187270a7b", "label": "no_evidence", "passage": null, "reason": "제시 문단에는 제46기의 연도 대응, 연구개발비용 1,143억원, 매출 5,434억원 및 연구개발비 비율 21%가 없다."}
+{"lid": "6740eeffb8", "label": "no_evidence", "passage": null, "reason": "라텍스 표의 제46기 44%는 한솔케미칼의 점유율이며 LG화학의 점유율은 제시되지 않는다."}
+{"lid": "175dc0e03a", "label": "no_evidence", "passage": null, "reason": "제시 문단에는 제44기의 연도 대응, 연구개발비용 1,044억원, 매출 4,934억원 및 연구개발비 비율 21%가 없다."}
+{"lid": "5ac3c1c608", "label": "no_evidence", "passage": null, "reason": "제시 문단에는 제45기의 연도 대응, 연구개발비용 1,044억원, 매출 4,934억원 및 연구개발비 비율 21%가 없다."}
+{"lid": "b13e95bcba", "label": "non_claim", "passage": null, "reason": "뒤이어 연구개발비용과 비율의 내용을 제시하겠다는 도입 안내로 구체적인 사실을 주장하지 않는다."}
