@@ -245,7 +245,7 @@ Alembic **`0010_judgment_journal`**(`down_revision = "0009"`)로 만든다.
 
 - **추천:** `run_id`·`chat_id`·`conversation_id`에 FK를 걸지 않는다. 스레드 삭제는 기록을 지우지 않고, 기록 상세는 원 실행 조회가 비면 "원래 대화는 삭제되었습니다"를 띄운다. 기록 삭제는 일지에서 따로 한다(결정 7-3).
 - **근거:** 일지는 사용자가 명시적으로 남긴 기록이다. 대화 정리(스레드 삭제)가 판단 이력까지 지우면 일지의 목적이 무너진다. `evidence_runs.conversation_id`도 FK 없이 둔 선례가 있다(`app/models/evidence.py:26`).
-- **틀렸을 때 비용:** 스레드를 지우면 질문·답변이 모두 사라진다고 기대한 사용자에게는 일지 사본이 남는다. 지금은 스레드 삭제 화면이 없고(2.1) API만 있으므로, 대화 삭제 화면을 만드는 때에 "이 대화에서 만든 판단 기록 N건은 일지에 남습니다" 확인 문구를 함께 넣는다(이 spec의 P1에서 대화 삭제 API 응답에 남는 기록 수 `journal_entries`를 더한다).
+- **틀렸을 때 비용:** 스레드를 지우면 질문·답변이 모두 사라진다고 기대한 사용자에게는 일지 사본이 남는다. 지금은 스레드 삭제 화면이 없고(2.1) API만 있으므로, 대화 삭제 화면을 만드는 때에 "이 대화에서 만든 판단 기록 N건은 일지에 남습니다" 확인 문구를 함께 넣는다(대화 삭제 API는 204라 본문이 없으므로 응답은 바꾸지 않는다. 대신 P1에서 목록 API에 `conversation_id` 거르기를 넣어, 삭제 화면이 지우기 전에 남을 기록 수를 조회하게 한다).
 
 ### 결정 5-5. 기록 생성 규칙
 
@@ -267,7 +267,7 @@ Alembic **`0010_judgment_journal`**(`down_revision = "0009"`)로 만든다.
 | 메서드·경로 | 동작 |
 |---|---|
 | `POST /api/journal` | 본문 `{run_id, decision, conviction, memo, relied_claims, review_on}` → 기록 생성(5-5), 201과 기록 |
-| `GET /api/journal?due=true&corp_code=&decision=&limit=&offset=` | 목록(최근 판단 기준 거르기), `total`, `due_count` |
+| `GET /api/journal?due=true&corp_code=&decision=&conversation_id=&limit=&offset=` | 목록(최근 판단 기준 거르기), `total`, `due_count`. `conversation_id`는 대화 삭제 전 남을 기록 수 확인용(결정 5-4) |
 | `GET /api/journal/{id}` | 상세: 스냅샷, update 목록, `source_available`(원 실행 존재 여부), `snapshot_ok`(해시 일치) |
 | `GET /api/journal/{id}/changes` | 변화 비교(결정 6-1). 상세와 분리해 저장소가 느리거나 죽어도 상세는 뜬다 |
 | `POST /api/journal/{id}/updates` | 다시 보기 기록 덧붙이기(`kind=revisit`) |
@@ -374,7 +374,7 @@ Alembic **`0010_judgment_journal`**(`down_revision = "0009"`)로 만든다.
 - 저장소 밖 새 공시 감지(분기·반기·주요사항보고서, OpenDART 목록 조회). 필요하면 로컬 CLI로 별도 설계.
 - 외부 알림(결정 7-4), 공유·공개 링크, 여러 사용자 간 일지 보기.
 - 에이전트 경로(`/api/chat`) 답변에서 기록하기 — 판정 실행이 없다(A-2 결정 3-1).
-- 대화 삭제 화면 신설. API 응답에 남는 기록 수만 더한다(결정 5-4).
+- 대화 삭제 화면 신설. 남을 기록 수를 조회하는 거르기만 만든다(결정 5-4).
 - 계정 삭제 API(일지 전체 삭제로 대신한다).
 - 모듈 B(뉴스 판단 피드).
 
@@ -384,7 +384,7 @@ Alembic **`0010_judgment_journal`**(`down_revision = "0009"`)로 만든다.
 
 | 단계 | 내용 | 어디서 | 완료 기준 |
 |---|---|---|---|
-| P1. 저장과 API | Alembic `0010_judgment_journal`, `JudgmentEntry`·`JudgmentUpdate` 모델, 스냅샷 생성기(`app/services/journal/snapshot.py`), `app/routes/journal.py`(생성·목록·상세·다시 보기·삭제·내보내기), `JOURNAL_ENABLED`, 실행 조회 응답의 `journal_entry_id`, 대화 삭제 응답의 남는 기록 수 | 클라우드. DB 테스트는 docker `postgres:16-alpine`에 `EVIDENCE_TEST_DATABASE_URL`을 주고 0001→head 적용 | 8.1의 1~4, 6, 7, 9 테스트 통과(DB 테스트 skip 0), 기존 `tests/evidence` 통과, 저장소 전체 테스트 수치 보고 |
+| P1. 저장과 API | Alembic `0010_judgment_journal`, `JudgmentEntry`·`JudgmentUpdate` 모델, 스냅샷 생성기(`app/services/journal/snapshot.py`), `app/routes/journal.py`(생성·목록·상세·다시 보기·삭제·내보내기), `JOURNAL_ENABLED`, 실행 조회 응답의 `journal_entry_id`, 목록의 `conversation_id` 거르기 | 클라우드. DB 테스트는 docker `postgres:16-alpine`에 `EVIDENCE_TEST_DATABASE_URL`을 주고 0001→head 적용 | 8.1의 1~4, 6, 7, 9 테스트 통과(DB 테스트 skip 0), 기존 `tests/evidence` 통과, 저장소 전체 테스트 수치 보고 |
 | P2. 변화 비교 | `GET /api/journal/{id}/changes`, 보고서·문단·정책 비교, `unavailable` 처리 | 코드·단위 테스트는 클라우드(Qdrant `:memory:` 저장소 — 기존 `test_passage_store.py` 방식). 실제 재적재 뒤 비교 확인은 로컬 | 8.1의 5 통과. 로컬에서 시드 1개사 재적재 전후로 `same`→`changed` 표시를 1회 확인하고 PR에 적는다 |
 | P3. 화면 | 요약줄 `판단 기록` 버튼과 상태(3.2), 기록 양식, 일지 탭(목록·거르기·상세 세 칸·변화 칸·다시 보기·삭제·내보내기), 고지(4-2), AI 출처 표시 | 코드와 화면 상태 테스트(`tests/e2e/evidence_views.py`와 같은 방식, 가짜 응답)는 클라우드. 실제 앱 화면 확인은 로컬 `compose.portfolio.yml` | 3.2의 모든 상태를 가짜 응답으로 확인, 8.1의 8 통과(프런트에서 외부 호출 없음 포함), 로컬 실화면 확인 1회 기록 |
 | P4. 종단 확인과 문서 | 로컬 실스택에서 근거 모드 질문 → 기록 → 스레드 삭제 → 기록 재열기 → 내보내기 → 전체 삭제 한 바퀴, README "판단 기록" 축 상태 갱신(AI 작성 표시) | 로컬(Ollama·JEV 키·Qdrant 필요). 문서 수정은 클라우드 가능 | 한 바퀴 결과(화면 캡처 또는 API 응답 요약)를 PR에 적고, 8.1의 10 통과 |
