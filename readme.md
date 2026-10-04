@@ -97,10 +97,11 @@ AI 답변의 문장마다 DART 사업보고서 문단이 그 문장을 뒷받침
 | 항목 | 결과 |
 |---|---|
 | 주체 교체 정확도(H-swap, 기준 ≥ 0.90) | a2-v1 0.642 → 0.848 (95% 0.768~0.918). 개선은 분명하지만 기준 미달 → **실패**. 회사 이름 교체는 0.295 → 0.932, 제품·브랜드 교체는 0.757 그대로 |
-| ✅ 재현율 손실(H-recall, 상한 ≤ 0.05) | 0.022 (95% 상한 0.054) → **실패**(이름이 아닌 말을 후보로 잡은 오탐) |
+| ✅ 재현율 손실(H-recall, 상한 ≤ 0.05) | 0.022 (95% 상한 0.054) → **실패**(잃은 지지 주장 6건: 이름이 아닌 말을 후보로 잡은 3건, 문단에 붙여 쓴 이름을 못 찾은 3건) |
 | ✅ 정밀도 비열등(H-prec) | 0.889 대 0.889 → 통과 |
 
 - 사전등록 규칙대로 기본 정책은 `a2-v1` 그대로이고 `a3-subject-exp`는 꺼진 실험 정책으로 남깁니다. 다음 후보는 JEV에 주체 질문을 더하는 방식(새 사전등록 필요)입니다([해석 문서](docs/lab/evidence-a3-interpretation.md), AI 작성).
+- 정답과 통제 주장은 AI(Claude·Codex)가 만든 참조 라벨·변형이며 사람 감사는 하지 않았습니다. 판정은 TypeSafe의 JEV 모델로 했고, 이 프로젝트는 TypeSafe와 제휴 관계가 아닙니다.
 
 리포트: [A-3 평가(자동)](docs/lab/evidence-a3-report.md) · [A-3 해석과 한계](docs/lab/evidence-a3-interpretation.md) · [A-2 평가(자동)](docs/lab/evidence-a2-report.md) · [A-2 해석과 한계](docs/lab/evidence-a2-interpretation.md) · [A-2 설계](docs/superpowers/specs/2026-10-02-evidence-chat-a2-design.md) · [Stage 1 홀드아웃](docs/lab/evidence-stage1-report.md) · [Stage 0 실현 가능성](docs/lab/evidence-stage0-report.md) · [설계](docs/superpowers/specs/2026-10-02-evidence-assistant-design.md)
 
