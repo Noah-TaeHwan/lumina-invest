@@ -1,4 +1,4 @@
-"""투자 판단 일지 API(모듈 C spec 5.1, P1 저장과 API).
+"""투자 판단 일지 API(모듈 C spec 5.1, 10절 P1 저장과 API).
 
   POST   /api/journal                       – 끝난 판정 실행 하나에서 판단 기록 생성(스냅샷은 서버가 복사, 결정 5-5)
   GET    /api/journal                       – 내 기록 목록(최근 판단 기준 거르기, total·due_count)
@@ -12,7 +12,8 @@
 - 남의 기록·실행은 404다(존재 여부를 드러내지 않는다).
 - 메모는 어디로도 나가지 않는다(결정 7-4): JEV·LLM·알림을 부르지 않고, 감사 로그에는 사건 종류와 개수·id만,
   로그에는 예외 이름만 남긴다. 검증 오류(422)는 본문을 직접 검사해 칸 이름과 사유(loc·msg)만 돌려준다(input 없음).
-- 판단은 덧붙이기만 한다(결정 5-2). 현재 판단 = 그 기록의 가장 최근 update.
+  PostgreSQL text가 받지 않는 NUL도 저장 전에 422로 거른다.
+- 판단은 덧붙이기만 한다(결정 5-2). 현재 판단 = 그 기록의 가장 최근 update(created_at, 같으면 id 순서의 마지막).
 """
 from __future__ import annotations
 
@@ -24,7 +25,7 @@ from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -41,6 +42,7 @@ from app.services.journal import snapshot as snap
 log = logging.getLogger("app.journal.api")
 
 MEMO_MAX = 2000
+UNIQUE_RUN = "uq_judgment_entries_user_run"
 KST = timezone(timedelta(hours=9))  # 서머타임 없음. tzdata에 기대지 않는다(risk_guard와 같은 방식)
 NOTICE = ("판단 일지는 내가 쓴 기록입니다. 답변과 배지는 AI가 만든 것으로, 배지는 검색된 공시 문단 기준 AI 판정"
           "(TypeSafe의 JEV 모델)이며 사실 여부를 보증하지 않습니다. 이 서비스는 투자 권유나 수익 예측을 하지 않으며, "
@@ -70,39 +72,46 @@ class JudgmentInput(BaseModel):
     relied_claims: list[int] = Field(default_factory=list, max_length=100)
     review_on: Optional[date] = None
 
+    @field_validator("memo")
+    @classmethod
+    def _no_nul(cls, v: str) -> str:
+        if "\x00" in v:  # PostgreSQL text는 NUL을 받지 않는다(그대로 두면 저장에서 500)
+            raise ValueError("메모에 NUL 문자를 쓸 수 없습니다.")
+        return v
+
 
 class EntryCreate(JudgmentInput):
     run_id: uuid.UUID
 
 
-class _Invalid(Exception):
-    def __init__(self, errors: list[dict]):
-        self.errors = errors
-
-
-def _invalid(errors: list[dict]) -> JSONResponse:
-    return JSONResponse(status_code=422, content={"detail": errors})
+def _invalid(errors: list[dict]) -> HTTPException:
+    return HTTPException(422, detail=errors)
 
 
 async def _parse(request: Request, model: type[BaseModel]) -> BaseModel:
-    """본문을 읽어 검사한다. 실패하면 칸 이름과 사유만 담은 오류 목록(input·ctx 없음)."""
+    """본문을 읽어 검사한다. 실패하면 칸 이름과 사유만 담은 422(input·ctx 없음)."""
     try:
         raw = json.loads(await request.body() or b"null")
     except ValueError:
-        raise _Invalid([{"loc": ["body"], "msg": "JSON 본문이 아닙니다."}])
+        raise _invalid([{"loc": ["body"], "msg": "JSON 본문이 아닙니다."}])
     try:
         return model.model_validate(raw)
     except ValidationError as e:
-        raise _Invalid([{"loc": ["body", *e_["loc"]], "msg": e_["msg"]}
-                        for e_ in e.errors(include_url=False, include_context=False, include_input=False)])
+        raise _invalid([{"loc": ["body", *err["loc"]], "msg": err["msg"]}
+                        for err in e.errors(include_url=False, include_context=False, include_input=False)])
 
 
 def _check_relied(relied: list[int], snapshot: dict) -> list[int]:
     picked = sorted(set(relied))
     if not set(picked) <= snap.selectable_claims(snapshot):
-        raise _Invalid([{"loc": ["body", "relied_claims"],
+        raise _invalid([{"loc": ["body", "relied_claims"],
                          "msg": "기댄 문장은 이 기록의 판정 문장(비주장 제외) 번호여야 합니다."}])
     return picked
+
+
+def _constraint(exc: IntegrityError) -> str | None:
+    """asyncpg 원 예외의 제약 이름. 예외 문자열(메모가 든 파라미터 포함)은 보지 않는다."""
+    return getattr(getattr(exc.orig, "__cause__", None), "constraint_name", None)
 
 
 # ── 헬퍼 ──────────────────────────────────────────────────────────────────────
@@ -127,7 +136,7 @@ async def _updates(db: AsyncSession, entry_ids: list[uuid.UUID]) -> dict[uuid.UU
     out: dict[uuid.UUID, list[JudgmentUpdate]] = {i: [] for i in entry_ids}
     if entry_ids:
         rows = await db.execute(select(JudgmentUpdate).where(JudgmentUpdate.entry_id.in_(entry_ids))
-                                .order_by(JudgmentUpdate.entry_id, JudgmentUpdate.created_at))
+                                .order_by(JudgmentUpdate.entry_id, JudgmentUpdate.created_at, JudgmentUpdate.id))
         for u in rows.scalars():
             out[u.entry_id].append(u)
     return out
@@ -170,10 +179,7 @@ def _ai_marked(snapshot: dict) -> dict:
 @router.post("", status_code=201, summary="판정 실행 하나에서 판단 기록 생성")
 async def create_entry(request: Request, user=Depends(get_current_user_any),
                        db: AsyncSession = Depends(get_pg_session)):
-    try:
-        body: EntryCreate = await _parse(request, EntryCreate)  # type: ignore[assignment]
-    except _Invalid as e:
-        return _invalid(e.errors)
+    body: EntryCreate = await _parse(request, EntryCreate)  # type: ignore[assignment]
     uid = uuid.UUID(user["id"])
     run = (await db.execute(select(EvidenceRun).where(EvidenceRun.id == body.run_id, EvidenceRun.user_id == uid))
            ).scalar_one_or_none()
@@ -193,12 +199,9 @@ async def create_entry(request: Request, user=Depends(get_current_user_any),
         raise HTTPException(409, "원래 답변을 찾을 수 없어 기록할 수 없습니다.")
     claims = (await records.load_claims(db, [run.id]))[run.id]
     snapshot = snap.build_snapshot(run, claims, chat)
-    try:
-        relied = _check_relied(body.relied_claims, snapshot)
-    except _Invalid as e:
-        return _invalid(e.errors)
+    relied = _check_relied(body.relied_claims, snapshot)
 
-    at = records.now()
+    run_id, at = run.id, records.now()  # rollback 뒤에는 run 속성을 읽을 수 없다(만료)
     entry = JudgmentEntry(id=uuid.uuid4(), user_id=uid, run_id=run.id, company=run.company, corp_code=run.corp_code,
                           snapshot=snapshot, snapshot_version=snap.SNAPSHOT_VERSION, created_at=at)
     db.add(entry)
@@ -206,10 +209,14 @@ async def create_entry(request: Request, user=Depends(get_current_user_any),
                           memo=body.memo, relied_claims=relied, review_on=body.review_on, created_at=at))
     try:
         await db.commit()
-    except IntegrityError:  # 같은 실행에 동시에 두 기록(유일 조건). 예외 문자열에는 메모가 든 파라미터가 있다
+    except IntegrityError as exc:  # 예외 문자열에는 메모가 든 파라미터가 있다 — 로그에 넣지 않는다
         await db.rollback()
+        if _constraint(exc) != UNIQUE_RUN:
+            log.error(json.dumps({"event": "journal_save_failed", "error": type(exc).__name__}))
+            raise HTTPException(500, "기록을 저장하지 못했습니다.")
+        # 존재 확인과 커밋 사이에 같은 실행의 기록이 먼저 저장됐다
         existing = await db.scalar(select(JudgmentEntry.id).where(JudgmentEntry.user_id == uid,
-                                                                   JudgmentEntry.run_id == run.id))
+                                                                   JudgmentEntry.run_id == run_id))
         return JSONResponse(status_code=409, content={"detail": "이 판정에는 이미 기록이 있습니다.",
                                                       "entry_id": str(existing) if existing else None})
     except Exception as exc:  # noqa: BLE001
@@ -236,7 +243,8 @@ async def list_entries(
         select(JudgmentEntry.id, JudgmentEntry.run_id, JudgmentEntry.company, JudgmentEntry.corp_code,
                JudgmentEntry.created_at, JudgmentEntry.snapshot["question"].astext,
                JudgmentEntry.snapshot["run"]["policy_version"].astext, JudgmentEntry.snapshot["run"]["status"].astext)
-        .where(JudgmentEntry.user_id == uid).order_by(JudgmentEntry.created_at.desc()))).all()
+        .where(JudgmentEntry.user_id == uid)
+        .order_by(JudgmentEntry.created_at.desc(), JudgmentEntry.id.desc()))).all()
     ups = await _updates(db, [r[0] for r in rows])
     today = today_kst()
     items = []
@@ -261,7 +269,7 @@ async def list_entries(
 @router.get("/export", summary="내 판단 기록 내보내기(JSON)")
 async def export_entries(user=Depends(get_current_user_any), db: AsyncSession = Depends(get_pg_session)):
     entries = list((await db.execute(select(JudgmentEntry).where(JudgmentEntry.user_id == uuid.UUID(user["id"]))
-                                     .order_by(JudgmentEntry.created_at))).scalars())
+                                     .order_by(JudgmentEntry.created_at, JudgmentEntry.id))).scalars())
     ups = await _updates(db, [e.id for e in entries])
     today = today_kst()
     out = {
@@ -282,15 +290,9 @@ async def get_entry(entry_id: str, user=Depends(get_current_user_any), db: Async
 @router.post("/{entry_id}/updates", status_code=201, summary="다시 보기 기록 덧붙이기")
 async def add_update(entry_id: str, request: Request, user=Depends(get_current_user_any),
                      db: AsyncSession = Depends(get_pg_session)):
-    try:
-        body: JudgmentInput = await _parse(request, JudgmentInput)  # type: ignore[assignment]
-    except _Invalid as e:
-        return _invalid(e.errors)
+    body: JudgmentInput = await _parse(request, JudgmentInput)  # type: ignore[assignment]
     entry = await _owned_entry(db, entry_id, user)
-    try:
-        relied = _check_relied(body.relied_claims, entry.snapshot)
-    except _Invalid as e:
-        return _invalid(e.errors)
+    relied = _check_relied(body.relied_claims, entry.snapshot)
     u = JudgmentUpdate(id=uuid.uuid4(), entry_id=entry.id, kind="revisit", decision=body.decision,
                        conviction=body.conviction, memo=body.memo, relied_claims=relied, review_on=body.review_on,
                        created_at=records.now())

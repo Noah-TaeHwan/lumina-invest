@@ -1,5 +1,5 @@
 # tests/evidence/test_journal_api.py
-"""판단 일지 저장·API(모듈 C spec 11절 P1, 수용 기준 8.1의 1~4, 6, 7, 9~12).
+"""판단 일지 저장·API(모듈 C spec 10절 P1, 수용 기준 8.1의 1~4, 6, 7, 9~12).
 
 마이그레이션 0010, 기록 생성 규칙(5-5), 스냅샷 보존(5-3·5-4), 다시 보기 원장(5-2), 삭제·내보내기(7-2·7-3),
 메모가 밖으로 나가지 않음(7-4), 기능 플래그(5-6), 관리자 초기화(5-7).
@@ -187,14 +187,9 @@ def test_flag_off_every_journal_path_is_404(monkeypatch, method, path):
 
 
 def test_flag_off_evidence_api_does_not_touch_journal_tables(pg, evidence_on, monkeypatch):
-    """0010이 적용되지 않은 환경 보호: 일지가 꺼져 있으면 판정 API가 judgment_entries를 조회하지 않는다."""
-    from app.routes import evidence
-
+    """0010이 적용되지 않은 환경 보호: 일지가 꺼져 있으면 판정 API가 judgment_entries를 조회하지 않는다.
+    실제로 0009까지만 적용한 DB(일지 표 없음)에서 판정 API가 200이어야 한다."""
     monkeypatch.setattr(settings, "JOURNAL_ENABLED", False)
-
-    async def boom(*a, **k):
-        raise AssertionError("judgment_entries를 조회하면 안 된다")
-    monkeypatch.setattr(evidence, "journal_entry_ids", boom)
 
     async def go():
         async with database(pg) as factory:
@@ -206,7 +201,11 @@ def test_flag_off_evidence_api_does_not_touch_journal_tables(pg, evidence_on, mo
                 timeline = await c.get(f"/api/conversations/{seed['conversation_id']}/evidence")
             return one, timeline
 
-    one, timeline = asyncio.run(go())
+    alembic_downgrade(pg, "0009")
+    try:
+        one, timeline = asyncio.run(go())
+    finally:
+        alembic_upgrade(pg)
     assert (one.status_code, timeline.status_code) == (200, 200)
     assert one.json()["journal_entry_id"] is None
     assert timeline.json()["runs"][0]["journal_entry_id"] is None
@@ -217,7 +216,6 @@ def test_serialize_run_reports_journal_entry_id(pg, journal, evidence_on):
     async def go():
         async with database(pg) as factory:
             seed = await seed_user(factory)
-            other = await seed_user(factory)
             run_id = await _judged_run(factory, seed)
             app = make_app(factory, Who(seed["user"]))
             async with client(app) as c:
@@ -407,6 +405,9 @@ def test_other_users_run_and_entry_are_404(pg, journal):
                 out["export"] = await c.get("/api/journal/export")
                 who.user = a["user"]
                 out["still_mine"] = await c.get(f"/api/journal/{entry_a}")
+            async with factory() as db:
+                out["a_updates"] = await db.scalar(select(func.count()).select_from(JudgmentUpdate)
+                                                   .where(JudgmentUpdate.entry_id == uuid.UUID(entry_a)))
             return out, entry_a
 
     out, entry_a = asyncio.run(go())
@@ -417,6 +418,7 @@ def test_other_users_run_and_entry_are_404(pg, journal):
     assert len(exported) == 1 and exported[0]["id"] != entry_a
     assert MEMO not in out["export"].text and MEMO not in out["list"].text
     assert out["still_mine"].status_code == 200
+    assert out["a_updates"] == 1 and len(out["still_mine"].json()["updates"]) == 1  # B의 다시 보기·삭제가 닿지 않았다
 
 
 def test_relied_claims_must_be_judgeable_claims(pg, journal):
@@ -824,23 +826,15 @@ def test_validation_422_never_echoes_memo(pg, journal, case):
 
 
 def test_memo_never_reaches_audit_logs_or_outside(pg, journal, audit_db, caplog, capsys, monkeypatch):
-    """감사 로그 payload·로그 출력 어디에도 메모가 없고, JEV·LLM·알림이 한 번도 불리지 않는다."""
-    from app.services import notification
-
-    sent = []
-
-    async def no_dispatch(*a, **k):
-        sent.append(a)
-    monkeypatch.setattr(notification, "dispatch", no_dispatch)
+    """감사 로그 payload·로그 출력 어디에도 메모가 없다."""
     caplog.set_level(logging.DEBUG)
-    jev, llm = FakeJev(), FakeLLM()
 
     async def go():
         async with database(pg) as factory:
             audit_db["factory"] = factory
             seed = await seed_user(factory)
             run_id = await _judged_run(factory, seed)
-            app = make_app(factory, Who(seed["user"]), llm=llm, runner=make_runner(jev))
+            app = make_app(factory, Who(seed["user"]))
             async with client(app) as c:
                 eid = (await c.post("/api/journal", json=_body(run_id))).json()["id"]
                 await c.post(f"/api/journal/{eid}/updates", json={"decision": "exclude", "conviction": 1,
@@ -863,4 +857,142 @@ def test_memo_never_reaches_audit_logs_or_outside(pg, journal, audit_db, caplog,
     logged = "\n".join(r.getMessage() for r in caplog.records)
     for blob in (json.dumps(events, ensure_ascii=False), logged, out.out, out.err):
         assert "비밀메모" not in blob
-    assert jev.calls == 0 and llm.calls == [] and sent == []
+
+
+def test_journal_modules_do_not_import_jev_llm_or_notification():
+    """일지 코드는 JEV·LLM·알림 모듈을 직접 import하지 않는다(메모가 밖으로 나갈 길이 없다, 결정 7-1·7-4)."""
+    import ast
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[2]
+    files = sorted((root / "app/services/journal").glob("*.py")) + [root / "app/routes/journal.py"]
+    banned = ("app.lib.jev", "app.lib.jev_service", "app.lib.llm_client", "app.lib.ollama", "app.services.notification")
+    seen = []
+    for f in files:
+        for node in ast.walk(ast.parse(f.read_text(encoding="utf-8"))):
+            if isinstance(node, ast.Import):
+                seen += [a.name for a in node.names]
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                seen += [node.module] + [f"{node.module}.{a.name}" for a in node.names]
+    assert len(files) >= 2 and "app.services.evidence.records" in seen  # 실제로 읽었다
+    assert not [m for m in seen if m.startswith(banned)]
+
+
+# ── 리뷰 반영: 저장 오류 구분·NUL·정렬 ──────────────────────────────────────────
+
+def test_create_race_on_unique_is_409_with_existing_id(pg, journal, monkeypatch):
+    """존재 확인과 커밋 사이에 같은 실행의 기록이 생기면(유일 제약 uq_judgment_entries_user_run) 409와 기존 id."""
+    real = records.load_claims
+    holder = {}
+
+    async def go():
+        async with database(pg) as factory:
+            seed = await seed_user(factory)
+            run_id = await _judged_run(factory, seed)
+
+            async def racing(db, run_ids):  # 존재 확인 뒤·커밋 전에 다른 세션이 먼저 저장한다
+                async with factory() as other:
+                    e = JudgmentEntry(user_id=uuid.UUID(seed["user"]["id"]), run_id=run_id, company=CO,
+                                      corp_code=CORP, snapshot={}, snapshot_version="c1")
+                    other.add(e)
+                    await other.commit()
+                    holder["competitor"] = str(e.id)
+                return await real(db, run_ids)
+            monkeypatch.setattr(records, "load_claims", racing)
+            app = make_app(factory, Who(seed["user"]))
+            async with client(app) as c:
+                r = await c.post("/api/journal", json=_body(run_id))
+            async with factory() as db:
+                n = await db.scalar(select(func.count()).select_from(JudgmentEntry))
+            return r, n
+
+    r, n = asyncio.run(go())
+    assert r.status_code == 409 and r.json()["entry_id"] == holder["competitor"] and n == 1
+    assert MEMO not in r.text
+
+
+def test_other_integrity_error_is_500_not_409(pg, journal, caplog):
+    """유일 제약이 아닌 무결성 오류(여기서는 시험용 CHECK)는 '이미 기록이 있습니다'가 아니라 500이다."""
+    caplog.set_level(logging.DEBUG)
+
+    async def ddl(sql):
+        async with database(pg) as factory, factory() as db:
+            await db.execute(text(sql))
+            await db.commit()
+
+    async def go():
+        async with database(pg) as factory:
+            seed = await seed_user(factory)
+            run_id = await _judged_run(factory, seed)
+            app = make_app(factory, Who(seed["user"]))
+            async with client(app) as c:
+                r = await c.post("/api/journal", json=_body(run_id))
+            async with factory() as db:
+                n = await db.scalar(select(func.count()).select_from(JudgmentEntry))
+            return r, n
+
+    asyncio.run(ddl("ALTER TABLE judgment_entries ADD CONSTRAINT ck_test_block CHECK (company <> '삼성전자')"))
+    try:
+        r, n = asyncio.run(go())
+    finally:
+        asyncio.run(ddl("ALTER TABLE judgment_entries DROP CONSTRAINT ck_test_block"))
+    assert r.status_code == 500 and "이미 기록" not in r.text and n == 0
+    assert MEMO not in r.text and "비밀메모" not in "\n".join(x.getMessage() for x in caplog.records)
+
+
+def test_memo_with_nul_is_422_not_500(pg, journal, caplog):
+    """PostgreSQL text는 NUL을 받지 않는다. 저장 전에 422로 거르고 메모 값은 응답·로그에 넣지 않는다."""
+    caplog.set_level(logging.DEBUG)
+    memo = "비밀메모\u0000끝"
+
+    async def go():
+        async with database(pg) as factory:
+            seed = await seed_user(factory)
+            run_id = await _judged_run(factory, seed)
+            app = make_app(factory, Who(seed["user"]))
+            async with client(app) as c:
+                created = await c.post("/api/journal", json=_body(run_id, memo=memo))
+                ok = await c.post("/api/journal", json=_body(run_id))
+                revisit = await c.post(f"/api/journal/{ok.json()['id']}/updates",
+                                       json={"decision": "watch", "conviction": 2, "memo": memo})
+            async with factory() as db:
+                n = await db.scalar(select(func.count()).select_from(JudgmentUpdate))
+            return created, revisit, n
+
+    created, revisit, n = asyncio.run(go())
+    for r in (created, revisit):
+        assert r.status_code == 422, r.text
+        assert r.json()["detail"][0]["loc"] == ["body", "memo"] and set(r.json()["detail"][0]) == {"loc", "msg"}
+        assert "비밀메모" not in r.text and "끝" not in r.text
+    assert n == 1  # 정상 기록의 initial 1건만
+    assert "비밀메모" not in "\n".join(x.getMessage() for x in caplog.records)
+
+
+def test_updates_with_same_created_at_are_ordered_by_id(pg, journal):
+    """같은 created_at의 update가 둘이면 id로 보조 정렬한다(상세·내보내기·현재 판단이 매번 같다)."""
+    async def go():
+        async with database(pg) as factory:
+            seed = await seed_user(factory)
+            run_id = await _judged_run(factory, seed)
+            app = make_app(factory, Who(seed["user"]))
+            async with client(app) as c:
+                eid = (await c.post("/api/journal", json=_body(run_id, review_on=None))).json()["id"]
+                at = records.now()
+                hi, lo = uuid.UUID(int=(1 << 128) - 1), uuid.UUID(int=1)
+                async with factory() as db:  # 큰 id를 먼저 넣는다(삽입 순서와 id 순서가 반대)
+                    db.add(JudgmentUpdate(id=hi, entry_id=uuid.UUID(eid), kind="revisit", decision="exclude",
+                                          conviction=1, memo="", relied_claims=[], created_at=at))
+                    await db.commit()
+                async with factory() as db:
+                    db.add(JudgmentUpdate(id=lo, entry_id=uuid.UUID(eid), kind="revisit", decision="consider_buy",
+                                          conviction=5, memo="", relied_claims=[], created_at=at))
+                    await db.commit()
+                detail = (await c.get(f"/api/journal/{eid}")).json()
+                listed = (await c.get("/api/journal")).json()
+                export = (await c.get("/api/journal/export")).json()
+            return detail, listed, export, str(lo), str(hi)
+
+    detail, listed, export, lo, hi = asyncio.run(go())
+    assert [u["id"] for u in detail["updates"]][1:] == [lo, hi]
+    assert [u["id"] for u in export["entries"][0]["updates"]][1:] == [lo, hi]
+    assert listed["items"][0]["current"]["decision"] == "exclude"  # 최근 = 정렬의 마지막(id가 큰 쪽)

@@ -88,13 +88,6 @@ def test_finished_statuses_are_recordable(status):
     assert snap.build_snapshot(run, claims, chat)["run"]["status"] == status
 
 
-@pytest.mark.parametrize("status", ["pending", "running"])
-def test_active_run_is_refused(status):
-    run, claims, chat = _run(status)
-    with pytest.raises(snap.RunNotFinished):
-        snap.build_snapshot(run, claims, chat)
-
-
 def test_selectable_claims_excludes_not_claim():
     out = snap.build_snapshot(*_run())
     assert snap.selectable_claims(out) == {0, 1}

@@ -39,12 +39,11 @@ from app.lib.guardrails import check_guardrails
 from app.lib.jwt_auth import get_current_user_any
 from app.lib.llm_client import get_llm_client
 from app.lib.user_state import get_user_state, set_active_conversation, update_user_state
-from app.models import Chat, Conversation, EvidenceRun
+from app.models import Chat, Conversation, EvidenceRun, JudgmentEntry
 from app.routes.conversations import _assert_owner
 from app.services.conversation_threads import get_or_create_conversation
 from app.services.evidence import background, records
 from app.services.evidence.generate import generate_answer
-from app.services.journal.entries import journal_entry_ids
 
 log = logging.getLogger("app.evidence.api")
 
@@ -134,8 +133,12 @@ async def _owned_run(db: AsyncSession, run_id: str, user: dict) -> EvidenceRun:
 
 
 async def _journal_ids(db: AsyncSession, user: dict, run_ids: list[uuid.UUID]) -> dict[uuid.UUID, str]:
-    """실행마다 내 판단 기록 id(모듈 C 결정 5-6). 일지가 꺼져 있으면 일지 표(0010)를 조회하지 않는다."""
-    return await journal_entry_ids(db, user["id"], run_ids) if settings.JOURNAL_ENABLED else {}
+    """실행마다 내 판단 기록 id(모듈 C 결정 5-6). 일지가 꺼져 있으면 판정 API에서 일지 표(0010)를 조회하지 않는다."""
+    if not settings.JOURNAL_ENABLED or not run_ids:
+        return {}
+    rows = await db.execute(select(JudgmentEntry.run_id, JudgmentEntry.id).where(
+        JudgmentEntry.user_id == uuid.UUID(user["id"]), JudgmentEntry.run_id.in_(run_ids)))
+    return {run_id: str(entry_id) for run_id, entry_id in rows}
 
 
 async def _launch(db: AsyncSession, run: EvidenceRun, runner, factory) -> None:
