@@ -1,11 +1,11 @@
 {
   "version": 1,
   "study": "a3",
-  "status": "draft",
+  "status": "registered",
   "status_note": "초안이다. 로컬 사전 탐색(exploration, A-2 조정 세트만)의 진행 기준을 통과하고 허용 범위 안에서만 고친 뒤 code_sha256을 다시 계산하고 status를 registered로 바꿔 커밋한다. registered 커밋 뒤에는 이 파일을 고치지 않는다(변경은 attempts.jsonl에 study a3 줄로). status가 registered가 아니면 split·데이터 명령이 거부한다.",
   "spec": "docs/superpowers/specs/2026-10-04-subject-swap-a3-design.md 5절",
   "authored_by": "AI(Claude Code)가 작성한 사전등록 초안. 결정권자는 노아.",
-  "registered_at": null,
+  "registered_at": "2026-10-04T17:40:52.433924+00:00",
   "motivation": [
     "A-2 확인 세트(리포트 docs/lab/evidence-a2-report.md): 통제 주장 '주체 교체' 정확도 0.57(A-1 0.45). 회사·부문 이름만 바꾼 거짓 문장이 ✅로 넘어간다.",
     "A-1 Stage 1 진단에서 JEV 확률은 주체 교체를 잘 가르지만(AUC 0.998) τ_s 근처에 몰리는 경우가 많다. 임계값을 올리는 대신 숫자 확인처럼 코드로 보는 필요조건(주체 확인)을 더한다.",
@@ -589,6 +589,20 @@
         "decision": "proceed. 법인 표지 어미 버그를 고친 코드로 연구자가 로컬에서 최종 a3-explore를 다시 돌려 원장에 남기고 registered로 확정한다"
       }
     ],
-    "allowed_changes_note": "3판 탐색 2차 뒤 고친 법인 표지 어미 처리((a) 규칙 토큰 분해 코드의 버그 수정, 후보 규칙 자체는 그대로)는 연구자가 필터 코드 수정으로 허용 범위에 든다고 판단했다."
+    "allowed_changes_note": "3판 탐색 2차 뒤 고친 법인 표지 어미 처리((a) 규칙 토큰 분해 코드의 버그 수정, 후보 규칙 자체는 그대로)는 연구자가 필터 코드 수정으로 허용 범위에 든다고 판단했다.",
+    "final_local_run": {
+      "at": "2026-10-04T17:40:52.433924+00:00",
+      "code_commit": "8dd280b",
+      "n": 256,
+      "base_supported_true": 142,
+      "lost": 1,
+      "loss_rate": 0.007042253521126761,
+      "proceed": true,
+      "remaining_loss": [
+        "00150828-q2-n2 'SOC'(분야 약칭, known_limits)"
+      ],
+      "history": "1차 0.0845(블랙리스트) → 2차 0.0141(허용 목록) → 3차 0.0070(법인 표지 뒤 어미 버그 수정)",
+      "by": "AI(Claude Code) 로컬, A-2 조정 세트 저장 확률만, JEV 호출 0"
+    }
   }
 }
