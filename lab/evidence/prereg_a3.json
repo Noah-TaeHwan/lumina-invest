@@ -393,7 +393,9 @@
       "설비",
       "소속",
       "자회사",
-      "종속회사"
+      "종속회사",
+      "주식",
+      "지분"
     ],
     "notation": "법인 표지(㈜·(주)·주식회사·Co., Ltd.·Ltd.·Inc.·Corp.)를 지우고, 글자 사이 공백을 허용하고, 라틴 대소문자를 무시하고, 문단 k개 안의 괄호 약칭 정의(X(Y), X(이하 'Y'))를 같은 이름으로 본다.",
     "known_limits": "문단에 정의가 없는 약칭·음역(SK ↔ 에스케이, LG엔솔 ↔ LG에너지솔루션), 조사 없이 쓴 이름(예: '건설사업 확대'), 일반명사 목록에 없는 흔한 낱말을 후보로 잘못 잡는 것. c3 표기 변형 오탐과 removed 감사로 잰다.",
@@ -463,7 +465,7 @@
     "변경은 lab/evidence/attempts.jsonl에 study a3 표시로 이유와 함께 덧붙인다(기존 줄은 고치지 않는다)"
   ],
   "code_sha256": {
-    "app/services/evidence/subject.py": "b96e748135d055f9f7e9af8d305ac83047ff6af3a7f640c0af3b0b7d5521825c",
+    "app/services/evidence/subject.py": "e91fd5550827bb087205c2d01cdb65d475d2700f48bd0879f8433d19c20c0596",
     "app/services/evidence/lexical.py": "40366b29426cd6ec8f7baeca373458f062844c1f515142e03bcf368627e82408",
     "app/services/evidence/claims.py": "b273c3e5b7a27901356181dd1641abf3e8003b351f0891de699f1bd6731d65e7",
     "app/services/evidence/numbers.py": "b440370b1e21d5e7f308406d3f6f3369f741edba15778236d2eeb68e48276f41",
