@@ -1,7 +1,7 @@
 /* 금융정보 Agent: AI 채팅, CB 분석, 금융상품, 뉴스/RAG, 크롤링
  * app.html 인라인 스크립트에서 분리됨. 엔트리는 main.js */
 import { api, getMe, setToast, escHtml, fmt, fmtPct, colorPct } from "/js/common.js";
-import { appendEvidenceMsg, getConversationId, initEvidence, isEvidenceMode, sendEvidenceChat, setConversationId, stopAllEvidence } from "/js/evidence.js";
+import { appendEvidenceMsg, chatEpoch, getConversationId, initEvidence, isEvidenceMode, sendEvidenceChat, setConversationId, stopAllEvidence } from "/js/evidence.js";
 
 let chatHistory = [];
 let msgSeq = 0;  // 말풍선 id. 복원처럼 같은 밀리초에 연달아 그려도 겹치지 않게 카운터를 쓴다
@@ -73,19 +73,22 @@ async function sendChat() {
   scrollChat();
 
   try {
-    // 화면의 스레드 id를 보낸다(없으면 서버가 정한다). Redis 활성 값에 기대지 않는다
+    // 화면의 스레드 id를 보낸다. 없으면(첫 질문·초기화 직후) 서버가 Redis 활성 스레드를 고르므로
+    // 초기화 직후 질문은 보통 방금 비운 스레드에 이어 저장된다(js/evidence.js stopAllEvidence 참고)
     const body = { question: q, history: chatHistory };
     const cid = getConversationId();
     if (cid) body.conversation_id = cid;
+    const epoch = chatEpoch();
     const res = await api("/api/chat", { method: "POST", body });
-    document.getElementById("thinking")?.remove();
-    setConversationId(res.conversation_id);
+    thinking.remove();  // 이 요청의 표시기만 지운다(초기화 뒤 새 질문의 표시기는 남긴다)
+    if (epoch !== chatEpoch()) return;  // 기다리는 사이 초기화했다: 늦은 답변·스레드 id를 되살리지 않는다
+    setConversationId(res.conversation_id, epoch);
     chatHistory.push({ role: "user", content: q });
     chatHistory.push({ role: "assistant", content: res.answer });
     if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
     appendAssistantMsg(res.answer, res.steps);
   } catch (e) {
-    document.getElementById("thinking")?.remove();
+    thinking.remove();
     setToast(e.message, "error");
   }
 }

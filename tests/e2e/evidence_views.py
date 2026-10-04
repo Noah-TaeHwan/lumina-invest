@@ -104,12 +104,13 @@ class FakeApi:
 
     def __init__(self, *, flag=200, acked=False, runs=None, chat=None, retry=None, active=None, conv=None,
                  timeline=None, agent_answer="일반 에이전트 답변입니다.", notice_status=200, chat_delay_s=0.0,
-                 rejudge=None):
+                 rejudge=None, agent_delay_s=0.0):
         self.flag, self.acked, self.runs = flag, acked, runs or {}
         self.chat, self.retry, self.active, self.conv, self.timeline = chat, retry, active, conv, timeline
         self.rejudge = rejudge
         self.agent_answer = agent_answer
         self.notice_status, self.chat_delay_s = notice_status, chat_delay_s
+        self.agent_delay_s = agent_delay_s
         self.calls: list[tuple[str, str, dict | None]] = []
 
     def respond(self, method: str, path: str, query: str, body: dict | None):
@@ -219,6 +220,8 @@ async def open_app(browser, base: str, fake: FakeApi, *, width=1280, height=900,
                 body = None
         if path == "/api/evidence/chat" and fake.chat_delay_s:
             await asyncio.sleep(fake.chat_delay_s)
+        if path == "/api/chat" and fake.agent_delay_s:
+            await asyncio.sleep(fake.agent_delay_s)
         status, payload = fake.respond(route.request.method, path, query, body)
         await route.fulfill(status=status, content_type="application/json", body=json.dumps(payload))
 
@@ -401,6 +404,43 @@ async def s_agent_thread(browser, base, ck: Checks):
     sent = [b.get("conversation_id") for b in fake.bodies("POST", "/api/chat")]
     ck.ok(sent == [None, CID, None], f"agent-thread: 첫 질문은 id 없이, 다음은 응답 스레드 id로, 초기화 뒤 다시 없이 {sent}")
     ck.ok(not page.errors, f"agent-thread: JS 오류 없음 {page.errors}")
+    await ctx.close()
+
+
+async def s_clear_race(browser, base, ck: Checks):
+    print("[clear-race] 응답을 기다리는 중 초기화하면 늦게 온 응답이 예전 스레드 id·말풍선을 되살리지 않는다")
+    fake = FakeApi(flag=404, agent_delay_s=1.0)
+    ctx, page = await open_app(browser, base, fake)
+    await ask(page, "느린 질문")
+    await page.wait_for_timeout(200)
+    await page.click("#clear-chat")
+    await page.wait_for_timeout(1300)  # 늦은 응답(conversation_id=CID)이 도착한다
+    ck.ok(await page.locator("#chat-messages .ai-label").count() == 0, "clear-race: 초기화한 화면에 늦은 답변을 그리지 않는다")
+    fake.agent_delay_s = 0.0
+    await ask(page, "초기화 뒤 질문")
+    await page.wait_for_function("document.querySelectorAll('#chat-messages .ai-label').length === 1")
+    bodies = fake.bodies("POST", "/api/chat")
+    ck.ok(bodies[-1].get("conversation_id") is None, f"clear-race: 일반 채팅 다음 질문은 스레드 id 없이 {bodies[-1]}")
+    ck.ok(bodies[-1].get("history") == [], f"clear-race: 늦은 답변을 대화 이력에 넣지 않는다 {bodies[-1].get('history')}")
+    ck.ok(not page.errors, f"clear-race: JS 오류 없음 {page.errors}")
+    await ctx.close()
+
+    fake = FakeApi(acked=True, chat=started("r1"), chat_delay_s=1.0,
+                   runs={"r1": [run("r1", "done", DONE["statuses"], DONE["extra"])]})
+    ctx, page = await open_app(browser, base, fake)
+    await turn_on(page)
+    await pick_company(page)
+    await ask(page)
+    await page.wait_for_timeout(200)
+    await page.click("#clear-chat")
+    await page.wait_for_timeout(1300)
+    ck.ok(await page.locator(".ev-msg").count() == 0, "clear-race: 초기화한 화면에 늦은 근거 답변을 그리지 않는다")
+    fake.chat_delay_s = 0.0
+    await ask(page)
+    await page.wait_for_selector(".ev-msg", timeout=5000)
+    sent = fake.bodies("POST", "/api/evidence/chat")[-1]
+    ck.ok(sent.get("conversation_id") is None, f"clear-race: 근거 모드 다음 질문도 스레드 id 없이 {sent}")
+    ck.ok(not page.errors, f"clear-race: JS 오류 없음 {page.errors}")
     await ctx.close()
 
 
@@ -823,7 +863,7 @@ async def main() -> int:
     ck = Checks()
     async with async_playwright() as p:
         browser = await p.chromium.launch(executable_path=_chromium())
-        for scenario in (s_pure, s_flag_off, s_agent_thread, s_notice, s_done, s_double_send, s_states, s_timeout, s_restore,
+        for scenario in (s_pure, s_flag_off, s_agent_thread, s_clear_race, s_notice, s_done, s_double_send, s_states, s_timeout, s_restore,
                          s_policy_v1, s_mobile):
             try:
                 await scenario(browser, base, ck)

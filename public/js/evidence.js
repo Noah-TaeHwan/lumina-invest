@@ -358,17 +358,27 @@ async function rejudge(msg) {
 export function stopAllEvidence() {
   for (const m of messages) { m.dead = true; clearTimeout(m.timer); }
   messages.clear();
-  state.conversationId = null;  // 초기화한 뒤 질문은 스레드 id 없이 보낸다(서버가 활성 스레드를 정한다)
+  // 초기화한 뒤 질문은 스레드 id 없이 보낸다. 서버는 Redis 활성 스레드를 고르므로, 보통은 방금 초기화한
+  // 화면의 스레드에 이어 저장된다(초기화는 화면만 비운다. 새 스레드는 대화 목록에서 만든다)
+  state.conversationId = null;
+  state.epoch++;  // 초기화 전에 보낸 요청의 늦은 응답은 버린다
 }
 
 // ── 화면: 모드 토글·회사 선택·고지 ─────────────────────────────────
-const state = { available: false, acked: null, company: null, conversationId: null, sending: false };
+const state = { available: false, acked: null, company: null, conversationId: null, sending: false, epoch: 0 };
 
 export function isEvidenceMode() {
   return state.available && document.getElementById("ev-mode")?.checked === true;
 }
 
-export function setConversationId(cid) {
+/** 화면 초기화 세대. 요청 전에 받아 두었다가 응답 때 달라졌으면(그사이 초기화) 응답을 버린다. */
+export function chatEpoch() {
+  return state.epoch;
+}
+
+/** epoch를 주면 그 세대일 때만 바꾼다: 초기화 뒤 도착한 응답이 예전 스레드 id를 되살리지 않게. */
+export function setConversationId(cid, epoch) {
+  if (epoch !== undefined && epoch !== state.epoch) return;
   if (cid) state.conversationId = cid;
 }
 
@@ -555,10 +565,12 @@ export async function sendEvidenceChat(question, { appendUserMsg, container, scr
   scroll();
   const body = { question, company: state.company.corp_name, corp_code: state.company.corp_code };
   if (state.conversationId) body.conversation_id = state.conversationId;
+  const epoch = state.epoch;
   try {
     const res = await api("/api/evidence/chat", { method: "POST", body });
     thinking.remove();
-    setConversationId(res.conversation_id);
+    if (epoch !== state.epoch) return true;  // 기다리는 사이 초기화했다: 늦은 답변을 그리지 않는다
+    setConversationId(res.conversation_id, epoch);
     appendEvidenceMsg(container, res.answer, runFromStarted(res));
     scroll();
     return true;
