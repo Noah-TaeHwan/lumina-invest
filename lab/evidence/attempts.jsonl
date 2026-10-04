@@ -44,3 +44,4 @@
 {"at": "2026-10-04T00:24:01.844907+00:00", "event": "split", "study": "a2", "companies": 40, "clusters": 40, "excluded": {"no_annual_report": 22, "short": 1, "document": 2, "a1_mention": 1, "a1_company": 3, "finance": 1}, "tune": 20, "check": 20}
 {"at": "2026-10-04T05:22:19.078337+00:00", "event": "claims", "study": "a2", "split": "tune", "answers": 120, "sentences": 330, "rows": 321, "not_claim_rule": 17, "capped": 9}
 {"at": "2026-10-04T05:24:04.196359+00:00", "event": "controlled-check", "study": "a2", "accepted": 117, "rejected": 3}
+{"at": "2026-10-04T06:50:13.748888+00:00", "event": "labels-merge", "study": "a2", "split": "tune", "labeled": 555, "disputed": 11, "kappa_binary_r1": 0.967}

@@ -1,0 +1,24 @@
+{"lid": "ae2cb471c0", "label": "supported", "passage": 5, "reason": "문단 5가 플랫폼 기술을 글로벌 제약사에 기술이전하고 자체개발 파이프라인도 기술이전하는 BD 전략을 명시"}
+{"lid": "f5a4e914ad", "label": "supported", "passage": 1, "reason": "문단 1이 ADC 플랫폼 기술·후보물질 기술이전을 주요 사업으로 한다고 명시(매출원으로 의역)"}
+{"lid": "2b537adb4d", "label": "contradicted", "passage": 5, "reason": "문단 5는 플랫폼 기술과 자체개발 파이프라인을 기술이전하는 전략이라고 해 부정문과 반대"}
+{"lid": "3c5481ec5d", "label": "supported", "passage": 1, "reason": "문단 1 원문과 동일"}
+{"lid": "4ab92795fe", "label": "supported", "passage": 3, "reason": "문단 3: PMT 플랫폼 기술로 정상세포에의 비선택적 약물 유입을 줄이는 효과를 확인"}
+{"lid": "69034af2de", "label": "supported", "passage": 3, "reason": "문단 3: OHPAS가 기존 링커의 적용 약물 제한 한계, 혈장 내 안정성, 면역세포 독성 문제에 대안을 제시(의역)"}
+{"lid": "7bea9d7126", "label": "supported", "passage": 3, "reason": "문단 3: PMT로 정상세포에의 비선택적 약물 유입을 줄이는 효과"}
+{"lid": "81e125079c", "label": "no_evidence", "passage": null, "reason": "셀트리온에 대한 내용이 문단에 없음"}
+{"lid": "319e1dad49", "label": "supported", "passage": 3, "reason": "문단 3: 인투셀은 OHPAS와 PMT라는 핵심 플랫폼 기술을 보유"}
+{"lid": "3dd97b0df8", "label": "supported", "passage": 7, "reason": "문단 7 표: 기술이전수익 2025년 2,016,433천원"}
+{"lid": "dc38d903d5", "label": "supported", "passage": 7, "reason": "문단 7 표: 2025년 기술이전수익 2,016,433, 물질이전수익 125,079천원 일치(기타수익 157,610 언급 생략)"}
+{"lid": "5aabb4263f", "label": "contradicted", "passage": 7, "reason": "문단 7은 2025년 기술이전수익을 2,016,433천원으로 기재, 2,316,433과 다름"}
+{"lid": "d4b1cd70fa", "label": "non_claim", "passage": null, "reason": "다음 내용을 안내하는 도입 문장으로 사실 주장 아님"}
+{"lid": "cbd7058ba9", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 임상 및 시험비 국내 금액이 없음(157,610은 기타수익 국내 값)"}
+{"lid": "bdf23c6ccd", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 임상 및 시험비 해외 금액이 없음(25,265는 2024년 물질이전수익 해외 값)"}
+{"lid": "2e0dfbd417", "label": "no_evidence", "passage": null, "reason": "문단에 2012년 기술이전수익 자료가 없음(2,016,433은 2025년 값)"}
+{"lid": "8015ac2e0a", "label": "supported", "passage": 7, "reason": "문단 7 표: 기술이전수익 국내 2025년 2,016,433천원"}
+{"lid": "0fdf73a9b9", "label": "supported", "passage": 1, "reason": "문단 1: 임상개발 비용 부담 속에 내부 파이프라인을 순차 진행하고 비임상~임상1상 내 기술이전하는 전략(비용 회수는 의역)"}
+{"lid": "ee4e7f8df6", "label": "no_evidence", "passage": null, "reason": "에이비엘바이오에 대한 내용이 문단에 없음"}
+{"lid": "a33c043141", "label": "supported", "passage": 3, "reason": "문단 3 주1: 연구개발비용은 연구개발활동을 위해 지출하는 손익계산서상 비용으로 경상연구개발비와 같음"}
+{"lid": "a2fb7be3b6", "label": "supported", "passage": 1, "reason": "문단 1: 파생거래는 보고서 제출일 현재 해당사항 없음"}
+{"lid": "9926882506", "label": "supported", "passage": 2, "reason": "문단 2: 삼성바이오에피스와 공동연구계약(RCA), 개발 옵션 포함"}
+{"lid": "20c836360b", "label": "supported", "passage": 2, "reason": "문단 2: 계약 상대방 삼성바이오에피스, 계약 형태 공동연구계약(RCA)"}
+{"lid": "1454292834", "label": "contradicted", "passage": 2, "reason": "문단 2는 삼성바이오에피스와 개발 옵션 포함 공동연구계약을 맺었다고 기재"}

@@ -1,0 +1,27 @@
+{"lid": "effad93622", "label": "supported", "passage": 1, "reason": "문단 1은 딜리의 산업용 디지털 UV 인쇄 세계 시장 점유율을 약 7% 내외로 추정한다."}
+{"lid": "0a4a929bb0", "label": "contradicted", "passage": 1, "reason": "문단 1은 세계 시장 점유율을 약 7% 내외로 추정한다고 명시하여 이를 부정하는 주장과 상충한다."}
+{"lid": "340e9bbc8e", "label": "supported", "passage": 1, "reason": "문단 1에 산업용 디지털 UV 인쇄 시장의 세계 시장 점유율이 약 7% 내외로 추정된다고 명시되어 있다."}
+{"lid": "a62e04e809", "label": "no_evidence", "passage": null, "reason": "제시된 문단은 딜리에 관한 내용이며 삼성전자의 메모리 반도체 사업과 매출·성장에 관한 근거가 없다."}
+{"lid": "e0cec05d81", "label": "supported", "passage": 5, "reason": "문단 5는 네오 피카소 시리즈가 출시 이후 수년 동안 딜리의 매출과 성장을 견인한 핵심 라벨 프레스 제품군이라고 명시한다."}
+{"lid": "f44c29fb18", "label": "supported", "passage": 5, "reason": "문단 5는 라벨 프레스 라인업인 네오 피카소 시리즈가 수년간 딜리의 매출과 성장을 견인한 핵심 제품군이라고 설명한다."}
+{"lid": "1aef740191", "label": "supported", "passage": 3, "reason": "문단 3은 주문생산 방식이며 일반적으로 수주 후 30일 내 선적 매출이 완료된다고 명시한다."}
+{"lid": "22676ce0e4", "label": "contradicted", "passage": 3, "reason": "문단 3이 제시하는 일반적인 수주 후 선적 매출 완료 기간은 30일 내로, 주장의 40일과 다르다."}
+{"lid": "daaa8b3980", "label": "non_claim", "passage": null, "reason": "수출·내수 매출 수치를 주장하지 않고 제공된 정보의 부족을 알리는 답변 유보 문장이다."}
+{"lid": "b770598fd1", "label": "no_evidence", "passage": null, "reason": "문단 4의 128대는 2025년도 생산실적이며, 제시된 문단에는 2022년도 생산실적이 없다."}
+{"lid": "cc3977faab", "label": "supported", "passage": 4, "reason": "문단 4는 당해 사업연도 Digital UV 프린터 부문과 합계의 평균가동률을 모두 50%로 명시한다."}
+{"lid": "ba72ac8dc1", "label": "supported", "passage": 4, "reason": "문단 4의 생산실적 표는 Digital UV 프린터 부문의 2025년도 연간 UV 프린터 생산량을 128대로 제시한다."}
+{"lid": "fa875ab2d3", "label": "no_evidence", "passage": null, "reason": "문단 1의 USD 환율 민감도는 딜리에 관한 것이며 한빛인쇄기계의 당기손익 영향에 관한 근거는 없다."}
+{"lid": "91689e42e0", "label": "supported", "passage": 1, "reason": "문단 1의 환율 민감도 표는 합계의 10% 상승 영향을 916,781천원, 하락 영향을 (916,781)천원으로 제시한다."}
+{"lid": "4efbf4dde4", "label": "supported", "passage": 1, "reason": "문단 1의 환율 민감도 표에서 RUB의 10% 상승시와 하락시 영향은 모두 -로 표시되어 있다."}
+{"lid": "eb15df6ccf", "label": "supported", "passage": 1, "reason": "문단 1은 JPY의 10% 상승 영향을 362천원, 하락 영향을 (362)천원으로 명시한다."}
+{"lid": "05c6469ee6", "label": "non_claim", "passage": null, "reason": "구체적인 손익 영향이나 금액을 주장하지 않고 이어지는 환율 민감도 정보를 안내하는 도입문이다."}
+{"lid": "e9738539b8", "label": "supported", "passage": 1, "reason": "문단 1은 USD의 10% 상승 영향을 916,612천원, 하락 영향을 (916,612)천원으로 명시한다."}
+{"lid": "0c1c415651", "label": "supported", "passage": 1, "reason": "문단 1은 EUR의 10% 상승 영향을 (193)천원, 하락 영향을 193천원으로 명시한다."}
+{"lid": "1fe52941de", "label": "supported", "passage": 1, "reason": "문단 1은 주요 외화에 대한 원화환율의 10% 상승시 USD 관련 당기손익이 916,612천원 증가한다고 제시한다."}
+{"lid": "a7a1a49fb4", "label": "contradicted", "passage": 6, "reason": "문단 6은 나열된 라벨 및 출판용 프린터 중 B2 고속 인쇄 프린터를 개발중으로 명시하여 모두 개발완료라는 주장을 반박한다."}
+{"lid": "5b4b6032db", "label": "non_claim", "passage": null, "reason": "문단 번호만 제시한 인용 표지로 사실을 주장하는 내용이 없다."}
+{"lid": "ec52292258", "label": "supported", "passage": 1, "reason": "문단 1은 연구개발을 통한 세계 인쇄 시장 선도 기업 목표와 높은 기술 진입장벽, 보유 기술로 대응할 경우의 밝은 전망을 함께 설명한다."}
+{"lid": "1ed1da14ae", "label": "supported", "passage": 7, "reason": "문단 7은 기본 4색(CMYK)과 화이트를 갖춘 프레스에 O·V 색상을 추가하여 색상 구현 영역을 확대했고 개발완료되었다고 명시한다."}
+{"lid": "2a11350641", "label": "contradicted", "passage": 7, "reason": "문단 7은 O·V 색상 추가로 색상 구현 영역을 확대했다고 명시하여 확대하지 않았다는 주장과 상충한다."}
+{"lid": "f0c66d8688", "label": "supported", "passage": 8, "reason": "문단 8은 건전한 자본구조 유지가 자본관리 목적이며 부채비율을 자본관리지표로 사용한다고 명시한다."}
+{"lid": "66bb88de71", "label": "supported", "passage": 8, "reason": "문단 8의 부채비율 표는 당기말 부채비율을 6.98%로 제시한다."}

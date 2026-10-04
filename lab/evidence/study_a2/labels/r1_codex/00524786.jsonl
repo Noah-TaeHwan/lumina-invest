@@ -1,0 +1,23 @@
+{"lid": "a267b0ce8c", "label": "contradicted", "passage": 7, "reason": "문단 7의 통상 발주 기간은 30~60일로, 주장한 30~45일과 다르다."}
+{"lid": "8da03525e5", "label": "supported", "passage": 7, "reason": "문단 7은 통상 30~60일 내외의 단기 발주로 생산·납품한다고 명시한다."}
+{"lid": "c830a2a300", "label": "no_evidence", "passage": null, "reason": "주력 제품과 공급 산업은 문단 8에, 정밀 피팅이라는 설명은 문단 3에 있어 한 문단이 모든 사실을 지지하지 않는다."}
+{"lid": "fd5161dc60", "label": "supported", "passage": 8, "reason": "문단 8은 2020년 4월 22일 부산주공과의 공장용지 매매계약을 명시한다."}
+{"lid": "84b9e06090", "label": "supported", "passage": 2, "reason": "문단 2는 나열한 산업의 플랜트에서 산업용 밸브와 정밀 피팅이 고가 장비·설비의 핵심부분을 차지한다고 설명한다."}
+{"lid": "87edacfe36", "label": "contradicted", "passage": 8, "reason": "문단 8의 부산주공 공장용지 계약 체결시기는 2016년 4월이 아니라 2020년 4월이다."}
+{"lid": "53b177957c", "label": "supported", "passage": 3, "reason": "문단 3은 비엠티 밸브/피팅사업부문의 주 생산품이 산업용 정밀 피팅과 밸브임을 명시한다."}
+{"lid": "b26f3f5483", "label": "no_evidence", "passage": null, "reason": "제시된 8개 문단에는 주장한 전체 매출액·내수·수출 금액이 없다."}
+{"lid": "506afc1cd7", "label": "non_claim", "passage": null, "reason": "미완성 문단·절 번호 인용으로, 판정할 사실 명제가 없다."}
+{"lid": "e6373ae0fa", "label": "contradicted", "passage": 8, "reason": "문단 8의 2013년 3월 건설공사 도급계약 상대방은 한빛종합건설이 아니라 지구종합건설이다."}
+{"lid": "a125ae8fdb", "label": "supported", "passage": 8, "reason": "문단 8은 2013년 3월 22일 지구종합건설과의 건설공사 도급계약을 명시한다."}
+{"lid": "7423b6d26b", "label": "supported", "passage": 8, "reason": "문단 8의 회사 개요 표에 벤처기업 해당 여부가 해당으로 기재되어 있다."}
+{"lid": "116ef92637", "label": "non_claim", "passage": null, "reason": "특수관계자 매입 비중에 관한 정보 부족을 알리는 답변의 한계 안내다."}
+{"lid": "9b498fb3dc", "label": "non_claim", "passage": null, "reason": "원재료 매입처에 관한 정보 부족을 알리는 답변의 한계 안내다."}
+{"lid": "8ccb1a6a78", "label": "contradicted", "passage": 8, "reason": "문단 8은 벤처기업 해당 여부를 해당으로 기재해 미해당이라는 주장과 반대다."}
+{"lid": "c262013e2e", "label": "no_evidence", "passage": null, "reason": "문단 1은 이자율스왑의 자산·부채 잔액을 제시할 뿐, 이자율스왑만 거래가 발생했다고 명시하지 않는다."}
+{"lid": "27bee177a7", "label": "supported", "passage": 3, "reason": "문단 3은 신흥메탈의 HEX BAR 외 매입 비율 12.86%와 특수관계 여부 여를 함께 명시한다."}
+{"lid": "80fc03cda2", "label": "no_evidence", "passage": null, "reason": "제시된 8개 문단에는 삼성전자의 생산·판매 제품에 관한 내용이 없다."}
+{"lid": "2e1a41ef0b", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 환율 변동에 따른 이자율 변동이나 환율 10% 상승의 이자율스왑 손익 영향이 없다."}
+{"lid": "6c1ee38240", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 파생상품 종류별로 환율의 당기손익 영향이 달라진다는 설명이 없다."}
+{"lid": "7681441278", "label": "no_evidence", "passage": null, "reason": "이 질문의 8개 문단에는 최근 사업연도의 연구개발비용·연도·매출액 대비 비율을 확인할 자료가 없다."}
+{"lid": "33ff242ad1", "label": "contradicted", "passage": 8, "reason": "문단 8의 2018년 12월 양산석계산업단지 계약금액은 2,135,000천원이 아니라 1,428,000천원이다."}
+{"lid": "66defb34bc", "label": "supported", "passage": 8, "reason": "문단 8은 2018년 12월 4일 양산석계산업단지와의 산업시설용지 매매계약 금액을 1,428,000천원으로 명시한다."}

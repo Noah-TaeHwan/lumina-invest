@@ -1,0 +1,33 @@
+{"lid": "b51e6f893d", "label": "supported", "passage": 5, "reason": "문단 5가 안양본사와 국내·해외 각 1개 연결대상회사 운영을 명시"}
+{"lid": "ab3fed14db", "label": "supported", "passage": 5, "reason": "문단 5: 서호드라이버는 인버터 판로개척과 제조·판매에 역점"}
+{"lid": "e6cbdbf795", "label": "contradicted", "passage": 5, "reason": "문단 5는 서호드라이버가 인버터 판로개척·제조·판매에 역점을 둔다고 함(부정 진술과 반대)"}
+{"lid": "3d0777eaf8", "label": "supported", "passage": 5, "reason": "문단 5의 주력사업 서술과 일치"}
+{"lid": "33a3e53cf7", "label": "supported", "passage": 3, "reason": "문단 3: 설계·시운전 경력 15년 이상 엔지니어 다수 확보"}
+{"lid": "a65fd51ebe", "label": "supported", "passage": 3, "reason": "문단 3: 주력 상품인 항만크레인용 제어시스템은 모두 주문제작"}
+{"lid": "40940721c1", "label": "no_evidence", "passage": null, "reason": "하드웨어·소프트웨어를 모두 자체 개발·공급한다는 내용이 문단에 없음"}
+{"lid": "f7f28d7743", "label": "supported", "passage": 7, "reason": "제조판매 사업 영위와 안양 본사는 문단 7과 일치(납품 방식이라는 틀은 어색하나 사실 내용은 동일)"}
+{"lid": "0960c92381", "label": "supported", "passage": 7, "reason": "문단 7의 주력사업 서술과 일치"}
+{"lid": "ffcb2eb0fb", "label": "no_evidence", "passage": null, "reason": "삼성전자 메모리 반도체에 관한 문단 없음"}
+{"lid": "0debf8b886", "label": "supported", "passage": 8, "reason": "인버터 발주 형태 ⓐⓑⓒ 서술이 문단 8과 일치"}
+{"lid": "0bda6eb772", "label": "non_claim", "passage": null, "reason": "정보가 없다는 답변상 메타 진술"}
+{"lid": "cd3c4be436", "label": "non_claim", "passage": null, "reason": "인용 표기만 있는 문장 조각"}
+{"lid": "2e0bdc4c23", "label": "supported", "passage": 5, "reason": "인용된 제조판매 사업·안양 본사 문장이 문단 5와 일치"}
+{"lid": "f22a253543", "label": "non_claim", "passage": null, "reason": "정보가 없다는 답변상 메타 진술"}
+{"lid": "7e8d348fc8", "label": "supported", "passage": 8, "reason": "인버터 단품 사업부문 사용처가 광범위해 다양한 형태로 발주된다는 문단 8 문장과 일치"}
+{"lid": "71ac41020d", "label": "non_claim", "passage": null, "reason": "인용 표기만 있는 문장 조각"}
+{"lid": "769871e1e8", "label": "no_evidence", "passage": null, "reason": "원재료 매입 품목·비율에 관한 문단 없음"}
+{"lid": "b2bcee23b7", "label": "supported", "passage": 6, "reason": "문단 6: 2005~2008년대처럼 많은 물량은 아니지만 꾸준히 크레인 도입"}
+{"lid": "06e2c75d23", "label": "contradicted", "passage": 6, "reason": "문단 6은 비교 기간을 2005~2008년으로 명시(2011~2014년 아님)"}
+{"lid": "3ded51b04f", "label": "no_evidence", "passage": null, "reason": "효성중공업에 관한 문단 없음(문단의 주체는 당사)"}
+{"lid": "df002e6b35", "label": "supported", "passage": 4, "reason": "문단 4: 설계·현장 시운전 경력 15년 이상 엔지니어 다수 확보"}
+{"lid": "a65dd1cdb9", "label": "non_claim", "passage": null, "reason": "정보가 제공되지 않았다는 메타 진술"}
+{"lid": "a312d1bf51", "label": "supported", "passage": 5, "reason": "문단 5 연구개발 기대효과 문장과 일치"}
+{"lid": "dff1898e9d", "label": "supported", "passage": 5, "reason": "문단 5: 무인트램 개발 연구기간 2022.04.01~2025.06.30"}
+{"lid": "4d1dd02638", "label": "supported", "passage": 4, "reason": "문단 4: PSA 싱가포르 PPT 터미널에 ARMG 130대 공급 실적"}
+{"lid": "32147d911e", "label": "non_claim", "passage": null, "reason": "인용 표기만 있는 문장 조각"}
+{"lid": "ebbe54d54d", "label": "supported", "passage": 5, "reason": "문단 5 기대효과 문장과 일치"}
+{"lid": "9d8a286bf7", "label": "non_claim", "passage": null, "reason": "인용 표기만 있는 문장 조각"}
+{"lid": "5d561878a9", "label": "non_claim", "passage": null, "reason": "인용 표기만 있는 문장 조각"}
+{"lid": "a30a6ab3f0", "label": "supported", "passage": 5, "reason": "문단 5 스마트 자동화 항만 기대효과 서술과 일치"}
+{"lid": "6ffa94a53e", "label": "supported", "passage": 5, "reason": "문단 5 기대효과 문장과 일치"}
+{"lid": "354cc7dae7", "label": "contradicted", "passage": 4, "reason": "문단 4는 PPT 터미널 ARMG 130대 공급 실적을 명시"}

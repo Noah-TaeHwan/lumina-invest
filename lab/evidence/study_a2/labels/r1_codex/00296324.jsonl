@@ -1,0 +1,22 @@
+{"lid": "adfa7f3767", "label": "supported", "passage": 2, "reason": "문단 2가 당사가 커피유통사업 부문을 영위한다고 설명한다."}
+{"lid": "4dc90b4f8b", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 오리온의 제과 제품 생산이나 판매에 관한 정보가 없다."}
+{"lid": "27da872d16", "label": "supported", "passage": 2, "reason": "문단 2가 엔터테인먼트 부문의 미디어 콘텐츠 소속과 수요자 기호 변화 및 경기 민감성을 설명한다."}
+{"lid": "b09f6d24ee", "label": "supported", "passage": 2, "reason": "문단 2가 자원개발 사업부문을 명시하여 자원 개발 사업을 영위함을 뒷받침한다."}
+{"lid": "e1ed212f7a", "label": "supported", "passage": 2, "reason": "문단 2가 엔터테인먼트사업부문이 미디어 콘텐츠 사업에 속한다고 명시한다."}
+{"lid": "c52ae9fb49", "label": "supported", "passage": 2, "reason": "문단 2가 당사의 커피유통·엔터테인먼트·자원개발 사업부문을 모두 명시한다."}
+{"lid": "e3a6fbe517", "label": "supported", "passage": 1, "reason": "문단 1의 FIS 자료는 2023년 세계 커피 시장 1,131억 5,260만 달러와 전년 대비 9.0% 증가를 제시하며 시장 규모는 반올림한 근사다."}
+{"lid": "b8d495aff5", "label": "contradicted", "passage": 1, "reason": "문단 1의 같은 2023년 세계 커피 시장 성장률은 13.7%가 아니라 9.0%다."}
+{"lid": "1f2c0ba54a", "label": "supported", "passage": 1, "reason": "문단 1의 사업현황 표가 커피 부문의 사업을 커피·커피머신 등의 판매로 명시한다."}
+{"lid": "0bf244f32e", "label": "non_claim", "passage": null, "reason": "자료에 필요한 정보가 제공되지 않았다는 답변 한계 안내이며 기업에 대한 실질적 사실 주장이 아니다."}
+{"lid": "3bbc7ac158", "label": "no_evidence", "passage": null, "reason": "문단 6은 2022년 매출액 4조 원을 제시하지만 2019년 매출액은 제시하지 않아 다른 기간의 값을 판단할 수 없다."}
+{"lid": "6e18a6f824", "label": "supported", "passage": 6, "reason": "문단 6이 2022년 국내 디지털 크리에이터 미디어 산업 매출액이 4조 원에 달한다고 명시한다."}
+{"lid": "231e8314a8", "label": "supported", "passage": 4, "reason": "실제 근거는 문단 4로, 미디어 콘텐츠의 빠른 기호 변화·경기 민감성과 그 업황에 영향을 받는 에이전시 사업을 함께 설명한다."}
+{"lid": "3f0f086816", "label": "supported", "passage": 1, "reason": "문단 1의 사업현황 표가 커피 부문에서 커피와 커피머신 등을 판매한다고 명시한다."}
+{"lid": "bccef18f11", "label": "no_evidence", "passage": null, "reason": "문단 1은 커피 부문의 판매 사업을 설명하며 건설 부문의 사업에 관한 근거는 없다."}
+{"lid": "9b7dd21d76", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 큐로홀딩스 커피 원두의 매입처가 국내라는 정보가 없다."}
+{"lid": "388d0d88c7", "label": "supported", "passage": 4, "reason": "문단 4가 자원개발 부문의 국제 유가 관련 영향과 거시경제 상황에 따른 사업·재무상황의 부정적 영향을 설명한다."}
+{"lid": "cc42d9c5b4", "label": "contradicted", "passage": 5, "reason": "문단 5는 2007년 Caliente 사업에서 30,000,000 USD를 지급하고 지분 90%를 인수했다고 명시하므로 확보하지 않았다는 주장과 반대다."}
+{"lid": "5d7b71f220", "label": "supported", "passage": 5, "reason": "문단 5가 2007년 Caliente 광구 지분 90%를 30,000,000 USD에 인수했다고 명시하며 이는 3천만 달러와 같다."}
+{"lid": "c8288fd546", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 농심의 라면 제품 생산이나 국내외 판매에 관한 정보가 없다."}
+{"lid": "5f9c946e27", "label": "non_claim", "passage": null, "reason": "유통계약 정보가 제공되지 않았다는 답변 한계 안내이며 계약 조건 자체에 관한 사실 주장이 아니다."}
+{"lid": "da62599e11", "label": "supported", "passage": 3, "reason": "문단 3이 내수경기 부진과 가계소득 감소로 소비심리가 위축된 상황에서도 커피 시장이 성장세를 이어왔다고 설명한다."}

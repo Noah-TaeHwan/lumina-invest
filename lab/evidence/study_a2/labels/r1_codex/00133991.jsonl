@@ -1,0 +1,33 @@
+{"lid":"8e09582033","label":"supported","passage":1,"reason":"문단 1에 선재사업부문과 AT사업부문이 함께 명시되어 있다."}
+{"lid":"f9be6f8f15","label":"no_evidence","passage":null,"reason":"서울사무소와 부산·대구영업소의 지역별 판매는 선재사업부문에 관한 설명이며 단조사업부문에 관한 근거는 없다."}
+{"lid":"c57c170123","label":"supported","passage":1,"reason":"문단 1은 선재사업부문의 서울사무소와 부산·대구영업소가 지역을 나누어 판매를 담당한다고 설명한다."}
+{"lid":"e8f0d4abb5","label":"supported","passage":1,"reason":"문단 1에 선재사업부문 각 사무소·영업소의 담당 지역이 주장과 동일하게 명시되어 있다."}
+{"lid":"83e9b5eb21","label":"supported","passage":1,"reason":"문단 1은 AT사업부문 원주공장 영업개발팀이 국내와 중국·멕시코 등 국내외 판매를 담당한다고 명시한다."}
+{"lid":"6cfc55d621","label":"contradicted","passage":6,"reason":"문단 6은 냉간압조용 선재와 봉강이 해당 전방산업에 기초소재로 공급된다고 명시하여 공급되지 않는다는 주장을 반박한다."}
+{"lid":"a9e3ea9c90","label":"non_claim","passage":null,"reason":"뒤따르는 제품 용도 설명을 소개하는 안내 문장으로 구체적인 용도에 관한 사실 주장이 없다."}
+{"lid":"d4cdb21d99","label":"supported","passage":6,"reason":"문단 6은 봉강의 해당 전방산업 기초소재 용도와 자동차산업 업황에 따른 매출·수익성 영향을 모두 설명한다."}
+{"lid":"597758a92d","label":"no_evidence","passage":null,"reason":"제시된 문단에는 봉강의 매출 비중이나 20% 이상이라는 수치가 없다."}
+{"lid":"6ddbeb9670","label":"no_evidence","passage":null,"reason":"문단 6은 회사가 자동차 부품·기계산업용 기초소재의 국산화를 목적으로 설립되었다고 할 뿐 자동차부품 제품의 개발 목적과 성과를 명시하지 않는다."}
+{"lid":"765e17f29a","label":"no_evidence","passage":null,"reason":"제시된 문단에는 선재의 매출 비중이나 30% 이상이라는 수치가 없다."}
+{"lid":"ef03c97578","label":"supported","passage":6,"reason":"문단 6은 냉간압조용 선재와 봉강이 자동차·전자·산업기계·건설·조선 등에 기초소재로 공급된다고 명시한다."}
+{"lid":"c829aaf34f","label":"non_claim","passage":null,"reason":"뒤따르는 품목별 매출 비중을 소개하는 안내 문장으로 자체적인 수치 주장이 없다."}
+{"lid":"25f8a55aca","label":"supported","passage":6,"reason":"문단 6은 선재의 해당 전방산업 기초소재 용도와 자동차산업 업황에 따른 매출·수익성 영향을 모두 설명한다."}
+{"lid":"d2d0aaebc2","label":"no_evidence","passage":null,"reason":"제시된 문단에는 자동차부품의 매출 비중이나 10% 이상이라는 수치가 없다."}
+{"lid":"a1a6e5735b","label":"no_evidence","passage":null,"reason":"제시된 문단에는 농심의 라면·스낵 생산과 국내외 판매에 관한 내용이 없다."}
+{"lid":"47c6cee6d5","label":"no_evidence","passage":null,"reason":"제시된 문단에는 선재·봉강·자동차부품의 해외 매출액이나 1,111,419백만원이라는 수치가 없다."}
+{"lid":"15afd705b0","label":"supported","passage":7,"reason":"문단 7은 수출을 통해 약 30여 개국에 판매한다고 명시한다."}
+{"lid":"6f5afcabd8","label":"no_evidence","passage":null,"reason":"제시된 문단에는 선재·봉강·자동차부품의 국내 매출액이나 1,111,419백만원이라는 수치가 없다."}
+{"lid":"e1b2407678","label":"non_claim","passage":null,"reason":"뒤따르는 최근 사업연도 매출액을 소개하는 안내 문장으로 자체적인 금액 주장이 없다."}
+{"lid":"67ae742055","label":"supported","passage":8,"reason":"문단 8은 대기·수질 배출오염물질을 법적 기준치 대비 30% 이내로 지속적으로 관리한다고 명시한다."}
+{"lid":"2728981e07","label":"supported","passage":4,"reason":"문단 4는 일부 물량을 해외에서 조달한다고 명시한다."}
+{"lid":"adb632fe89","label":"supported","passage":4,"reason":"문단 4는 포스코·세아창원특수강 등 소수 공급자에 의한 원재료 공급 구조를 명시한다."}
+{"lid":"91feab62fd","label":"contradicted","passage":8,"reason":"문단 8에 명시된 대기·수질 배출오염물질 관리 수준은 법적 기준치 대비 30% 이내이며 주장에 제시된 45%와 다르다."}
+{"lid":"4a9a7fbdac","label":"non_claim","passage":null,"reason":"제공 자료에서 생산설비 가동률 정보를 찾을 수 없다는 답변의 한계를 알리는 문장이다."}
+{"lid":"8847f550d8","label":"contradicted","passage":6,"reason":"문단 6은 설비의 안정적 가동과 생산 효율 극대화를 위한 TPM 도입 시점을 2004년으로 명시하여 2009년이라는 주장과 다르다."}
+{"lid":"68de5d4eb2","label":"no_evidence","passage":null,"reason":"문단 1은 투기 목적의 파생상품거래를 하지 않는 정책만 설명하며 금리·환율 위험 회피용 파생상품 계약의 부재는 명시하지 않는다."}
+{"lid":"18b85fa18b","label":"supported","passage":6,"reason":"문단 6은 설비의 안정적인 가동을 통한 생산 효율 극대화를 위해 2004년부터 TPM 활동을 도입했다고 명시한다."}
+{"lid":"79423bc5a3","label":"supported","passage":6,"reason":"문단 6은 2006년 국제 자동차분야 품질경영시스템 ISO/TS 16949 인증을 받았다고 명시한다."}
+{"lid":"db714c48ca","label":"supported","passage":5,"reason":"문단 5는 고객 납기 준수를 최우선으로 대응하기 위해 단납기 생산 체제를 지속적으로 구축해 왔다고 명시한다."}
+{"lid":"1da5f5b413","label":"no_evidence","passage":null,"reason":"문단 5는 전 임직원이 참여하는 TPM 활동과 성과를 설명하지만 이를 연구개발 조직의 활동으로 특정하는 근거는 없다."}
+{"lid":"2cf5e8a61c","label":"supported","passage":6,"reason":"문단 6은 고객 요구의 내부 프로세스 반영과 품질시스템 정착·개선 전문가 육성·전 직원 교육을 통한 품질 및 경쟁력 확보를 모두 명시한다."}
+{"lid":"2ccb5b5e49","label":"no_evidence","passage":null,"reason":"문단 6의 ISO/TS 16949 인증은 세아특수강에 관한 내용이며 고려제강의 인증에 관한 근거는 없다."}

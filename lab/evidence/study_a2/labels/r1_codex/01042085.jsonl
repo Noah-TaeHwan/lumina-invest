@@ -1,0 +1,27 @@
+{"lid": "abb4f646ed", "label": "no_evidence", "passage": null, "reason": "빅데이터 플랫폼 사업과 이빅스의 시장 확대는 언급되지만 해당 사업이 엑셈의 주력이라는 근거는 없다."}
+{"lid": "f7893d17f8", "label": "supported", "passage": 2, "reason": "문단 2가 일본·중국·미국의 종속회사 3곳을 통한 해외 사업을 명시한다."}
+{"lid": "fb49406014", "label": "supported", "passage": 2, "reason": "문단 2에 신시웨이 매각 계약일, 매각 완료일, 2025년 회계연도 중단영업 분류가 모두 명시되어 있다."}
+{"lid": "997abb8c8d", "label": "contradicted", "passage": 2, "reason": "문단 2의 해외 종속회사 수는 3곳으로, 주장한 9곳과 다르다."}
+{"lid": "39c4a9f69a", "label": "supported", "passage": 2, "reason": "문단 2가 우드페커를 대학교·대기업 제조 계열사 등에 공급하는 신제품으로 소개하고 AI 분석 수요 대응을 설명한다."}
+{"lid": "2ee42beb40", "label": "contradicted", "passage": 8, "reason": "문단 8은 신시웨이 매각에 따른 중단영업 분류 회계연도를 2025년으로 명시하여 주장한 2022년과 다르다."}
+{"lid": "76d98b7176", "label": "supported", "passage": 2, "reason": "문단 2에 엑셈블의 공공기관·지자체 LLM 플랫폼 사업 제안과 이빅스·우드페커를 함께 공급하는 독자 수행 전략이 모두 기재되어 있다."}
+{"lid": "8cfea7873d", "label": "no_evidence", "passage": null, "reason": "우드페커·엑셈블은 신제품으로 소개되지만 두 제품을 AI·빅데이터 플랫폼 부문의 주요 공급 제품으로 규정한 근거는 없다."}
+{"lid": "9d8d2f625b", "label": "supported", "passage": 7, "reason": "문단 7이 2025년 회계연도 재무제표에서 신시웨이를 중단영업사업으로 분류했다고 명시한다."}
+{"lid": "1e068a9802", "label": "contradicted", "passage": 6, "reason": "문단 6의 2025년 DB 성능관리 솔루션 MaxGauge 매출은 12,657백만원(126.57억원), 비중은 28.60%로 주장한 금액·비중과 다르다."}
+{"lid": "02f6462c92", "label": "supported", "passage": 6, "reason": "문단 6이 MaxGauge의 DB 실시간 감시, 가동 정보 수집·분석 및 성능 관리 지원 기능을 설명한다."}
+{"lid": "08f8891069", "label": "non_claim", "passage": null, "reason": "구체적인 금액이나 비중을 주장하지 않고 뒤에 제시할 내용을 안내하는 문장이다."}
+{"lid": "00611b3d13", "label": "no_evidence", "passage": null, "reason": "엑셈의 유지보수·컨설팅 매출액과 비중은 제시되지 않으며, 12,840억원은 문단 3의 2023년 데이터 관리 솔루션 업종 수치다."}
+{"lid": "77cdb4bbe2", "label": "no_evidence", "passage": null, "reason": "문단 6의 DB 감시·분석 기능은 MaxGauge에 대한 설명이며, 옵스뷰라는 제품과 그 기능에 관한 근거는 없다."}
+{"lid": "bfe0ac6721", "label": "contradicted", "passage": 1, "reason": "문단 1은 일부 고객의 솔루션·서버 통합 공급 요청에 따라 장비를 외부에서 수급하여 매출하는 경우가 있다고 명시한다."}
+{"lid": "7bdb01b895", "label": "supported", "passage": 1, "reason": "문단 1이 소프트웨어 개발 업체라는 점과 인적자원 외 별도 원재료 및 제품 생산설비가 필요하지 않다는 점을 설명한다."}
+{"lid": "7633206395", "label": "supported", "passage": 1, "reason": "문단 1이 솔루션과 서버 장비의 통합 공급을 원하는 일부 고객에게 외부 수급 장비를 판매하는 경우를 명시한다."}
+{"lid": "4f6e6cc42a", "label": "supported", "passage": 1, "reason": "문단 1이 일부 고객의 통합 공급 요청에 따라 서버 등의 장비를 외부에서 조달하여 판매하는 경우가 있다고 설명한다."}
+{"lid": "db6286f42c", "label": "supported", "passage": 5, "reason": "문단 5의 파생상품 및 풋백옵션 등 거래 현황은 해당사항 없음으로 기재되어 있다."}
+{"lid": "77861587db", "label": "supported", "passage": 5, "reason": "문단 5가 파생상품 및 풋백옵션 등 거래에 해당사항이 없다고 명시한다."}
+{"lid": "bdfa045fc9", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 현대자동차의 완성차 생산이나 국내외 판매에 관한 내용이 없다."}
+{"lid": "ff719e8fd0", "label": "supported", "passage": 5, "reason": "문단 5의 제10기 연구개발비는 9,050,873천원이고 매출액 대비 비율은 16.80%다."}
+{"lid": "2cb7266975", "label": "contradicted", "passage": 5, "reason": "문단 5의 2025년 제12기 연구개발비 비율은 12.86%로 주장한 14.37%와 다르다."}
+{"lid": "d6ac8fd33a", "label": "non_claim", "passage": null, "reason": "구체적인 연구개발비나 비율을 주장하지 않고 뒤에 제시할 변화 내용을 안내한다."}
+{"lid": "32915c4f41", "label": "supported", "passage": 5, "reason": "문단 5의 제12기 연구개발비는 6,140,782천원이고 매출액 대비 비율은 12.86%다."}
+{"lid": "768cdf92b2", "label": "supported", "passage": 5, "reason": "문단 5가 2025년 제12기 연구개발비의 매출액 대비 비율을 12.86%로 명시한다."}
+{"lid": "ce3710d9cd", "label": "supported", "passage": 5, "reason": "문단 5의 제11기 연구개발비는 7,930,045천원이고 매출액 대비 비율은 12.95%다."}

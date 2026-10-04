@@ -1,0 +1,23 @@
+{"lid": "a267b0ce8c", "label": "contradicted", "passage": 7, "reason": "문단 7은 발주 주기를 30~60일 내외라고 하므로 30~45일과 다르다"}
+{"lid": "8da03525e5", "label": "supported", "passage": 7, "reason": "문단 7: 통상 30~60일 내외의 단기 발주형식으로 생산 납품"}
+{"lid": "c830a2a300", "label": "supported", "passage": 8, "reason": "문단 8: 산업용 Fitting 및 Valve를 주력제품으로 조선/해양플랜트, 발전(원자력), 플랜트산업, 반도체 생산업체에 공급"}
+{"lid": "fd5161dc60", "label": "supported", "passage": 8, "reason": "문단 8: 2020년 04월 22일 (주)부산주공과 공장용지 매매계약"}
+{"lid": "84b9e06090", "label": "supported", "passage": 2, "reason": "문단 2가 같은 산업 목록과 핵심부분을 차지하는 제품 특성을 그대로 서술"}
+{"lid": "87edacfe36", "label": "contradicted", "passage": 8, "reason": "문단 8의 (주)부산주공 공장용지 매매계약 체결시기는 2016년이 아니라 2020년 4월"}
+{"lid": "53b177957c", "label": "no_evidence", "passage": null, "reason": "문단 3은 밸브/피팅사업부문의 주 생산품만 말하며 회사 제품 전체가 이 둘로 구성된다는 문단은 없다"}
+{"lid": "b26f3f5483", "label": "no_evidence", "passage": null, "reason": "어느 문단에도 매출액·내수·수출 금액이 없다(문단 6은 수주현황 미작성만 언급)"}
+{"lid": "506afc1cd7", "label": "non_claim", "passage": null, "reason": "문단 표기 조각일 뿐 사실 주장이 아니다"}
+{"lid": "e6373ae0fa", "label": "contradicted", "passage": 8, "reason": "문단 8의 2013년 3월 건설공사 도급계약 상대방은 지구종합건설(주)"}
+{"lid": "a125ae8fdb", "label": "supported", "passage": 8, "reason": "문단 8: 2013년 03월 22일 지구종합건설(주)과 건설공사 도급계약"}
+{"lid": "7423b6d26b", "label": "supported", "passage": 8, "reason": "문단 8 표: 벤처기업 해당 여부 | 해당"}
+{"lid": "116ef92637", "label": "non_claim", "passage": null, "reason": "정보가 제공되지 않았다는 답변 불가 안내로 회사에 대한 사실 주장이 아니다"}
+{"lid": "9b498fb3dc", "label": "non_claim", "passage": null, "reason": "정보가 제공되지 않았다는 답변 불가 안내로 회사에 대한 사실 주장이 아니다"}
+{"lid": "8ccb1a6a78", "label": "contradicted", "passage": 8, "reason": "문단 8 표는 벤처기업 해당 여부를 해당으로 적고 있다"}
+{"lid": "c262013e2e", "label": "no_evidence", "passage": null, "reason": "이자율스왑만 거래가 발생했다는 내용을 한 문단이 지지하지 않으며 문단 8의 거래손익 합계와도 연결되지 않는다"}
+{"lid": "27bee177a7", "label": "supported", "passage": 3, "reason": "문단 3: 신흥메탈(주) HEX BAR 외, 비율 12.86%, 특수관계 여부 여"}
+{"lid": "80fc03cda2", "label": "no_evidence", "passage": null, "reason": "삼성전자에 관한 문단이 없다"}
+{"lid": "2e1a41ef0b", "label": "no_evidence", "passage": null, "reason": "이자율스왑 이자율이 원화 환율에 따라 변동한다는 내용은 어느 문단에도 없다"}
+{"lid": "6c1ee38240", "label": "non_claim", "passage": null, "reason": "다를 수 있다는 일반적 추측으로 확인 가능한 사실 주장이 아니다"}
+{"lid": "7681441278", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에는 연구개발비용이나 매출액 대비 비율이 없다"}
+{"lid": "33ff242ad1", "label": "contradicted", "passage": 8, "reason": "문단 8의 양산석계산업단지 산업시설용지 매매계약 금액은 1,428,000천원"}
+{"lid": "66defb34bc", "label": "supported", "passage": 8, "reason": "문단 8: 2018년 12월 04일 양산석계산업단지 산업시설용지 매매계약 1,428,000천원"}

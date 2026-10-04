@@ -1,0 +1,44 @@
+{"lid":"d40a3fd011","label":"supported","passage":4,"reason":"문단 4의 사업부문별 현황에서 생물자원부문의 주요 제품을 배합사료로 명시한다."}
+{"lid":"940f6e6e09","label":"supported","passage":4,"reason":"문단 4가 회사의 사업부문을 제분부문과 생물자원부문으로 구분한다."}
+{"lid":"3350fcdc43","label":"supported","passage":4,"reason":"문단 4의 제분 시장점유율은 2023년 24.5%, 2024년 24.3%, 2025년 24.1%로 매년 감소한다."}
+{"lid":"1a1ed60120","label":"contradicted","passage":4,"reason":"문단 4는 생물자원부문의 주요 제품이 배합사료라고 명시하여 이를 부정하는 주장과 상충한다."}
+{"lid":"1d9d619e4e","label":"contradicted","passage":4,"reason":"제시한 수치는 맞지만 문단 4에서 2024년과 2025년은 모두 1.5%로 같아 계속 증가한다는 서술과 상충한다."}
+{"lid":"398b887058","label":"supported","passage":1,"reason":"문단 1의 주요 제품 판매가격 표가 제분부문의 품목을 소맥분 외로 명시한다."}
+{"lid":"aac0a14522","label":"supported","passage":1,"reason":"문단 1의 생물자원부문 양계·양돈 품목 판매가격은 제55기 556원/kg이다."}
+{"lid":"b1ada45200","label":"non_claim","passage":null,"reason":"주요 제품 목록을 소개하는 안내 문장으로 구체적인 제품 사실을 진술하지 않는다."}
+{"lid":"990ea8facb","label":"supported","passage":1,"reason":"문단 1이 생물자원부문의 품목을 양계와 양돈으로 명시한다."}
+{"lid":"50d0233467","label":"supported","passage":1,"reason":"문단 1의 소맥분 외 판매가격은 제55기 674원/kg으로 제54기 695원/kg보다 낮다."}
+{"lid":"4ab5621a57","label":"non_claim","passage":null,"reason":"이어지는 판매가격 정보를 소개하는 안내 문장이다."}
+{"lid":"a537969fee","label":"supported","passage":1,"reason":"문단 1의 제분부문 품목은 소맥분 외이다."}
+{"lid":"0ee891a9a3","label":"no_evidence","passage":null,"reason":"제시된 8개 문단에는 현대자동차의 울산 공장 생산이나 국내외 판매에 관한 근거가 없다."}
+{"lid":"584e546bda","label":"supported","passage":1,"reason":"문단 1의 제분부문 소맥분 외 판매가격은 제55기 674원/kg이다."}
+{"lid":"908a8c7bbe","label":"supported","passage":1,"reason":"문단 1의 생물자원부문 품목은 양계와 양돈이다."}
+{"lid":"723ca6c04b","label":"supported","passage":1,"reason":"문단 1의 제분부문 소맥분 외 판매가격은 제54기 695원/kg이다."}
+{"lid":"e8a068588b","label":"supported","passage":1,"reason":"문단 1의 제분부문 소맥분 외 판매가격은 제53기 758원/kg이다."}
+{"lid":"f0ef6841a2","label":"supported","passage":3,"reason":"문단 3이 회사의 2025년 매출액 약 6,743억원과 영업이익 425억원을 함께 명시한다."}
+{"lid":"b255d2ae8e","label":"no_evidence","passage":null,"reason":"문단 3의 6,743억원은 회사 전체 매출액이며 제분사업부문만의 매출액은 제시되지 않는다."}
+{"lid":"4b05ba08cb","label":"non_claim","passage":null,"reason":"수출·내수 비중에 대한 답변의 근거 부족을 알리는 한계 안내이다."}
+{"lid":"ee7fa9b317","label":"no_evidence","passage":null,"reason":"사업부문 구분은 나오지만 최근 매출액의 부문별 배분과 수출·내수 비중을 제시하는 문단은 없다."}
+{"lid":"1f70651291","label":"non_claim","passage":null,"reason":"생물자원부문 매출액을 제시할 수 없다는 정보 제공 한계 안내이다."}
+{"lid":"7a0bbc2303","label":"contradicted","passage":3,"reason":"문단 3의 2025년 회사 매출액은 약 6,743억원으로 주장한 약 7,218억원과 다르다."}
+{"lid":"412ffdf5ff","label":"non_claim","passage":null,"reason":"공장별 생산능력·가동률에 관한 답변의 정보 제공 한계를 설명한다."}
+{"lid":"2a10899435","label":"supported","passage":7,"reason":"문단 7이 원맥의 미국·호주·캐나다, 옥수수의 미국, 대두박의 브라질, 소맥의 호주 조달을 명시한다."}
+{"lid":"ba3bcd9129","label":"supported","passage":1,"reason":"문단 1이 2017년 당시 최대주주 한국제분을 흡수합병하여 제분사업부문을 통합했다고 명시한다."}
+{"lid":"3fc35618fc","label":"contradicted","passage":1,"reason":"문단 1의 한국제분 흡수합병 및 제분사업 통합 연도는 2017년으로 주장한 2019년과 다르다."}
+{"lid":"06f1bd33b3","label":"non_claim","passage":null,"reason":"문장이 손에서 끊겨 손익의 내용이나 값을 진술하는 완결된 사실 주장이 아니다."}
+{"lid":"ca2a8890bb","label":"supported","passage":6,"reason":"문단 6이 회사가 신용위험·유동성위험·시장위험 등 다양한 금융위험에 노출되어 있다고 명시한다."}
+{"lid":"3644546cc6","label":"supported","passage":3,"reason":"문단 3이 생물자원부문의 옥수수·대두박 등 주원료 대부분을 수입하므로 환율 변동의 영향을 받을 수 있다고 설명한다."}
+{"lid":"db2b6d8bbb","label":"supported","passage":6,"reason":"문단 6의 단기금융상품 행은 제55기 500,000천원, 제54기와 제53기 모두 대시로 기재되어 있다."}
+{"lid":"4d8d07c2a6","label":"no_evidence","passage":null,"reason":"금융위험 노출은 명시되지만 그것이 원재료 수입의 환율 위험을 관리하기 위한 것이라는 목적은 제시되지 않는다."}
+{"lid":"b7c553de77","label":"no_evidence","passage":null,"reason":"문단 6은 금융위험 노출을 설명할 뿐 환율 위험 관리 목적으로 해당 위험에 노출된다고 말하지 않는다."}
+{"lid":"c41f4a2007","label":"non_claim","passage":null,"reason":"이어지는 신용위험 최대 노출 표를 소개하는 안내 문장이다."}
+{"lid":"7415308144","label":"supported","passage":6,"reason":"문단 6의 매출채권및기타채권은 제55기 83,751,295, 제54기 81,151,059, 제53기 82,141,496천원이다."}
+{"lid":"a51a52a959","label":"no_evidence","passage":null,"reason":"제시된 문단에는 파생상품 손익 항목이나 제55기 1,000,000이라는 금액이 없다."}
+{"lid":"af6dae1361","label":"non_claim","passage":null,"reason":"파생상품 손익 정보를 소개하는 문장으로 구체적인 손익 사실을 진술하지 않는다."}
+{"lid":"183cd37ffc","label":"non_claim","passage":null,"reason":"이어질 파생상품 손익 내용을 안내할 뿐 손익의 발생액이나 방향을 진술하지 않는다."}
+{"lid":"f3daf9967f","label":"supported","passage":6,"reason":"문단 6의 현금성자산은 제55기 38,482,022, 제54기 985,559, 제53기 3,499,217천원이다."}
+{"lid":"17a9099928","label":"contradicted","passage":4,"reason":"문단 4가 회사의 사업부문을 제분과 생물자원으로 구분하므로 건강기능식품부문이라는 사업부문 서술과 상충한다."}
+{"lid":"f232d5a6f0","label":"supported","passage":8,"reason":"문단 8의 정부보조금 차감 후 연구개발비용은 제54기 1,038,093천원에서 제55기 1,052,137천원으로 늘었다."}
+{"lid":"a2e6a7d3dd","label":"non_claim","passage":null,"reason":"최근 신제품 출시 내용을 제시할 근거가 없다는 답변 한계 안내이다."}
+{"lid":"d39127c14d","label":"contradicted","passage":8,"reason":"문단 8에서 정부보조금 차감 후 연구개발비용은 제55기 1,052,137천원으로 제54기 1,038,093천원보다 크다."}
+{"lid":"c629025a36","label":"supported","passage":8,"reason":"문단 8이 제55기 연구개발비용 1,052,137천원과 매출액 대비 비율 0.16을 함께 제시한다."}

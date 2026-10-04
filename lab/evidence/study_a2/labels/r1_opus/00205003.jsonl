@@ -1,0 +1,29 @@
+{"lid": "bd8d7aab4e", "label": "non_claim", "passage": null, "reason": "문단 인용 머리 조각일 뿐 사실 주장이 아니다"}
+{"lid": "7bf9ac133c", "label": "no_evidence", "passage": null, "reason": "문단 7은 좋은사람들에 대해 말하며 쌍방울은 어느 문단에도 없다"}
+{"lid": "568930fe66", "label": "no_evidence", "passage": null, "reason": "브랜드화 선도는 문단 7에 있으나 1993년 설립은 보여 준 문단에 없다"}
+{"lid": "e573b142d4", "label": "supported", "passage": 7, "reason": "문단 7: 소비자 Needs 다양화에 따라 타겟·트렌드를 세분화해 여러 브랜드 운영"}
+{"lid": "75d48ae5bd", "label": "supported", "passage": 7, "reason": "문단 7: 백물내의 위주 시장에서 패션내의 카테고리 창출, 언더웨어 브랜드화 선도"}
+{"lid": "2b97408b35", "label": "supported", "passage": 3, "reason": "문단 3에 같은 브랜드 목록이 있다"}
+{"lid": "247ae3f279", "label": "supported", "passage": 3, "reason": "문단 3: 보디가드, 섹시쿠키, 예스, 제임스딘 등 브랜드 운영"}
+{"lid": "8d04163e88", "label": "contradicted", "passage": 3, "reason": "문단 3은 해당 브랜드들을 운영하고 있다고 한다"}
+{"lid": "bf1dd87351", "label": "supported", "passage": 3, "reason": "문단 3: 보고서 작성기준일 현재 보디가드 등 상표권 278건"}
+{"lid": "ae97d8ee82", "label": "supported", "passage": 6, "reason": "문단 6에 발열 스마트웨어 상용화 개발, 쇼케이스, 복합생체신호 과제가 있다"}
+{"lid": "aa371c4efd", "label": "supported", "passage": 7, "reason": "문단 7의 금융자산·금융부채 구성과 일치한다"}
+{"lid": "1e82f698bf", "label": "no_evidence", "passage": null, "reason": "삼성전자는 보여 준 문단에 없다"}
+{"lid": "70a3a69895", "label": "supported", "passage": 4, "reason": "문단 4 첫 문장과 같다"}
+{"lid": "734e6d8ad6", "label": "supported", "passage": 5, "reason": "문단 5의 판매방법·조건과 같다"}
+{"lid": "d68d312eed", "label": "supported", "passage": 4, "reason": "문단 4 내용과 같다"}
+{"lid": "f4d83bc13b", "label": "supported", "passage": 4, "reason": "문단 4: 저가시장 대비 생산인프라, 스포츠기능성 베이스레이어 개발·유통"}
+{"lid": "0e02392d34", "label": "contradicted", "passage": 4, "reason": "문단 4는 개성공단 전면 중단을 2016년이라 한다"}
+{"lid": "1c3c5802a9", "label": "supported", "passage": 4, "reason": "문단 4: 2016년 개성공단 중단 후 캄보디아·필리핀·베트남 생산기지 개척"}
+{"lid": "8465cef733", "label": "contradicted", "passage": 6, "reason": "문단 6은 개성1공장 가동 중단을 2016년 2월 조치로 적는다"}
+{"lid": "c33458dafe", "label": "non_claim", "passage": null, "reason": "뒤 내용을 소개하는 도입 문장이다"}
+{"lid": "2ff8e77b64", "label": "contradicted", "passage": 1, "reason": "문단 1 표에서 119,420,948은 10% 상승시 (손실), 하락시 이익으로 부호가 반대다"}
+{"lid": "28ecaaf250", "label": "contradicted", "passage": 1, "reason": "문단 1 표에서 EUR 4,695,153은 상승시 (손실), 하락시 이익으로 부호가 반대다"}
+{"lid": "26b61edfca", "label": "non_claim", "passage": null, "reason": "출처 문단을 가리키는 인용 안내다"}
+{"lid": "a5423661c5", "label": "contradicted", "passage": 1, "reason": "문단 1 표에서 CNY 319,780은 상승시 (손실), 하락시 이익으로 부호가 반대다"}
+{"lid": "9a64f15e26", "label": "supported", "passage": 1, "reason": "문단 1 민감도 표의 외화가 USD, EUR, CNY다"}
+{"lid": "ee08aed858", "label": "supported", "passage": 6, "reason": "문단 6: 개성1공장은 2016년 2월 정부 전면중단조치로 가동 중단"}
+{"lid": "4656660c4e", "label": "supported", "passage": 4, "reason": "문단 4: 보디가드 등 등록 상표권 278건"}
+{"lid": "5f83f1e7e0", "label": "non_claim", "passage": null, "reason": "정보가 없다는 답변 측 면책 문장이다"}
+{"lid": "04397fcab2", "label": "no_evidence", "passage": null, "reason": "문단 4는 보디가드 등 278건이라 하며 트라이는 언급하지 않는다"}

@@ -1,0 +1,24 @@
+{"lid":"9bb9ec1db8","label":"supported","passage":5,"reason":"문단 5는 2025년 기말 매출의 약 32.2%가 국내외 교체용 제품 공급에서 발생한다고 명시한다."}
+{"lid":"abfac06721","label":"no_evidence","passage":null,"reason":"문단 5의 32.2%는 2025년 기말 수치이며, 2019년 기말 비중은 제시되지 않아 같은 기간의 지지나 반박 근거가 없다."}
+{"lid":"777a6b4614","label":"no_evidence","passage":null,"reason":"제시된 문단에는 금융업을 목적으로 설립되었다는 사실과 금융투자업이 현재 주력이라는 사실을 확인할 근거가 없다."}
+{"lid":"e78ab72812","label":"no_evidence","passage":null,"reason":"신조용 고객과 교체 수요 대응 공정은 문단 3, 국내외 교체용 제품 공급은 문단 4에 있어 전체 사실을 한 문단이 지지하지 못한다."}
+{"lid":"37dc1f25a3","label":"supported","passage":4,"reason":"문단 4는 동일한 타입의 교체용 실린더라이너가 신조선용보다 고가에 판매된다고 명시한다."}
+{"lid":"93802efc0a","label":"no_evidence","passage":null,"reason":"문단 4의 가격 비교 대상은 실린더라이너이며, 피스톤링의 가격 비교는 제시되지 않는다."}
+{"lid":"2bcf59992c","label":"contradicted","passage":6,"reason":"문단 6은 가공부문에 필요한 소재를 전량 주물부문에서 조달한다고 명시하여 공급받지 않는다는 주장과 반대다."}
+{"lid":"c31536806c","label":"non_claim","passage":null,"reason":"문단 번호와 잘린 항목 번호만 있는 인용 표식으로 사실 주장이 없다."}
+{"lid":"004924a8dd","label":"supported","passage":2,"reason":"끝부분은 잘렸지만 긴급 교체 수요 대응을 위한 생산공정 구축과 생산공정시스템 개선에 관한 내용은 문단 2에 기재되어 있다."}
+{"lid":"e972be7fb1","label":"supported","passage":2,"reason":"문단 2는 기존 엔진 고객과의 협력 강화, 신조선 수주에 따른 신조·교체 물량 증가 및 유대 강화 노력을 모두 설명한다."}
+{"lid":"4ed08a2b3a","label":"supported","passage":2,"reason":"문단 2는 품질의 판매 영향, 소재공장 가동을 통한 품질 차별화, 일괄생산체제와 원가절감 및 납품 노력을 모두 명시한다."}
+{"lid":"1fe5525d27","label":"supported","passage":6,"reason":"문단 6은 가공부문에 필요한 소재 전량을 주물부문에서 조달한다고 명시한다."}
+{"lid":"ae59068f3a","label":"no_evidence","passage":null,"reason":"제시된 8개 문단에는 삼성전자의 메모리 반도체나 스마트폰 사업에 관한 정보가 없다."}
+{"lid":"a05ca4355f","label":"supported","passage":5,"reason":"문단 5는 가공부문에 필요한 소재를 전량 주물부문에서 조달한다고 명시한다."}
+{"lid":"94a402bd61","label":"supported","passage":5,"reason":"문단 5는 실린더라이너 사업을 주물·가공·기타의 세 부문으로 구분한다."}
+{"lid":"ca0f49b5ee","label":"supported","passage":5,"reason":"문단 5는 기존 거래처의 소재판매가격과 시세 등을 고려해 판매가격을 추정하여 주물부문 매출액을 산정했다고 명시한다."}
+{"lid":"919a003283","label":"supported","passage":5,"reason":"문단 5는 실린더라이너 사업이 주물부문, 가공부문, 기타부문으로 구분된다고 명시한다."}
+{"lid":"080cfb3469","label":"non_claim","passage":null,"reason":"환율 위험 관리 자체에 대한 사실 주장이 아니라 제공된 정보의 한계를 알리는 안내 문장이다."}
+{"lid":"c25e9d39f7","label":"contradicted","passage":7,"reason":"문단 7은 마모에 따른 교환 주기를 5~7년으로 명시하며, 주장한 5~10년은 반올림 차이가 아닌 다른 범위다."}
+{"lid":"fdd7062ee0","label":"supported","passage":7,"reason":"문단 7은 실린더라이너가 내벽 마모 정도에 따라 5~7년 주기로 교환해야 하는 고가의 소모품이라고 명시한다."}
+{"lid":"2b2d6055ba","label":"supported","passage":5,"reason":"문단 5는 국내 조선업이 2021년을 기점으로 코로나 이전 수준으로 회복했다고 명시한다."}
+{"lid":"12c69b995a","label":"supported","passage":2,"reason":"문단 2는 소재공장 가동에 따른 품질 차별화와 소재 생산부터 가공·검사까지의 일괄생산체제 및 원가절감·납품 노력을 모두 명시한다."}
+{"lid":"c349865f82","label":"contradicted","passage":5,"reason":"문단 5는 국내 조선업의 코로나 이전 수준 회복 시점을 2021년으로 명시하여 주장한 회복 시점인 2017년과 다르다."}
+{"lid":"4b61a05a55","label":"non_claim","passage":null,"reason":"연구개발 과제 목록을 소개하는 도입 문장으로 구체적인 과제나 성과에 대한 사실 주장이 없다."}

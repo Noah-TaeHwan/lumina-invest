@@ -1,0 +1,22 @@
+{"lid":"5d19986770","label":"supported","passage":4,"reason":"문단 4는 2025년 말 취급 의약품이 총 117개 품목이라고 명시한다."}
+{"lid":"abd5f0df9e","label":"supported","passage":4,"reason":"문단 4는 다양한 치료영역의 의약품 개발과 천연물·저분자 신약후보 탐색, 개량신약 및 퍼스트제네릭 연구를 모두 명시한다."}
+{"lid":"b081567644","label":"supported","passage":4,"reason":"문단 4는 완제의약품 중 전문의약품을 위주로 사업을 영위한다고 명시한다."}
+{"lid":"c051c48161","label":"no_evidence","passage":null,"reason":"문단 4의 117개 품목은 2025년 말 기준이며, 2019년 말 품목 수는 제시되지 않는다."}
+{"lid":"06a5b03ff6","label":"supported","passage":4,"reason":"문단 4는 CMO 사업도 병행한다고 명시한다."}
+{"lid":"cf2b3193b5","label":"supported","passage":4,"reason":"문단 4는 고혈압·고지혈증 치료제인 순환기용제와 혈당 조절 치료제인 당뇨병용제의 매출 비중을 각각 46.8%, 10.7%로 명시한다."}
+{"lid":"89a2c00c47","label":"no_evidence","passage":null,"reason":"문단 3은 네 제품을 순환기용제 대표 품목으로 열거하지만 제품별 매출액이나 최대 매출 순위는 제시하지 않는다."}
+{"lid":"22990cddd2","label":"no_evidence","passage":null,"reason":"문단 3에는 카덴자정이 대표 품목으로 나오지만 아토젠정이 대표 품목이라는 근거는 없다."}
+{"lid":"8a73d6bdd8","label":"supported","passage":3,"reason":"문단 3은 세자르정과 카덴자정을 순환기용제 대표 품목으로 명시한다."}
+{"lid":"08877a2e92","label":"supported","passage":8,"reason":"문단 8은 고혈압·고지혈증 치료제인 순환기용제가 매출의 46.8%를 차지한다고 명시한다."}
+{"lid":"399628ef9a","label":"supported","passage":8,"reason":"문단 8의 2025년 말 사업 개요에 순환기용제와 CMO의 매출 비중이 각각 46.8%, 11.4%로 제시된다."}
+{"lid":"d07e6fe88e","label":"contradicted","passage":8,"reason":"문단 8은 순환기용제에서 매출의 46.8%가 나온다고 명시하여 해당 비중을 부정하는 주장과 반대된다."}
+{"lid":"8168e950a8","label":"supported","passage":5,"reason":"문단 5는 인천공장의 정제 생산설비를 타정기 9대로 명시한다."}
+{"lid":"2bf72310da","label":"no_evidence","passage":null,"reason":"문단 2에 세 가동률 수치는 있으나 해당 행의 공장·제형·연도 표기가 없어 인천공장 정제의 시간순 증가를 입증하지 못한다."}
+{"lid":"4e04808efd","label":"no_evidence","passage":null,"reason":"제시된 문단에는 셀트리온이나 송도 공장의 바이오시밀러 생산에 대한 내용이 없다."}
+{"lid":"43bec538c3","label":"no_evidence","passage":null,"reason":"제시된 문단에는 2024년 제45기 부채비율이나 0.73이라는 수치가 없다."}
+{"lid":"3ddc58ae3c","label":"non_claim","passage":null,"reason":"파생상품·풋백옵션 거래의 존재나 내용을 주장하지 않고 제공 정보의 한계를 안내하는 문장이다."}
+{"lid":"493929cc16","label":"contradicted","passage":7,"reason":"문단 7은 현재 CMO 거래처를 44곳으로 명시하여 57곳이라는 주장과 다르다."}
+{"lid":"56e3d1f562","label":"supported","passage":7,"reason":"문단 7은 CMO 사업에서 현재 44개 거래처와 거래한다고 명시한다."}
+{"lid":"33f50f4238","label":"contradicted","passage":7,"reason":"문단 7은 중앙연구소가 인천 부평에서 개소한 연도를 1995년으로 명시하여 1988년이라는 주장과 다르다."}
+{"lid":"337a57d274","label":"non_claim","passage":null,"reason":"개발 대상 치료제에 대한 사실을 주장하지 않고 정보 제공의 한계를 안내하는 문장이다."}
+{"lid":"c72ec5cadb","label":"supported","passage":7,"reason":"문단 7은 중앙연구소가 1995년 인천 부평에 개소했다고 명시한다."}

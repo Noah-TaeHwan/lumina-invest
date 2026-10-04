@@ -1,0 +1,24 @@
+{"lid":"ae2cb471c0","label":"supported","passage":5,"reason":"문단 5는 글로벌 제약사를 위한 ADC 플랫폼 기술이전과 자체개발 파이프라인의 기술이전 전략을 함께 설명한다."}
+{"lid":"f5a4e914ad","label":"supported","passage":5,"reason":"문단 5의 매출 및 판매전략은 ADC 플랫폼과 자체개발 파이프라인의 기술이전을 통한 사업을 설명한다."}
+{"lid":"2b537adb4d","label":"contradicted","passage":5,"reason":"문단 5는 ADC 플랫폼과 자체개발 파이프라인을 기술이전하는 전략을 명시하므로 이를 하지 않는다는 주장과 반대다."}
+{"lid":"3c5481ec5d","label":"supported","passage":1,"reason":"문단 1은 ADC 플랫폼 개발과 이를 적용한 후보물질 발굴 및 기술이전이 주요 사업이라고 명시한다."}
+{"lid":"4ab92795fe","label":"supported","passage":3,"reason":"문단 3은 PMT가 정상세포의 비선택적 약물 유입을 줄이는 효과를 확인했다고 설명한다."}
+{"lid":"69034af2de","label":"supported","passage":3,"reason":"문단 3은 OHPAS가 적용 약물의 제한, 혈장 내 안정성 문제, 면역세포 독성 문제에 대한 대안을 제시한다고 설명한다."}
+{"lid":"7bea9d7126","label":"supported","passage":3,"reason":"문단 3은 인투셀의 PMT 플랫폼이 정상세포로의 비선택적 약물 유입을 줄인다고 설명한다."}
+{"lid":"81e125079c","label":"no_evidence","passage":null,"reason":"제시된 문단에는 셀트리온의 바이오시밀러 개발·판매 사업에 관한 근거가 없다."}
+{"lid":"319e1dad49","label":"supported","passage":3,"reason":"문단 3은 인투셀이 OHPAS와 PMT라는 핵심 플랫폼 기술을 보유한다고 명시한다."}
+{"lid":"3dd97b0df8","label":"supported","passage":7,"reason":"문단 7은 2025년 기술이전수익을 2,016,433천원으로 기재한다."}
+{"lid":"dc38d903d5","label":"supported","passage":7,"reason":"문단 7에 2025년 기술이전수익 2,016,433천원과 물질이전수익 125,079천원이 모두 기재되어 있다."}
+{"lid":"5aabb4263f","label":"contradicted","passage":7,"reason":"문단 7의 2025년 기술이전수익은 2,016,433천원으로, 주장한 2,316,433천원과 다르다."}
+{"lid":"d4b1cd70fa","label":"non_claim","passage":null,"reason":"구체적인 금액이나 결과 없이 뒤따르는 국내·해외 내역을 소개하는 안내 문장이다."}
+{"lid":"cbd7058ba9","label":"no_evidence","passage":null,"reason":"임상 및 시험비의 국내 금액은 제시되지 않았고, 문단 7의 157,610천원은 2025년 국내 기타수익이다."}
+{"lid":"bdf23c6ccd","label":"no_evidence","passage":null,"reason":"임상 및 시험비의 해외 금액은 제시되지 않았고, 문단 7의 25,265천원은 2024년 해외 물질이전수익이다."}
+{"lid":"2e0dfbd417","label":"no_evidence","passage":null,"reason":"문단 7의 2,016,433천원은 2025년 국내 기술이전수익이며, 2012년의 해당 수익은 제시되지 않았다."}
+{"lid":"8015ac2e0a","label":"supported","passage":7,"reason":"문단 7은 2025년 국내 기술이전수익을 2,016,433천원으로 기재한다."}
+{"lid":"0fdf73a9b9","label":"no_evidence","passage":null,"reason":"문단 1은 내부 파이프라인의 순차 진행과 조기 기술이전을 설명하지만, 기술이전으로 비용을 회수한다는 내용은 없다."}
+{"lid":"ee4e7f8df6","label":"no_evidence","passage":null,"reason":"문단 1의 파생거래 부재는 인투셀에 관한 내용이며, 에이비엘바이오의 파생거래 여부는 제시되지 않았다."}
+{"lid":"a33c043141","label":"supported","passage":6,"reason":"문단 6은 연구개발활동을 위해 지출하는 손익계산서상 연구개발비용이 회계상 경상연구개발비와 같다고 명시한다."}
+{"lid":"a2fb7be3b6","label":"supported","passage":1,"reason":"문단 1은 인투셀이 보고서 제출일 현재 파생거래에 해당사항이 없다고 명시한다."}
+{"lid":"9926882506","label":"supported","passage":2,"reason":"문단 2는 삼성바이오에피스와의 계약 형태를 개발 옵션이 포함된 공동연구계약(RCA)으로 기재한다."}
+{"lid":"20c836360b","label":"supported","passage":4,"reason":"문단 4의 플랫폼기술 계약 총괄표는 상대방을 삼성바이오에피스, 계약 형태를 공동연구계약(RCA)으로 명시한다."}
+{"lid":"1454292834","label":"contradicted","passage":2,"reason":"문단 2에 삼성바이오에피스와 개발 옵션이 포함된 공동연구계약이 기재되어 있어 미체결 주장을 반박한다."}
