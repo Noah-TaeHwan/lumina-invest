@@ -1,4 +1,5 @@
 """크롤링 서비스: GitHub docs, 금융 포털, Qdrant RAG 구축."""
+import hashlib
 import httpx
 import re
 from html.parser import HTMLParser
@@ -82,6 +83,14 @@ def _chunk_text(text: str) -> list[str]:
     return chunks
 
 
+def _point_id(url: str, i: int) -> int:
+    """URL·청크 번호로 정한 Qdrant point ID. 다시 크롤링하면 같은 점을 덮어쓴다.
+
+    str hash()는 프로세스마다(PYTHONHASHSEED) 달라 같은 청크가 중복으로 쌓였다. sha256 앞 8바이트를 쓴다."""
+    digest = hashlib.sha256(f"{url}-{i}".encode("utf-8")).digest()
+    return int.from_bytes(digest[:8], "big") % (2 ** 63)
+
+
 async def _store_qdrant(chunks: list[str], meta: dict, ollama: OllamaClient) -> int:
     """Qdrant에 임베딩 저장 (Qdrant 미연결 시 스킵)."""
     try:
@@ -109,7 +118,7 @@ async def _store_qdrant(chunks: list[str], meta: dict, ollama: OllamaClient) -> 
             emb = await ollama.embed(settings.EMBED_MODEL, chunk)
             if not emb:
                 continue
-            point_id = abs(hash(f"{meta.get('url', '')}-{i}")) % (2 ** 63)
+            point_id = _point_id(meta.get("url", ""), i)
             points.append(PointStruct(
                 id=point_id,
                 vector=emb,
