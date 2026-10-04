@@ -1,0 +1,25 @@
+{"lid": "b4d1c1f8cb", "label": "supported", "passage": 5, "reason": "지배회사인 당사는 패션부문으로 의류 제조 및 판매를 주요사업으로 한다고 명시"}
+{"lid": "a5a2b1f525", "label": "contradicted", "passage": 5, "reason": "시설관리 종속회사는 나산실업(주)이고 종속회사는 1개사뿐이라 한빛개발과 충돌"}
+{"lid": "ee190ddc16", "label": "supported", "passage": 5, "reason": "종속회사 나산실업(주)가 시설관리 부문으로 시설관리 등 사업을 영위한다고 명시"}
+{"lid": "33ba0495b0", "label": "supported", "passage": 5, "reason": "종속회사 나산실업이 시설관리 부문 사업을 한다고 명시"}
+{"lid": "0bbfecc455", "label": "non_claim", "passage": null, "reason": "정보를 알 수 없다는 면책성 문장"}
+{"lid": "141187358a", "label": "supported", "passage": 4, "reason": "대리점 판매방법 현금 및 신용판매, 대금회수조건 현금 표 행과 일치"}
+{"lid": "f0bdee14cd", "label": "contradicted", "passage": 2, "reason": "문단은 오랜 브랜드 인지도로 고객의 브랜드충성도가 높다고 함"}
+{"lid": "82f0c8cd7c", "label": "supported", "passage": 2, "reason": "오랜 브랜드 인지도로 고객의 브랜드충성도가 높다고 명시"}
+{"lid": "f7e57cd710", "label": "non_claim", "passage": null, "reason": "사실 내용이 없는 인용 조각"}
+{"lid": "e153945d58", "label": "supported", "passage": 4, "reason": "직영점 판매방법 현금 및 신용카드, 대금회수조건 현금 표 행과 일치"}
+{"lid": "750e6890f9", "label": "non_claim", "passage": null, "reason": "뒤 내용을 예고하는 도입 문장"}
+{"lid": "f40982c836", "label": "no_evidence", "passage": null, "reason": "삼성전자 사업에 관한 문단 없음"}
+{"lid": "7e2e53b5c6", "label": "supported", "passage": 8, "reason": "매출 합계 첫 열(당기) 104,591백만원, 판매경로 합계와도 일치"}
+{"lid": "b446a5ca6a", "label": "supported", "passage": 8, "reason": "매출 합계 셋째 열(제44기) 126,500백만원"}
+{"lid": "4baf806909", "label": "supported", "passage": 8, "reason": "합계 126,500→114,738→104,591백만원은 약 1,265억→1,147억→1,046억으로 감소"}
+{"lid": "a7cf290096", "label": "supported", "passage": 8, "reason": "매출 합계 둘째 열(전기) 114,738백만원"}
+{"lid": "7488d7c303", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에는 생산공장 보유 여부나 외주생산 언급이 없음"}
+{"lid": "7a896e214f", "label": "no_evidence", "passage": null, "reason": "브랜드·나산실업 시설관리는 문단 4에 있으나 나산실업이 자체 생산공장을 운영한다는 내용은 없음"}
+{"lid": "d5b55ed186", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에 하청생산 표가 없음"}
+{"lid": "a44bff2029", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에 하청생산 표가 없음"}
+{"lid": "4794a3d104", "label": "contradicted", "passage": 1, "reason": "표 단위가 천원이라 100bp 상승 시 이자비용 영향은 266,000천원(2.66억원)이지 266,000원이 아님"}
+{"lid": "4966a1783b", "label": "supported", "passage": 2, "reason": "연구개발비/매출액 비율 제46기 2.3%"}
+{"lid": "930c1de876", "label": "supported", "passage": 2, "reason": "연구개발비/매출액 비율 당기(제46기) 2.3%"}
+{"lid": "ab4c0ee0e4", "label": "no_evidence", "passage": null, "reason": "한섬에 관한 문단 없음"}
+{"lid": "ef7f4fbbd5", "label": "no_evidence", "passage": null, "reason": "디자이너 양성은 문단 2에 있으나 연구개발을 패션부문이 맡는다는 내용은 없음"}

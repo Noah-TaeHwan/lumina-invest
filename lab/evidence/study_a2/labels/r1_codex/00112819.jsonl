@@ -1,0 +1,26 @@
+{"lid": "efd1271477", "label": "no_evidence", "passage": null, "reason": "제시된 8개 문단에는 오뚜기의 가공식품 제조·판매에 관한 내용이 없다."}
+{"lid": "0ae9af8f6c", "label": "supported", "passage": 2, "reason": "문단 2는 2024년 4월 1일부터 오프라인 매출을 배제하고 온라인 전용으로 사업 구조를 재편했다고 명시한다."}
+{"lid": "e236536050", "label": "supported", "passage": 2, "reason": "문단 2에 2024년 4월 1일 사업 구조 재편과 오프라인 매출 배제·온라인 전용 경영 전환이 모두 명시돼 있다."}
+{"lid": "406bef8996", "label": "supported", "passage": 2, "reason": "문단 2는 자사몰·온라인몰을 통한 내수 매출과 자사몰 오픈을 통한 브랜드 경쟁력 강화를 함께 설명한다."}
+{"lid": "81c5f03e94", "label": "contradicted", "passage": 5, "reason": "문단 5의 당기말 매출채권 손실충당금 합계와 1년 초과 연체분은 모두 36,705천원으로, 41,820천원과 다르다."}
+{"lid": "eb721034c5", "label": "supported", "passage": 5, "reason": "문단 5는 1년 초과 연체분과 손실충당금 합계를 모두 36,705천원으로 제시하고 다른 연체 구간은 없는 것으로 표시한다."}
+{"lid": "0fc78c3b33", "label": "non_claim", "passage": null, "reason": "주요 브랜드에 대한 답변 근거가 없음을 알리는 문장으로, 회사의 브랜드 구성 자체를 주장하지 않는다."}
+{"lid": "8bf725e332", "label": "non_claim", "passage": null, "reason": "매출 설명을 시작하는 도입 문장일 뿐 구체적인 매출액이나 비중을 제시하지 않는다."}
+{"lid": "ae9a6ef753", "label": "supported", "passage": 3, "reason": "문단 3에 2025년 하반기 자사몰 개설, 검색채널·인스타 홍보, 제품 업로드·마케팅에 의한 유입 유도와 수주 해당사항 없음이 모두 명시돼 있다."}
+{"lid": "63fa0eb0a7", "label": "supported", "passage": 3, "reason": "문단 3는 온라인몰 프로모션·할인으로 가격 경쟁력을 강화하고 상품 업데이트로 노출과 클릭 구매를 유도한다고 설명한다."}
+{"lid": "a61abcd4e8", "label": "non_claim", "passage": null, "reason": "문장이 중간에 끊긴 명사구로, 매출액이나 비중 등에 관한 완결된 사실 주장이 없다."}
+{"lid": "aab5de16d0", "label": "contradicted", "passage": 3, "reason": "문단 3는 자체 온라인몰 개설 시기를 2025년 하반기로 명시하므로 2022년 하반기라는 주장과 다르다."}
+{"lid": "37b11c3153", "label": "supported", "passage": 3, "reason": "문단 3는 2025년 하반기 자사몰 오픈과 온라인 검색채널·인스타를 이용한 홍보를 함께 명시한다."}
+{"lid": "39789f2e6d", "label": "non_claim", "passage": null, "reason": "문단 번호와 잘린 제목 표기만 있으며 사실 주장이 없다."}
+{"lid": "44ea9a23e5", "label": "supported", "passage": 3, "reason": "문단 3는 미입점 온라인몰 중 소비자 선호·접속·판매가 많은 몰을 지속적으로 파악하고 추후 입점으로 판매망 확대와 매출 증대를 추진한다고 설명한다."}
+{"lid": "92d96fcf9b", "label": "supported", "passage": 4, "reason": "문단 4는 내수경기 침체로 중산층 이하 가계의 소득·소비지출이 위축되어 의류 수요에 큰 영향을 미친다고 설명한다."}
+{"lid": "7f35be722c", "label": "no_evidence", "passage": null, "reason": "문단 3의 변동금리 차입금 부재와 이자비용 위험 설명은 데코앤에프에 관한 것으로, 세림어패럴에 관한 근거는 없다."}
+{"lid": "8c597c4b13", "label": "supported", "passage": 3, "reason": "문단 3는 회사가 보고기간말 변동금리 차입금을 보유하지 않아 이자비용 변동 위험에 노출되지 않는다고 명시한다."}
+{"lid": "8b27d7534e", "label": "supported", "passage": 4, "reason": "문단 4는 회사 차원의 신용위험 관리와 수취채권·확정계약 거래처 및 현금·금융기관 예치금에서 발생하는 신용위험을 함께 설명한다."}
+{"lid": "6be24b98a4", "label": "supported", "passage": 7, "reason": "문단 7의 매출채권 손실충당금 표는 당기말 금액을 36,705천원으로 명시한다."}
+{"lid": "a60cbf8e4e", "label": "supported", "passage": 4, "reason": "문단 4는 대부분의 도매 거래처에 독립 평가 신용등급이 없어 예수보증금과 기타 담보를 받으며 신용위험을 관리한다고 명시한다."}
+{"lid": "fb55cdc8aa", "label": "supported", "passage": 4, "reason": "문단 4에 도매 거래처 대부분의 독립 평가 신용등급 부재와 예수보증금·기타 담보를 통한 신용위험 관리가 모두 명시돼 있다."}
+{"lid": "0f28fd460b", "label": "contradicted", "passage": 4, "reason": "문단 4는 도매 거래처에서 예수보증금을 수령하고 기타 담보를 제공받는다고 명시하므로 받지 않는다는 주장과 반대다."}
+{"lid": "f105cdf7c2", "label": "non_claim", "passage": null, "reason": "연구개발·주요계약에 대한 답변 정보의 부족을 알리는 문장으로, 해당 조직·비용·계약의 존재 여부를 주장하지 않는다."}
+{"lid": "4a54babf3f", "label": "supported", "passage": 3, "reason": "문단 3는 1993년 코스닥 상장, 2019년 11월 부도에 따른 상장 폐지와 현재 비상장법인 상태를 모두 명시한다."}
+{"lid": "96f6c3c267", "label": "no_evidence", "passage": null, "reason": "제시된 8개 문단에는 LG화학의 제품이나 상장 여부에 관한 내용이 없다."}

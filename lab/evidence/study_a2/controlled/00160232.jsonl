@@ -1,0 +1,6 @@
+{"qid": "00160232-q1", "true_text": "회사는 1999년에 글로벌 해운회사 이미지에 맞추려고 사명을 ㈜KSS해운으로 바꾸었다.", "variant_text": "회사는 2003년에 글로벌 해운회사 이미지에 맞추려고 사명을 ㈜KSS해운으로 바꾸었다.", "variant_type": "기간 바꾸기", "source_passage": 2}
+{"qid": "00160232-q2", "true_text": "KSS해운은 상대적으로 부가가치가 높은 LPG·가스화물과 석유화학제품 운송을 사업의 중심에 두고 있다.", "variant_text": "팬오션은 상대적으로 부가가치가 높은 LPG·가스화물과 석유화학제품 운송을 사업의 중심에 두고 있다.", "variant_type": "주체 교체", "source_passage": 5}
+{"qid": "00160232-q3", "true_text": "KSS해운 매출의 10% 이상을 차지하는 외부 고객 세 곳은 모두 GAS 부문에 속한다.", "variant_text": "KSS해운 매출의 10% 이상을 차지하는 외부 고객 세 곳은 모두 GAS 부문에 속하지 않는다.", "variant_type": "부정", "source_passage": 2}
+{"qid": "00160232-q4", "true_text": "KSS해운이 매출을 내는 데 쓰는 주된 원재료는 선박에 넣는 연료유다.", "variant_text": "현대제철은 철광석과 원료탄을 주된 원재료로 사용한다.", "variant_type": "다른 기업 사실", "source_passage": 7}
+{"qid": "00160232-q5", "true_text": "KSS해운은 이번 사업연도에 과거 손상을 인식했던 선박 한 척에서 224,035천원의 손상차손을 환입했다.", "variant_text": "KSS해운은 이번 사업연도에 과거 손상을 인식했던 선박 한 척에서 318,640천원의 손상차손을 환입했다.", "variant_type": "숫자 변경", "source_passage": 5}
+{"qid": "00160232-q6", "true_text": "2025년 12월 31일 기준으로 KSS해운 GAS 부문의 주요 고객에는 SK GAS와 PTT가 들어 있다.", "variant_text": "2021년 12월 31일 기준으로 KSS해운 GAS 부문의 주요 고객에는 SK GAS와 PTT가 들어 있다.", "variant_type": "기간 바꾸기", "source_passage": 3}

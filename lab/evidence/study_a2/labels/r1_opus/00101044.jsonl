@@ -1,0 +1,24 @@
+{"lid": "5d2c81eb61", "label": "no_evidence", "passage": null, "reason": "문단 3은 당사가 제조·판매, 에이프로젠파마가 유통, 엔투텍이 반도체 부품을 한다고만 말하며 회사가 세 종속회사로 '나뉘어 있다'는 구조는 어느 문단에도 없다"}
+{"lid": "4337d62046", "label": "no_evidence", "passage": null, "reason": "문단 1은 제약사업부문이 합성의약품을 취급한다고만 하며, '대표 상표가 없다'는 내용은 어느 문단에도 없다"}
+{"lid": "4ca222d2cc", "label": "contradicted", "passage": 1, "reason": "문단 1은 계열회사 흡수합병 시점을 2022년 12월 19일로 적어 2019년 12월과 다르다"}
+{"lid": "c360392e29", "label": "supported", "passage": 1, "reason": "문단 1: 2022년 12월 19일 바이오의약품 생산 설비·기술·인력을 보유한 계열회사를 흡수합병해 바이오사업부문이 추가됨"}
+{"lid": "c21df40cc0", "label": "non_claim", "passage": null, "reason": "질문 문장"}
+{"lid": "6d2029fea0", "label": "supported", "passage": 5, "reason": "문단 5 표가 사업부문을 의약품(제약)과 바이오 등으로 구분해 보여 준다"}
+{"lid": "8c66eda111", "label": "supported", "passage": 5, "reason": "문단 5: 당기 중 연결대상 종속회사로 편입된 ㈜엔투텍은 반도체 장비부품 제조 및 판매 사업을 영위"}
+{"lid": "3b9dadbeeb", "label": "no_evidence", "passage": null, "reason": "문단 6의 62,954/(3,489)는 의약품-제약 부문 수치이고 어느 연도인지도 불분명하며, 전체 매출액·영업손익은 보여 준 문단에 없다"}
+{"lid": "c1bafb18b1", "label": "contradicted", "passage": 5, "reason": "문단 5는 당기 편입된 반도체 장비부품 종속회사를 ㈜한빛정밀이 아니라 ㈜엔투텍으로 적는다"}
+{"lid": "2407134ace", "label": "non_claim", "passage": null, "reason": "자료에 정보가 없다는 면책 문장"}
+{"lid": "3b824c8aae", "label": "supported", "passage": 1, "reason": "문단 1: 제약사업부문은 KGMP 적합 판정을 받은 경기도 화성시 공장에서 합성의약품을 제조·판매"}
+{"lid": "ebdd4c6e7a", "label": "contradicted", "passage": 1, "reason": "문단 1은 화성시 공장에서 합성의약품을 제조·판매한다고 말해 부정 문장과 반대된다"}
+{"lid": "47d1bca708", "label": "no_evidence", "passage": null, "reason": "삼성바이오로직스나 인천 송도 공장은 어느 문단에도 없다"}
+{"lid": "384d5a612b", "label": "non_claim", "passage": null, "reason": "어디서 확인하라는 절차 안내 조각"}
+{"lid": "1d3c62c5f0", "label": "supported", "passage": 3, "reason": "문단 3: 바이오사업부문은 충북 청주시 오송읍 소재 공장에서 바이오의약품을 생산"}
+{"lid": "ffd714aff0", "label": "non_claim", "passage": null, "reason": "위험관리 내용의 기재 위치를 안내하는 절차 안내 조각"}
+{"lid": "1888b3f19b", "label": "contradicted", "passage": 6, "reason": "문단 6은 배분받은 이익의 80%를 ㈜에이프로젠에 기술료로 지급한다고 적어 65%와 다르다"}
+{"lid": "1acb11875e", "label": "supported", "passage": 6, "reason": "문단 6 계약조건에 같은 문장이 있다"}
+{"lid": "263dc758f8", "label": "supported", "passage": 6, "reason": "문단 6 계약조건: 순수익을 ㈜바이넥스와 ㈜에이프로젠바이오로직스가 50:50으로 균등하게 나눔"}
+{"lid": "69f6a5e935", "label": "supported", "passage": 7, "reason": "문단 7: GS071 관절염 치료제, 글로벌 임상 3상 완료, 일본 및 중남미 판매허가, 터키 품목허가 진행중"}
+{"lid": "d719667ed2", "label": "non_claim", "passage": null, "reason": "뒤 내용을 소개하는 연결 문장"}
+{"lid": "fa249fd3da", "label": "supported", "passage": 6, "reason": "문단 6: 이익을 배분받은 일방은 배분받은 이익의 80%를 ㈜에이프로젠에게 기술료로 지급"}
+{"lid": "a7540ab68f", "label": "non_claim", "passage": null, "reason": "뒤 내용을 소개하는 연결 문장"}
+{"lid": "2c0a98a4c5", "label": "supported", "passage": 6, "reason": "문단 6 계약조건에 같은 문장이 있다"}

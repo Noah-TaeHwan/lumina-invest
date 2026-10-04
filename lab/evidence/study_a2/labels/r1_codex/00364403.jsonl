@@ -1,0 +1,32 @@
+{"lid": "10ddfe6f88", "label": "supported", "passage": 1, "reason": "문단 1이 통신장비 사업영역과 중계기·광전송장비·개방형 무선네트워크 기지국 장비의 연구개발·제조·판매를 모두 명시한다."}
+{"lid": "9994062b3e", "label": "supported", "passage": 1, "reason": "문단 1의 주요 사업영역과 장비 종류 및 연구개발·제조·판매를 의미가 같은 표현으로 옮겼다."}
+{"lid": "50dc10c04c", "label": "no_evidence", "passage": null, "reason": "제시된 8개 문단에는 삼성전자의 사업에 관한 근거가 없다."}
+{"lid": "bd9506dddc", "label": "contradicted", "passage": 4, "reason": "문단 4는 국내 납품 대금이 납품 후 60일 이내 모두 현금화된다고 명시하여 제시된 75일과 다르다."}
+{"lid": "01042a9bc5", "label": "supported", "passage": 4, "reason": "문단 4가 국내 납품 대금의 현금화 시기를 납품 후 60일 이내로 명시한다."}
+{"lid": "cfa4fa6075", "label": "no_evidence", "passage": null, "reason": "문단 2는 현재 영위하는 주요 통신장비 사업을 설명하며 이를 신규사업으로 추진한다는 사실은 제시하지 않는다."}
+{"lid": "f7c7e03047", "label": "supported", "passage": 2, "reason": "문단 2에 설립일 1998년 11월 5일과 코스닥 매매 개시일 2005년 7월 8일이 모두 명시되어 있다."}
+{"lid": "54e2df2b87", "label": "supported", "passage": 2, "reason": "문단 2가 이동통신·유선통신 네트워크 장비 제조·개발 목적과 1998년 11월 설립을 함께 지지한다."}
+{"lid": "3b6c489b06", "label": "non_claim", "passage": null, "reason": "자료 제목과 단위만 표시하는 표 머리말이며 독립적인 사실 주장이 아니다."}
+{"lid": "48435d7373", "label": "non_claim", "passage": null, "reason": "구체적인 매출 사실이나 수치를 제시하지 않고 표를 확인하도록 안내하는 문장이다."}
+{"lid": "c90332a062", "label": "no_evidence", "passage": null, "reason": "문단 1의 동일 수치는 안양사업장 생산실적이며 이를 매출액이라고 제시한 문단은 없다."}
+{"lid": "606059f644", "label": "supported", "passage": 1, "reason": "문단 1의 생산실적 표에 사업부문·품목·사업소와 제28기부터 제26기까지의 세 수치가 모두 일치한다."}
+{"lid": "396f11d600", "label": "contradicted", "passage": 2, "reason": "문단 2는 같은 설립 목적의 쏠리드 설립일을 1998년 11월 5일로 명시하여 2001년 11월과 다르다."}
+{"lid": "d2b79aa7c8", "label": "supported", "passage": 1, "reason": "문단 1의 합계 행에 161,639,719·127,764,181·174,152,505가 그대로 제시되어 있다."}
+{"lid": "3dd10bd5bf", "label": "supported", "passage": 1, "reason": "문단 1이 외주 생산과 연간 평준화 없이 사업자 수주 시점에 일괄생산하는 방식을 모두 명시한다."}
+{"lid": "74b046d4b5", "label": "supported", "passage": 1, "reason": "문단 1이 외주 생산 및 사업자 수주 시점의 일괄생산을 명시한다."}
+{"lid": "0576ea02bb", "label": "no_evidence", "passage": null, "reason": "문단 1의 생산 방식은 쏠리드에 관한 것이며 한빛네트웍스의 생산 방식에 대한 근거는 없다."}
+{"lid": "87bc7049a9", "label": "supported", "passage": 1, "reason": "문단 1이 외주를 포함한 총생산 금액을 회사의 생산능력으로 파악한다고 명시한다."}
+{"lid": "18410de05b", "label": "no_evidence", "passage": null, "reason": "문단 3은 JPY 자산과 순액만 제시하며 10% 하락 시 손익 영향 2,213,658은 제시하지 않는다."}
+{"lid": "50a2173ee2", "label": "non_claim", "passage": null, "reason": "환율 민감도 결과가 뒤따른다고 알리는 도입 문장으로 구체적인 손익 사실이나 수치를 주장하지 않는다."}
+{"lid": "e2d55b3d5b", "label": "no_evidence", "passage": null, "reason": "문단 3의 USD 순액은 71,400,425이며 10% 상승 시 손익 영향 7,140,425는 문단에 없는 계산값이다."}
+{"lid": "28b6b4ebe5", "label": "supported", "passage": 3, "reason": "문단 3이 외화로 표시된 거래로 인해 연결회사가 환율변동위험에 노출되어 있다고 명시한다."}
+{"lid": "e7006b3fc9", "label": "contradicted", "passage": 3, "reason": "문단 3은 연결회사가 외화 거래를 하고 환율변동위험에 노출되어 있다고 명시하여 두 부정 주장을 반박한다."}
+{"lid": "6d738e8620", "label": "non_claim", "passage": null, "reason": "당기말 외화 화폐성자산·부채의 원화환산장부금액 표를 소개하는 문장으로 구체적인 금액을 주장하지 않는다."}
+{"lid": "906a118e51", "label": "supported", "passage": 3, "reason": "문단 3의 당기 USD 외화자산 96,430,582·외화부채 (25,030,157)·순액 71,400,425와 모두 일치한다."}
+{"lid": "a1e14a970f", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 USD 환율 10% 하락 시 손익 영향 (7,140,425)가 없으며 순액으로부터의 계산은 근거로 인정되지 않는다."}
+{"lid": "3e710fd044", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 JPY 환율 10% 상승 시 손익 영향 2,213,658이 없으며 자산액으로부터의 계산은 근거로 인정되지 않는다."}
+{"lid": "be174815bb", "label": "supported", "passage": 3, "reason": "문단 3의 당기 JPY 외화자산 22,136,586·외화부채 -·순액 22,136,586과 모두 일치한다."}
+{"lid": "4bc008828a", "label": "no_evidence", "passage": null, "reason": "환율 10% 변동 시 손익 영향 합계 9,354,683천원은 어느 문단에도 없고 외화 순액을 이용해 계산한 값이다."}
+{"lid": "7cde189746", "label": "no_evidence", "passage": null, "reason": "이 질문의 8개 문단에는 제28기 연결 연구개발비의 매출액 대비 15.4%라는 수치가 없다."}
+{"lid": "75b1616f03", "label": "supported", "passage": 2, "reason": "문단 2가 매년 매출액의 약 10~14% 내외 수준을 연구개발에 투자한다고 명시한다."}
+{"lid": "cd278cb76e", "label": "no_evidence", "passage": null, "reason": "제시된 8개 문단에는 SK하이닉스의 주력 제품에 관한 근거가 없다."}

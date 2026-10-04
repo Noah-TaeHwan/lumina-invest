@@ -1,0 +1,29 @@
+{"lid": "602dcec8b5", "label": "contradicted", "passage": 7, "reason": "문단 7은 지분투자·관계회사를 통해 신약 연구개발 제약·바이오 사업에 투자한다고 명시"}
+{"lid": "3d53b5a5cf", "label": "supported", "passage": 7, "reason": "문단 7이 지분투자·관계회사를 통한 신약 개발 제약·바이오 투자를 그대로 진술"}
+{"lid": "35f3e0687d", "label": "supported", "passage": 7, "reason": "문단 7: 주요사업은 표면처리 관련 약품 사업 부문과 기계 사업 부문으로 구성"}
+{"lid": "6b47c64eb8", "label": "supported", "passage": 7, "reason": "문단 7: 제약 및 바이오 사업 등에 투자하고 있음"}
+{"lid": "0bbbd23c26", "label": "supported", "passage": 7, "reason": "문단 7 문장과 동일"}
+{"lid": "6e3f98dfa8", "label": "supported", "passage": 7, "reason": "문단 7 문장과 사실상 동일(대개 생략)"}
+{"lid": "3ae9eb3c07", "label": "supported", "passage": 5, "reason": "문단 5 주요 제품 표가 표면처리약품과 전자동 도금설비 두 사업부문을 제시"}
+{"lid": "5f8d1e99f9", "label": "no_evidence", "passage": null, "reason": "현대자동차에 관한 문단 없음"}
+{"lid": "90cefa7e52", "label": "supported", "passage": 1, "reason": "문단 1 문장과 동일"}
+{"lid": "ae05929b2c", "label": "supported", "passage": 1, "reason": "문단 1: 전자동 도금설비의 주요 수요층은 PCB 및 전자부품 제조업체"}
+{"lid": "804b8af71f", "label": "supported", "passage": 1, "reason": "문단 1이 주문 제작 방식과 PCB·전자부품 제조업체 수요층을 함께 진술"}
+{"lid": "6852bc193e", "label": "contradicted", "passage": 5, "reason": "문단 5상 기계사업부문 매출 비중은 5.40%이고 최대는 기타사업부문 88.19%; 62.94%는 이커머스 등 비중"}
+{"lid": "739ae37d64", "label": "contradicted", "passage": 5, "reason": "문단 5: 기타사업부문 매출 67,839백만원 비중 88.19%로 71.46%와 다름"}
+{"lid": "de4fce0666", "label": "supported", "passage": 5, "reason": "문단 5: 2025년 기타사업부문 매출 67,839백만원(=678억3,900만원), 비중 88.19%"}
+{"lid": "9e151a804f", "label": "supported", "passage": 2, "reason": "문단 2: PTC-CAT 2025년 268,568원, 2024년 233,653원"}
+{"lid": "32c6b85947", "label": "supported", "passage": 6, "reason": "문단 6: 기계사업부문 매출 4,155(5.40%), 자산총액 58,553백만원(단 5.40%는 가동률이 아닌 매출 비중)"}
+{"lid": "cdd2d095fb", "label": "no_evidence", "passage": null, "reason": "매출 12,693·16.50%는 문단 4, 자산총액 31,350은 문단 6에 있어 한 문단이 전부 지지하지 않음"}
+{"lid": "bfe7c7828c", "label": "no_evidence", "passage": null, "reason": "문단 2는 2025·2024·2023년 가격만 제시, 2018년 가격 정보 없음"}
+{"lid": "605b142a9d", "label": "non_claim", "passage": null, "reason": "뒤 내용을 소개하는 안내 문장"}
+{"lid": "1acb37d301", "label": "no_evidence", "passage": null, "reason": "문단 2 표에 영향 금액·방향 값이 없음"}
+{"lid": "f1d57efb3a", "label": "no_evidence", "passage": null, "reason": "한빛소재에 관한 문단 없음(문단 2 주체는 연결회사=케이피엠테크)"}
+{"lid": "6308cf08dc", "label": "supported", "passage": 2, "reason": "문단 2: 별도 금융상품 위험회피 없이 지급기일 조정 등으로 환위험 관리"}
+{"lid": "1198ec4c1a", "label": "no_evidence", "passage": null, "reason": "문단 2 표에 영향 금액·방향 값이 없음"}
+{"lid": "c45f363377", "label": "no_evidence", "passage": null, "reason": "환율 상승·하락 시 이익 증감 방향은 어느 문단에도 없음"}
+{"lid": "9fbf2667af", "label": "non_claim", "passage": null, "reason": "다음 표를 소개하는 안내 문장"}
+{"lid": "209a465962", "label": "supported", "passage": 2, "reason": "문단 2: 지급기일 조정 등을 통하여 환위험 관리"}
+{"lid": "98cf56f877", "label": "supported", "passage": 4, "reason": "문단 4: 기업부설연구소 중심으로 신기술·기능 개선 표면처리제 개발"}
+{"lid": "c058562c42", "label": "contradicted", "passage": 4, "reason": "문단 4는 기업부설연구소 중심으로 표면처리제 개발에 대응한다고 명시"}
+{"lid": "3f537393c1", "label": "no_evidence", "passage": null, "reason": "12,693백만원·16.50%는 문단 6의 약품사업부문 매출액·비중이며 연구개발비 정보는 없음"}

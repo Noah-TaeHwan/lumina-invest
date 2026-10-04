@@ -1,0 +1,22 @@
+{"lid": "96bff0569d", "label": "no_evidence", "passage": null, "reason": "문단 4는 주요 제품이 임상단계 약물이고 상업화 의약품이 없다고만 하며, 개발·판매를 사업 모델로 삼는다는 서술은 없다"}
+{"lid": "24e8e22a1c", "label": "no_evidence", "passage": null, "reason": "삼성전자에 관한 문단이 없다"}
+{"lid": "3255afe081", "label": "supported", "passage": 5, "reason": "문단 5: IMC-002 계약 조건이 계약금 800만 달러, 진척단계별 마일스톤, 순매출액 일정비율 로열티"}
+{"lid": "4ffabe4f01", "label": "contradicted", "passage": 5, "reason": "문단 5는 계약금을 800만 달러로 적어 900만 달러와 다르다"}
+{"lid": "c6cb87169a", "label": "no_evidence", "passage": null, "reason": "IMC-002 임상 1b상은 문단 5에 있으나 EGFR 돌연변이 비소세포폐암 2차 치료제는 문단 2의 렉라자 이야기로, IMC-002 적응증을 말하는 문단이 없다"}
+{"lid": "02469b65e1", "label": "supported", "passage": 5, "reason": "문단 5: 계약금 800만 달러"}
+{"lid": "9de1b2e99c", "label": "supported", "passage": 5, "reason": "문단 5: 이뮨온시아 계약 대상기술 IMC-002의 개발 진행 경과가 임상 1b상"}
+{"lid": "810263a35b", "label": "supported", "passage": 4, "reason": "문단 4: 계약금 750만 달러 중 2022년 600만 달러를 매출로 인식"}
+{"lid": "b6583b458d", "label": "non_claim", "passage": null, "reason": "인용 위치를 가리키는 문장 조각으로 사실 주장이 아니다"}
+{"lid": "7ece991f3e", "label": "supported", "passage": 2, "reason": "문단 2: 라. 수주현황 보고서 제출일 현재 해당사항 없습니다"}
+{"lid": "294aeee9d5", "label": "contradicted", "passage": 4, "reason": "문단 4는 600만 달러를 2022년 매출로 인식했다고 적어 2019년과 다르다"}
+{"lid": "e93753cb81", "label": "no_evidence", "passage": null, "reason": "최근 사업연도 매출액을 밝힌 문단이 없다(문단 4는 2022년 600만 달러 매출 인식만 언급)"}
+{"lid": "2446798cfa", "label": "no_evidence", "passage": null, "reason": "문단 2의 당사는 이뮨온시아이며 셀트리온에 관한 문단은 없다"}
+{"lid": "79ef2febfa", "label": "non_claim", "passage": null, "reason": "정보가 제공되지 않았다는 면책·메타 진술"}
+{"lid": "ae532a13fa", "label": "supported", "passage": 2, "reason": "문단 2: 주요 제품은 임상단계 약물이며 완제품이 아니므로 적용되는 산업표준이 없다"}
+{"lid": "4fef7ed948", "label": "supported", "passage": 2, "reason": "문단 2: 연구실 안전관리 규정·생물 안전관리 규정 등을 준수하고 있다"}
+{"lid": "ea01f87800", "label": "supported", "passage": 3, "reason": "문단 3: 부채비율 전기말 34.86%, 당기말 16.65%"}
+{"lid": "578b801903", "label": "contradicted", "passage": 3, "reason": "문단 3은 부채비율이 34.86%에서 16.65%로 낮아졌음을 보여 준다"}
+{"lid": "d45b5117e2", "label": "supported", "passage": 3, "reason": "문단 3: 당기말 16.65%, 전기말 34.86%"}
+{"lid": "c8a0c9d14b", "label": "no_evidence", "passage": null, "reason": "현대자동차에 관한 문단이 없다"}
+{"lid": "35e56c0b8f", "label": "supported", "passage": 3, "reason": "문단 3: IMC-002 계약 상대방 3D Medicines Biotechnology Shanghai Co, Ltd., 수취 금액 USD 7,500,000"}
+{"lid": "07b0a0e3ff", "label": "supported", "passage": 3, "reason": "문단 3: 대상 지역 중화권 IMC-002 전용실시권 이전, 수취 금액 USD 7,500,000"}

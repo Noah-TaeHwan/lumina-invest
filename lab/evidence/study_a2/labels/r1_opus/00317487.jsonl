@@ -1,0 +1,49 @@
+{"lid": "7f39877f8c", "label": "supported", "passage": 7, "reason": "문단 7이 자회사 뉴로소나를 통한 집속초음파 뉴로모듈레이션 기기 개발과 저강도 집속초음파자극시스템 등 핵심특허 보유를 기술"}
+{"lid": "7cc99fb05a", "label": "supported", "passage": 8, "reason": "문단 8: 집속초음파 시장 2024년 약 9.2조원, 2030년 약 19조원 예상"}
+{"lid": "abfb5afb5a", "label": "contradicted", "passage": 7, "reason": "문단 7은 뉴로소나를 통해 뉴로모듈레이션 기기를 개발하고 있다고 명시해 부정문과 충돌"}
+{"lid": "4b8633d23b", "label": "no_evidence", "passage": null, "reason": "향후 신규사업 추진 계획을 말하는 문단이 없음"}
+{"lid": "25167f33ad", "label": "supported", "passage": 8, "reason": "문단 8 [에너지사업부]가 전력배전설비 Busway와 대형건물·공장·플랜트 수요를 기술"}
+{"lid": "fa13264693", "label": "supported", "passage": 7, "reason": "문단 7: 자회사 (주)뉴로소나를 통하여 집속초음파 기반 뉴로모듈레이션 기기 개발"}
+{"lid": "ca4d096a29", "label": "supported", "passage": 8, "reason": "문단 8에 [에너지사업부]와 [의료기기사업부]가 함께 기술됨"}
+{"lid": "9ce87495a2", "label": "supported", "passage": 8, "reason": "문단 8: 댐퍼는 원자력·화력·복합화력 발전소의 공기나 가스 기류 제어에 사용"}
+{"lid": "2cc7e0476e", "label": "no_evidence", "passage": null, "reason": "삼성전자 메모리 반도체에 관한 문단이 없음"}
+{"lid": "537fbb21cb", "label": "no_evidence", "passage": null, "reason": "보여 준 문단 중 산업설비사업부와 댐퍼를 연결하는 문단이 없음"}
+{"lid": "735ca71374", "label": "supported", "passage": 8, "reason": "문단 8: 댐퍼는 덕트에 설치되어 발전소 기류를 차단하거나 조절"}
+{"lid": "56cb7d3a4d", "label": "no_evidence", "passage": null, "reason": "3개 기 합산값 645,739는 문단에 없는 계산값"}
+{"lid": "6a183155a9", "label": "no_evidence", "passage": null, "reason": "3개 기 합산값 35,688,495는 문단에 없는 계산값"}
+{"lid": "23ba08feb8", "label": "no_evidence", "passage": null, "reason": "비중 계산값은 문단에 없음(계산 자체도 틀림)"}
+{"lid": "993bb526f3", "label": "no_evidence", "passage": null, "reason": "비중 계산값은 문단에 없음"}
+{"lid": "435b33240e", "label": "no_evidence", "passage": null, "reason": "3개 기 합산값 22,467,174는 문단에 없는 계산값"}
+{"lid": "ed2035dddb", "label": "supported", "passage": 8, "reason": "문단 8: 기타 매출액 1,176,154천원"}
+{"lid": "d4766a0e4d", "label": "no_evidence", "passage": null, "reason": "산업설비사업부 비중 계산값과 비교는 문단에 없음"}
+{"lid": "4b572aaf21", "label": "non_claim", "passage": null, "reason": "목록을 소개하는 도입 문장"}
+{"lid": "f03c31b58e", "label": "supported", "passage": 8, "reason": "문단 8: 2025년 기준 기타 1,176,154천원, 비중 8.6%, 계속영업매출 기준"}
+{"lid": "e205f57a64", "label": "contradicted", "passage": 8, "reason": "문단 8은 기타 비중을 8.6%로 기재, 12.4%와 다름"}
+{"lid": "0ed67ce840", "label": "non_claim", "passage": null, "reason": "제시 정보에 없다는 면책성 문장"}
+{"lid": "49cc429695", "label": "non_claim", "passage": null, "reason": "제목 조각"}
+{"lid": "a605c06357", "label": "non_claim", "passage": null, "reason": "제목 조각"}
+{"lid": "4413eb6a24", "label": "contradicted", "passage": 8, "reason": "문단 8은 의무 시점을 2020년부터로 기재, 2017년과 다름"}
+{"lid": "030bec8380", "label": "non_claim", "passage": null, "reason": "제목 조각"}
+{"lid": "7512ac4eba", "label": "non_claim", "passage": null, "reason": "제목 조각"}
+{"lid": "95f42a84b3", "label": "non_claim", "passage": null, "reason": "제목 조각"}
+{"lid": "0a81ca8b66", "label": "no_evidence", "passage": null, "reason": "매입처 유형을 말하는 문단이 없음"}
+{"lid": "ad75bd2869", "label": "non_claim", "passage": null, "reason": "제시 정보에 없다는 면책성 문장"}
+{"lid": "dc67336905", "label": "non_claim", "passage": null, "reason": "제시 정보에 없다는 면책성 문장"}
+{"lid": "a47bcf85b2", "label": "non_claim", "passage": null, "reason": "제목 조각"}
+{"lid": "ac51a66ea6", "label": "supported", "passage": 8, "reason": "문단 8: IMO 황산화물 규제 강화로 2020년부터 탈황설비 설치 또는 선박 교체 의무"}
+{"lid": "6d077520ec", "label": "non_claim", "passage": null, "reason": "제목 조각"}
+{"lid": "afa3592083", "label": "no_evidence", "passage": null, "reason": "매입처 유형을 말하는 문단이 없음"}
+{"lid": "bd32260f14", "label": "no_evidence", "passage": null, "reason": "매입처 유형을 말하는 문단이 없음"}
+{"lid": "b9de32f341", "label": "non_claim", "passage": null, "reason": "목록을 소개하는 도입 문장"}
+{"lid": "7b872c4e3d", "label": "non_claim", "passage": null, "reason": "제목 조각"}
+{"lid": "21902192bd", "label": "no_evidence", "passage": null, "reason": "문단 1은 티에스넥스젠(당사)에 관한 것이며 한빛엔지니어링 관련 문단 없음"}
+{"lid": "81d4ef5ec6", "label": "supported", "passage": 1, "reason": "문단 1의 위험관리정책 문장과 일치"}
+{"lid": "226a3f529d", "label": "supported", "passage": 1, "reason": "문단 1: 시장위험, 신용위험 및 유동성위험에 노출"}
+{"lid": "581d7c3109", "label": "supported", "passage": 1, "reason": "문단 1: 여러 활동으로 인하여 시장·신용·유동성위험에 노출"}
+{"lid": "52350adcd5", "label": "non_claim", "passage": null, "reason": "제목 조각"}
+{"lid": "981ca584ab", "label": "contradicted", "passage": 3, "reason": "문단 3은 인천사업장 생산품목을 Damper, Busway로 기재해 부정문과 충돌"}
+{"lid": "76b45e8d2d", "label": "non_claim", "passage": null, "reason": "목록을 소개하는 도입 문장"}
+{"lid": "495743789a", "label": "non_claim", "passage": null, "reason": "제목 조각"}
+{"lid": "fe102d9be2", "label": "no_evidence", "passage": null, "reason": "보여 준 문단 중 기술연구소 업무를 다루는 문단이 없음"}
+{"lid": "7594625e14", "label": "supported", "passage": 3, "reason": "문단 3: 인천사업장 생산품목 Damper, Busway"}
+{"lid": "91e7c9bdf3", "label": "non_claim", "passage": null, "reason": "제목 조각"}

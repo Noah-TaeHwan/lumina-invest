@@ -1,0 +1,22 @@
+{"lid": "96bff0569d", "label": "no_evidence", "passage": null, "reason": "임상단계 약물이라는 설명은 있으나, 약물 개발과 판매를 기본 사업 모델로 삼는다는 근거는 없다."}
+{"lid": "24e8e22a1c", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 삼성전자의 메모리 반도체 사업이나 수익 창출 방식에 관한 정보가 없다."}
+{"lid": "3255afe081", "label": "supported", "passage": 5, "reason": "문단 5는 IMC-002 계약의 계약금, 진척단계별 마일스톤, 순매출액 일정 비율의 로열티를 모두 명시한다."}
+{"lid": "4ffabe4f01", "label": "contradicted", "passage": 5, "reason": "문단 5에 IMC-002 계약금은 800만 달러로 명시되어 있어 900만 달러라는 주장과 다르다."}
+{"lid": "c6cb87169a", "label": "no_evidence", "passage": null, "reason": "문단 5는 IMC-002의 임상 1b상을 지지하지만, 문단 2의 EGFR 돌연변이 비소세포폐암 2차 치료제는 렉라자에 관한 정보다."}
+{"lid": "02469b65e1", "label": "supported", "passage": 5, "reason": "문단 5는 대상기술 IMC-002의 계약금을 800만 달러로 명시한다."}
+{"lid": "9de1b2e99c", "label": "supported", "passage": 5, "reason": "문단 5는 이뮨온시아의 대상기술 IMC-002가 임상 1b상 단계임을 명시한다."}
+{"lid": "810263a35b", "label": "supported", "passage": 4, "reason": "문단 4는 IMC-002 계약금 중 600만 달러를 2022년 매출로 인식했다고 명시한다."}
+{"lid": "b6583b458d", "label": "non_claim", "passage": null, "reason": "인용을 시작하다 끊긴 문장 조각으로, 완결된 사실 주장이 없다."}
+{"lid": "7ece991f3e", "label": "supported", "passage": 2, "reason": "문단 2에 수주현황은 보고서 제출일 현재 해당사항 없다는 인용 내용이 명시되어 있다."}
+{"lid": "294aeee9d5", "label": "contradicted", "passage": 4, "reason": "문단 4는 IMC-002 계약금 중 600만 달러의 매출 인식 연도를 2019년이 아닌 2022년으로 명시한다."}
+{"lid": "e93753cb81", "label": "no_evidence", "passage": null, "reason": "최근 사업연도 매출액이 없다는 근거는 없으며, 수주현황 해당사항 없음은 매출액 없음과 다르다."}
+{"lid": "2446798cfa", "label": "no_evidence", "passage": null, "reason": "문단 2의 임상단계 제품과 산업표준 설명은 이뮨온시아에 관한 것으로, 셀트리온에 관한 근거는 없다."}
+{"lid": "79ef2febfa", "label": "non_claim", "passage": null, "reason": "제공된 근거의 정보 부족을 알리는 안내이며, 회사의 실제 생산 방식에 관한 사실 주장은 아니다."}
+{"lid": "ae532a13fa", "label": "supported", "passage": 2, "reason": "문단 2는 주요 제품이 임상단계 약물이고 완제품이 아니어서 적용되는 산업표준이 없다고 명시한다."}
+{"lid": "4fef7ed948", "label": "supported", "passage": 2, "reason": "문단 2는 면역항암제 개발 과정에서 연구실 안전관리 및 생물 안전관리 규정을 준수한다고 명시한다."}
+{"lid": "ea01f87800", "label": "supported", "passage": 3, "reason": "문단 3은 전기말 부채비율 34.86%와 당기말 16.65%를 명시하여 감소를 지지한다."}
+{"lid": "578b801903", "label": "contradicted", "passage": 3, "reason": "문단 3의 전기말 34.86%와 당기말 16.65%는 감소를 나타내므로 낮아지지 않았다는 주장과 반대다."}
+{"lid": "d45b5117e2", "label": "supported", "passage": 3, "reason": "문단 3은 당기말 부채비율 16.65%와 전기말 34.86%를 함께 명시하며 당기말 값이 더 낮다."}
+{"lid": "c8a0c9d14b", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 현대자동차의 울산 공장이나 완성차 생산에 관한 정보가 없다."}
+{"lid": "35e56c0b8f", "label": "supported", "passage": 3, "reason": "문단 3은 IMC-002 계약 상대방을 3D Medicines Biotechnology Shanghai Co, Ltd.로, 수취 금액을 USD 7,500,000으로 명시한다."}
+{"lid": "07b0a0e3ff", "label": "supported", "passage": 3, "reason": "문단 3은 3D Medicines에 IMC-002의 중화권 전용실시권을 이전하는 계약과 수취 금액 USD 7,500,000, 즉 750만 달러를 명시한다."}

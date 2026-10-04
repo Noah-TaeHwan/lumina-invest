@@ -1,0 +1,24 @@
+{"lid": "5d2c81eb61", "label": "supported", "passage": 3, "reason": "문단 3이 에이프로젠파마의 종속회사 지위·의약품 사업·유통과 엔투텍의 종속회사 지위·반도체 장비부품 제조 및 판매를 모두 명시한다."}
+{"lid": "4337d62046", "label": "no_evidence", "passage": null, "reason": "문단 1은 합성의약품 취급을 지지하지만, 대표 상표가 없다는 사실은 어느 문단에도 제시되지 않는다."}
+{"lid": "4ca222d2cc", "label": "contradicted", "passage": 1, "reason": "문단 1은 해당 계열회사 흡수합병과 바이오사업부문 추가 시점을 2019년 12월이 아닌 2022년 12월 19일로 명시한다."}
+{"lid": "c360392e29", "label": "supported", "passage": 1, "reason": "문단 1이 바이오의약품 생산 설비·기술·인력을 보유한 계열회사를 2022년 12월 19일 흡수합병하여 바이오사업부문이 추가되었다고 명시한다."}
+{"lid": "c21df40cc0", "label": "non_claim", "passage": null, "reason": "매출액과 영업손익 및 사업부문 구분을 묻는 질문이다."}
+{"lid": "6d2029fea0", "label": "supported", "passage": 5, "reason": "문단 5의 사업부문 표에 의약품과 그 제약 부문 및 바이오 부문이 제시되어 있다."}
+{"lid": "8c66eda111", "label": "supported", "passage": 5, "reason": "문단 5가 당기 연결대상 종속회사로 편입된 엔투텍의 반도체 장비부품 제조 및 판매 사업을 명시한다."}
+{"lid": "3b9dadbeeb", "label": "no_evidence", "passage": null, "reason": "문단 6의 62,954백만원과 영업손실 3,489백만원은 제약 부문 수치이며, 최근 사업연도 전체 매출액과 영업손익으로는 제시되지 않는다."}
+{"lid": "c1bafb18b1", "label": "no_evidence", "passage": null, "reason": "한빛정밀의 당기 연결 편입이나 사업 내용은 제시되지 않으며, 엔투텍에 관한 문단 5는 한빛정밀에 대한 직접 반박도 아니다."}
+{"lid": "2407134ace", "label": "non_claim", "passage": null, "reason": "가동률 수치를 제시하는 대신 문헌의 정보 한계를 알리는 답변이다."}
+{"lid": "3b824c8aae", "label": "supported", "passage": 1, "reason": "문단 1이 KGMP 적합 판정을 받은 경기도 화성시 공장에서 제약사업부문이 합성의약품을 제조·판매한다고 명시한다."}
+{"lid": "ebdd4c6e7a", "label": "contradicted", "passage": 1, "reason": "문단 1은 해당 화성시 공장에서 합성의약품을 제조·판매한다고 하므로 생산·판매하지 않는다는 주장과 반대다."}
+{"lid": "47d1bca708", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 삼성바이오로직스나 인천 송도 공장의 바이오의약품 위탁생산에 관한 정보가 없다."}
+{"lid": "384d5a612b", "label": "non_claim", "passage": null, "reason": "자료를 확인할 위치를 안내하는 문장 조각이다."}
+{"lid": "1d3c62c5f0", "label": "supported", "passage": 3, "reason": "문단 3이 바이오사업부문은 충북 청주시 오송읍 소재 공장에서 바이오의약품을 생산한다고 명시한다."}
+{"lid": "ffd714aff0", "label": "non_claim", "passage": null, "reason": "위험관리 내용의 문서 위치를 안내하다 끊긴 문장 조각으로 완결된 사실 주장이 아니다."}
+{"lid": "1888b3f19b", "label": "contradicted", "passage": 6, "reason": "문단 6은 배분받은 이익의 기술료 지급 비율을 65%가 아닌 80%로 명시한다."}
+{"lid": "1acb11875e", "label": "supported", "passage": 6, "reason": "문단 6이 두 공동사업자 중 일방의 사업권이 무효화되어도 나머지 일방의 독점적 사업권은 유지된다고 명시한다."}
+{"lid": "263dc758f8", "label": "supported", "passage": 6, "reason": "문단 6이 사업화 순수익을 바이넥스와 에이프로젠바이오로직스가 50:50으로 균등 배분한다고 명시한다."}
+{"lid": "69f6a5e935", "label": "supported", "passage": 7, "reason": "문단 7이 GS071의 관절염 치료제 용도, 글로벌 임상 3상 완료, 일본·중남미 판매허가 및 터키 품목허가 진행을 모두 명시한다."}
+{"lid": "d719667ed2", "label": "non_claim", "passage": null, "reason": "품목별 개발 진행 상황을 이어서 소개하는 안내 문장이다."}
+{"lid": "fa249fd3da", "label": "supported", "passage": 6, "reason": "문단 6이 이익을 배분받은 일방은 그 이익의 80%를 에이프로젠에게 기술료로 지급한다고 명시한다."}
+{"lid": "a7540ab68f", "label": "non_claim", "passage": null, "reason": "라이선스 계약 조건을 이어서 소개하는 안내 문장이다."}
+{"lid": "2c0a98a4c5", "label": "supported", "passage": 6, "reason": "문단 6이 배분받은 이익의 80%를 에이프로젠에게 기술료로 지급하도록 정한다."}

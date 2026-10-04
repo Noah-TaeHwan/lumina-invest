@@ -1,0 +1,25 @@
+{"lid": "a23959381b", "label": "no_evidence", "passage": null, "reason": "문단 8의 가스팀·탱커팀·케미칼팀은 판매(영업)조직이며 사업부문 구분이라는 문단은 없음"}
+{"lid": "f7874dbf6d", "label": "contradicted", "passage": 2, "reason": "문단 2는 사명 변경 연도를 1999년으로 기술"}
+{"lid": "3b4cc5c79b", "label": "supported", "passage": 2, "reason": "문단 2: 1999년 글로벌 해운회사 이미지에 부합하도록 ㈜KSS해운으로 사명 변경"}
+{"lid": "82f741255f", "label": "supported", "passage": 5, "reason": "문단 5: 부가가치가 높은 LPG 및 가스화물, 석유화학제품 운송 사업을 중심으로"}
+{"lid": "c638ed94d5", "label": "no_evidence", "passage": null, "reason": "각 사업부문별 운송 화물을 말하는 문단 없음, 액화가스(문단 2)와 LPG·가스화물(문단 5)을 합쳐야 함"}
+{"lid": "417a14b28b", "label": "no_evidence", "passage": null, "reason": "팬오션에 관한 문단 없음(문단 5는 KSS해운 서술)"}
+{"lid": "e13da8cb87", "label": "supported", "passage": 4, "reason": "문단 4: 해상 운송서비스의 생산과 판매를 업으로 하는 해운업 영위"}
+{"lid": "777a4c305b", "label": "contradicted", "passage": 2, "reason": "문단 2 표에서 A·B·C사 모두 GAS 부문"}
+{"lid": "e35ef213ba", "label": "supported", "passage": 2, "reason": "문단 2: 영업부문을 수익 창출 선박의 종류 기준 GAS선·PRODUCT선·CHEMICAL선 부문으로 구분"}
+{"lid": "8910ff9708", "label": "supported", "passage": 2, "reason": "문단 2 표에서 10% 이상 외부 고객 A·B·C사 모두 GAS 부문"}
+{"lid": "c5f2f2754b", "label": "no_evidence", "passage": null, "reason": "합계 233,340,858은 문단에 없는 계산값"}
+{"lid": "646bc4cdcf", "label": "no_evidence", "passage": null, "reason": "합계 248,069,143은 문단에 없는 계산값"}
+{"lid": "49f6ef0c16", "label": "non_claim", "passage": null, "reason": "뒤따르는 정보를 소개하는 안내 문장"}
+{"lid": "05641a1954", "label": "no_evidence", "passage": null, "reason": "비중은 문단에 없는 계산값이며 분모 1,677,201,890은 유형자산 기초 합계(문단 8)이지 매출이 아님"}
+{"lid": "98a04f4b11", "label": "no_evidence", "passage": null, "reason": "현대제철에 관한 문단 없음"}
+{"lid": "9e676382c2", "label": "non_claim", "passage": null, "reason": "정보 부재를 말하는 면책성 문장"}
+{"lid": "afc4d1bb61", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단 중 주요 원재료를 밝히는 문단 없음"}
+{"lid": "d54f35b0d8", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단 중 연료유를 주요 원재료로 밝히는 문단 없음"}
+{"lid": "73ab9581d1", "label": "contradicted", "passage": 5, "reason": "문단 5는 손상차손환입 금액을 224,035천원으로 기술"}
+{"lid": "f86f28cdbf", "label": "supported", "passage": 5, "reason": "문단 5: 기존 손상 선박 1척에 대해 당기 손상차손환입 224,035천원 인식"}
+{"lid": "225e8c88f8", "label": "non_claim", "passage": null, "reason": "정보 부재를 말하는 면책성 문장"}
+{"lid": "bbafc23bd0", "label": "supported", "passage": 8, "reason": "문단 8 장기해상운송계약 서술과 일치"}
+{"lid": "9e573a31ab", "label": "supported", "passage": 3, "reason": "문단 3 기준일 2025.12.31 GAS 부문 주요 고객에 SK GAS, PTT 포함"}
+{"lid": "b05340dd63", "label": "supported", "passage": 8, "reason": "문단 8: 대선료 및 운임단가 등은 계약 연장시 조정"}
+{"lid": "daf2102661", "label": "no_evidence", "passage": null, "reason": "2021.12.31 기준 고객 정보 문단 없음(문단 3은 2025.12.31 기준)"}

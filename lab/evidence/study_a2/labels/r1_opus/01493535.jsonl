@@ -1,0 +1,24 @@
+{"lid": "a59e372a10", "label": "non_claim", "passage": null, "reason": "목록을 여는 도입 문장으로 구체적 사실 단위가 없다"}
+{"lid": "c04303fcca", "label": "supported", "passage": 1, "reason": "문단 1이 미디어렙은 광고주의 효율적 광고집행과 매체사의 광고판매를 대행한다고 명시"}
+{"lid": "4ba4dbb6ae", "label": "supported", "passage": 4, "reason": "문단 4가 마케팅 서비스(퍼포먼스 마케팅 포함) 판매에 고객사 요청형 인바운드와 아웃바운드 영업이 있다고 서술"}
+{"lid": "3cbe495efd", "label": "supported", "passage": 4, "reason": "문단 4가 퍼포먼스마케팅·미디어렙 서비스를 주요 매출 사업이라고 서술"}
+{"lid": "3e18ad2d3b", "label": "contradicted", "passage": 1, "reason": "문단 1은 미디어렙이 분석·실행·리포트하는 데이터중심 업무를 수행한다고 해 부정 주장과 반대"}
+{"lid": "4e1f21f590", "label": "supported", "passage": 1, "reason": "문단 1이 매체 특성과 광고기술로 어떤 매체·시점·소재가 효과적인지 분석·실행·리포트하는 데이터중심 업무를 한다고 명시"}
+{"lid": "6dd2599694", "label": "no_evidence", "passage": null, "reason": "농심·라면에 관한 문단이 없다"}
+{"lid": "b7715775f9", "label": "supported", "passage": 4, "reason": "문단 4가 마케팅 서비스로 퍼포먼스 마케팅과 미디어렙을 제공한다고 서술"}
+{"lid": "2818ce3906", "label": "supported", "passage": 2, "reason": "문단 2가 미디어렙 경쟁사 나스미디어·인크로스 등이 당사 모바일 미디어 플랫폼 모비커넥트를 매체로 구매해 사용한다고 명시"}
+{"lid": "6a78b732a8", "label": "supported", "passage": 7, "reason": "문단 7 표에서 2025년 퍼포먼스 매출 5,466백만원, 비중 12.32%"}
+{"lid": "14db64c68b", "label": "no_evidence", "passage": null, "reason": "어느 문단도 2025년 최대 비중 사업부문을 명시하지 않으며 퍼포먼스 비중 12.32%만 제시"}
+{"lid": "8b39e2525c", "label": "supported", "passage": 7, "reason": "문단 7 표에서 퍼포먼스 매출 5,466백만원, 비중 12.32%"}
+{"lid": "b597ba7c0f", "label": "contradicted", "passage": 7, "reason": "문단 7은 2025년 퍼포먼스 비중을 12.32%로 제시해 17.46%와 다르다"}
+{"lid": "2ccf117ebe", "label": "no_evidence", "passage": null, "reason": "문단 6에 IP커머스 상품 매입 행이 있으나 모든 연도 값이 '-'이고 원재료 대신 매입한다는 서술은 없다"}
+{"lid": "508926dcef", "label": "contradicted", "passage": 6, "reason": "문단 6 표에서 2025년 매입 총합계는 369,177백만원"}
+{"lid": "a3c274500a", "label": "no_evidence", "passage": null, "reason": "문단 6 표는 2023~2025년만 제시하고 2019년 매입액은 없다"}
+{"lid": "9e57bbd2bd", "label": "supported", "passage": 6, "reason": "문단 6 표에서 2025년 매입 합계 369,177백만원"}
+{"lid": "04b398a604", "label": "supported", "passage": 8, "reason": "문단 8 표에서 부채비율 전기말 151%, 당기말 157%"}
+{"lid": "3e27d8c911", "label": "no_evidence", "passage": null, "reason": "펄어비스에 관한 문단이 없다(문단 8은 당사=모비데이즈의 부채비율)"}
+{"lid": "84384c42d4", "label": "no_evidence", "passage": null, "reason": "157%는 문단 8에 있으나 6% 증가는 문단에 없는 계산값"}
+{"lid": "537c9f856c", "label": "contradicted", "passage": 4, "reason": "문단 4 표에서 2025년 판관비(경상연구개발비) 373백만원으로 부정 주장과 반대"}
+{"lid": "92321929cb", "label": "supported", "passage": 4, "reason": "문단 4 표에서 2025년 연구개발비 매출액 대비 비율 0.84%"}
+{"lid": "3634d9c783", "label": "supported", "passage": 4, "reason": "문단 4 표에서 2025년 연구개발비용 합계 373백만원"}
+{"lid": "b3f94dd1e0", "label": "supported", "passage": 4, "reason": "문단 4 표에서 2025년 판관비(경상연구개발비) 373백만원"}

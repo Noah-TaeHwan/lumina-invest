@@ -1,0 +1,30 @@
+{"lid": "99f968132e", "label": "supported", "passage": 7, "reason": "문단 7에 같은 문장이 그대로 있다"}
+{"lid": "509c6a0337", "label": "no_evidence", "passage": null, "reason": "문단 1은 '전기와 동일'이라고만 하고 2017년이라는 연도는 어디에도 없다"}
+{"lid": "f8271e9cf9", "label": "no_evidence", "passage": null, "reason": "렌탈업 정의는 문단 4에 있지만 유통업이 매트리스 판매 사업이라는 내용은 없다(문단 5의 유통업은 슈퍼마켓 산업)"}
+{"lid": "0cf22367d2", "label": "no_evidence", "passage": null, "reason": "주요 사업이 유통업과 렌탈업 두 가지로 구성된다고 밝힌 문단이 없다"}
+{"lid": "1e3a639fdf", "label": "supported", "passage": 1, "reason": "문단 1: 전반적인 금융위험 관리 전략은 전기와 동일하다"}
+{"lid": "7c989ec823", "label": "no_evidence", "passage": null, "reason": "문단 7은 소비자 약 50% 이상이 렌탈 경험이 있다고만 하고, 렌탈업이 그들을 대상으로 한다는 내용은 없다"}
+{"lid": "26b6878e78", "label": "supported", "passage": 2, "reason": "문단 2에 같은 문장이 그대로 있다"}
+{"lid": "d8276e1b62", "label": "supported", "passage": 2, "reason": "문단 2: 목표시장은 일반기업, 공공기업, 공기관, 병원 등 다양한 고객이다"}
+{"lid": "88b6f01ca2", "label": "no_evidence", "passage": null, "reason": "문단 1은 성공적으로 안착하기 위해 노력했다고만 하고, 안착했다는 내용은 없다"}
+{"lid": "030cf71e8f", "label": "supported", "passage": 1, "reason": "문단 1: 공급하는 폼매트리스는 독일에서 직수입한 완제품이다"}
+{"lid": "58531f0736", "label": "supported", "passage": 1, "reason": "문단 1: 렌탈 시장에서 당사가 공급하는 제품은 매트리스다"}
+{"lid": "eba3c24b5a", "label": "contradicted", "passage": 1, "reason": "문단 1에서 독일 직수입 완제품은 정수기가 아니라 매트리스다"}
+{"lid": "ce95b90d34", "label": "supported", "passage": 5, "reason": "문단 5에 렌탈 시장 성장과 그 요인이 같은 내용으로 있다"}
+{"lid": "b74571aca5", "label": "contradicted", "passage": 2, "reason": "문단 2: 관광숙박업 경기변동에 간접적으로 영향을 받는다"}
+{"lid": "56da6fccc1", "label": "non_claim", "passage": null, "reason": "문장이 중간에 끊겨 사실 주장이 성립하지 않는다"}
+{"lid": "a6fe3b914b", "label": "no_evidence", "passage": null, "reason": "문단 4에는 '도소매업(B2C유통업) (1) 리조트영업 및 외부시장 개척'이라는 제목만 있고 성장한다는 내용은 없다"}
+{"lid": "251d56c29a", "label": "supported", "passage": 4, "reason": "문단 4: 목표시장은 법적 제약이 없는 모든 산업이고, 업종별로 제조업·유통업·서비스업 등 다양한 고객을 대상으로 한다"}
+{"lid": "f405d20d5d", "label": "supported", "passage": 2, "reason": "문단 2: 관광숙박업 경기변동에 간접적으로 영향을 받는다"}
+{"lid": "63b8b938ed", "label": "supported", "passage": 3, "reason": "문단 3에 2021년 3조, 2022년 5.9조, 2023년 7.4조, 약 2.5배 성장이 그대로 있다"}
+{"lid": "687857a2af", "label": "supported", "passage": 4, "reason": "문단 4: 매입 품목이 다양하고 특정제품이 없어 가격 변동 추이를 기재하지 않았다"}
+{"lid": "790130bd92", "label": "supported", "passage": 4, "reason": "문단 4: 원재료 가격 변동 추이를 기재하지 않았다"}
+{"lid": "8ba77b7a92", "label": "no_evidence", "passage": null, "reason": "포스코홀딩스나 철광석에 관한 문단이 없다"}
+{"lid": "0bf0ce2cdd", "label": "supported", "passage": 4, "reason": "문단 4에 같은 이유가 그대로 있다"}
+{"lid": "0b1528b292", "label": "non_claim", "passage": null, "reason": "표를 소개하는 도입 문장이라 사실 주장이 없다"}
+{"lid": "f930c18925", "label": "no_evidence", "passage": null, "reason": "문단 1에는 표 머리글만 있고 10% 변동 영향 금액은 없다"}
+{"lid": "d948d013ee", "label": "supported", "passage": 1, "reason": "문단 1: 당기말 USD 현금성자산의 원화금액은 3,120,546천원이다"}
+{"lid": "1cc7437bf8", "label": "contradicted", "passage": 1, "reason": "문단 1의 당기말 원화금액은 3,480,546천원이 아니라 3,120,546천원이다"}
+{"lid": "ec213e1428", "label": "contradicted", "passage": 8, "reason": "문단 8에서 7.4조 원은 2019년이 아니라 2023년 매출이다"}
+{"lid": "8753537400", "label": "supported", "passage": 8, "reason": "문단 8: 2023년 국내 관광숙박업 매출은 7.4조 원이다"}
+{"lid": "a09625dae8", "label": "no_evidence", "passage": null, "reason": "주요 계약 여부를 다룬 문단이 없다"}

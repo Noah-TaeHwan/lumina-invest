@@ -1,0 +1,32 @@
+{"lid": "f3f571b77f", "label": "supported", "passage": 4, "reason": "문단 4가 2025년 하반기 화장품 제조(OEM) 사업 진출을 명시"}
+{"lid": "9cbf3996f4", "label": "supported", "passage": 1, "reason": "문단 1에 남녀 피부관리 관심 증가로 화장품 시장이 성장한다는 문장이 그대로 있음"}
+{"lid": "9c779dde63", "label": "no_evidence", "passage": null, "reason": "문단 1은 산업 규모를 서술할 뿐 그것이 OEM 사업 추진 이유라고 말하지 않음"}
+{"lid": "af9683fff0", "label": "no_evidence", "passage": null, "reason": "문단 4의 '외형 및 수익성 모색' 목적은 2020~2022년 하이드로콜로이드 투자에 대한 것이며 OEM 사업 목적·시장 동향 파악은 어느 문단에도 없음"}
+{"lid": "dcf6d2e6ee", "label": "non_claim", "passage": null, "reason": "뒤 내용을 소개하는 도입 문장"}
+{"lid": "84827115ef", "label": "contradicted", "passage": 6, "reason": "문단 6은 Semi Gel(제24류) 중국 등록일을 2020.03.07로 기재"}
+{"lid": "b4f633bcf3", "label": "supported", "passage": 1, "reason": "문단 1에 하이드로겔·바이오셀룰로스 단점과 Semi Gel의 무첨가 내용이 그대로 있음"}
+{"lid": "49db9408ef", "label": "supported", "passage": 1, "reason": "문단 1에 CMC 응용 기술, 생분해·화학물질 잔류 없음이 그대로 있음"}
+{"lid": "889858f095", "label": "supported", "passage": 1, "reason": "문단 1이 하이드로겔의 Gel 형태와 바이오셀룰로스의 흡수력을 특징으로 명시"}
+{"lid": "cfdbcee6fb", "label": "supported", "passage": 6, "reason": "문단 6에 Semi Gel(제24류) 2020.03.07 중국 등록"}
+{"lid": "8222f9f52e", "label": "supported", "passage": 8, "reason": "문단 8에 화장품제조판매 2025년 내수 12,103,087,719원(약 121억)"}
+{"lid": "1472687b92", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에는 화장품제조판매·기타류만 있어 전체 제품군 중 최대인지 확인 불가"}
+{"lid": "c9fabc4f26", "label": "no_evidence", "passage": null, "reason": "24% 비중은 문단 8과 6을 합친 계산값으로 문단에 직접 없음"}
+{"lid": "5192220305", "label": "no_evidence", "passage": null, "reason": "네일케어 부문은 어느 문단에도 언급되지 않음"}
+{"lid": "53b7adbc31", "label": "supported", "passage": 3, "reason": "문단 3이 하이드로콜로이드 화장품용 패치 제품군을 현재 생산·판매 중이라고 명시"}
+{"lid": "2497dd39ff", "label": "contradicted", "passage": 3, "reason": "문단 3은 하이드로콜로이드 패치를 현재 생산·판매 중이라고 함"}
+{"lid": "5c3eccf121", "label": "non_claim", "passage": null, "reason": "제공 문단에서 정보를 찾을 수 없다는 면책 문장"}
+{"lid": "1e15ce95e4", "label": "supported", "passage": 8, "reason": "문단 8이 매출채권에 대해 기대신용손실을 대손충당금으로 인식한다고 명시"}
+{"lid": "3ed8045efe", "label": "no_evidence", "passage": null, "reason": "농심에 관한 내용은 문단에 없음"}
+{"lid": "b7652e10f7", "label": "supported", "passage": 4, "reason": "문단 4에 마도공장 가동가능 2,196시간, 실제 2,259시간, 평균가동율 103%"}
+{"lid": "5203d2f134", "label": "no_evidence", "passage": null, "reason": "매출채권의 통화 구성은 어느 문단에도 없음"}
+{"lid": "75334235cb", "label": "no_evidence", "passage": null, "reason": "환율 10% 상승 시 손익 10% 감소라는 민감도는 문단에 없음"}
+{"lid": "0cd3f5aa3c", "label": "no_evidence", "passage": null, "reason": "손익이 매출채권·대손충당금 가치로 결정된다는 내용은 문단에 없음"}
+{"lid": "51e26d58c1", "label": "no_evidence", "passage": null, "reason": "대손충당금 환율 민감도는 문단에 없음"}
+{"lid": "c7c81073f0", "label": "no_evidence", "passage": null, "reason": "환율 상승이 베트남 동화 환율 상승을 뜻한다는 서술은 문단에 없음"}
+{"lid": "77fa354093", "label": "non_claim", "passage": null, "reason": "답변 절차를 안내하는 문장"}
+{"lid": "a6be702a22", "label": "no_evidence", "passage": null, "reason": "매출채권 가치의 환율 민감도는 문단에 없음"}
+{"lid": "cac3cccd66", "label": "non_claim", "passage": null, "reason": "문헌에 명시되지 않았다는 면책 문장"}
+{"lid": "9fc0ea874f", "label": "supported", "passage": 7, "reason": "문단 7에 기술이전 대가 정액 기술료 부가세포함 3,300만원"}
+{"lid": "b3fe63001c", "label": "contradicted", "passage": 7, "reason": "문단 7은 정액 기술료를 3,300만원으로 기재(4,700만원 아님)"}
+{"lid": "24e753a640", "label": "no_evidence", "passage": null, "reason": "문단 3은 셀룰로스 분자 제어 기술 적용만 말하고 한국생산기술연구원이 개발했다거나 기술이전 형태라고 하지 않음"}
+{"lid": "5d9e37804d", "label": "non_claim", "passage": null, "reason": "뒤 내용을 소개하는 도입 문장"}

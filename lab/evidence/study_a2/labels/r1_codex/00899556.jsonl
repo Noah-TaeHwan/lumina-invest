@@ -1,0 +1,38 @@
+{"lid": "1e5f57a543", "label": "supported", "passage": 1, "reason": "문단 1이 본사 서울시 광진구, 공장 충북 옥천, 기술연구소 대전광역시 유성구를 모두 명시한다."}
+{"lid": "f8e2d13107", "label": "supported", "passage": 1, "reason": "문단 1이 기술연구소의 소재지를 대전광역시 유성구로 명시한다."}
+{"lid": "a8ebd39535", "label": "supported", "passage": 1, "reason": "문단 1이 사업부문을 금속제품과 합성수지제품으로 구분했다고 명시한다."}
+{"lid": "a9d4da6376", "label": "contradicted", "passage": 1, "reason": "문단 1은 기술연구소가 대전광역시 유성구에 소재한다고 명시하므로 부정 주장과 반대다."}
+{"lid": "aca2d7b802", "label": "supported", "passage": 1, "reason": "문단 1의 사업부문 표가 합성수지제품의 주요 용도를 가공 및 지중배전 수지제품으로 명시한다."}
+{"lid": "0f2ea3a28f", "label": "non_claim", "passage": null, "reason": "사업부문별 용도 목록을 소개하는 안내 문장이다."}
+{"lid": "e903910fa7", "label": "non_claim", "passage": null, "reason": "주요 제품군 목록을 소개하는 안내 문장이다."}
+{"lid": "663c925848", "label": "supported", "passage": 1, "reason": "문단 1의 사업부문 표가 금속제품의 용도를 송ㆍ배전, 통신 및 철도전차선 금구류로 명시한다."}
+{"lid": "1a15ed4836", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 농심의 제품이나 제조ㆍ판매 사업에 대한 정보가 없다."}
+{"lid": "419d8eb5a7", "label": "supported", "passage": 1, "reason": "문단 1의 사업부문 표가 합성수지제품의 주요 용도를 가공 및 지중배전 수지제품으로 명시한다."}
+{"lid": "c4ccbffa8e", "label": "supported", "passage": 1, "reason": "문단 1의 사업부문 표가 금속제품의 용도를 송ㆍ배전, 통신 및 철도전차선 금구류로 명시한다."}
+{"lid": "d8fa7586c4", "label": "supported", "passage": 1, "reason": "문단 1이 금속제품 부문의 주요 용도를 송ㆍ배전, 통신 및 철도전차선 금구류로 명시한다."}
+{"lid": "af7202cced", "label": "supported", "passage": 2, "reason": "문단 2가 제품매출의 대부분을 주문에 의한 다품종 소량생산 방식으로 생산한다고 명시한다."}
+{"lid": "639b9fe433", "label": "supported", "passage": 2, "reason": "문단 2의 사업부문 표가 합성수지제품의 비율을 16.7%로 명시한다."}
+{"lid": "6e6a8507a5", "label": "supported", "passage": 2, "reason": "문단 2의 사업부문 표가 금속제품의 비율을 83.3%로 명시한다."}
+{"lid": "e4c26d71e4", "label": "contradicted", "passage": 2, "reason": "문단 2가 금속제품 부문의 비율을 83.3%로 명시하여 79.4%와 다르다."}
+{"lid": "18a8c7a389", "label": "non_claim", "passage": null, "reason": "판매경로별 매출 비중 목록을 소개하는 안내 문장이다."}
+{"lid": "f28bbdc8dd", "label": "non_claim", "passage": null, "reason": "사업부문별 매출 비중 목록을 소개하는 안내 문장이다."}
+{"lid": "b058cfb323", "label": "supported", "passage": 2, "reason": "문단 2의 사업부문 표가 금속제품의 비율을 83.3%로 명시한다."}
+{"lid": "6e76eaf95f", "label": "no_evidence", "passage": null, "reason": "문단 6의 322,767,195원은 제15기 연구개발 원재료비이며, 이 질문의 문단에는 총매출액이 없다."}
+{"lid": "384cde1417", "label": "non_claim", "passage": null, "reason": "원재료 가격 추이 정보가 자료에 없다는 응답의 한계 안내다."}
+{"lid": "cb708eb174", "label": "supported", "passage": 8, "reason": "문단 8이 제11차 전력수급기본계획의 기간을 2024~2038년, 전력소비량 증가 전망을 연평균 2.0%로 명시한다."}
+{"lid": "a30c3ea8ec", "label": "supported", "passage": 6, "reason": "문단 6의 가동률 표가 청산공장 금속제품의 평균가동률을 148.1%로 명시한다."}
+{"lid": "375f9f33bb", "label": "non_claim", "passage": null, "reason": "공장별 가동률 목록을 소개하는 안내 문장이다."}
+{"lid": "d8739d9907", "label": "supported", "passage": 6, "reason": "문단 6의 가동률 표가 청산공장 합성수지의 평균가동률을 15.3%로 명시한다."}
+{"lid": "7c83a8c58a", "label": "contradicted", "passage": 8, "reason": "문단 8이 제11차 전력수급기본계획의 기간을 2024~2038년으로 명시하여 2019~2033년과 다르다."}
+{"lid": "74bfd59a85", "label": "no_evidence", "passage": null, "reason": "제시된 문단의 파생거래 공시는 제룡산업에 관한 것으로, 대원전선의 거래 여부는 제시되지 않는다."}
+{"lid": "363f611615", "label": "supported", "passage": 3, "reason": "문단 3이 파생거래 및 풋백옵션 등 거래 현황에 해당사항이 없다고 명시한다."}
+{"lid": "20e41b3a5c", "label": "supported", "passage": 3, "reason": "문단 3이 소규모기업에 해당하여 위험관리 기재를 생략한다고 명시한다."}
+{"lid": "b7defb43a5", "label": "supported", "passage": 3, "reason": "문단 3이 파생거래 및 풋백옵션 등 거래 현황을 해당사항 없음으로 공시한다."}
+{"lid": "79251e5ec4", "label": "supported", "passage": 1, "reason": "문단 1이 회사의 지속적인 성장발전을 위해 제품 연구개발에 주력한다고 명시한다."}
+{"lid": "300b124987", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에는 2022년 연구개발비 1,142억 원이나 매출액 대비 4.3%라는 수치가 없다."}
+{"lid": "37f49dc3f5", "label": "supported", "passage": 8, "reason": "문단 8이 송배전 금구류 제품에 대한 고객의 니즈를 반영하여 고부가가치 신제품 개발에 몰두한다고 명시한다."}
+{"lid": "668b6e0eed", "label": "contradicted", "passage": 1, "reason": "문단 1은 지속적인 성장발전을 위해 제품 연구개발에 주력한다고 명시하므로 부정 주장과 반대다."}
+{"lid": "29f174b5c8", "label": "no_evidence", "passage": null, "reason": "연구개발 집중은 명시되지만, 안정적인 시장 수요를 반영한 연구개발이라는 관계는 어느 한 문단에도 명시되지 않는다."}
+{"lid": "475271c5cc", "label": "no_evidence", "passage": null, "reason": "문단 8은 안정적인 시장 수요와 고객 니즈를 반영한 개발을 설명하지만 안정적인 수요를 반영한 개발이라고 명시하지 않는다."}
+{"lid": "b06b36b17c", "label": "supported", "passage": 8, "reason": "문단 8이 합성수지류 제품에 대한 고객의 니즈를 반영한 고부가가치 신제품 개발을 명시한다."}
+{"lid": "895292e25f", "label": "non_claim", "passage": null, "reason": "주요 연구개발 실적 목록을 소개하는 안내 문장이다."}
