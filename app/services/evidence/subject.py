@@ -125,6 +125,14 @@ def _name(tok: str) -> str:
     return t
 
 
+_PARTICLES = re.compile(rf"(?:{lexical._TAIL_RE}|이고|이자|이라는|인)*")
+
+
+def _only_particles(text: str) -> bool:
+    """조사·서술격 어미만으로 된 꼬리인가('이며', '는', '와의'). 빈 문자열도 참."""
+    return _PARTICLES.fullmatch(text) is not None
+
+
 def _is_caps(name: str) -> bool:
     """(b) 라틴 대문자 약칭(대문자 2자 이상)."""
     return bool(_CAPS.fullmatch(name)) and sum(c.isupper() for c in name) >= 2
@@ -196,8 +204,12 @@ def _candidates(claim: str, names: CompanyNames) -> list[tuple[tuple[str, ...], 
         if i in used:
             continue
         nm = plain[i]
-        if "㈜" in t:  # (a) 법인 표지: 붙은 토큰이면 그 이름. 표지만 있으면 앞에 둔 표지('주식회사 X')는 뒤 토큰,
-            # 조사가 붙은 표지('X 주식회사와')는 앞 토큰
+        if "㈜" in t:  # (a) 법인 표지. 표지 앞 이름(X㈜는)이 있으면 그것, 없으면 표지 뒤 이름(㈜X와).
+            # 표지 뒤가 조사·어미뿐이면(주식회사이며·㈜는) 이름이 아니다: 표지만 있는 토큰으로 보고, 앞에 둔 표지('주식회사 X')는
+            # 뒤 토큰, 조사·어미가 붙은 표지('X 주식회사이며')는 앞 토큰의 이름을 잡는다
+            before, _, after = t.partition("㈜")
+            before, after = _name(before), lexical._EDGE.sub("", after)
+            nm = before if len(before) >= 2 else ("" if _only_particles(after) else _name(after))
             j = i + 1 if t == "㈜" else i - 1
             if len(nm) >= 2:
                 out.append(((nm,), False))

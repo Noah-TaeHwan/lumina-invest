@@ -258,3 +258,23 @@ def test_high_ok_requires_subject_on_best_passage():
     assert not sj.subject_high_ok(False, 1, [True, True])
     assert not sj.subject_high_ok(True, None, [True])
     assert not sj.subject_high_ok(True, 0, [])  # 주체 확인 결과가 없으면 상단 구간이 아니다(IndexError 아님)
+
+
+@pytest.mark.parametrize("claim", [
+    "계약의 상대방은 삼성생명보험 주식회사이며, 계약 금액은 645,060,000,000원입니다.",  # A-2 조정 세트 01765265-q6-n1
+    "계약 상대방은 삼성생명보험 주식회사입니다.",
+    "계약 상대방은 삼성생명보험 (주)와 같다.",
+    "계약 상대방은 삼성생명보험㈜는 아니다.",
+    "계약 상대방은 삼성생명보험(주)와 같다.",
+    "계약 상대방은 주식회사 삼성생명보험이다.",
+    "계약 상대방은 ㈜삼성생명보험과 같다.",
+])
+def test_corp_mark_keeps_name_and_drops_trailing_endings(claim):
+    """(a) 법인 표지 뒤에 붙은 조사·어미('이며'·'는'·'와')는 이름이 아니다. 표지 앞(또는 앞에 둔 표지면 뒤)의 이름을 잡는다."""
+    assert groups(claim, names=sj.EMPTY_NAMES) == [{"삼성생명보험"}]
+
+
+def test_sector_acronym_is_known_limit():
+    """(b) 대문자 약칭은 회사명이 아닌 분야 약칭(SOC)도 후보가 된다. 예외 목록은 만들지 않는다(조정 세트 과적합 방지)."""
+    assert groups("토목 부문은 SOC 관련 공사들을 주로 수행하고 있습니다.", "진흥기업") == [
+        {"토목", "토목부문", "토목사업부문", "토목사업부", "토목사업본부", "토목본부", "토목사업"}, {"SOC"}]
