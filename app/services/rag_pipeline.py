@@ -34,6 +34,7 @@ CONTENT_KEY = QdrantVectorStore.CONTENT_KEY
 METADATA_KEY = QdrantVectorStore.METADATA_KEY
 # 업로드 문서 소유자(users.id). 업로드 점에만 있고 크롤링 점(공용)에는 없다. 검색은 공용 + 요청자 본인 것만 본다.
 OWNER_KEY = "owner_user_id"
+UPSERT_BATCH = 64  # 큰 문서도 요청 하나가 너무 커지지 않게 나눠 올린다
 
 
 # ── 내부 팩토리 ───────────────────────────────────────────────────────────────
@@ -175,7 +176,19 @@ async def store_chunks(
                                  **({OWNER_KEY: str(owner_user_id)} if owner_user_id else {})})
             for chunk, v in zip(chunks, vectors)
         ]
-        await client.upsert(collection_name=coll, points=points)
+        written: list[str] = []
+        try:
+            for i in range(0, len(points), UPSERT_BATCH):
+                batch = points[i:i + UPSERT_BATCH]
+                await client.upsert(collection_name=coll, points=batch)
+                written += [p.id for p in batch]
+        except Exception:
+            if written:  # 앞서 올린 배치를 지운다(문서 행 없는 점이 남지 않게). 실패해도 원래 예외를 올린다
+                try:
+                    await client.delete(collection_name=coll, points_selector=written)
+                except Exception:
+                    pass
+            raise
         return len(points)
     except Exception as exc:
         _fail("rag_store_failed", coll, exc)

@@ -139,3 +139,34 @@ def test_delete_by_source_removes_stored_chunks(qdrant):
         return sorted(p.payload["page_content"] for p in res[0])
 
     assert run(go()) == ["d1"]
+
+
+def test_store_chunks_upserts_in_batches_of_64(qdrant, monkeypatch):
+    sizes = []
+    real = qdrant.upsert
+
+    async def spy(*a, points, **k):
+        sizes.append(len(points))
+        return await real(*a, points=points, **k)
+
+    monkeypatch.setattr(qdrant, "upsert", spy)
+    n = run(rp.store_chunks([f"c{i}" for i in range(130)], {"source": "s"}, collection=COLL))
+    assert n == 130
+    assert sizes == [64, 64, 2]
+    assert run(qdrant.count(COLL)).count == 130
+
+
+def test_store_chunks_removes_partial_batches_on_failure(qdrant, monkeypatch):
+    """중간 배치가 실패하면 앞서 올린 배치를 지운다(문서 행 없는 점이 본인 채팅 검색에 남지 않게)."""
+    real, calls = qdrant.upsert, []
+
+    async def flaky(*a, points, **k):
+        calls.append(len(points))
+        if len(calls) == 2:
+            raise ConnectionError("qdrant down")
+        return await real(*a, points=points, **k)
+
+    monkeypatch.setattr(qdrant, "upsert", flaky)
+    with pytest.raises(ConnectionError):
+        run(rp.store_chunks([f"c{i}" for i in range(130)], {"source": "s"}, collection=COLL, owner_user_id="u1"))
+    assert run(qdrant.count(COLL)).count == 0
