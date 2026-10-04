@@ -197,6 +197,7 @@ export function initJournal() {
     const { status, data } = await call("/api/journal?limit=1");
     const result = status === 200 && isListShape(data) ? "on" : status === 404 ? "off" : "error";
     jr.enabled = result === "on";
+    document.body.dataset.jrProbe = result;  // 마지막 확인 결과(화면 상태 확인용)
     document.body.classList.toggle("jr-on", jr.enabled);
     if (jr.enabled) {
       setDue(data.due_count);

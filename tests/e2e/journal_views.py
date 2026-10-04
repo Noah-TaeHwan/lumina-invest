@@ -4,6 +4,7 @@ evidence_views.py와 같은 방식이다. 앱 서버·DB·Redis·Ollama·JEV 없
 가짜 응답을 준다. 외부 CDN 요청은 끊고, 일지 화면을 다루는 동안 밖으로 나가는 요청이 없는지도 센다.
 변화 칸(GET /api/journal/{id}/changes)은 P2가 병행 구현 중이라 아래 CHANGES_* 모양(가정한 계약)으로 가짜 응답을 준다.
 pytest 수집 대상이 아니다(파일명이 test_* 가 아님).
+느린 환경을 흉내 내려면 JV_API_DELAY_MS=300 처럼 /api 응답 지연을 준다.
     pip install playwright        # 브라우저가 없으면 playwright install chromium
     python tests/e2e/journal_views.py
 종료 코드 0 = 모든 확인 통과, 1 = 실패 있음.
@@ -22,6 +23,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import evidence_views as ev  # noqa: E402  같은 폴더의 가짜 판정 응답·정적 서버를 그대로 쓴다
 
 WAIT_MS = 10_000  # 상태 기반 대기의 상한(evidence_views.py와 같다)
+# 느린 환경 흉내: 모든 /api 응답을 이만큼 늦춘다(예: JV_API_DELAY_MS=300). 대기가 고정 시간에 기대는지 드러낸다
+API_DELAY_S = int(os.environ.get("JV_API_DELAY_MS", "0")) / 1000
 KST = datetime.timezone(datetime.timedelta(hours=9))
 
 # spec 결정 4-2 고정 고지(app/routes/journal.py NOTICE와 같은 글자)
@@ -203,8 +206,27 @@ class JournalApi(ev.FakeApi):
         return [(m, p, b) for m, p, b in self.calls if p.startswith("/api/journal") and (method is None or m == method)]
 
 
+# 시나리오가 예외로 끝나도 열린 컨텍스트(라우트 핸들러·폴링)가 다음 시나리오로 새지 않게 main()에서 닫는다
+OPEN_CONTEXTS: list = []
+
+
+async def new_context(browser, **kw):
+    ctx = await browser.new_context(**kw)
+    OPEN_CONTEXTS.append(ctx)
+    return ctx
+
+
+async def close_leftovers():
+    while OPEN_CONTEXTS:
+        ctx = OPEN_CONTEXTS.pop()
+        try:
+            await ctx.close()
+        except Exception:  # noqa: BLE001 — 이미 닫혔다
+            pass
+
+
 async def open_app(browser, base, fake: JournalApi, *, hash_="agent-chat", width=1280, height=900):
-    ctx = await browser.new_context(viewport={"width": width, "height": height}, accept_downloads=True)
+    ctx = await new_context(browser, viewport={"width": width, "height": height}, accept_downloads=True)
     ctx.set_default_timeout(WAIT_MS)
     page = await ctx.new_page()
     page.errors = []
@@ -231,6 +253,8 @@ async def open_app(browser, base, fake: JournalApi, *, hash_="agent-chat", width
             await asyncio.sleep(fake.create_delay_s)
         if path == "/api/evidence/chat" and fake.chat_delay_s:
             await asyncio.sleep(fake.chat_delay_s)
+        if API_DELAY_S:
+            await asyncio.sleep(API_DELAY_S)
         status, payload = fake.respond(route.request.method, path, query, body)
         headers = {}
         if path == "/api/journal/export" and status == 200:
@@ -240,18 +264,45 @@ async def open_app(browser, base, fake: JournalApi, *, hash_="agent-chat", width
 
     await page.route("**/*", handle)
     await page.goto(f"{base}/app.html#{hash_}")
-    await page.wait_for_timeout(600)
+    # 고정 시간 대신 상태로 기다린다: 일지 기능 확인(GET /api/journal)이 끝나 body에 결과가 붙을 때까지
+    await page.wait_for_function("!!document.body?.dataset.jrProbe")
     return ctx, page
+
+
+async def turn_on(page):
+    """근거 모드 켜기(상태 기반). evidence_views.turn_on은 고정 대기라 느린 환경에서 깨진다."""
+    await page.wait_for_selector("#ev-bar:not(.hidden)")
+    await page.click("#ev-mode")
+    await page.wait_for_function("document.getElementById('ev-mode')?.checked || document.getElementById('ev-notice')?.open")
+    if await page.is_visible("#ev-notice"):
+        await page.click("#ev-notice-ok")
+    await page.wait_for_function("document.getElementById('ev-mode')?.checked === true"
+                                 " && !document.getElementById('ev-company-wrap')?.classList.contains('hidden')")
+
+
+async def pick_company(page, text="삼성", name="삼성전자"):
+    """회사 고르기(상태 기반): 거른 후보 목록이 뜰 때까지 기다린 뒤 고른다."""
+    await page.fill("#ev-company", text)
+    await page.wait_for_function(
+        "(n) => { const li = [...document.querySelectorAll('#ev-company-list li[data-i]')];"
+        " return li.length > 0 && li.every(e => e.textContent.includes(n)); }", arg=name)
+    await page.locator("#ev-company-list li[data-i]").first.click()
+    await page.wait_for_function("(n) => document.getElementById('ev-company')?.value === n", arg=name)
 
 
 async def done_answer(page, fake, run_status="done", **run_kw):
     """근거 모드로 질문해 끝난 판정 답변을 하나 그린다."""
     fake.chat = ev.started("r1")
     fake.runs["r1"] = [ev.run("r1", run_status, ev.DONE["statuses"], ev.DONE["extra"], **run_kw)]
-    await ev.turn_on(page)
-    await ev.pick_company(page)
+    await turn_on(page)
+    await pick_company(page)
     await ev.ask(page)
     await page.wait_for_function("document.querySelector('.ev-msg .ev-summary')?.innerText.startsWith('AI 판정: ✅')")
+
+
+async def changes_done(page):
+    """변화 칸이 결과나 확인 불가를 그렸을 때까지(상태 기반). 상세가 아직 없거나 이전 상세가 남아 있어도 안전하다."""
+    await page.wait_for_selector("#jr-detail .jr-ch-report, #jr-detail .jr-unavailable")
 
 
 def no_leak(ck, page, fake, name, external_before, calls_before=0):
@@ -344,6 +395,7 @@ async def s_flag_off(browser, base, ck):
     fake = JournalApi(journal=404, acked=True)
     ctx, page = await open_app(browser, base, fake)
     ck.ok(await page.locator('.lnb-item[data-view="journal"]').count() == 1, "flag-off: 메뉴 항목은 DOM에 있다")
+    ck.ok(await page.evaluate("document.body.dataset.jrProbe") == "off", "flag-off: 기능 확인 결과 꺼짐(404)")
     ck.ok(not await page.is_visible('.lnb-item[data-view="journal"]'), "flag-off: 판단 일지 탭이 보이지 않는다")
     await done_answer(page, fake)
     ck.ok(await page.locator(".ev-msg .ev-journal, .ev-msg .ev-journal-link").count() == 0,
@@ -372,6 +424,7 @@ async def s_probe_retry(browser, base, ck):
     print("[probe-retry] 기능 확인 5xx·네트워크 오류는 꺼짐으로 굳히지 않고 다음 진입 때 다시 확인한다")
     fake = JournalApi(journal_seq=[500])
     ctx, page = await open_app(browser, base, fake)
+    ck.ok(await page.evaluate("document.body.dataset.jrProbe") == "error", "probe-retry: 첫 확인 500은 일시 오류")
     ck.ok(not await page.is_visible('.lnb-item[data-view="journal"]'), "probe-retry: 첫 확인 500이면 탭은 아직 없다")
     await page.evaluate("location.hash = 'journal'")
     await page.wait_for_selector("#jr-list .jr-row")
@@ -383,7 +436,7 @@ async def s_probe_retry(browser, base, ck):
 
     # 네트워크 오류: 첫 GET /api/journal을 끊는다
     srv_fake = JournalApi()
-    ctx2 = await browser.new_context(viewport={"width": 1280, "height": 900})
+    ctx2 = await new_context(browser, viewport={"width": 1280, "height": 900})
     ctx2.set_default_timeout(WAIT_MS)
     page = await ctx2.new_page()
     page.errors = []
@@ -428,7 +481,7 @@ async def s_probe_retry(browser, base, ck):
     fake = JournalApi(notice_status=500, changes={"e1": (200, CHANGES_SAME)})
     ctx, page = await open_app(browser, base, fake, hash_="journal")
     await page.click('#jr-list .jr-row[data-id="e1"]')
-    await page.wait_for_function("!document.querySelector('#jr-detail .jr-col-changes').innerText.includes('확인하는 중')")
+    await changes_done(page)
     ck.ok(await page.locator("#jr-detail .jr-reask").count() == 0, "evidence-retry: 확인 실패면 다시 묻기 숨김")
     fake.notice_status = 200
     await page.click("#jr-back")
@@ -444,9 +497,10 @@ async def s_button(browser, base, ck):
     fake = JournalApi(acked=True, chat=ev.started("r1"),
                       runs={"r1": [ev.run("r1", "running"), ev.run("r1", "done", ev.DONE["statuses"], ev.DONE["extra"])]})
     ctx, page = await open_app(browser, base, fake)
+    await page.wait_for_selector('.lnb-item[data-view="journal"]')
     ck.ok(await page.is_visible('.lnb-item[data-view="journal"]'), "button: 판단 일지 탭이 보인다")
-    await ev.turn_on(page)
-    await ev.pick_company(page)
+    await turn_on(page)
+    await pick_company(page)
     await ev.ask(page)
     await page.wait_for_selector(".ev-msg .ev-journal")
     btn = page.locator(".ev-msg .ev-journal")
@@ -529,7 +583,7 @@ async def s_form(browser, base, ck):
     ext0, calls0 = len(page.external), len(fake.calls)
     fake.create_delay_s = 0.8
     await form.locator(".jr-save").click()
-    await page.wait_for_timeout(200)
+    await page.wait_for_function("document.querySelector('.ev-msg .jr-save')?.disabled === true")
     ck.ok(await form.locator(".jr-save").is_disabled() and await form.locator(".jr-cancel").is_disabled(),
           "form: 저장 중에는 저장·취소 모두 비활성")
     await page.wait_for_selector(".ev-msg .ev-journal-link")
@@ -629,8 +683,8 @@ async def s_form_errors(browser, base, ck):
     fake.runs["r1"] = [partial]
     fake.retry = ev.started("r9")
     fake.runs["r9"] = [ev.run("r9", "running"), ev.run("r9", "done", ev.DONE["statuses"], ev.DONE["extra"])]
-    await ev.turn_on(page)
-    await ev.pick_company(page)
+    await turn_on(page)
+    await pick_company(page)
     await ev.ask(page)
     await page.wait_for_selector(".ev-msg .ev-retry")
     await page.click(".ev-msg .ev-journal")
@@ -748,7 +802,7 @@ async def s_detail(browser, base, ck):
     ck.ok(await s.locator(".jr-source-gone").count() == 0 and await s.locator(".jr-nojudge").count() == 0,
           "detail: 정상 기록에는 띠·삭제 안내 없음")
 
-    await page.wait_for_function("!document.querySelector('#jr-detail .jr-col-changes').innerText.includes('확인하는 중')")
+    await changes_done(page)
     ct = await ch.inner_text()
     ck.ok(ct.startswith("그 뒤 바뀐 것"), "detail: 변화 칸 머리")
     ck.ok("적재된 보고서가 바뀌었습니다: 당시 20260312000123 → 현재 20260315000999" in ct, f"detail: 보고서 교체 {ct}")
@@ -767,7 +821,8 @@ async def s_detail(browser, base, ck):
     # 같은 질문 다시 묻기: 채팅 화면에 회사·질문을 채우기만 한다(보내지 않는다)
     await page.click("#jr-detail .jr-actions .jr-reask")
     await page.wait_for_function("document.querySelector('.view.active')?.dataset.view === 'agent-chat'")
-    await page.wait_for_function("document.getElementById('chat-input').value.length > 0")
+    await page.wait_for_function("(document.getElementById('chat-input')?.value ?? '').length > 0"
+                                 " && document.getElementById('ev-mode')?.checked === true")
     ck.ok(await page.input_value("#chat-input") == Q1 and await page.input_value("#ev-company") == "삼성전자"
           and await page.is_checked("#ev-mode"), "detail: 같은 회사·질문을 근거 모드에 채운다")
     await page.wait_for_timeout(300)
@@ -790,7 +845,7 @@ async def s_detail(browser, base, ck):
         ctx, page = await open_app(browser, base, fake, hash_="journal")
         await page.click('#jr-list .jr-row[data-id="e2"]')
         await page.wait_for_selector("#jr-detail:not(.hidden) .jr-col-snapshot")
-        await page.wait_for_function("!document.querySelector('#jr-detail .jr-col-changes').innerText.includes('확인하는 중')")
+        await changes_done(page)
         ct = await page.locator("#jr-detail .jr-col-changes").inner_text()
         ck.ok("지금은 공시 변화를 확인할 수 없습니다" in ct, f"detail-nojudge[{label}]: 확인 불가 문구")
         ck.ok("변화 없음" not in ct and "지금도 적재되어" not in ct and "같습니다" not in ct
@@ -819,7 +874,7 @@ async def s_revisit(browser, base, ck):
     await page.click('#jr-list .jr-row[data-id="e1"]')
     await page.wait_for_selector("#jr-detail:not(.hidden) .jr-update")
     ct = await page.locator("#jr-detail .jr-col-changes").inner_text()
-    await page.wait_for_function("!document.querySelector('#jr-detail .jr-col-changes').innerText.includes('확인하는 중')")
+    await changes_done(page)
     ct = await page.locator("#jr-detail .jr-col-changes").inner_text()
     ck.ok("적재된 보고서가 당시와 같습니다" in ct and "판정 기준은 당시와 같습니다" in ct, f"revisit: same 결과 {ct}")
     ck.ok(await page.locator("#jr-detail .jr-update button").count() == 0, "revisit: 판단 줄마다 고치기·지우기 버튼 없음")
@@ -924,7 +979,7 @@ async def s_mobile(browser, base, ck):
     await page.wait_for_selector("#jr-list .jr-row")
     await page.click('#jr-list .jr-row[data-id="e1"]')
     await page.wait_for_selector("#jr-detail:not(.hidden) .jr-col-changes")
-    await page.wait_for_function("!document.querySelector('#jr-detail .jr-col-changes').innerText.includes('확인하는 중')")
+    await changes_done(page)
     boxes = await page.evaluate("""() => ['.jr-col-judgment', '.jr-col-snapshot', '.jr-col-changes']
       .map(s => document.querySelector('#jr-detail ' + s).getBoundingClientRect()).map(r => [r.left, r.top])""")
     ck.ok(boxes[0][0] == boxes[1][0] == boxes[2][0] and boxes[0][1] < boxes[1][1] < boxes[2][1],
@@ -963,6 +1018,8 @@ async def main() -> int:
                 await scenario(browser, base, ck)
             except Exception as exc:  # noqa: BLE001 — 한 시나리오가 죽어도 나머지를 본다
                 ck.ok(False, f"{scenario.__name__}: 예외 {type(exc).__name__}: {str(exc)[:300]}")
+            finally:
+                await close_leftovers()
         await browser.close()
     srv.shutdown()
     print(f"checks passed={ck.passed} failed={len(ck.failures)}")
