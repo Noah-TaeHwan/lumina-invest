@@ -25,8 +25,11 @@ async def graph_rag_search(
             "combined_context": str,   # LLM 프롬프트용 합성 텍스트
         }
     """
-    # 1) 벡터 검색 (Qdrant)
-    vector_results = await rag_search(query, top_k=top_k, collection=collection, viewer_user_id=viewer_user_id)
+    # 1) 벡터 검색 (Qdrant). 실패하면 그래프 결과만 돌려준다(로그는 rag_pipeline이 남긴다)
+    try:
+        vector_results = await rag_search(query, top_k=top_k, collection=collection, viewer_user_id=viewer_user_id)
+    except Exception:
+        vector_results = []
 
     # 2) 쿼리 + 벡터 결과에서 종목 심볼 추출
     all_text = query + " " + " ".join(r.get("text", "") for r in vector_results)

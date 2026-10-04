@@ -25,6 +25,7 @@ from app.config import settings
 router = APIRouter(prefix="/api/documents", tags=["documents"])
 
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB
+VECTOR_STORE_ERROR = "벡터 저장소 오류"  # 예외 메시지(Qdrant URL 등)는 응답에 싣지 않는다. 로그는 rag_pipeline이 남긴다
 
 
 # ── 업로드 ────────────────────────────────────────────────────────────────────
@@ -76,7 +77,10 @@ async def upload_document(
         "uploader": user["email"],
     }
 
-    stored = await store_chunks(chunks, meta, collection=settings.DOCUMENT_COLLECTION, owner_user_id=user["id"])
+    try:
+        stored = await store_chunks(chunks, meta, collection=settings.DOCUMENT_COLLECTION, owner_user_id=user["id"])
+    except Exception:
+        raise HTTPException(503, VECTOR_STORE_ERROR)  # 0청크짜리 문서 행을 만들지 않는다
 
     doc = UploadedDoc(
         filename=file.filename,
@@ -148,7 +152,10 @@ async def delete_document(
 
     # Qdrant 벡터 삭제 (source_key로 필터링)
     if doc.source_key:
-        await delete_chunks_by_source(doc.source_key, collection=settings.DOCUMENT_COLLECTION)
+        try:
+            await delete_chunks_by_source(doc.source_key, collection=settings.DOCUMENT_COLLECTION)
+        except Exception:
+            raise HTTPException(503, VECTOR_STORE_ERROR)  # 메타를 남겨 다시 지울 수 있게 한다(고아 벡터 방지)
 
     filename = doc.filename
     await db.delete(doc)
@@ -180,11 +187,14 @@ async def search_documents(
         sources = [body.source] if body.source in sources else []
     if not sources:
         return {"ok": True, "hits": []}
-    hits = await rag_search(
-        body.query,
-        top_k=body.top_k,
-        collection=settings.DOCUMENT_COLLECTION,
-        filter_source=sources,
-        viewer_user_id=user["id"],
-    )
+    try:
+        hits = await rag_search(
+            body.query,
+            top_k=body.top_k,
+            collection=settings.DOCUMENT_COLLECTION,
+            filter_source=sources,
+            viewer_user_id=user["id"],
+        )
+    except Exception:
+        raise HTTPException(503, VECTOR_STORE_ERROR)
     return {"ok": True, "hits": hits}

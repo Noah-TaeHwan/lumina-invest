@@ -1,5 +1,7 @@
 """Neo4j 그래프 관련 API 라우터."""
 from __future__ import annotations
+import json
+import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from app.lib.jwt_auth import get_current_user_any
@@ -7,6 +9,7 @@ from app.services import graph_service
 from app.services.graph_rag import graph_rag_search, graph_rag_answer
 
 router = APIRouter(prefix="/api/graph", tags=["graph"])
+log = logging.getLogger("app.graph")
 
 
 @router.get("/related/{symbol}")
@@ -84,4 +87,6 @@ async def graph_rag(body: GraphRagRequest, user=Depends(get_current_user_any)):
         result = await graph_rag_search(body.query, top_k=body.top_k, viewer_user_id=user["id"])
         return result
     except Exception as exc:
-        raise HTTPException(503, f"GraphRAG 실패: {exc}") from exc
+        # 예외 메시지(접속 주소 등)는 응답에 싣지 않는다
+        log.error(json.dumps({"event": "graph_rag_failed", "error": type(exc).__name__}))
+        raise HTTPException(503, "GraphRAG 실패") from exc
