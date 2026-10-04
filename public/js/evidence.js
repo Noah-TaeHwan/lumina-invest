@@ -6,12 +6,21 @@ import { api, setToast, escHtml } from "/js/common.js";
 // ── 상수·문구 ─────────────────────────────────────────────────────
 // 근거 보고서는 2025.12 사업보고서뿐이다(spec 10절 범위). API에 기간 필드가 없어 화면 상수로 둔다
 export const REPORT_LABEL = "2025.12 사업보고서";
-const PROVISIONAL = new Set(["a2-provisional", "a2-provisional-2"]);  // 요약줄에 "(시험 기준)"(spec 6.4)
+// 요약줄에 "(시험 기준)"(spec 6.4). a2-v1도 정밀도 목표를 확인하지 못해(H-prec 실패) 시험 운영으로 둔다
+const TRIAL = new Set(["a2-provisional", "a2-provisional-2", "a2-v1"]);
+// 정책별 배지 툴팁 덧붙임. 사전등록 문구("보수적으로 둔")는 이번 결과(τ_s 0.85 < 조정값 0.90)와 맞지 않아
+// 사실대로 쓴다(docs/lab/evidence-a2-interpretation.md)
+const TRIAL_NOTES = { "a2-v1": "정밀도 목표를 확인하지 못한 시험 운영" };
 const ACTIVE = new Set(["pending", "running"]);
 const POLL_INTERVAL_MS = 500;
 const DEFAULT_POLL_UNTIL_S = 15;  // 서버가 상한을 주지 않을 때(spec 결정 4-1)
 
 export const BADGE_TOOLTIP = "AI 판정(JEV 모델) · 검색된 공시 문단 기준이며 사실 여부를 보증하지 않습니다";
+// 1차 필터 구간(lex_low·lex_high)은 JEV를 부르지 않은 규칙 판정이라 "JEV 모델"이라고 쓰지 않는다
+const RULE_TOOLTIPS = {
+  lex_high: "규칙 판정(문단과 거의 같은 문장, JEV 호출 없음) · 검색된 공시 문단 기준이며 사실 여부를 보증하지 않습니다",
+  lex_low: "규칙 판정(문단과 겹치는 표현이 매우 적음, JEV 호출 없음) · 검색된 공시 문단 기준이며 사실 여부를 보증하지 않습니다",
+};
 
 const BADGES = {
   pending:      { glyph: "⋯",  cls: "ev-b-pending", label: "AI 판정 중" },
@@ -113,7 +122,7 @@ export function summaryText(run) {
   const c = run.counts || {};
   const n = (run.passages || []).length;
   let t = `AI 판정: ✅ ${c.supported || 0} · ⚠️ ${c.contradicted || 0} · ❔ ${c.no_evidence || 0} — 검색된 ${REPORT_LABEL} 문단 ${n}개 기준`;
-  if (PROVISIONAL.has(run.policy_version)) t += " (시험 기준)";
+  if (TRIAL.has(run.policy_version)) t += " (시험 기준)";
   if (run.status === "partial") t += ". 일부 문장은 판정하지 못했습니다";
   if ((run.claims || []).some(cl => cl.reason === "claim_cap")) t += ". 긴 답변의 뒷부분은 판정하지 않았습니다";
   return t;
@@ -124,14 +133,26 @@ export function showRetry(run) {
   return (run.status === "failed" || run.status === "partial") && run.retryable === true;
 }
 
+/** 새 기준으로 재판정 버튼: 서버가 rejudgeable(이전 정책으로 끝난 최신 실행, spec 6.4)이라고 할 때만. */
+export function showRejudge(run) {
+  return run.rejudgeable === true;
+}
+
+/** 배지 툴팁의 판정 방식 문구: 규칙 경로면 규칙 판정, 아니면 AI 판정(JEV 모델). */
+export function judgeTooltip(claim) {
+  return Object.hasOwn(RULE_TOOLTIPS, claim?.route ?? "") ? RULE_TOOLTIPS[claim.route] : BADGE_TOOLTIP;
+}
+
 export function passageHeader(run, p) {
   return `근거 문단 · ${REPORT_LABEL}(접수번호 ${run.rcept_no || "-"}) · ${p.section || "-"} · 문단 ${p.idx ?? "-"}`;
 }
 
-function badgeTitle(kind, claim, run) {
-  const parts = [BADGES[kind].label, BADGE_TOOLTIP];
+export function badgeTitle(kind, claim, run) {
+  const parts = [BADGES[kind].label, judgeTooltip(claim)];
   const conf = confidenceText(claim);
   if (conf) parts.push(`AI 판정 확신도: ${conf}`);
+  const note = Object.hasOwn(TRIAL_NOTES, run?.policy_version ?? "") ? TRIAL_NOTES[run.policy_version] : null;
+  if (note && kind !== "pending") parts.push(note);
   return parts.join(" — ");
 }
 
@@ -154,7 +175,7 @@ function passageBlock(run, p, claimText, numberOk) {
 export function panelHtml(run, claim, kind) {
   const passages = run.passages || [];
   const src = Number.isInteger(claim.source_idx) ? passages[claim.source_idx] : null;
-  const foot = `<div class="ev-panel-foot">${escHtml(BADGE_TOOLTIP)}</div>`;
+  const foot = `<div class="ev-panel-foot">${escHtml(judgeTooltip(claim))}</div>`;
   if ((kind === "supported" || kind === "contradicted") && src) {
     const ok = Array.isArray(claim.number_ok) && claim.number_ok[claim.source_idx] === true;
     const conf = confidenceText(claim);
@@ -234,8 +255,9 @@ function renderSummary(msg, delayed = false) {
   if (delayed) {
     html = `<span class="ev-summary-text">AI 판정: 판정이 지연되고 있습니다.</span>
       <button type="button" class="ev-refresh btn-secondary text-xs">새로고침</button>`;
-  } else if (showRetry(run)) {
-    html += ` <button type="button" class="ev-retry btn-secondary text-xs">다시 판정</button>`;
+  } else {
+    if (showRetry(run)) html += ` <button type="button" class="ev-retry btn-secondary text-xs">다시 판정</button>`;
+    if (showRejudge(run)) html += ` <button type="button" class="ev-rejudge btn-secondary text-xs" title="저장된 판정 확률에 새 기준을 다시 적용합니다(외부 호출 없음)">새 기준으로 재판정</button>`;
   }
   msg.summaryEl.innerHTML = html;
 }
@@ -269,6 +291,7 @@ export function appendEvidenceMsg(container, answer, run) {
   });
   msg.summaryEl.addEventListener("click", e => {
     if (e.target.closest(".ev-retry")) retry(msg);
+    if (e.target.closest(".ev-rejudge")) rejudge(msg);
     if (e.target.closest(".ev-refresh")) refresh(msg);
   });
   setRun(msg, run);
@@ -311,6 +334,20 @@ async function retry(msg) {
     setRun(msg, { ...runFromStarted(res), passages: msg.run.passages, rcept_no: msg.run.rcept_no,
                   policy_version: msg.run.policy_version });
     startPolling(msg);
+  } catch (e) {
+    if (btn) btn.disabled = false;
+    setToast(e.message, "error");
+  }
+}
+
+/** 재판정: 서버가 저장된 확률로 바로 끝낸 실행을 돌려준다(폴링 없음). */
+async function rejudge(msg) {
+  const btn = msg.summaryEl.querySelector(".ev-rejudge");
+  if (btn) btn.disabled = true;
+  try {
+    const run = await api(`/api/evidence/runs/${encodeURIComponent(msg.run.id)}/rejudge`, { method: "POST" });
+    msg.open.clear();
+    setRun(msg, run);
   } catch (e) {
     if (btn) btn.disabled = false;
     setToast(e.message, "error");

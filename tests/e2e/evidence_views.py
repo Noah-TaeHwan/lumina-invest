@@ -74,15 +74,15 @@ DONE = {
 
 
 def run(run_id: str, status: str, statuses=None, extra=None, *, retryable=False, chat_id="h1", error_code=None,
-        poll_until_s=None, created_at=None):
+        poll_until_s=None, created_at=None, policy_version="a2-provisional", rejudgeable=False, trigger="auto"):
     cl = claims_with(statuses or PENDING, extra)
     counts = {k: 0 for k in ("supported", "contradicted", "no_evidence", "not_claim", "unjudged", "pending")}
     for c in cl:
         counts[c["status"]] += 1
     active = status in ("pending", "running")
-    return {"id": run_id, "chat_id": chat_id, "conversation_id": CID, "status": status, "trigger": "auto",
-            "error_code": error_code, "retryable": retryable, "company": "삼성전자", "corp_code": "00126380",
-            "rcept_no": "20260312000123", "passages": PASSAGES, "policy_version": "a2-provisional",
+    return {"id": run_id, "chat_id": chat_id, "conversation_id": CID, "status": status, "trigger": trigger,
+            "error_code": error_code, "retryable": retryable, "rejudgeable": rejudgeable, "company": "삼성전자",
+            "corp_code": "00126380", "rcept_no": "20260312000123", "passages": PASSAGES, "policy_version": policy_version,
             "jev_model": "jev-1.13.0", "generator_model": "llama3.1:8b", "calls": 3, "cache_hits": 0,
             "input_tokens": 1, "created_at": created_at or _now_iso(), "started_at": None, "finished_at": None,
             "counts": counts, "claims": cl, "poll_interval_ms": 500 if active else None,
@@ -103,9 +103,11 @@ class FakeApi:
     """시나리오별 가짜 API. runs[run_id]는 GET마다 하나씩 꺼내는 응답 목록(마지막은 계속 준다)."""
 
     def __init__(self, *, flag=200, acked=False, runs=None, chat=None, retry=None, active=None, conv=None,
-                 timeline=None, agent_answer="일반 에이전트 답변입니다.", notice_status=200, chat_delay_s=0.0):
+                 timeline=None, agent_answer="일반 에이전트 답변입니다.", notice_status=200, chat_delay_s=0.0,
+                 rejudge=None):
         self.flag, self.acked, self.runs = flag, acked, runs or {}
         self.chat, self.retry, self.active, self.conv, self.timeline = chat, retry, active, conv, timeline
+        self.rejudge = rejudge
         self.agent_answer = agent_answer
         self.notice_status, self.chat_delay_s = notice_status, chat_delay_s
         self.calls: list[tuple[str, str, dict | None]] = []
@@ -136,6 +138,9 @@ class FakeApi:
         m = re.fullmatch(r"/api/evidence/runs/([^/]+)/retry", path)
         if m:
             return 201, self.retry
+        m = re.fullmatch(r"/api/evidence/runs/([^/]+)/rejudge", path)
+        if m:
+            return (201, self.rejudge) if self.rejudge else (409, {"detail": "이 판정은 새 기준으로 재판정할 수 없습니다."})
         m = re.fullmatch(r"/api/evidence/runs/([^/]+)", path)
         if m:
             seq = self.runs.get(m.group(1)) or []
@@ -287,6 +292,14 @@ async def s_pure(browser, base, ck: Checks):
         s_prov2: m.summaryText({status:'done', policy_version:'a2-provisional-2', counts:{}, passages:[1]}),
         s_cap: m.summaryText({status:'done', policy_version:'a2-v1', counts:{supported:1}, passages:[1,2,3],
                               claims:[{status:'unjudged', reason:'claim_cap'}]}),
+        s_unknown: m.summaryText({status:'done', policy_version:'a9-future', counts:{}, passages:[1]}),
+        rejudge: [m.showRejudge({rejudgeable:true}), m.showRejudge({rejudgeable:false}), m.showRejudge({})],
+        tip_jev: m.badgeTitle('supported', {status:'supported', route:'jev', confidence:'보통'}, {policy_version:'a2-v1'}),
+        tip_lex: m.badgeTitle('supported', {status:'supported', route:'lex_high', confidence:null}, {policy_version:'a2-v1'}),
+        tip_prov: m.badgeTitle('supported', {status:'supported', route:'jev', confidence:'높음'}, {policy_version:'a2-provisional-2'}),
+        tip_pending: m.badgeTitle('pending', {status:'pending'}, {policy_version:'a2-v1'}),
+        tip_low: m.judgeTooltip({route:'lex_low'}),
+        tip_proto: m.judgeTooltip({route:'toString'}),
         emoji: (() => {
           const a = "📈 매출이 늘었습니다. 영업이익은 3조원입니다.";  // 서버 claim_spans: (0,12) (13,26), 코드포인트 26
           const segs = m.segmentsFromClaims(a, [{idx:0,start:0,end:12,status:'supported'},
@@ -332,10 +345,22 @@ async def s_pure(browser, base, ck: Checks):
     ck.ok(res["hl_ent"] == "it&#39;s <strong>39</strong>", f"pure: 이스케이프 엔티티 숫자는 건드리지 않음 {res['hl_ent']}")
     ck.ok(res["s_failed"].startswith("AI 판정: 근거 판정을 하지 못했습니다(일시적 오류)"), "pure: failed 문구")
     ck.ok(res["s_running"] == "AI 판정 중…", "pure: 판정 중 문구")
-    ck.ok(res["s_cap"].startswith("AI 판정: ✅ 1 · ⚠️ 0 · ❔ 0 — 검색된 2025.12 사업보고서 문단 3개 기준")
-          and "긴 답변의 뒷부분은 판정하지 않았습니다" in res["s_cap"] and "시험 기준" not in res["s_cap"],
-          f"pure: 요약줄·주장 상한 문구 {res['s_cap']}")
+    ck.ok(res["s_cap"].startswith("AI 판정: ✅ 1 · ⚠️ 0 · ❔ 0 — 검색된 2025.12 사업보고서 문단 3개 기준 (시험 기준)")
+          and "긴 답변의 뒷부분은 판정하지 않았습니다" in res["s_cap"],
+          f"pure: 요약줄·주장 상한 문구, a2-v1도 시험 기준(정밀도 목표 미확인) {res['s_cap']}")
+    ck.ok("시험 기준" not in res["s_unknown"], f"pure: 목록에 없는 정책은 시험 기준을 붙이지 않는다 {res['s_unknown']}")
+    ck.ok(res["rejudge"] == [True, False, False], "pure: 재판정 버튼은 서버 rejudgeable일 때만")
+    note = "정밀도 목표를 확인하지 못한 시험 운영"
+    ck.ok(note in res["tip_jev"] and "AI 판정(JEV 모델)" in res["tip_jev"] and "보수적" not in res["tip_jev"],
+          f"pure: a2-v1 배지 툴팁에 사실대로 쓴 시험 운영 문구 {res['tip_jev']}")
+    ck.ok(note in res["tip_lex"] and "규칙 판정" in res["tip_lex"] and "JEV 모델" not in res["tip_lex"],
+          f"pure: lex_high ✅ 툴팁은 규칙 판정(JEV 모델이라 쓰지 않는다) {res['tip_lex']}")
+    ck.ok("규칙 판정" in res["tip_low"] and "거의 같은" not in res["tip_low"], f"pure: lex_low 툴팁 {res['tip_low']}")
+    ck.ok(res["tip_proto"].startswith("AI 판정(JEV 모델)"), f"pure: 모르는 경로는 JEV 문구 {res['tip_proto']}")
+    ck.ok(note not in res["tip_prov"] and note not in res["tip_pending"],
+          f"pure: 잠정 정책·판정 중 배지에는 덧붙이지 않는다 {res['tip_prov']} / {res['tip_pending']}")
     ck.ok("(시험 기준)" in res["s_prov2"], f"pure: 비주장 규칙 보강 뒤 잠정 정책도 시험 기준 {res['s_prov2']}")
+    ck.ok(not page.errors, f"pure: JS 오류 없음(a2-v1 확인 포함) {page.errors}")
     ck.ok(res["retry"] == [True, False, False, False], "pure: 다시 판정은 failed·partial이면서 서버 retryable일 때만")
     ck.ok(not page.errors, f"pure: JS 오류 없음 {page.errors}")
     await ctx.close()
@@ -658,6 +683,91 @@ async def s_restore(browser, base, ck: Checks):
     await ctx.close()
 
 
+# 1차 필터 상단 구간(lex_high, JEV 없음) ✅와 JEV ✅·❔를 함께 가진 a2-v1 결과
+V1 = {
+    "statuses": ["supported", "supported", "no_evidence", "not_claim", "no_evidence"],
+    "extra": {
+        0: {"route": "jev", "source_idx": 0, "s": [0.9] + [0.1] * 7, "c": [0.01] * 8, "number_ok": [True] * 8,
+            "confidence": "보통"},
+        1: {"route": "lex_high", "source_idx": 1, "lex": 1.0, "number_ok": [False, True] + [False] * 6},
+        2: {"route": "jev", "s": [0.05] * 8, "c": [0.0] * 8, "number_ok": [True] * 8},
+        4: {"route": "jev", "s": [0.8] * 8, "c": [0.05] * 8, "number_ok": [False] * 8},
+    },
+}
+
+
+async def s_policy_v1(browser, base, ck: Checks):
+    print("[policy-v1] 이전 정책 실행 재판정(연 스레드), lex_high ✅, 시험 운영 문구")
+    old = run("r1", "done", DONE["statuses"], DONE["extra"], policy_version="a2-provisional-2", rejudgeable=True)
+    new = run("r2", "done", V1["statuses"], V1["extra"], policy_version="a2-v1", trigger="rejudge")
+    msgs = [{"id": "h1", "question": "주요 제품은?", "answer": ANSWER, "steps": [], "citations": [],
+             "latest_evidence_run": {"id": "r1", "status": "done", "counts": old["counts"]}}]
+    fake = FakeApi(active={"id": CID, "title": "t"}, conv={"id": CID, "messages": msgs, "msg_total": 1},
+                   timeline={"conversation_id": CID, "runs": [old]}, rejudge=new)
+    ctx, page = await open_app(browser, base, fake)
+    await page.wait_for_selector(".ev-msg .ev-rejudge")
+    btn = page.locator(".ev-msg .ev-rejudge")
+    ck.ok(await btn.inner_text() == "새 기준으로 재판정", "policy-v1: 연 스레드의 이전 정책 실행에 재판정 버튼")
+    ck.ok("(시험 기준)" in await summary(page), "policy-v1: 이전 정책 요약줄은 시험 기준")
+    old_tip = await page.locator(".ev-msg .ev-badge").first.get_attribute("title")
+    ck.ok("정밀도 목표를 확인하지 못한" not in old_tip, f"policy-v1: 잠정 정책 배지에는 a2-v1 문구 없음 {old_tip}")
+    await page.locator(".ev-msg .ev-badge").first.click()  # 펼친 칸은 재판정 뒤 닫는다
+    await btn.click()
+    await page.wait_for_function("document.querySelector('.ev-msg .ev-summary').innerText.startsWith('AI 판정: ✅ 2 · ⚠️ 0 · ❔ 2')",
+                                 timeout=5000)
+    ck.ok(fake.n("POST", "/api/evidence/runs/r1/rejudge") == 1, "policy-v1: 옛 실행 id로 재판정 요청")
+    ck.ok(fake.n("GET", "/api/evidence/runs/r2") == 0, "policy-v1: 재판정은 폴링하지 않는다(응답이 종결 실행)")
+    ck.ok(await badges(page) == ["✅", "✅", "❔", "❔"], f"policy-v1: 재판정 결과 배지 {await badges(page)}")
+    s = await summary(page)
+    ck.ok(s.endswith("문단 8개 기준 (시험 기준)") and "새 기준으로 재판정" not in s and "다시 판정" not in s,
+          f"policy-v1: a2-v1 요약줄은 시험 기준 유지, 재판정 버튼 사라짐 {s}")
+    ck.ok(not await page.locator(".ev-msg .ev-panel").count(), "policy-v1: 재판정하면 펼친 칸을 닫는다")
+    ck.ok(await page.locator(".ev-msg").count() == 1, "policy-v1: 같은 말풍선에서 갱신")
+    jev_tip = await page.locator(".ev-msg .ev-badge").nth(0).get_attribute("title")
+    ck.ok("AI 판정(JEV 모델)" in jev_tip and "정밀도 목표를 확인하지 못한 시험 운영" in jev_tip and "확신도: 보통" in jev_tip,
+          f"policy-v1: JEV ✅ 툴팁 {jev_tip}")
+    lex = page.locator(".ev-msg .ev-badge").nth(1)
+    lex_tip = await lex.get_attribute("title")
+    ck.ok(lex_tip.startswith("검색된 공시 문단에서 확인됨") and "규칙 판정" in lex_tip and "JEV 모델" not in lex_tip
+          and "확신도" not in lex_tip and "정밀도 목표를 확인하지 못한 시험 운영" in lex_tip,
+          f"policy-v1: lex_high ✅ 툴팁(규칙 판정, 확신도 없음) {lex_tip}")
+    await lex.click()
+    lp = await page.locator("#" + await lex.get_attribute("aria-controls")).inner_text()
+    ck.ok("근거 문단 · 2025.12 사업보고서(접수번호 20260312000123) · II. 사업의 내용 · 문단 11" in lp
+          and "174조 8,877억원" in lp and "확신도" not in lp and "규칙 판정" in lp,
+          f"policy-v1: lex_high ✅ 근거 문단 펼치기 {lp[:120]}")
+    ck.ok(not page.errors, f"policy-v1: JS 오류 없음 {page.errors}")
+    await ctx.close()
+
+    print("[policy-v1-live] 새 질문(a2-v1)은 재판정 버튼이 없다")
+    fake = FakeApi(acked=True, chat=started("r3"),
+                   runs={"r3": [run("r3", "running"), run("r3", "done", V1["statuses"], V1["extra"],
+                                                         policy_version="a2-v1")]})
+    ctx, page = await open_app(browser, base, fake)
+    await turn_on(page)
+    await pick_company(page)
+    await ask(page)
+    await page.wait_for_function("document.querySelector('.ev-msg .ev-summary').innerText.startsWith('AI 판정: ✅')",
+                                 timeout=5000)
+    ck.ok(await badges(page) == ["✅", "✅", "❔", "❔"], "policy-v1-live: lex_high 포함 배지")
+    ck.ok(not await page.locator(".ev-msg .ev-rejudge").count(), "policy-v1-live: 현재 정책 실행에는 재판정 버튼 없음")
+    ck.ok((await summary(page)).endswith("(시험 기준)"), "policy-v1-live: 요약줄 시험 기준")
+    ck.ok(fake.n("POST", "/api/evidence/runs/r3/rejudge") == 0, "policy-v1-live: 자동 재판정 없음")
+    ck.ok(not page.errors, f"policy-v1-live: JS 오류 없음 {page.errors}")
+    await ctx.close()
+
+    print("[policy-v1-refused] 재판정 409면 알림, 버튼 다시 사용 가능")
+    fake = FakeApi(active={"id": CID, "title": "t"}, conv={"id": CID, "messages": msgs, "msg_total": 1},
+                   timeline={"conversation_id": CID, "runs": [old]}, rejudge=None)
+    ctx, page = await open_app(browser, base, fake)
+    await page.wait_for_selector(".ev-msg .ev-rejudge")
+    await page.click(".ev-msg .ev-rejudge")
+    await page.wait_for_timeout(300)
+    ck.ok(await page.locator(".ev-msg .ev-rejudge").is_enabled(), "policy-v1-refused: 실패하면 버튼을 다시 켠다")
+    ck.ok(await badges(page) == ["✅", "✅", "⚠️", "❔"], "policy-v1-refused: 배지는 그대로")
+    await ctx.close()
+
+
 async def s_mobile(browser, base, ck: Checks):
     print("[mobile] 375px 폭")
     fake = FakeApi(acked=True, chat=started("r1"),
@@ -692,7 +802,8 @@ async def main() -> int:
     ck = Checks()
     async with async_playwright() as p:
         browser = await p.chromium.launch(executable_path=_chromium())
-        for scenario in (s_pure, s_flag_off, s_notice, s_done, s_double_send, s_states, s_timeout, s_restore, s_mobile):
+        for scenario in (s_pure, s_flag_off, s_notice, s_done, s_double_send, s_states, s_timeout, s_restore,
+                         s_policy_v1, s_mobile):
             try:
                 await scenario(browser, base, ck)
             except Exception as exc:  # noqa: BLE001 — 한 시나리오가 죽어도 나머지를 본다

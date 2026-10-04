@@ -22,7 +22,7 @@ from sqlalchemy import update
 
 from app.models import Chat, EvidenceRun
 from app.services.evidence import records
-from app.services.evidence.runner import A2_PROVISIONAL, Policy, Runner
+from app.services.evidence.runner import DEFAULT_POLICY, Policy, Runner
 
 log = logging.getLogger("app.evidence.background")
 
@@ -55,7 +55,7 @@ async def close_runner() -> None:
         await jev_client.aclose()
 
 
-def start_run(run_id: uuid.UUID, *, runner, session_factory, policy: Policy = A2_PROVISIONAL) -> asyncio.Task:
+def start_run(run_id: uuid.UUID, *, runner, session_factory, policy: Policy = DEFAULT_POLICY) -> asyncio.Task:
     """커밋된 pending 실행을 백그라운드에서 판정한다. 작업을 돌려준다(테스트·종료 처리에서 기다릴 수 있게)."""
     task = asyncio.create_task(execute_run(run_id, runner=runner, session_factory=session_factory, policy=policy),
                                name=f"evidence-run-{run_id}")
@@ -68,7 +68,7 @@ def _superseded(run_id: uuid.UUID, stage: str) -> None:
     log.warning(json.dumps({"event": "run_superseded", "run_id": str(run_id), "stage": stage}))
 
 
-async def execute_run(run_id: uuid.UUID, *, runner, session_factory, policy: Policy = A2_PROVISIONAL) -> None:
+async def execute_run(run_id: uuid.UUID, *, runner, session_factory, policy: Policy = DEFAULT_POLICY) -> None:
     try:
         async with session_factory() as db:
             run = await db.get(EvidenceRun, run_id)

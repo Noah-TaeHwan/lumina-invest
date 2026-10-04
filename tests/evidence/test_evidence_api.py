@@ -172,7 +172,7 @@ def test_chat_saves_message_and_run_then_judges(pg, enabled):
     assert [c["passage_id"] for c in chat.citations] == [p["passage_id"] for p in PASSAGES]
     assert conv.message_count == 1
     assert run["status"] == "done" and run["chat_id"] == body["chat_id"] and run["trigger"] == "auto"
-    assert run["policy_version"] == "a2-provisional-2" and run["generator_model"] == settings.EVIDENCE_LLM_MODEL
+    assert run["policy_version"] == "a2-v1" and run["generator_model"] == settings.EVIDENCE_LLM_MODEL
     assert run["rcept_no"] == "20260312000123" and run["corp_code"] == CORP and run["company"] == CO
     assert [c["status"] for c in run["claims"]] == ["supported", "supported", "not_claim"]
     assert run["passages"][0]["text"] == PASSAGES[0]["text"] and run["poll_until_s"] is None
@@ -333,7 +333,7 @@ def test_retry_allowed_only_for_failed_and_partial(pg, enabled, status, code, ex
     if expected == 201:
         body, got = r.json(), new.json()
         assert body["run_id"] != str(run.id) and body["chat_id"] == str(run.chat_id)
-        assert got["trigger"] == "retry" and got["status"] == "done"
+        assert got["trigger"] == "retry" and got["status"] == "done" and got["policy_version"] == "a2-v1"
         assert got["passages"] == run.passages and got["company"] == CO
 
 
@@ -392,6 +392,137 @@ def test_runner_unavailable_fails_run_and_claims(pg, enabled):
     assert (run["status"], run["error_code"]) == ("failed", "quota_unavailable")
     assert [(c["status"], c["reason"]) for c in run["claims"]] == [
         ("unjudged", "quota_unavailable"), ("unjudged", "quota_unavailable"), ("not_claim", None)]
+
+
+# ── 정책 a2-v1(P6) ───────────────────────────────────────────────────────────
+
+def test_generate_timeout_is_check_p95_times_two():
+    """spec 7.1: 확인 세트 생성 지연 p95 × 2(a2-check.json generation_latency.check.timeout_s)를 초 단위로 올림."""
+    import json
+    import math
+    import pathlib
+    from app.routes import evidence
+
+    root = pathlib.Path(__file__).resolve().parents[2]
+    lat = json.loads((root / "lab/evidence/results/a2-check.json").read_text(encoding="utf-8"))["generation_latency"]
+    assert evidence.GENERATE_TIMEOUT_S == math.ceil(lat["check"]["timeout_s"]) == 53
+
+
+def test_chat_lex_high_claim_is_supported_without_jev(pg, enabled):
+    """1차 필터 상단 구간: 문단을 그대로 옮긴 문장은 JEV 없이 ✅(route lex_high), 다른 문장만 JEV를 부른다."""
+    jev_client = FakeJev(s=0.9)
+    answer = f"{PASSAGES[1]['text']} 회사는 반도체를 만든다."
+
+    async def go():
+        async with database(pg) as factory:
+            seed = await seed_user(factory, with_chat=False)
+            app = make_app(factory, Who(seed["user"]), search=fake_search(), llm=FakeLLM(answer=answer),
+                           runner=make_runner(jev_client))
+            async with client(app) as c:
+                body = (await c.post("/api/evidence/chat", json=_body(seed))).json()
+                await drain()
+                return (await c.get(f"/api/evidence/runs/{body['run_id']}")).json()
+
+    run = asyncio.run(go())
+    assert run["policy_version"] == "a2-v1" and run["status"] == "done" and run["rejudgeable"] is False
+    lex, jev_claim = run["claims"]
+    assert (lex["status"], lex["route"], lex["source_idx"], lex["s"], lex["confidence"]) == (
+        "supported", "lex_high", 1, None, None)
+    assert lex["number_ok"][1] is True and lex["lex"] >= 0.95
+    assert (jev_claim["status"], jev_claim["route"]) == ("supported", "jev")
+    assert jev_client.calls == 1 and run["calls"] == 1  # lex_high 문장은 호출하지 않는다
+
+
+def test_chat_lex_high_only_answer_makes_no_jev_call(pg, enabled):
+    jev_client = FakeJev()
+
+    async def go():
+        async with database(pg) as factory:
+            seed = await seed_user(factory, with_chat=False)
+            app = make_app(factory, Who(seed["user"]), search=fake_search(),
+                           llm=FakeLLM(answer=PASSAGES[0]["text"]), runner=make_runner(jev_client))
+            async with client(app) as c:
+                body = (await c.post("/api/evidence/chat", json=_body(seed))).json()
+                await drain()
+                return (await c.get(f"/api/evidence/runs/{body['run_id']}")).json()
+
+    run = asyncio.run(go())
+    assert jev_client.calls == 0 and (run["status"], run["calls"], run["input_tokens"]) == ("done", 0, 0)
+    assert [(c["status"], c["route"]) for c in run["claims"]] == [("supported", "lex_high")]
+
+
+async def _provisional_run(factory, seed, s=0.8):
+    """이전 정책(a2-provisional-2, τ_s 0.70)으로 판정이 끝난 실행 하나를 만든다."""
+    from app.services.evidence import runner as rn
+
+    run = await _store(factory, _run_for(seed, policy=rn.A2_PROVISIONAL))
+    await background.start_run(run.id, runner=make_runner(FakeJev(s=s)), session_factory=factory,
+                               policy=rn.A2_PROVISIONAL)
+    return run
+
+
+def test_rejudge_previous_policy_run_without_calls(pg, enabled):
+    jev_client = FakeJev()
+
+    async def go():
+        async with database(pg) as factory:
+            seed = await seed_user(factory)
+            old = await _provisional_run(factory, seed, s=0.8)
+            app = make_app(factory, Who(seed["user"]), runner=make_runner(jev_client))
+            async with client(app) as c:
+                before = (await c.get(f"/api/evidence/runs/{old.id}")).json()
+                r = await c.post(f"/api/evidence/runs/{old.id}/rejudge")
+                await drain()
+                got = (await c.get(f"/api/evidence/runs/{r.json()['id']}")).json() if r.status_code == 201 else None
+                after = (await c.get(f"/api/evidence/runs/{old.id}")).json()
+                again = await c.post(f"/api/evidence/runs/{old.id}/rejudge")
+                tl = (await c.get(f"/api/conversations/{seed['conversation_id']}/evidence")).json()
+            return old, before, r, got, after, again, tl
+
+    old, before, r, got, after, again, tl = asyncio.run(go())
+    assert before["policy_version"] == "a2-provisional-2" and before["rejudgeable"] is True
+    assert [c["status"] for c in before["claims"]] == ["supported", "supported", "not_claim"]
+    assert r.status_code == 201
+    body = r.json()
+    assert body["id"] != str(old.id) and body["chat_id"] == str(old.chat_id)
+    assert (body["trigger"], body["policy_version"], body["status"]) == ("rejudge", "a2-v1", "done")
+    assert (body["calls"], body["cache_hits"], body["input_tokens"]) == (0, 0, 0) and jev_client.calls == 0
+    # 저장된 s=0.8은 새 τ_s 0.85에 못 미친다. 경로(jev)와 확률·문단 스냅샷은 그대로 옮긴다
+    assert [(c["status"], c["route"]) for c in body["claims"]] == [
+        ("no_evidence", "jev"), ("no_evidence", "jev"), ("not_claim", "rule_not_claim")]
+    assert [c["s"] for c in body["claims"]] == [c["s"] for c in before["claims"]]
+    assert [(c["start"], c["end"]) for c in body["claims"]] == [(c["start"], c["end"]) for c in before["claims"]]
+    assert body["passages"] == before["passages"] and body["rejudgeable"] is False and body["poll_until_s"] is None
+    assert got == body  # 저장된 결과와 응답이 같다
+    assert after["rejudgeable"] is False  # 옛 실행은 더 이상 최신이 아니다
+    assert again.status_code == 409
+    assert [x["id"] for x in tl["runs"]] == [body["id"]]
+
+
+@pytest.mark.parametrize("case", ["a2_v1_run", "failed_run", "other_user"])
+def test_rejudge_refused(pg, enabled, case):
+    from app.services.evidence import runner as rn
+
+    async def go():
+        async with database(pg) as factory:
+            seed = await seed_user(factory)
+            who = Who(seed["user"])
+            if case == "a2_v1_run":
+                run = await _store(factory, _run_for(seed))
+                await background.start_run(run.id, runner=make_runner(), session_factory=factory)
+            elif case == "failed_run":
+                run = _run_for(seed, policy=rn.A2_PROVISIONAL)
+                run.status, run.error_code = "failed", "timeout"
+                await _store(factory, run)
+            else:
+                run = await _provisional_run(factory, seed)
+                who = Who((await seed_user(factory))["user"])
+            app = make_app(factory, who)
+            async with client(app) as c:
+                return await c.post(f"/api/evidence/runs/{run.id}/rejudge")
+
+    want = {"a2_v1_run": 409, "failed_run": 409, "other_user": 404}[case]
+    assert asyncio.run(go()).status_code == want
 
 
 # ── 스레드 타임라인·메시지 요약 ──────────────────────────────────────────────
@@ -509,13 +640,13 @@ def test_admin_stats_from_db(pg):
     assert stats["claim_status"] == {"supported": 6, "not_claim": 4, "unjudged": 2}  # 실패 실행의 문장은 ⊘
     assert stats["unjudged_reasons"] == {"stale": 2}
     assert stats["alerts"]["unjudged_over_5pct"] is True and stats["alerts"]["failed_partial_over_5pct"] is True
-    assert stats["routes"] == {"jev": 6, "rule_not_claim": 4}
+    assert stats["routes"] == {"jev": 3, "lex_high": 3, "rule_not_claim": 4}  # a2-v1 1차 필터 상단 구간 경로 분포
     assert stats["claims_per_answer"]["p50"] == 2  # 비주장 문장은 빼고 센다(spec 5.3 상한과 같은 기준)
-    assert stats["calls"] == 6 and stats["input_tokens"] == 600 and stats["cache_hit_rate"] == 0.0
+    assert stats["calls"] == 3 and stats["input_tokens"] == 300 and stats["cache_hit_rate"] == 0.0
     assert stats["run_duration_ms"]["p95"] is not None and stats["start_delay_ms"]["p95"] is not None
     assert stats["jev_latency_ms"]["p50"] == 1.0
-    assert stats["top_users"][0] == {"user_id": a["user"]["id"], "calls": 4, "input_tokens": 400}
-    assert stats["daily"][0]["calls"] == 6
+    assert stats["top_users"][0] == {"user_id": a["user"]["id"], "calls": 2, "input_tokens": 200}
+    assert stats["daily"][0]["calls"] == 3
     assert stats["limits"]["global_tokens"] == settings.EVIDENCE_DAILY_GLOBAL_TOKENS
     assert set(stats["alerts"]) >= {"run_p95_over_1500ms", "failed_partial_over_5pct", "unjudged_over_5pct",
                                     "claims_p95_over_7", "global_tokens_over_80pct"}

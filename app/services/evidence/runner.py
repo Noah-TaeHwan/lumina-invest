@@ -47,6 +47,11 @@ class Policy:
 A2_PROVISIONAL = Policy("a2-provisional-2", tau_s=0.70, tau_c=0.35)
 # 이전 버전으로 저장된 실행의 확신도 라벨용(τ는 같고 비주장 규칙만 다르다)
 A2_PROVISIONAL_1 = Policy("a2-provisional", tau_s=0.70, tau_c=0.35)
+# 평가(P5) 결과 정책: lab/evidence/results/a2-check.json의 policy_a2_v1 그대로(spec 6.4 반영 규칙, 다시 고르지 않는다).
+# H-prec 실패(✅ 예측 150건 미만) → τ_s 0.85 고정, H-low 미시험 → θ_low 없음, H-high 통과 → θ_high 0.95.
+# 정밀도 목표는 확인하지 못했다(precision_target_confirmed=false). 위 잠정 정책 상수는 이력 표시·재판정용으로 남긴다.
+A2_V1 = Policy("a2-v1", tau_s=0.85, tau_c=0.35, theta_low=None, theta_high=0.95)
+DEFAULT_POLICY = A2_V1  # 새 판정(auto·retry)과 재판정(rejudge)이 쓰는 정책
 
 
 @dataclass
@@ -129,7 +134,7 @@ class Runner:
         self._user_locks: dict[str, asyncio.Lock] = {}
 
     async def run(self, *, company: str, answer: str, passages: list[str], user_id: str,
-                  policy: Policy = A2_PROVISIONAL, trigger: str = "auto", run_id: str | None = None) -> RunResult:
+                  policy: Policy = DEFAULT_POLICY, trigger: str = "auto", run_id: str | None = None) -> RunResult:
         t0 = time.monotonic()
         claims = [ClaimResult(i, sp.text, sp.start, sp.end, "unjudged") for i, sp in enumerate(claim_spans(answer))]
         for c in claims:

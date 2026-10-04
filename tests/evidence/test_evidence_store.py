@@ -47,7 +47,7 @@ def test_preview_claims_marks_not_claim_and_pending():
 def test_new_run_snapshot_and_pending_claims():
     seed = {"chat_id": str(uuid.uuid4()), "conversation_id": str(uuid.uuid4()), "user": {"id": str(uuid.uuid4())}}
     run = _new_run(seed)
-    assert (run.status, run.trigger, run.policy_version, run.jev_model) == ("pending", "auto", "a2-provisional-2",
+    assert (run.status, run.trigger, run.policy_version, run.jev_model) == ("pending", "auto", "a2-v1",
                                                                          "jev-1.13.0")
     assert run.rcept_no == "20260312000123" and run.company == CO and run.corp_code == CORP
     assert run.passages[0] == {k: PASSAGES[0][k] for k in ("passage_id", "section", "idx", "sha256", "text")}
@@ -108,10 +108,12 @@ def test_save_result_writes_claims_and_usage(pg):
                 return run, claims, result
 
     run, claims, result = asyncio.run(go())
-    assert (run.status, run.error_code, run.calls, run.input_tokens) == ("done", None, 2, 200)
+    # 기본 정책 a2-v1: 문단을 그대로 옮긴 두 번째 문장은 1차 필터 상단 구간(lex_high)이라 호출하지 않는다
+    assert (run.status, run.error_code, run.calls, run.input_tokens) == ("done", None, 1, 100)
     assert run.finished_at is not None
     assert [c.status for c in claims] == ["supported", "supported", "not_claim"]
-    assert [c.route for c in claims] == ["jev", "jev", "rule_not_claim"]
+    assert [c.route for c in claims] == ["jev", "lex_high", "rule_not_claim"]
+    assert (claims[1].s, claims[1].source_idx, claims[1].jev_request_key) == (None, 1, None)
     first = claims[0]
     assert first.s == result.claims[0].s and len(first.s) == 3 and first.source_idx == result.claims[0].source_idx
     assert first.number_ok == result.claims[0].number_ok and first.jev_request_key == result.claims[0].jev_request_key
@@ -301,7 +303,7 @@ def test_background_uses_snapshot_and_company(pg):
     run_id = asyncio.run(go())
     assert seen["company"] == CO and seen["answer"] == ANSWER and seen["trigger"] == "retry"
     assert seen["passages"] == [p["text"] for p in PASSAGES] and seen["run_id"] == str(run_id)
-    assert seen["policy"] is rn.A2_PROVISIONAL
+    assert seen["policy"] is rn.DEFAULT_POLICY is rn.A2_V1
 
 
 def test_latest_run_summary_per_chat(pg):
