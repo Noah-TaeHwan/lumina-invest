@@ -147,6 +147,11 @@ export function passageHeader(run, p) {
   return `근거 문단 · ${REPORT_LABEL}(접수번호 ${run.rcept_no || "-"}) · ${p.section || "-"} · 문단 ${p.idx ?? "-"}`;
 }
 
+/** 배지 모양(글자·클래스·이름). 판단 일지(js/journal.js)가 당시 배지를 같은 모양으로 그릴 때 쓴다. */
+export function badgeMark(kind) {
+  return Object.hasOwn(BADGES, kind ?? "") ? BADGES[kind] : null;
+}
+
 export function badgeTitle(kind, claim, run) {
   const parts = [BADGES[kind].label, judgeTooltip(claim)];
   const conf = confidenceText(claim);
@@ -166,6 +171,28 @@ export function runFromStarted(res) {
 // ── 화면: 답변 말풍선 ─────────────────────────────────────────────
 let seq = 0;
 const messages = new Set();
+// 요약줄 확장(판단 일지의 '판단 기록' 버튼, js/journal.js). 일지가 기능 확인 뒤 붙인다.
+// evidence.js는 journal.js를 import하지 않는다(한 방향 의존: journal.js → evidence.js)
+let summaryExt = null;
+
+/** ext = {html(msg) → 요약줄 끝에 붙일 HTML, onClick(msg, event)} 또는 null. 이미 그린 말풍선 요약줄도 다시 그린다. */
+export function setSummaryExtension(ext) {
+  summaryExt = ext;
+  for (const m of messages) renderSummary(m, m.delayed);
+}
+
+/** 실행 일부 값(journal_entry_id 등)을 바꾸고 요약줄을 다시 그린다. */
+export function patchRun(msg, patch) {
+  msg.run = { ...msg.run, ...patch };
+  renderSummary(msg, msg.delayed);
+}
+
+/** 화면에 그린 근거 답변 중 journal_entry_id가 pred에 맞는 실행의 기록 표시를 지운다(일지에서 기록을 지운 뒤). */
+export function forgetJournalEntries(pred) {
+  for (const m of messages) {
+    if (m.run.journal_entry_id && pred(m.run.journal_entry_id)) patchRun(m, { journal_entry_id: null });
+  }
+}
 
 function passageBlock(run, p, claimText, numberOk) {
   return `<div class="ev-passage-head">${escHtml(passageHeader(run, p))}</div>
@@ -251,6 +278,7 @@ function togglePanel(msg, btn) {
 
 function renderSummary(msg, delayed = false) {
   const { run } = msg;
+  msg.delayed = delayed;
   let html = `<span class="ev-summary-text">${escHtml(summaryText(run))}</span>`;
   if (delayed) {
     html = `<span class="ev-summary-text">AI 판정: 판정이 지연되고 있습니다.</span>
@@ -258,11 +286,17 @@ function renderSummary(msg, delayed = false) {
   } else {
     if (showRetry(run)) html += ` <button type="button" class="ev-retry btn-secondary text-xs">다시 판정</button>`;
     if (showRejudge(run)) html += ` <button type="button" class="ev-rejudge btn-secondary text-xs" title="저장된 판정 확률에 새 기준을 다시 적용합니다(외부 호출 없음)">새 기준으로 재판정</button>`;
+    if (summaryExt) html += summaryExt.html(msg);
   }
   msg.summaryEl.innerHTML = html;
 }
 
 function setRun(msg, run) {
+  // 다른 실행(다시 판정·재판정)으로 바뀌면 이전 실행에 붙은 칸(판단 기록 양식)을 닫는다
+  if (msg.extraEl.dataset.runId && msg.extraEl.dataset.runId !== run.id) {
+    msg.extraEl.innerHTML = "";
+    delete msg.extraEl.dataset.runId;
+  }
   msg.run = run;
   renderAnswer(msg);
   renderSummary(msg);
@@ -278,12 +312,14 @@ export function appendEvidenceMsg(container, answer, run) {
     <div class="ev-answer"></div>
     <div class="ev-panels"></div>
     <div class="ev-summary" aria-live="polite"></div>
+    <div class="ev-extra"></div>
   </div>`;
   container.appendChild(d);
   const root = d.firstElementChild;
   const msg = { id, answer, run, open: new Set(), timer: null, dead: false, root,
                 answerEl: root.querySelector(".ev-answer"), panelsEl: root.querySelector(".ev-panels"),
-                summaryEl: root.querySelector(".ev-summary") };
+                summaryEl: root.querySelector(".ev-summary"), extraEl: root.querySelector(".ev-extra"),
+                delayed: false };
   messages.add(msg);
   msg.answerEl.addEventListener("click", e => {
     const btn = e.target.closest("button.ev-badge");
@@ -293,6 +329,7 @@ export function appendEvidenceMsg(container, answer, run) {
     if (e.target.closest(".ev-retry")) retry(msg);
     if (e.target.closest(".ev-rejudge")) rejudge(msg);
     if (e.target.closest(".ev-refresh")) refresh(msg);
+    summaryExt?.onClick(msg, e);
   });
   setRun(msg, run);
   if (ACTIVE.has(run.status)) startPolling(msg);
@@ -520,11 +557,14 @@ function toggleHelp() {
   document.getElementById("ev-help").classList.toggle("hidden", open);
 }
 
-let inited = false;
-/** 채팅 화면이 처음 열릴 때 한 번: 플래그 확인과 이벤트 연결. */
-export async function initEvidence() {
-  if (inited) return;
-  inited = true;
+let initPromise = null;
+/** 채팅 화면이 처음 열릴 때 한 번: 플래그 확인과 이벤트 연결. 두 번째 호출부터는 같은 확인을 기다린다. */
+export function initEvidence() {
+  initPromise ??= doInitEvidence();
+  return initPromise;
+}
+
+async function doInitEvidence() {
   const inp = document.getElementById("chat-input");
   inp.dataset.agentPlaceholder = inp.placeholder;
   document.getElementById("ev-mode").addEventListener("change", onToggle);
@@ -544,6 +584,24 @@ export async function initEvidence() {
     if (li) choose(Number(li.dataset.i));
   });
   await probe();
+}
+
+/** 판단 일지의 '같은 질문 다시 묻기'(spec 3.1-8): 근거 모드를 켜고 회사·질문을 채우기만 한다. 보내기는 사용자가 누른다.
+ *  근거 모드를 쓸 수 없으면 false. 고지를 아직 확인하지 않았으면 고지 대화상자를 띄운다(확인하면 켜진다). */
+export async function prefillEvidenceChat(company, question) {
+  await initEvidence();
+  if (!state.available) return false;
+  state.company = { corp_name: company.corp_name, corp_code: company.corp_code };
+  document.getElementById("ev-company").value = company.corp_name;
+  const inp = document.getElementById("chat-input");
+  inp.value = question;
+  if (await noticeAcked()) {
+    setModeUi(true);
+    inp.focus();
+  } else {
+    openNotice();
+  }
+  return true;
 }
 
 /** 근거 모드 질문 전송. 성공하면 true(말풍선을 그렸다), 보내지 않았거나 실패하면 false. */

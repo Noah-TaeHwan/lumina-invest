@@ -17,6 +17,7 @@ import { initTradingViewView, onTradingViewViewActivated } from "/js/tradingview
 import { initFormulaView, onFormulaViewActivated } from "/js/formula.js";
 import { loadUsChart, loadUsDashboard, loadUsPortfolio, renderUsOrders } from "/js/us.js";
 import { initCompletionIndicator } from "/js/completion.js";
+import { initJournal, onJournalViewActivated } from "/js/journal.js";
 
 // ── Boot ──────────────────────────────────────────────────────────
 async function boot() {
@@ -33,6 +34,7 @@ async function boot() {
     initRebalanceView();                   // 리밸런싱 엔진 버튼 바인딩 (js/rebalance.js)
     initTradingViewView();                 // TradingView 연동 (js/tradingview.js)
     initFormulaView();                     // 자유 산식 지표 (js/formula.js)
+    initJournal();                         // 판단 일지 기능 확인(꺼져 있으면 탭·버튼 없음, js/journal.js)
     const hash = location.hash.replace("#", "");
     navigate(hash && document.querySelector(`[data-view="${hash}"]`) ? hash : "agent-chat");
   } catch {
@@ -52,6 +54,7 @@ function onViewActivated(view) {
   onTradingViewViewActivated(view); // TradingView 연동 (js/tradingview.js)
   onFormulaViewActivated(view); // 자유 산식 지표 (js/formula.js)
   if (view === "agent-chat") onChatViewActivated(); // 공시 근거 모드·대화 복원 (js/agent.js, js/evidence.js)
+  if (view === "journal") onJournalViewActivated(); // 판단 일지 (js/journal.js)
   if (view === "trading-chart") loadStockChart();
   if (view === "trading-portfolio") loadPortfolio();
   if (view === "trading-order") { loadOrderHistory(); loadBrokerStatus(); }
