@@ -1,0 +1,43 @@
+{"lid": "1e8648e98b", "label": "supported", "passage": 3, "reason": "자동차외장재 부문 ABS수지는 사출 원재료이고 주요 매입처가 LG화학 외라고 표에 있다."}
+{"lid": "8367aacfd1", "label": "no_evidence", "passage": null, "reason": "문단 4는 한국큐빅을 내장재 부문으로만 밝히고, 문단 3은 두 부문을 나열하지만 한국큐빅이라고 하지 않는다. 한 문단이 둘 다 한국큐빅의 주력이라고 말하지 않는다."}
+{"lid": "87dc59e214", "label": "contradicted", "passage": 3, "reason": "문단 3에서 이들은 원재료 매입처이고 TAICA·켐텍코리아·덕진·LG화학·현대모비스는 특수관계 미해당이라 자회사라는 주장과 어긋난다."}
+{"lid": "ff5270327d", "label": "supported", "passage": 3, "reason": "자동차외장재 ABS수지의 주요 매입처는 LG화학 외다. ㈜ 표기 차이는 같은 회사다."}
+{"lid": "d18d0b0ebb", "label": "contradicted", "passage": 3, "reason": "ABS수지의 주요 매입처는 LG화학 외이고, TAICA는 내장재 필름의 매입처다."}
+{"lid": "c7314a7654", "label": "supported", "passage": 6, "reason": "ABS수지는 자동차외장재 부문의 사출 원재료로 표에 있다."}
+{"lid": "7b47383534", "label": "supported", "passage": 6, "reason": "도금약품의 구체적 용도는 도금용 원재료다."}
+{"lid": "5ebfc717ec", "label": "supported", "passage": 7, "reason": "'자동차 내장재 부문 : (주)한국큐빅'이라고 적혀 있다. 띄어쓰기만 다르다."}
+{"lid": "0d19285511", "label": "supported", "passage": 6, "reason": "필름은 자동차내장재 부문의 전사용 원재료다."}
+{"lid": "878be4de85", "label": "no_evidence", "passage": null, "reason": "문단 6은 후방카메라외를 현대모비스 외에서 매입한다고만 하고 안전장치 용도는 말하지 않는다."}
+{"lid": "434d116549", "label": "supported", "passage": 6, "reason": "도료의 구체적 용도는 도장용 원재료다."}
+{"lid": "ff10c84d75", "label": "contradicted", "passage": 6, "reason": "사출물은 자동차외장재가 아니라 자동차내장재 부문의 원재료로 표에 있다."}
+{"lid": "87c0464726", "label": "non_claim", "passage": null, "reason": "뒤에 올 목록을 예고하는 도입 문장이다."}
+{"lid": "1c9c9be353", "label": "contradicted", "passage": 7, "reason": "내장재 부문을 맡은 법인은 서연이화가 아니라 (주)한국큐빅이다."}
+{"lid": "8033879e84", "label": "contradicted", "passage": 6, "reason": "이 품목들은 매입유형이 원재료인 매입 품목이고, 회사가 만드는 제품이 아니다."}
+{"lid": "5c3bcd6451", "label": "supported", "passage": 7, "reason": "'자동차 내장재 부문 : (주)한국큐빅'이라고 적혀 있다."}
+{"lid": "7e9116c888", "label": "contradicted", "passage": 5, "reason": "외장재 부문에서 현대자동차 외 1차벤더로 가는 54%는 해외가 아니라 국내 매출이다."}
+{"lid": "5ee43aa493", "label": "no_evidence", "passage": null, "reason": "46%는 외장재 부문 매출 중 해외(GM, MAZDA 외) 비중이다. 해외 매출 중 외장재 비중을 말하는 문단은 없다(기준이 뒤바뀜)."}
+{"lid": "8342482eae", "label": "supported", "passage": 5, "reason": "자동차외장재 부문의 해외(GM, MAZDA 외) 판매경로별 매출액 비중이 46%다."}
+{"lid": "de32b29fb7", "label": "contradicted", "passage": 5, "reason": "GM, MAZDA 해외 46%는 자동차외장재 부문의 수치이고, 자동차전장 부문은 없다."}
+{"lid": "0e4016e6cd", "label": "no_evidence", "passage": null, "reason": "99%는 내장재 부문 매출 중 국내 비중이다. 국내 매출 중 내장재 비중을 말하는 문단은 없다(기준이 뒤바뀜)."}
+{"lid": "8494169e43", "label": "supported", "passage": 5, "reason": "합계의 해외 비중이 48%다."}
+{"lid": "992d9edf39", "label": "supported", "passage": 5, "reason": "합계의 국내 비중이 52%다."}
+{"lid": "42017aea68", "label": "non_claim", "passage": null, "reason": "뒤에 올 내용을 예고하는 도입 문장이다."}
+{"lid": "1798f86011", "label": "supported", "passage": 1, "reason": "판매조직이 내장재는 영업팀, 외장재는 국내영업팀·해외사업팀이라고 적혀 있다."}
+{"lid": "79dc928727", "label": "non_claim", "passage": null, "reason": "문단 번호와 절 번호만 남은 조각이다."}
+{"lid": "70671f4b46", "label": "supported", "passage": 8, "reason": "기타 원재료 후방카메라외를 현대모비스 외에서 매입한다."}
+{"lid": "c0dc89a47d", "label": "supported", "passage": 1, "reason": "사업부문 산하에 영업 및 고객지원조직이 있다는 문장과 같다."}
+{"lid": "0f6c8bbbfa", "label": "non_claim", "passage": null, "reason": "답변 방식을 안내하는 문장이다."}
+{"lid": "dd3647c2d9", "label": "non_claim", "passage": null, "reason": "절 제목만 남은 조각이다."}
+{"lid": "c280ec5a1f", "label": "non_claim", "passage": null, "reason": "문단 번호와 절 번호만 남은 조각이다."}
+{"lid": "4a102d6ebc", "label": "non_claim", "passage": null, "reason": "문단 번호와 절 번호만 남은 조각이다."}
+{"lid": "36f0d6d4be", "label": "supported", "passage": 8, "reason": "기타 원재료 후방카메라외를 현대모비스 외에서 매입한다. ㈜ 표기 차이는 같은 회사다."}
+{"lid": "f7ee009415", "label": "contradicted", "passage": 8, "reason": "현대모비스 외에서 매입하는 기타 원재료는 블랙박스가 아니라 후방카메라외로 적혀 있다."}
+{"lid": "6c9b7db3c3", "label": "supported", "passage": 3, "reason": "자동차 산업과 경기변동의 관계를 설명하는 문단 3의 문장과 같다."}
+{"lid": "e211c48ce3", "label": "supported", "passage": 7, "reason": "'자동차 내장재 부문 : (주)한국큐빅'이라고 적혀 있다."}
+{"lid": "45ec224316", "label": "supported", "passage": 7, "reason": "'자동차 내장재 부문 : (주)한국큐빅'이라고 적혀 있다."}
+{"lid": "9b5adb4f13", "label": "supported", "passage": 1, "reason": "외환위험 회피가 필요한 경우 통화선도 거래 등을 통해 외환위험을 관리한다고 적혀 있다."}
+{"lid": "290c76380b", "label": "contradicted", "passage": 7, "reason": "내장재 부문을 맡은 법인은 대유에이텍이 아니라 (주)한국큐빅이다."}
+{"lid": "c4b7a09015", "label": "supported", "passage": 8, "reason": "주식회사 한국큐빅은 1989년 5월 13일 Curl-fit 공법을 이용한 곡면표면처리업을 주 영업목적으로 설립되었다."}
+{"lid": "af7fd515b3", "label": "supported", "passage": 8, "reason": "1989년 5월 13일 설립, 곡면표면처리업 주 영업목적, 2003년 1월 코스닥 상장이 모두 문단 8에 있다."}
+{"lid": "c4128695cb", "label": "contradicted", "passage": 8, "reason": "그렇게 설립된 회사는 한국큐빅이다. 한국거래소는 코스닥시장 개설 주체로만 나온다."}
+{"lid": "4aa726ca30", "label": "supported", "passage": 8, "reason": "한국큐빅은 약식으로 CKI라고 표기하며, 1989년 5월 13일 Curl-fit 공법을 이용한 곡면표면처리업으로 설립되었다."}

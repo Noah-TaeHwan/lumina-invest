@@ -1,0 +1,33 @@
+{"lid": "fa79ee06ae", "label": "supported", "passage": 7, "reason": "문단 7에 연결 종속회사와 함께 영위하는 주력 검사장비 사업과 지속 감시·사전 통보·손실 최소화 기능이 모두 명시되어 있다."}
+{"lid": "c7f9399a25", "label": "contradicted", "passage": 7, "reason": "문단 7은 주력 사업을 세정장비가 아닌 반도체/디스플레이 검사장비 사업으로 명시한다."}
+{"lid": "48c0b40122", "label": "supported", "passage": 7, "reason": "문단 7에 불량 환경 모니터링, 불량 징후 사전 통보, 실시간 제품 불량 검사·통보 및 손실 최소화가 모두 명시되어 있다."}
+{"lid": "2c447f91af", "label": "supported", "passage": 7, "reason": "문단 7은 당사와 연결 종속회사의 주 사업이 반도체/디스플레이 검사장비 사업이라고 명시한다."}
+{"lid": "04afa50a5c", "label": "supported", "passage": 7, "reason": "문단 7에 당사와 연결 종속회사의 주력 검사장비 사업 및 불량 환경 감시·사전 통보를 통한 손실 최소화가 명시되어 있다."}
+{"lid": "eb588af7ca", "label": "supported", "passage": 1, "reason": "문단 1에 검사장비의 불량 환경 감시, 사전 통보, 실시간 불량 검사·통보 및 손실 최소화 기능이 모두 명시되어 있다."}
+{"lid": "cd3c9bcde3", "label": "supported", "passage": 1, "reason": "문단 1은 반도체/디스플레이 사업의 장비를 검사장비로 설명한다."}
+{"lid": "c3744fec16", "label": "supported", "passage": 8, "reason": "문단 8에 합비 중국법인 외에 고객사 사이트별 사무실과 서비스 조직을 운영한다고 명시되어 있다."}
+{"lid": "fb8aad7c00", "label": "contradicted", "passage": 8, "reason": "문단 8에 고객사별 사무실과 별도로 언급된 중국법인의 소재지는 심천이 아닌 합비로 기재되어 있다."}
+{"lid": "10fdfd1247", "label": "supported", "passage": 8, "reason": "문단 8에 합비 중국법인 외의 고객사별 사무실과 각 서비스 조직 운영이 명시되어 있으며 띄어쓰기 차이는 의미를 바꾸지 않는다."}
+{"lid": "4c5224ca4b", "label": "supported", "passage": 6, "reason": "문단 6에 메인 장비시장의 독과점 구조, 제조사 간 사용 장비의 유사성 및 비슷한 생산수준에 대한 판단이 모두 제시되어 있다."}
+{"lid": "107a90b737", "label": "non_claim", "passage": null, "reason": "문장이 설에서 끊겨 장비제조 핵심부문에 관한 완결된 사실 주장을 이루지 않는다."}
+{"lid": "6e04712889", "label": "supported", "passage": 8, "reason": "문단 8은 당사 제품이 양산체제가 아닌 주문 생산에 의한다고 명시한다."}
+{"lid": "9b5350b949", "label": "supported", "passage": 5, "reason": "문단 5는 전방산업 투자에 따른 매출 변동을 보완하기 위해 진출한 전기차 사업이 초기단계라고 명시한다."}
+{"lid": "adea69ae2f", "label": "supported", "passage": 7, "reason": "문단 7에 디스플레이 제조공정용 검사장비 제조, 패널·공정장비 업체 납품 및 디스플레이 장비산업 소속이 모두 명시되어 있다."}
+{"lid": "bb6b5863f5", "label": "contradicted", "passage": 5, "reason": "문단 5에서 매출 변동 보완을 위해 진출했고 초기단계라고 설명한 사업은 반도체/디스플레이 검사장비가 아닌 전기차 사업이다."}
+{"lid": "fb58719dc6", "label": "supported", "passage": 6, "reason": "문단 6에 검사장비의 지속적 환경 모니터링, 사전 통보, 실시간 불량 검사·통보 및 손실 최소화가 모두 명시되어 있다."}
+{"lid": "73c5037572", "label": "supported", "passage": 6, "reason": "문단 6은 당사와 연결 종속회사가 반도체/디스플레이 검사장비 사업을 주 사업으로 영위한다고 명시한다."}
+{"lid": "84a618f228", "label": "supported", "passage": 2, "reason": "문단 2에 CCD모듈을 제외한 원재료 매입처가 대부분 국내 회사이며 조달에 특별한 애로점이 없다고 명시되어 있다."}
+{"lid": "4bcc27ab4d", "label": "no_evidence", "passage": null, "reason": "원재료 총매입액의 큰 변동은 제시되지 않았고, 가격 추이 파악의 어려움은 총매입액이 아닌 제조 사양과 원재료 규격 변경으로 설명되어 있다."}
+{"lid": "1a19c270ed", "label": "supported", "passage": 2, "reason": "문단 2에 CCD모듈을 제외한 원재료 매입처 대부분이 국내 회사이며 당사와 매입처의 특수관계가 없다고 명시되어 있다."}
+{"lid": "f2cb6376c9", "label": "supported", "passage": 2, "reason": "문단 2에 당사의 원재료 국내 조달 비중과 조달상 특별한 애로점이 없다는 내용이 명시되어 있다."}
+{"lid": "8d37b6977c", "label": "no_evidence", "passage": null, "reason": "제시된 문단의 원재료 조달 설명은 스마트솔루션즈에 관한 것으로 파크시스템스의 매입처와 조달 상황은 제시되지 않았다."}
+{"lid": "ddb8c4f9f0", "label": "no_evidence", "passage": null, "reason": "문단 7에는 당기말 588.23%와 전기말 303.71%만 제시되어 있으며, 주장한 284.52% 증가율은 문단에 없는 계산값이다."}
+{"lid": "726c235ffe", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 2013년·2014년·2015년 매출액이 없다는 사실이 기재되어 있지 않으며 수치 미제시만으로 매출 부재를 판단할 수 없다."}
+{"lid": "78939ea039", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 해당 연도별 연구개발비 비율이나 그 비율이 없다는 사실이 기재되어 있지 않다."}
+{"lid": "32852ef2fc", "label": "no_evidence", "passage": null, "reason": "문단 6은 해당 연구기간을 제시하지만 연구개발비용의 금액이나 비용이 없다는 사실은 제시하지 않는다."}
+{"lid": "e978a253ea", "label": "supported", "passage": 6, "reason": "문단 6에 실리콘 관통전극(TSV) 고속깊이 측정 장비 연구기간 2013.11.01~2015.10.31과 상품화 내용인 TSV계측 장비개발이 명시되어 있다."}
+{"lid": "7a21f5bfee", "label": "contradicted", "passage": 6, "reason": "문단 6에서 해당 기간의 고속깊이 측정 연구과제는 웨이퍼 레벨 패키지가 아닌 실리콘 관통전극(TSV) 장비 개발로 기재되어 있다."}
+{"lid": "9085664861", "label": "non_claim", "passage": null, "reason": "문단과 절 번호를 표시하다 끊긴 인용 표기로 사실 주장이 없다."}
+{"lid": "3aa3040ae1", "label": "non_claim", "passage": null, "reason": "연구개발비용과 비율을 뒤에 제시하겠다는 답변 도입 문장으로 구체적인 사실이나 수치를 주장하지 않는다."}
+{"lid": "2f616ae01e", "label": "supported", "passage": 6, "reason": "문단 6에 TSV 고속깊이 측정 장비 연구기간과 상품화 내용인 TSV계측 장비개발이 모두 명시되어 있다."}
+{"lid": "7c943b4d63", "label": "non_claim", "passage": null, "reason": "특정 표를 근거로 답변한다는 절차 안내로 사업보고서의 사실을 주장하지 않는다."}

@@ -1,0 +1,37 @@
+{"lid": "305505aba9", "label": "supported", "passage": 4, "reason": "문단 4가 전기 전자부품 제조사 대양코리아의 인수를 통한 사업 다각화를 명시한다."}
+{"lid": "4c98630f9d", "label": "supported", "passage": 4, "reason": "문단 4가 대륙제관의 대양코리아 인수와 전기 전자부품 제조 사업 다각화를 함께 뒷받침한다."}
+{"lid": "a82893f0a7", "label": "contradicted", "passage": 4, "reason": "문단 4는 인수한 대양코리아의 사업을 전기 전자부품 제조로 설명하여 반도체 장비 제조라는 주장과 다르다."}
+{"lid": "55e01b4ae4", "label": "supported", "passage": 1, "reason": "문단 1에 열거된 일반관, 휴대용 부탄가스, 에어졸관, 캡 등의 사출물 및 제관 기계의 제작·판매가 모두 명시되어 있다."}
+{"lid": "e0caa5e627", "label": "supported", "passage": 1, "reason": "문단 1이 주장에 나열된 제품과 사출물 및 제관 기계의 제작·판매를 모두 설명한다."}
+{"lid": "6c47c52d3e", "label": "supported", "passage": 1, "reason": "문단 1은 휴대용 부탄가스를 연료관으로 분류하고 이를 제작·판매한다고 명시한다."}
+{"lid": "4a9b887074", "label": "contradicted", "passage": 1, "reason": "문단 1은 연료관을 휴대용 부탄가스로 설명하므로 연료관 제품을 음료캔으로 바꾼 주장과 다르다."}
+{"lid": "163bcab719", "label": "supported", "passage": 1, "reason": "문단 1은 휴대용부탄가스를 연료관으로 설명하고 제작·판매한다고 명시한다."}
+{"lid": "7f6f15776e", "label": "supported", "passage": 2, "reason": "인용한 문단 2가 열거된 일반관, 연료관, 에어졸관, 사출물 및 제관 기계의 제작·판매를 모두 명시한다."}
+{"lid": "b6d32d3462", "label": "non_claim", "passage": null, "reason": "금액과 비중을 뒤에서 제시하겠다는 도입문으로, 구체적인 매출 금액이나 비중을 주장하지 않는다."}
+{"lid": "a54b3153d5", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 에어졸관의 매출 비중이 100%라는 수치가 없다."}
+{"lid": "1b3465167b", "label": "contradicted", "passage": 7, "reason": "문단 7은 같은 상장일의 상장시장을 코스닥시장으로 명시하여 유가증권시장이라는 주장과 다르다."}
+{"lid": "77b1590118", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 일반관과 에어졸관의 매출 비중이나 각각 100%라는 수치가 없다."}
+{"lid": "27133ada33", "label": "supported", "passage": 7, "reason": "문단 7이 코스닥시장 상장과 상장일 1994년 12월 29일을 함께 명시한다."}
+{"lid": "8698dba97f", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 일반관의 매출 비중이 100%라는 수치가 없다."}
+{"lid": "d921192019", "label": "contradicted", "passage": 3, "reason": "문단 3은 윤활유관·페인트관·식용유관을 일반관으로 분류하며 일반 에어졸관으로 분류하지 않는다."}
+{"lid": "6083af40e3", "label": "supported", "passage": 3, "reason": "문단 3은 대륙제관이 제작·판매하는 일반관의 대표 제품으로 윤활유관·페인트관·식용유관을 명시한다."}
+{"lid": "951becf309", "label": "supported", "passage": 8, "reason": "문단 8이 주문처 요구에 따라 색상·크기·도금방법·코팅방법을 결정하고 생산한다는 내용을 명시한다."}
+{"lid": "bbf2283b5e", "label": "no_evidence", "passage": null, "reason": "문단은 윤활유·페인트·식용유를 용기에 충전하는 물질로 열거할 뿐, 질문의 매입 비중이 가장 큰 원재료로 제시하지 않는다."}
+{"lid": "138183f9e3", "label": "supported", "passage": 3, "reason": "문단 3이 윤활유관·페인트관·식용유관을 대륙제관의 일반관 대표 제품으로 명시한다."}
+{"lid": "5edeb76094", "label": "no_evidence", "passage": null, "reason": "문단 8에는 JPY 원화환산액 2,119,645만 있으며 변동 후 2,331,715와 증가액 212,070은 없고, 문단에 없는 계산값은 근거로 인정하지 않는다."}
+{"lid": "25ed1b764f", "label": "supported", "passage": 8, "reason": "문단 8이 내부 환위험 측정의 기준을 원화 환율 10% 변동으로 명시한다."}
+{"lid": "3c0a94da23", "label": "no_evidence", "passage": null, "reason": "문단 8에는 변동 후 금액 3,822,639와 감소액 425,070이 없으며 제시되지 않은 계산값은 근거로 인정하지 않는다."}
+{"lid": "c771d9cfbc", "label": "no_evidence", "passage": null, "reason": "문단 8에는 변동 후 금액 4,672,789와 증가액 425,080이 없으며 제시되지 않은 계산값은 근거로 인정하지 않는다."}
+{"lid": "d673803dce", "label": "no_evidence", "passage": null, "reason": "문단 8에는 매출채권 환산액 1,117,644만 있으며 변동 후 1,230,714와 증가액 113,070은 제시되지 않았다."}
+{"lid": "a941ae73b3", "label": "no_evidence", "passage": null, "reason": "문단 8에는 EUR 원화환산액 2,043,208만 있으며 변동 후 2,245,628와 증가액 202,420은 제시되지 않았다."}
+{"lid": "0537c4d6fb", "label": "no_evidence", "passage": null, "reason": "제시된 문단은 대륙제관의 환위험 측정 기준을 설명하며 고려제강의 측정 기준에 관한 근거는 없다."}
+{"lid": "7458d92d5d", "label": "supported", "passage": 8, "reason": "문단 8이 보고기간말에 다른 변수를 고정하고 원화 환율 10% 변동에 따른 세후 이익 영향을 제시하는 조건을 명시한다."}
+{"lid": "8bf59f7cd4", "label": "non_claim", "passage": null, "reason": "원화 환율 상승 시나리오의 제목일 뿐, 실제 이익 영향이나 수치를 주장하지 않는다."}
+{"lid": "0aed432167", "label": "non_claim", "passage": null, "reason": "원화 환율 하락 시나리오의 제목일 뿐, 실제 이익 영향이나 수치를 주장하지 않는다."}
+{"lid": "2fd00d2b70", "label": "supported", "passage": 8, "reason": "문단 8은 대륙제관이 원화 환율 10% 변동을 기준으로 내부 환위험을 측정한다고 명시한다."}
+{"lid": "3d93f89c56", "label": "non_claim", "passage": null, "reason": "제공된 문단의 정보 부족을 알리는 답변 한계 안내이며 연구개발비용이나 비율 자체를 주장하지 않는다."}
+{"lid": "f25486d7c9", "label": "supported", "passage": 4, "reason": "문단 4의 판매조직 설명이 주문처 요구에 따른 색상·크기·도금방법·코팅방법 결정과 생산을 명시한다."}
+{"lid": "8043b605c4", "label": "contradicted", "passage": 1, "reason": "문단 1은 헤어스프레이관과 스프레이식 살충제관을 일반 에어졸관으로 분류하여 음료캔 부문이라는 주장과 다르다."}
+{"lid": "66946448cf", "label": "no_evidence", "passage": null, "reason": "인용한 문단 4는 판매조직과 제품을 설명하며 최근 사업연도 연구개발비용 총액이나 매출액 대비 비율의 근거를 제공하지 않는다."}
+{"lid": "ac10995dba", "label": "supported", "passage": 4, "reason": "문단 4가 충전 물질과 최종 소비재의 예시, 주문처 요구에 따른 용기 사양 결정, 납품 및 최종소비자 판매를 모두 명시한다."}
+{"lid": "b54ca0b43b", "label": "supported", "passage": 1, "reason": "문단 1은 대륙제관이 제작·판매하는 일반 에어졸관으로 헤어스프레이관과 스프레이식 살충제관을 명시한다."}

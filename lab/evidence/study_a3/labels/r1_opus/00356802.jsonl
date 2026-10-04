@@ -1,0 +1,38 @@
+{"lid": "db32c04c9b", "label": "supported", "passage": 1, "reason": "문단1: 생산설비 없이 외주가공으로 생산해 납품받으며 생산업체에 (주)뉴로메카 포함"}
+{"lid": "13576569c8", "label": "supported", "passage": 3, "reason": "문단3: 의료로봇 사업은 당사의 핵심사업"}
+{"lid": "51b90c5a97", "label": "contradicted", "passage": 1, "reason": "문단1의 생산업체는 비케이전자·일산·뉴로메카로 레인보우로보틱스가 아님"}
+{"lid": "29cd24e20a", "label": "supported", "passage": 1, "reason": "문단1: 외주가공 납품, 생산업체에 (주)뉴로메카 포함"}
+{"lid": "67c526a535", "label": "supported", "passage": 4, "reason": "문단4: 기준일 현재 의료로봇·임플란트·무역사업부문으로 구성"}
+{"lid": "f6047fe34e", "label": "supported", "passage": 3, "reason": "문단3: 의료로봇사업부문이 척추수술로봇 큐비스-스파인을 판매"}
+{"lid": "f7a77f326e", "label": "supported", "passage": 4, "reason": "문단4: 주요 제품은 큐비스-조인트, 큐비스-스파인, 모닝워크 등"}
+{"lid": "ff953ad62f", "label": "contradicted", "passage": 3, "reason": "문단3: 큐비스-스파인은 의료로봇사업부문 판매 제품이고 임플란트사업부문은 임플란트를 판매"}
+{"lid": "a6a49d2f5e", "label": "no_evidence", "passage": null, "reason": "수술 정확도 향상·회복 단축은 문단4에서 의료로봇 사업 전체의 목표로만 나오고 큐비스-조인트의 효과로 단정한 문단 없음"}
+{"lid": "365d8efd5a", "label": "supported", "passage": 3, "reason": "문단3: 의료로봇사업부문이 큐비스-스파인을 판매"}
+{"lid": "d1a6d3eb6d", "label": "supported", "passage": 1, "reason": "문단1: 모닝워크(보행재활로봇)로 보행 재활 용도가 표현만 다르게 지지됨"}
+{"lid": "9113e2e882", "label": "supported", "passage": 4, "reason": "문단4: 큐비스-스파인은 척추수술로봇이고 의료로봇은 정밀한 수술 지원을 제공"}
+{"lid": "18d3165c01", "label": "no_evidence", "passage": null, "reason": "수출 24.6% 증가는 문단에 없는 계산값이며 열 순서도 문단에 표시되지 않음"}
+{"lid": "c489b8ad30", "label": "no_evidence", "passage": null, "reason": "사업부문별 매출 비중을 제시한 문단 없음"}
+{"lid": "e71ffb7411", "label": "no_evidence", "passage": null, "reason": "문단은 큐비스-조인트를 당사 제품으로만 말하며 미래컴퍼니에 관한 내용 없음"}
+{"lid": "2baa00b0b9", "label": "supported", "passage": 3, "reason": "문단3: 주요 제품은 인공관절 수술로봇 큐비스-조인트(Cuvis-joint)"}
+{"lid": "dec55a17e5", "label": "no_evidence", "passage": null, "reason": "사업부문별 매출 비중을 제시한 문단 없음"}
+{"lid": "d5367d8375", "label": "supported", "passage": 3, "reason": "문단3: 주요 제품은 인공관절 수술로봇 큐비스-조인트"}
+{"lid": "df7144c18e", "label": "no_evidence", "passage": null, "reason": "사업부문별 매출 비중을 제시한 문단 없음"}
+{"lid": "380e089d45", "label": "supported", "passage": 1, "reason": "문단1: 의료로봇사업부문 큐비스-조인트 등 제조 부품 당기 매입액 20,298백만원"}
+{"lid": "82ba2e01cb", "label": "supported", "passage": 1, "reason": "문단1: 생산설비 미보유, 외주가공 형태로 생산해 납품받음"}
+{"lid": "4328ae16f8", "label": "contradicted", "passage": 1, "reason": "문단1: 해당 매입은 의료로봇사업부문의 것이며 정밀기계사업부문이 아님"}
+{"lid": "1fd4484541", "label": "supported", "passage": 1, "reason": "문단1: 제조사 위탁 외주가공, 생산업체 비케이전자·일산·뉴로메카"}
+{"lid": "6b36c9ddf0", "label": "supported", "passage": 1, "reason": "문단1: 의료로봇사업부문 제조 부품 당기 매입액 20,298백만원"}
+{"lid": "f39f5ffe7c", "label": "supported", "passage": 7, "reason": "문단7: 국내시장은 큐비스-조인트를 중심으로 판매경로를 정함"}
+{"lid": "48e9991b24", "label": "supported", "passage": 7, "reason": "문단7: 국내시장은 큐비스-조인트를 중심으로 판매경로를 정함"}
+{"lid": "f5e676c254", "label": "contradicted", "passage": 7, "reason": "문단7: 판매경로의 중심은 큐비스-조인트이며 마코가 아님"}
+{"lid": "e2b69b9d10", "label": "supported", "passage": 5, "reason": "문단5: 특히 달러화 관련 환율변동위험에 노출"}
+{"lid": "444529c0ff", "label": "no_evidence", "passage": null, "reason": "5% 변동 민감도 수치나 그 결과를 제시한 문단 없음"}
+{"lid": "55bdfac5c6", "label": "supported", "passage": 1, "reason": "문단1: 모닝워크 등 의료사업부문 제품은 비케이전자 등 외주 생산"}
+{"lid": "0bd2cd99e7", "label": "supported", "passage": 7, "reason": "문단7: 연구과제 반영제품이 보행재활로봇 모닝워크 개발"}
+{"lid": "3fe00922b4", "label": "supported", "passage": 7, "reason": "문단7: 뇌졸중 환자 다기관 임상연구 및 질환별 치료프로토콜 개발"}
+{"lid": "f031a649d8", "label": "supported", "passage": 1, "reason": "문단1: 모닝워크 등 의료사업부문 제품 생산업체에 비케이전자 포함"}
+{"lid": "f481283109", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 매출액 대비 연구개발비 비율이 없음"}
+{"lid": "181c5e6ab6", "label": "non_claim", "passage": null, "reason": "보고서에 명시되지 않았다는 면책성 진술"}
+{"lid": "302c6a4975", "label": "contradicted", "passage": 1, "reason": "문단1의 생산업체는 비케이전자·일산·뉴로메카로 유진로봇이 아님"}
+{"lid": "d727d997a3", "label": "supported", "passage": 7, "reason": "문단7: 전국 7개병원 운영 중, 제품의 실증"}
+{"lid": "3a93ca263a", "label": "non_claim", "passage": null, "reason": "목록을 여는 도입 문장"}

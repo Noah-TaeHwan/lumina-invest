@@ -1,0 +1,29 @@
+{"lid": "0c6acff22f", "label": "supported", "passage": 6, "reason": "문단 6이 선박용 기자재의 선종·선형별 규격 다양화와 선박 사양에 따른 주문생산체제를 서술"}
+{"lid": "1675cc05ea", "label": "contradicted", "passage": 1, "reason": "문단 1은 숙련 노동력·연구개발 필요를 제품과 기술개발이 중요한 산업이라는 점에 연결하며 철도산업 특성을 원인으로 말하지 않음"}
+{"lid": "661976aa71", "label": "contradicted", "passage": 4, "reason": "문단 4는 전동기·발전기 사업이 아니라 조선사업의 불황으로 고객사 매출이 감소하는 경우를 말함"}
+{"lid": "ab1f292788", "label": "supported", "passage": 4, "reason": "문단 4: 조선사업 불황으로 현대중공업 등 고객사 매출이 감소해도 수주 물량 영향이 크지 않다고 판단"}
+{"lid": "d5341229a4", "label": "no_evidence", "passage": null, "reason": "연결실체의 사업부문 구성을 열거한 문단이 없음(문단 8에는 바이오 부문도 등장)"}
+{"lid": "9ec92627c3", "label": "supported", "passage": 4, "reason": "문단 4: 조선사업 불황으로 현대중공업 등 고객사 매출이 감소해도 수주 물량 영향이 크지 않음"}
+{"lid": "0c5e30822e", "label": "supported", "passage": 5, "reason": "문단 5: 조선사업 불황으로 현대중공업 등 고객사 매출이 감소해도 수주 물량에 직접적 영향이 없거나 크지 않음"}
+{"lid": "baa426dbc0", "label": "no_evidence", "passage": null, "reason": "문단 5가 든 고객사 예시는 현대중공업이고 삼성중공업은 어느 문단에도 없음"}
+{"lid": "3c7fbd4d40", "label": "supported", "passage": 5, "reason": "문단 5와 같은 내용(띄어쓰기 차이만 있음)"}
+{"lid": "960319c98a", "label": "supported", "passage": 5, "reason": "문단 5: 후판·철재 등 원자재를 별도 구입하지 않고 발주처에서 발주계약과 동시에 무상 공급받음"}
+{"lid": "ea97d426ab", "label": "supported", "passage": 1, "reason": "문단 1: 진해 공장은 초대형 블록 선적이 쉬운 해안에 있고 국내 3대 조선소와 가까움"}
+{"lid": "455f94624a", "label": "no_evidence", "passage": null, "reason": "부문별 매출액 수치를 담은 문단이 없음"}
+{"lid": "3c87678b3c", "label": "contradicted", "passage": 1, "reason": "문단 1은 해당 공장을 울산이 아니라 진해 공장이라고 함"}
+{"lid": "59622f9f4d", "label": "no_evidence", "passage": null, "reason": "부문별 매출 비중 수치를 담은 문단이 없음"}
+{"lid": "c5fa29401b", "label": "no_evidence", "passage": null, "reason": "조선기자재 부문 매출액·비중 수치를 담은 문단이 없음"}
+{"lid": "a66ce02a2c", "label": "non_claim", "passage": null, "reason": "뒤 내용을 예고하는 도입 문장으로 사실 주장이 아님"}
+{"lid": "0970bbe966", "label": "supported", "passage": 3, "reason": "문단 3: 블록제조 필수 재료인 후판 등을 별도 구입하지 않고 발주처가 발주계약과 동시에 무상 공급"}
+{"lid": "f945379bd2", "label": "contradicted", "passage": 3, "reason": "문단 3은 무상 공급 원자재를 프로펠러가 아니라 블록제조용이라고 함"}
+{"lid": "0f5173ee96", "label": "supported", "passage": 3, "reason": "문단 3: 블록제조용 후판 등 원자재를 발주처에서 무상 공급받음"}
+{"lid": "8c04f87ad8", "label": "supported", "passage": 3, "reason": "문단 3: 수주물량이 지속적으로 확보될 경우 꾸준한 매출규모를 유지할 수 있음"}
+{"lid": "f7dc7f5767", "label": "supported", "passage": 3, "reason": "문단 3: 후판 및 철재 기타 원자재를 발주처에서 발주계약과 동시에 무상 공급받는 구조"}
+{"lid": "1f94cf145c", "label": "supported", "passage": 3, "reason": "문단 3: 원자재를 직접 구매·조달하는 일반 제조업 형식과 달라 원자재가격의 탄력도가 낮음"}
+{"lid": "8d42016324", "label": "supported", "passage": 7, "reason": "문단 7: 현대중공업과 매달 2번, 15일·30일 납기 완료건 매출확인 후 15일 후 대금회수"}
+{"lid": "56869c5d0e", "label": "no_evidence", "passage": null, "reason": "문단 7의 결제 조건은 현대중공업에 대한 것이고 한화오션은 어느 문단에도 없음"}
+{"lid": "a6fb1d8829", "label": "no_evidence", "passage": null, "reason": "부채비율·순차입부채비율을 담은 문단이 없음"}
+{"lid": "8f2d879fb5", "label": "supported", "passage": 7, "reason": "문단 7의 현대중공업 매출확인·대금회수 조건과 같음(띄어쓰기 차이만 있음)"}
+{"lid": "00dfc52108", "label": "non_claim", "passage": null, "reason": "정보가 없다는 답변 면책 문장으로 회사에 대한 사실 주장이 아님"}
+{"lid": "e3a35223bd", "label": "supported", "passage": 1, "reason": "문단 1: 국내 전동기 및 발전기 사업은 국가 전력수급기본계획에 따라 투자가 결정되어 경기변동 영향이 크지 않음"}
+{"lid": "3fef2d0cf2", "label": "contradicted", "passage": 1, "reason": "문단 1은 전력수급기본계획 기반을 전동기·발전기 사업에 대해 말하고, 철도차량 수요는 정부·지자체 SOC 투자계획이 결정한다고 함"}

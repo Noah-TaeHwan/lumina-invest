@@ -1,0 +1,32 @@
+{"lid": "06a03878fa", "label": "supported", "passage": 3, "reason": "문단 3이 부품 소재 산업이지만 소비자가 원하는 신규 소재·기능에 맞춰 개발 생산해야 하는 특성을 그대로 서술"}
+{"lid": "8caead19e5", "label": "supported", "passage": 3, "reason": "문단 3에 사용처별로 요구 기능이 상이한 정밀 화학 산업이라고 명시"}
+{"lid": "bd62ba33fa", "label": "supported", "passage": 3, "reason": "문단 3의 특수잉크 정의(페인트와 달리 매개체를 통해 정해진 건조조건으로 부착)와 일치"}
+{"lid": "16e3360ec3", "label": "supported", "passage": 3, "reason": "문단 3: (1) 소재부품 제조도소매, 2018.02.27 100% 종속회사 (주)녹원씨엔아이 흡수합병으로 특수잉크 제조·유통 사업 영위"}
+{"lid": "bcc89ae1fa", "label": "supported", "passage": 3, "reason": "문단 3: 소재부품 제조도소매, 2018.02.27 산업용 잉크 자회사 녹원씨엔아이 흡수합병 후 특수잉크 제조·유통"}
+{"lid": "deefdad322", "label": "supported", "passage": 3, "reason": "문단 3에 현재 특수잉크 제조 및 유통사업을 영위한다고 명시"}
+{"lid": "27deaaef68", "label": "contradicted", "passage": 3, "reason": "문단 3은 사업 구분을 소재부품 제조도소매라고 하는데 주장은 의류 제조도소매라고 함"}
+{"lid": "20a1f49417", "label": "supported", "passage": 3, "reason": "문단 3 연혁에 1995.08 녹원 커머셜 설립, 1997.01 중국절강포강녹원화공 유한공사 합작설립이 있음"}
+{"lid": "f51f10ac65", "label": "supported", "passage": 3, "reason": "문단 3 연혁에 1997.05 파주 잉크공장 설립, 1998.01 중국 절강성 포강 잉크 제조가 있음"}
+{"lid": "d5c7e6d300", "label": "supported", "passage": 3, "reason": "문단 3에 사용처별로 요구 기능이 상이한 정밀 화학 산업이라고 명시"}
+{"lid": "7d7ec58bbe", "label": "contradicted", "passage": 3, "reason": "문단 3은 회사가 생산하는 제품을 특수잉크라고 하는데 주장은 특수접착제라고 함"}
+{"lid": "cc19111849", "label": "supported", "passage": 3, "reason": "문단 3: 회사는 특수잉크 제조·유통이 사업이며 그 특수잉크가 페인트와 달리 매개체를 통해 정해진 조건으로 부착하는 물질이라고 설명"}
+{"lid": "f91f63b7af", "label": "supported", "passage": 3, "reason": "문단 3의 특수잉크 정의(선박용·건물 내외장용 페인트와 달리 옵셋·그라비아·실크·PAD 인쇄기로 건조조건에 따라 부착)와 일치"}
+{"lid": "8e82de42fb", "label": "supported", "passage": 3, "reason": "문단 3의 특수잉크 정의와 일치(띄어쓰기 차이만 있음)"}
+{"lid": "c68b170196", "label": "no_evidence", "passage": null, "reason": "문단 3에서 합병된 자회사는 (주)녹원씨엔아이이고, 영문명 Nokwon Commercials & Industries, Inc.는 문단 4에 존속회사의 명칭으로만 나옴. 자회사의 영문명이라는 근거는 없음"}
+{"lid": "cedfe42ad3", "label": "non_claim", "passage": null, "reason": "'수출과 내수는 [5.'에서 끊긴 조각으로 사실 내용이 없음"}
+{"lid": "a816d7ba15", "label": "contradicted", "passage": 2, "reason": "문단 2의 매출채권 연령 구간 합계(계)는 3,436,405천원인데 주장은 1,436,401천원이라고 함. 총매출액 대비 비율의 근거도 없음"}
+{"lid": "7417aba540", "label": "contradicted", "passage": 3, "reason": "문단 3은 흡수합병한 자회사를 (주)녹원씨엔아이라고 하는데 주장은 한빛잉크라고 함"}
+{"lid": "63daa15cfe", "label": "no_evidence", "passage": null, "reason": "제시된 문단에 연결 총매출액이 없음. 1,902,608천원은 문단 2의 미연체 매출채권 금액"}
+{"lid": "ca9e9a96ab", "label": "supported", "passage": 3, "reason": "문단 3에 2018.02.27 산업용 잉크 제조유통업체인 100% 종속회사 (주)녹원씨엔아이를 흡수합병했다고 나옴"}
+{"lid": "f903ea1c8c", "label": "supported", "passage": 7, "reason": "문단 7 상호 변경 표에 2013.07.08 주식회사 큐브스가 있음"}
+{"lid": "adf3ad984d", "label": "no_evidence", "passage": null, "reason": "제시된 문단에 생산능력·생산실적·가동률 정보가 없음"}
+{"lid": "0f02f60045", "label": "supported", "passage": 7, "reason": "문단 7에 2013.07.08 회사명 주식회사 큐브스가 있음"}
+{"lid": "1b749c11c6", "label": "contradicted", "passage": 7, "reason": "문단 7에 따르면 2013.07.08 변경된 상호는 큐브스이고, 선도소프트는 2004.03.18 상호임"}
+{"lid": "e116621bdc", "label": "contradicted", "passage": 2, "reason": "문단 2는 2018년 02월 합병 당사자를 (주)녹원씨아이와 (주)녹원씨엔아이라고 하는데 주장은 동진쎄미켐이라고 함"}
+{"lid": "d70719ced1", "label": "supported", "passage": 2, "reason": "문단 2 연혁에 2018년 02월 (주)녹원씨아이 & (주)녹원씨엔아이 합병이 있음"}
+{"lid": "497b4d9b69", "label": "supported", "passage": 2, "reason": "문단 2 연혁에 2018년 02월 (주)녹원씨아이 & (주)녹원씨엔아이 합병이 있음(띄어쓰기 차이만 있음)"}
+{"lid": "528cb0ef89", "label": "supported", "passage": 1, "reason": "문단 1 매출채권 표에서 2년초과 총장부금액은 1,272,672천원"}
+{"lid": "fde1c12bab", "label": "no_evidence", "passage": null, "reason": "제시된 문단에 기대손실률 적용 여부에 관한 정보가 없음"}
+{"lid": "d1af5215e4", "label": "supported", "passage": 8, "reason": "문단 8에 제39기 연구개발비용 계 1,003백만원, 연구개발비/매출액 비율 9.02%가 있음"}
+{"lid": "760932daad", "label": "supported", "passage": 8, "reason": "문단 8 연구개발 실적에 잉크 부문 연구과제 모바일 IT기기 등, 과제건수 12가 있음"}
+{"lid": "c6b12ed8fa", "label": "contradicted", "passage": 8, "reason": "문단 8에서 모바일 IT기기 등 연구과제 12건은 필름이 아니라 잉크 부문임"}

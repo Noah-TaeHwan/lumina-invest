@@ -1,0 +1,40 @@
+{"lid": "676b74a2ee", "label": "supported", "passage": 1, "reason": "문단 1은 한국도로전산과 와이티테크놀로지의 기술용역업 부문을 보고부문 요건 미달로 기타 부문에 포함했다고 명시한다."}
+{"lid": "34c8f71e6d", "label": "no_evidence", "passage": null, "reason": "문단 1은 한국도로전산과 와이티테크놀로지를 언급하며, 에스트래픽의 기술용역업 부문 분류는 제시하지 않는다."}
+{"lid": "59f1fd128f", "label": "supported", "passage": 7, "reason": "문단 7은 당사의 주요 사업으로 ITS 사업, 모바일 관련 부품 공급업, 임대사업을 명시한다."}
+{"lid": "e5e16eb196", "label": "supported", "passage": 1, "reason": "문단 1이 두 회사의 기술용역업 부문과 보고부문 요건 미달에 따른 기타 부문 분류를 모두 명시한다."}
+{"lid": "f1b495c6f6", "label": "no_evidence", "passage": null, "reason": "문단 1에는 ITS 사업, 모바일 부품 공급업, 임대사업이 제시되지만 철도신호 사업 영위 여부는 제시되지 않는다."}
+{"lid": "fc2ad75ba1", "label": "supported", "passage": 8, "reason": "문단 8의 한국도로공사 납품현황에 교통량 측정기 176차로가 명시되어 있다."}
+{"lid": "d6fc5ec694", "label": "supported", "passage": 1, "reason": "문단 1은 회사가 ITS 사업, 모바일 관련 부품 공급업, 임대사업 등을 주요 사업으로 영위한다고 명시한다."}
+{"lid": "ceb130c49f", "label": "no_evidence", "passage": null, "reason": "문단 8의 국산화 대상은 축중검출판이며, 나열된 장비 전체가 주요 부품이고 국산화되었다는 내용은 없다."}
+{"lid": "56d2772056", "label": "supported", "passage": 8, "reason": "문단 8은 고정식 축중기의 제조·납품과 한국도로공사 납품현황을 명시한다."}
+{"lid": "30dea4025c", "label": "non_claim", "passage": null, "reason": "장비 목록을 소개하는 안내 문장으로 구체적인 장비 종류나 별도의 사실을 주장하지 않는다."}
+{"lid": "dcb4f686cd", "label": "supported", "passage": 8, "reason": "문단 8의 국내 장비 납품현황에 고속 축중기 4차로가 명시되어 있다."}
+{"lid": "93857dd974", "label": "supported", "passage": 1, "reason": "문단 1에 ITS 사업, 모바일 관련 부품 공급업, 임대사업이라는 주요 사업 목록이 제시되어 있다."}
+{"lid": "282d987a6f", "label": "supported", "passage": 8, "reason": "문단 8의 국내 장비 납품현황에 이동식 축중기 28 SET가 명시되어 있다."}
+{"lid": "6b4d7a1363", "label": "supported", "passage": 7, "reason": "문단 7은 스마트 축중기와 고속 축중기의 자체 기술 개발 및 지속적인 제품 고도화를 명시한다."}
+{"lid": "da0fb3a8c1", "label": "no_evidence", "passage": null, "reason": "문단 7이 명시한 개발 제품은 스마트 축중기와 고속 축중기이며, 스마트 신호제어기의 자체 개발·고도화 근거는 없다."}
+{"lid": "64141d63bf", "label": "supported", "passage": 7, "reason": "문단 7은 ITS 분야의 스마트 축중기와 고속 축중기가 자체 기술로 개발되어 고도화되고 있다고 명시한다."}
+{"lid": "e27d8ac1b6", "label": "non_claim", "passage": null, "reason": "연결 매출 구성의 뒤따르는 설명을 소개하는 문장으로 자체적으로 구체적인 구성이나 수치를 제시하지 않는다."}
+{"lid": "f2d458d86c", "label": "supported", "passage": 4, "reason": "문단 4가 나노테크의 600여개 이상 제품 생산·납품 역량, 경쟁사 대비 성장 예상, 당사 원자재 납품 매출·이익 증가 기대를 모두 명시한다."}
+{"lid": "e21e5ead5c", "label": "supported", "passage": 5, "reason": "문단 5가 B2B 중심 거래, 베트남 자회사 식품 조달, 쿠팡의 요리가 맛있다 브랜드 공급 및 B2C 확대를 모두 명시한다."}
+{"lid": "68729ede99", "label": "supported", "passage": 7, "reason": "문단 7이 축중기의 자체 개발·고도화, 무인화·고속화 대비 개선 및 도로 교통 인프라 연계 핵심기술 개발 추진을 모두 명시한다."}
+{"lid": "fb1f1ac93e", "label": "no_evidence", "passage": null, "reason": "문단 4는 나노테크의 역량과 성장 전망만 설명하며, 연결 매출 비중이나 사업부문별 순위를 제시하지 않는다."}
+{"lid": "a36b20acbe", "label": "supported", "passage": 8, "reason": "문단 8이 베트남 나노테크의 국내 원자재 조달·삼성전자 등 신제품 개발 대응 제약과 당사의 업무 수행·원재료 공급 및 판매를 명시한다."}
+{"lid": "d97c5925dc", "label": "supported", "passage": 8, "reason": "문단 8의 삼성전자 등 원청업체 대응 제약과 당사의 국내 업무 수행·자회사 원재료 공급 및 판매 내용에 부합한다."}
+{"lid": "79832e5e3e", "label": "non_claim", "passage": null, "reason": "주요 원재료 정보가 없어 답변할 수 없음을 알리는 정보 부족 안내이다."}
+{"lid": "b2d63d8ef5", "label": "non_claim", "passage": null, "reason": "가격 변동 정보를 제공할 수 없음을 알리는 정보 부족 안내이다."}
+{"lid": "a0946f45c0", "label": "no_evidence", "passage": null, "reason": "문단 8은 삼성전자 등을 예시로 들지만 LG전자와의 신제품 개발 대응 제약은 구체적으로 제시하지 않는다."}
+{"lid": "02234f5735", "label": "supported", "passage": 2, "reason": "문단 2는 나노테크가 삼성전자의 1차 협력사라고 명시하며 삼성 전자라는 띄어쓰기는 같은 회사를 가리킨다."}
+{"lid": "167326d2f5", "label": "no_evidence", "passage": null, "reason": "제공된 문단에는 에스에이티의 파생상품 거래 여부를 확인할 근거가 없다."}
+{"lid": "2ae4711189", "label": "no_evidence", "passage": null, "reason": "문단 2는 나노테크를 삼성전자의 1차 협력사로 명시할 뿐 삼성디스플레이와의 1차 협력 관계는 제시하지 않는다."}
+{"lid": "35c06c561b", "label": "supported", "passage": 2, "reason": "문단 2가 나노테크는 삼성전자의 1차 협력사라고 직접 명시한다."}
+{"lid": "7b32f7916a", "label": "supported", "passage": 8, "reason": "문단 8이 군포시 소재 에스에이티 기술연구소와 ITS개발팀·영상개발팀·하드웨어개발팀의 3개 팀 구성을 명시한다."}
+{"lid": "26448f3089", "label": "non_claim", "passage": null, "reason": "연구개발비 비율의 뒤따르는 설명을 소개할 뿐 구체적인 비율이나 변화 사실을 제시하지 않는다."}
+{"lid": "c5ce7e8f6b", "label": "no_evidence", "passage": null, "reason": "문단 8이 설명하는 주체는 에스에이티 기술연구소이며, 에스트래픽 기술연구소의 소재지와 팀 구성은 제시되지 않는다."}
+{"lid": "c13dc85b7c", "label": "no_evidence", "passage": null, "reason": "문단 8의 161,313천원은 제28기 연구개발 원재료비이며, 연구개발비 총액과 제28기=2022년이라는 대응은 제시되지 않는다."}
+{"lid": "fc7e183649", "label": "no_evidence", "passage": null, "reason": "문단 8의 267,853천원은 제26기 연구개발 원재료비이며, 전체 연구개발비 및 제26기=2020년이라는 대응은 확인되지 않는다."}
+{"lid": "c58715e116", "label": "no_evidence", "passage": null, "reason": "문단 8의 91,215천원은 제27기 연구개발 원재료비이며, 연구개발비 총액과 제27기=2021년이라는 대응은 제시되지 않는다."}
+{"lid": "16c67ec6e0", "label": "no_evidence", "passage": null, "reason": "문단 8은 제28기 원재료비 161,313천원만 제시하므로 이를 2022년 전체 연구개발비로 단정할 근거가 없다."}
+{"lid": "b951cfa183", "label": "no_evidence", "passage": null, "reason": "문단 8은 제27기 원재료비 91,215천원만 제시하므로 이를 2021년 전체 연구개발비로 단정할 근거가 없다."}
+{"lid": "68db590fab", "label": "non_claim", "passage": null, "reason": "최근 3년 연구개발비 규모에 관한 뒤따르는 설명을 소개하는 문장이다."}
+{"lid": "33a94e7310", "label": "no_evidence", "passage": null, "reason": "문단 8은 제26기 연구개발 원재료비 267,853천원만 제시하며, 전체 연구개발비와 2020년이라는 기간 대응은 제시하지 않는다."}

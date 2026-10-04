@@ -1,0 +1,37 @@
+{"lid": "305505aba9", "label": "supported", "passage": 4, "reason": "문단 4가 대양코리아(구,대륙전자) 인수로 전기 전자부품 제조 사업 다각화를 명시한다."}
+{"lid": "4c98630f9d", "label": "supported", "passage": 4, "reason": "문단 4가 대양코리아 인수로 전기 전자부품 제조 사업 다각화를 명시한다."}
+{"lid": "a82893f0a7", "label": "contradicted", "passage": 4, "reason": "문단 4는 대양코리아가 반도체 장비가 아니라 전기 전자부품을 제조한다고 말한다."}
+{"lid": "55e01b4ae4", "label": "supported", "passage": 4, "reason": "문단 4가 나열된 용기·연료관 부착 캡 등 사출물·제관 기계의 제작·판매를 모두 말한다."}
+{"lid": "e0caa5e627", "label": "supported", "passage": 1, "reason": "문단 1의 문장과 동일하다."}
+{"lid": "6c47c52d3e", "label": "supported", "passage": 1, "reason": "문단 1이 연료관이라 불리는 휴대용 부탄가스를 제작·판매한다고 말한다."}
+{"lid": "4a9b887074", "label": "contradicted", "passage": 1, "reason": "문단 1은 연료관을 음료캔이 아니라 휴대용 부탄가스라고 말한다."}
+{"lid": "163bcab719", "label": "supported", "passage": 1, "reason": "문단 1이 연료관이라 불리는 휴대용부탄가스를 제작·판매한다고 말한다."}
+{"lid": "7f6f15776e", "label": "supported", "passage": 2, "reason": "문단 2의 문장과 동일하다."}
+{"lid": "b6d32d3462", "label": "non_claim", "passage": null, "reason": "뒤 내용을 안내하는 도입 문장으로 사실 주장이 없다."}
+{"lid": "a54b3153d5", "label": "no_evidence", "passage": null, "reason": "제품별 매출 금액·비중은 어느 문단에도 없다."}
+{"lid": "1b3465167b", "label": "contradicted", "passage": 7, "reason": "문단 7은 1994년 12월 29일 상장 시장을 유가증권시장이 아닌 코스닥시장으로 적는다."}
+{"lid": "77b1590118", "label": "no_evidence", "passage": null, "reason": "제품별 매출 비중은 어느 문단에도 없다."}
+{"lid": "27133ada33", "label": "supported", "passage": 7, "reason": "문단 7이 1994년 12월 29일 코스닥시장 상장을 적는다."}
+{"lid": "8698dba97f", "label": "no_evidence", "passage": null, "reason": "제품별 매출 비중은 어느 문단에도 없다."}
+{"lid": "d921192019", "label": "contradicted", "passage": 3, "reason": "문단 3은 윤활유관·페인트관·식용유관을 일반관으로, 일반 에어졸관은 헤어스프레이관 등으로 구분한다."}
+{"lid": "6083af40e3", "label": "supported", "passage": 3, "reason": "문단 3이 윤활유관·페인트관·식용유관을 일반관의 대표로 적는다."}
+{"lid": "951becf309", "label": "supported", "passage": 1, "reason": "문단 1의 문장과 동일하다."}
+{"lid": "bbf2283b5e", "label": "no_evidence", "passage": null, "reason": "질문 맥락상 주요 원재료가 윤활유·페인트·식용유라는 주장이나 문단은 이를 충전 원료로만 말하고 원재료 매입은 없다."}
+{"lid": "138183f9e3", "label": "supported", "passage": 3, "reason": "문단 3이 윤활유관·페인트관·식용유관을 일반관의 대표로 적는다."}
+{"lid": "5edeb76094", "label": "no_evidence", "passage": null, "reason": "변동 후 금액·변동액은 문단에 없는 계산값이다."}
+{"lid": "25ed1b764f", "label": "supported", "passage": 8, "reason": "문단 8이 내부적으로 원화 환율 10% 변동을 기준으로 환위험을 측정한다고 말한다."}
+{"lid": "3c0a94da23", "label": "no_evidence", "passage": null, "reason": "변동 후 금액·변동액은 문단에 없는 계산값이다."}
+{"lid": "c771d9cfbc", "label": "no_evidence", "passage": null, "reason": "변동 후 금액·변동액은 문단에 없는 계산값이다."}
+{"lid": "d673803dce", "label": "no_evidence", "passage": null, "reason": "변동 후 금액·변동액은 문단에 없는 계산값이다."}
+{"lid": "a941ae73b3", "label": "no_evidence", "passage": null, "reason": "변동 후 금액·변동액은 문단에 없는 계산값이다."}
+{"lid": "0537c4d6fb", "label": "no_evidence", "passage": null, "reason": "문단은 당사(대륙제관)에 관한 것이고 고려제강에 대한 내용은 없다."}
+{"lid": "7458d92d5d", "label": "non_claim", "passage": null, "reason": "표를 안내하는 도입 문장으로 영향 수치 등 사실 내용이 없다."}
+{"lid": "8bf59f7cd4", "label": "non_claim", "passage": null, "reason": "내용 없는 항목 머리말이다."}
+{"lid": "0aed432167", "label": "non_claim", "passage": null, "reason": "내용 없는 항목 머리말이다."}
+{"lid": "2fd00d2b70", "label": "supported", "passage": 8, "reason": "문단 8이 내부적으로 원화 환율 10% 변동을 기준으로 환위험을 측정한다고 말한다(띄어쓰기 차이만 있음)."}
+{"lid": "3d93f89c56", "label": "non_claim", "passage": null, "reason": "자료 부재를 밝히는 면책성 메타 문장이다."}
+{"lid": "f25486d7c9", "label": "supported", "passage": 4, "reason": "문단 4의 문장과 동일하다."}
+{"lid": "8043b605c4", "label": "contradicted", "passage": 1, "reason": "문단 1은 헤어스프레이관·스프레이식 살충제관을 음료캔이 아닌 일반 에어졸관으로 분류한다."}
+{"lid": "66946448cf", "label": "non_claim", "passage": null, "reason": "뒤 내용을 안내하는 도입 문장으로 수치 등 사실 내용이 없다."}
+{"lid": "ac10995dba", "label": "supported", "passage": 1, "reason": "문단 1의 문장과 동일하다."}
+{"lid": "b54ca0b43b", "label": "supported", "passage": 1, "reason": "문단 1이 일반 에어졸관이라 불리는 헤어스프레이관·스프레이식 살충제관을 제작·판매한다고 말한다."}

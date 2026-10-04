@@ -1,0 +1,40 @@
+{"lid": "a98b8136e4", "label": "supported", "passage": 2, "reason": "주요 사업은 네 개의 사업부문으로 구성된다고 명시"}
+{"lid": "2eb46b1a59", "label": "contradicted", "passage": 2, "reason": "발전소설계는 한국전력기술(주)로 명시되어 현대엔지니어링과 다름"}
+{"lid": "88bfc440a1", "label": "supported", "passage": 2, "reason": "기타사업부문 목록(발전소설계·전력설비정비·원자력연료가공·전력ICT서비스·해외전력사업 및 투자)이 일치"}
+{"lid": "1eeeed9452", "label": "supported", "passage": 2, "reason": "전기판매부문이 국내 전역 소비 전력량의 대부분을 판매한다고 명시"}
+{"lid": "df1389e369", "label": "supported", "passage": 2, "reason": "발전소설계[한국전력기술(주)]로 명시"}
+{"lid": "becdcc11ea", "label": "contradicted", "passage": 2, "reason": "문단은 화력발전 자회사가 생산한 전기를 전력거래소를 통해 한전에 판매한다고 하며, 부문이 거래소에서 구입해 판매한다는 주장과 역할이 반대"}
+{"lid": "fc7cbefc0e", "label": "supported", "passage": 2, "reason": "발전소설계[한국전력기술(주)]로 명시"}
+{"lid": "020e9a088b", "label": "contradicted", "passage": 2, "reason": "문단은 한수원이 생산한 전기를 전력거래소를 통해 한전에 판매한다고 하며, 부문이 거래소에서 구입해 판매한다는 주장과 역할이 반대"}
+{"lid": "676259f54e", "label": "non_claim", "passage": null, "reason": "뒤 내용을 소개하는 도입 문장으로 구체 사실 주장이 없음"}
+{"lid": "326d6232d4", "label": "supported", "passage": 8, "reason": "전력통계월보 출처 표에서 한국수력원자력(주) 시장점유율 18.5%"}
+{"lid": "9c3eb853a1", "label": "supported", "passage": 8, "reason": "전력통계월보 출처 표에서 한국수력원자력(주) 시장점유율 18.5%"}
+{"lid": "ed9d759196", "label": "no_evidence", "passage": null, "reason": "용도별 판매단가 수치가 문단에 없음"}
+{"lid": "78911a2aac", "label": "no_evidence", "passage": null, "reason": "판매단가 추이가 문단에 없음"}
+{"lid": "75e414032a", "label": "no_evidence", "passage": null, "reason": "산업용 판매단가 수치가 문단에 없음"}
+{"lid": "99dbd26e39", "label": "contradicted", "passage": 8, "reason": "표에서 한국중부발전(주) 점유율은 9.7%이며 18.5%는 한수원"}
+{"lid": "fde53ff7fa", "label": "no_evidence", "passage": null, "reason": "상업용 판매단가 수치가 문단에 없음"}
+{"lid": "b0dbaaebc1", "label": "supported", "passage": 3, "reason": "캔두 에너지·안살도 뉴클리어와 컨소시엄을 구성해 SNN과 2024년 12월 계약 체결"}
+{"lid": "46f49962d6", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 연결 매출액이나 전년 대비 증감이 없음"}
+{"lid": "40bf61c9f1", "label": "contradicted", "passage": 3, "reason": "계약 상대는 루마니아원자력공사(SNN)로 명시되어 프랑스전력공사와 다름"}
+{"lid": "687b0044d1", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 2025년 연결 매출액이 없음"}
+{"lid": "10457ad491", "label": "supported", "passage": 3, "reason": "루마니아원자력공사(SNN)와 2024년 12월 컨소시엄 계약 체결"}
+{"lid": "34f970b2f0", "label": "supported", "passage": 4, "reason": "구분 송변전, 발주처 한국전력공사, 기본도급액 143,552(백만원)"}
+{"lid": "34a0e79bf5", "label": "non_claim", "passage": null, "reason": "질문 문장"}
+{"lid": "baa7d32144", "label": "supported", "passage": 4, "reason": "구분 송변전, 발주처 한국전력공사, 기본도급액 143,552(백만원)"}
+{"lid": "2a244f6829", "label": "supported", "passage": 4, "reason": "표의 송변전 행 값(기본도급액·완성공사액·계약잔액)이 모두 일치"}
+{"lid": "42d817f949", "label": "contradicted", "passage": 4, "reason": "해당 공사의 구분은 송변전이며 배전이 아님"}
+{"lid": "5e4004e11e", "label": "supported", "passage": 8, "reason": "매분기 1회 환위험관리위원회 개최, 외환거래는 헤지거래로 한정"}
+{"lid": "0f4c89d3bb", "label": "supported", "passage": 3, "reason": "원자력ㆍ원자로 사업유형에 소형모듈형원자로(SMR) 포함"}
+{"lid": "2527c495ea", "label": "supported", "passage": 6, "reason": "환위험관리위원회 및 재무위험관리위원회를 설치ㆍ운영"}
+{"lid": "8f9c59aec2", "label": "supported", "passage": 3, "reason": "원자력ㆍ원자로 사업유형에 소형모듈형원자로(SMR) 포함"}
+{"lid": "bab3a52e83", "label": "no_evidence", "passage": null, "reason": "사업유형 목록에 소듐냉각고속로가 없고 반박 문단도 없음"}
+{"lid": "589833f818", "label": "supported", "passage": 8, "reason": "통화스왑으로 외화사채 100% 헤지, 통화선도로 매입채무 일정부분 헤지"}
+{"lid": "1a9824404a", "label": "no_evidence", "passage": null, "reason": "외부전문가 3인(문단1)과 7~10인 구성·심의사항(문단6)을 합쳐야 하며 한 문단이 모두 지지하지 않음"}
+{"lid": "31c57011fd", "label": "supported", "passage": 8, "reason": "환위험 관리조직으로 환위험관리위원회를 두고 운영"}
+{"lid": "29318b5b2a", "label": "supported", "passage": 8, "reason": "통화스왑으로 외화사채 100% 헤지, 통화선도로 매입채무 일정부분 헤지"}
+{"lid": "67be8e44d1", "label": "supported", "passage": 2, "reason": "루마니아원자력공사(SNN)와 2024년 12월 계약 체결"}
+{"lid": "4679442e13", "label": "supported", "passage": 6, "reason": "2025년 수행과제 242건, 완료과제 88건"}
+{"lid": "67cc98df3e", "label": "no_evidence", "passage": null, "reason": "비율 0.3%는 있으나 투입 금액은 문단에 없음"}
+{"lid": "7470d4047c", "label": "contradicted", "passage": 2, "reason": "계약 상대는 루마니아원자력공사(SNN)로 프랑스전력공사와 다름"}
+{"lid": "c7d28da1ab", "label": "supported", "passage": 2, "reason": "루마니아원자력공사(SNN)와 2024년 12월 계약 체결"}

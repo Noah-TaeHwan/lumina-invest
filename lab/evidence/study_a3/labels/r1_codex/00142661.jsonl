@@ -1,0 +1,19 @@
+{"lid": "64ef88e41c", "label": "supported", "passage": 3, "reason": "문단 3은 연결회사가 논산·경산·아산에 제조시설을 두고 배합사료 제품을 생산한다고 명시한다."}
+{"lid": "6ef9b3e680", "label": "supported", "passage": 3, "reason": "문단 3 하나에 국내 논산·경산·아산 제조시설과 해외 베트남·중국 생산 및 판매 법인이 모두 명시되어 있다."}
+{"lid": "9ddf09e22a", "label": "no_evidence", "passage": null, "reason": "제조시설과 생산은 연결회사 기준으로 설명되며, (주)우성 자체가 세 시설에서 제조한다는 사실은 확인되지 않는다."}
+{"lid": "77e5bfc6d9", "label": "contradicted", "passage": 5, "reason": "문단 5는 국내 3개 공장을 논산·경산·아산으로 명시하여 김제를 포함한 주장과 다르다."}
+{"lid": "8bbe173b92", "label": "supported", "passage": 6, "reason": "문단 6의 배합사료 제품 가격 표에 제56기 601, 제55기 589, 제54기 627이 그대로 제시되어 있다."}
+{"lid": "af0d3fa2d9", "label": "supported", "passage": 6, "reason": "문단 6은 매출 대부분이 배합사료 제품에서 발생한다고 명시하며, 뒤의 문구는 목록 안내로 구체적 상표를 주장하지 않는다."}
+{"lid": "5f86201ed2", "label": "supported", "passage": 2, "reason": "문단 2는 사양가와의 직거래뿐 아니라 대리점 및 농/축협을 통한 영업활동도 명시한다."}
+{"lid": "1f1c1997f7", "label": "supported", "passage": 2, "reason": "문단 2는 배합사료 제품 매출액 6,070억과 전체 매출 대비 약 99.0%를 함께 명시한다."}
+{"lid": "5e1d5359a7", "label": "no_evidence", "passage": null, "reason": "사양가 직거래와 대리점 판매는 제시되지만 이마트를 통한 판매는 어느 문단에도 없다."}
+{"lid": "b8290031ea", "label": "supported", "passage": 4, "reason": "문단 4의 (주)우성사료 사업내용에 가축용 배합사료 및 양어·반려동물 사료 제조업이 명시되어 있다."}
+{"lid": "4c0c8c4522", "label": "supported", "passage": 4, "reason": "문단 4는 (주)우성사료가 가축용 배합사료와 양어·반려동물 사료 제조업을 영위한다고 명시한다."}
+{"lid": "d7dcec030d", "label": "no_evidence", "passage": null, "reason": "문단 4는 해당 제조업을 (주)우성사료의 사업으로 명시하며, (주)우성 자체의 제조 담당 여부는 확인되지 않는다."}
+{"lid": "c2de672625", "label": "supported", "passage": 5, "reason": "문단 5 하나에 주요 원재료인 옥수수·소맥과 원재료 거의 전량의 수입 의존이 모두 명시되어 있다."}
+{"lid": "742ec628ba", "label": "supported", "passage": 2, "reason": "문단 2는 우성사료의 가축용·양어·반려동물 사료 제조업과 가축용 배합사료 판매업을 함께 명시한다."}
+{"lid": "42e42d0285", "label": "supported", "passage": 2, "reason": "문단 2는 우성사료가 세 사료군을 제조하고 가축용 배합사료 판매업도 영위한다고 명시한다."}
+{"lid": "2fe3c60769", "label": "no_evidence", "passage": null, "reason": "제조·판매 내용은 우성사료에 관한 것이며 팜스코의 사업은 어느 문단에도 제시되지 않는다."}
+{"lid": "3a64a97742", "label": "no_evidence", "passage": null, "reason": "환율 위험 노출은 명시되지만 환율 위험 관리용 파생상품을 보유하지 않는다는 사실은 제시되지 않는다."}
+{"lid": "fba62c9181", "label": "supported", "passage": 7, "reason": "문단 7은 연구기관과의 컨설팅 계약 체결만 언급하고 계약 상대방 명칭과 계약 기간은 제시하지 않는다."}
+{"lid": "1097532a76", "label": "contradicted", "passage": 5, "reason": "문단 5는 회사별 사업과 제조거점을 설명할 뿐 해외 연구기관 계약의 상대방·기간을 언급하지 않는다."}

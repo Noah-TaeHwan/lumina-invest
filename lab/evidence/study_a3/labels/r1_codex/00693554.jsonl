@@ -1,0 +1,32 @@
+{"lid": "3331c786ec", "label": "supported", "passage": 7, "reason": "문단 7에서 회사의 건설 부문과 전자 부문을 함께 설명한다."}
+{"lid": "7cf807a19a", "label": "supported", "passage": 1, "reason": "문단 1에 2014년 공동주택 시행 시작, 2015년 우방토건 합병과 건설사업부 편입, 시행·시공 병행이 모두 명시되어 있다."}
+{"lid": "8c01446b3d", "label": "supported", "passage": 1, "reason": "문단 1에 2015년 우방토건 합병을 통한 건설사업부 편입과 시행·시공 병행이 명시되어 있다."}
+{"lid": "2ece8967d3", "label": "supported", "passage": 1, "reason": "문단 1의 우방토건과 동일한 회사명이며 2015년 합병, 건설사업부 편입, 시행·시공 병행을 지지한다."}
+{"lid": "484a45e325", "label": "no_evidence", "passage": null, "reason": "문단 1은 건설사업부 편입을 설명하지만 플랜트사업부를 조직 내에 두었다는 근거는 없다."}
+{"lid": "2284d92332", "label": "supported", "passage": 4, "reason": "문단 4에 PET 수지의 경제성·가공성·식품 보관 안전성과 유리·알루미늄·종이 용기 시장 대체가 모두 명시되어 있다."}
+{"lid": "89ed2c3f01", "label": "no_evidence", "passage": null, "reason": "문단 4의 해당 설명은 PET 수지에 관한 것이며 PVC 수지의 특성과 시장 대체는 제시되지 않는다."}
+{"lid": "fc5a348702", "label": "supported", "passage": 4, "reason": "문단 4에 PET 수지가 경제성·가공성·식품 보관 안전성을 바탕으로 기존 용기 시장을 빠르게 대체했다고 명시되어 있다."}
+{"lid": "c122962e92", "label": "non_claim", "passage": null, "reason": "제공된 근거에서 판매가격 정보를 찾을 수 없다는 답변의 한계 안내이다."}
+{"lid": "b09b993b9e", "label": "no_evidence", "passage": null, "reason": "문단 1은 제주특별자치도개발공사를 화학부문 매출처로 제시하지만 롯데케미칼은 제시하지 않는다."}
+{"lid": "af39157662", "label": "supported", "passage": 1, "reason": "문단 1의 2025년 화학부문 주요 매출처에 생수판매업체인 제주특별자치도개발공사와 효성티앤씨가 포함되어 있다."}
+{"lid": "2e41ebd3e7", "label": "contradicted", "passage": 6, "reason": "문단 6의 PET-Chip 판매경로 비중은 Local 및 직수출 43.3%, 내수 판매 56.7%로 주장과 반대이다."}
+{"lid": "ea90295538", "label": "no_evidence", "passage": null, "reason": "문단 1은 삼성전자와 엘지디스플레이를 전자부문 매출처로 제시하며 화학부문 고객이라는 근거는 없다."}
+{"lid": "ecf4c26b11", "label": "supported", "passage": 1, "reason": "문단 1의 2025년 전자부문 주요 매출처에 삼성전자와 엘지디스플레이가 함께 명시되어 있다."}
+{"lid": "b24a89bfec", "label": "no_evidence", "passage": null, "reason": "문단 7은 재생원료 기반 블렌딩 칩 설비투자의 정책 대응과 전망을 설명하지만 PET-Chip 자체가 그 블렌딩 칩이라는 근거는 없다."}
+{"lid": "8b2f4a2229", "label": "no_evidence", "passage": null, "reason": "화학부문과 전자부문은 문단 6의 사업부문 명칭이며 이 부문 자체가 주력 제품이라는 근거는 없다."}
+{"lid": "26579b8666", "label": "no_evidence", "passage": null, "reason": "문단 6의 터치스크린패널 100.0%는 내수 판매경로 비중이며 제품 자체의 매출액 비중으로 일반화할 근거는 없다."}
+{"lid": "d31f16ccc4", "label": "no_evidence", "passage": null, "reason": "문단 6의 PET-Chip 43.3%는 Local 및 직수출 판매경로 비중이며 제품 자체의 매출액 비중이라는 근거는 없다."}
+{"lid": "2521d01d95", "label": "supported", "passage": 1, "reason": "문단 1에 2025년 전자부문 주요 매출처로 삼성전자와 엘지디스플레이가 명시되어 있다."}
+{"lid": "9c1330da14", "label": "non_claim", "passage": null, "reason": "주요 원재료 정보를 제시할 수 없다는 근거 부족 안내이다."}
+{"lid": "4b8261ad33", "label": "contradicted", "passage": 7, "reason": "문단 7은 폴리에스터와 스판덱스 사업부문의 사업중단 결정을 명시하므로 이 제품들을 현재 생산한다는 주장과 상충한다."}
+{"lid": "61b08585ab", "label": "supported", "passage": 6, "reason": "문단 6에 회사가 2008년 동국무역의 화학사업부문을 영업 양수하여 현재까지 사업을 영위한다고 명시되어 있다."}
+{"lid": "92855cb3bf", "label": "non_claim", "passage": null, "reason": "환율 변동의 영향을 다음 내용에서 제시하겠다는 도입·절차 안내이다."}
+{"lid": "d557f1fb5a", "label": "supported", "passage": 2, "reason": "문단 2의 당기말 USD 환율 10% 상승 시 당기손익 영향은 (112,756)천원이다."}
+{"lid": "4ee6b7c90a", "label": "supported", "passage": 2, "reason": "문단 2의 당기말 USD 환율 10% 하락 시 당기손익 영향은 112,756천원이다."}
+{"lid": "0e663d4cbe", "label": "supported", "passage": 6, "reason": "문단 6에 2008년 동국무역 화학사업부문 영업 양수와 현재까지의 사업 영위가 명시되어 있다."}
+{"lid": "68300ef9ab", "label": "no_evidence", "passage": null, "reason": "문단 6은 동국무역 화학사업부문 양수를 설명하며 대한유화가 사업부문을 넘겼다는 근거는 없다."}
+{"lid": "1f57e0b1b7", "label": "supported", "passage": 3, "reason": "문단 3에 지속적인 실적 악화를 이유로 2023년 3월 15일 이사회에서 폴리사업부 중단을 결정했다고 명시되어 있다."}
+{"lid": "0fa78a1db3", "label": "supported", "passage": 2, "reason": "문단 2의 매출액 대비 연구개발 비율은 2023년 0.22%, 2024년 0.07%, 2025년 0.04%로 감소한다."}
+{"lid": "2d2fb2ffbc", "label": "supported", "passage": 2, "reason": "문단 2의 연구개발비용은 2023년 900백만원, 2024년 235백만원, 2025년 130백만원으로 감소한다."}
+{"lid": "77ec84110d", "label": "no_evidence", "passage": null, "reason": "문단 3의 2023년 3월 사업중단 대상은 폴리에스터이며 나일론 사업부문 중단은 제시되지 않는다."}
+{"lid": "5e5c5d968f", "label": "supported", "passage": 3, "reason": "문단 3에 지속적인 실적 악화를 이유로 2023년 3월 이사회에서 폴리에스터 사업부문 중단을 결정했다고 명시되어 있다."}

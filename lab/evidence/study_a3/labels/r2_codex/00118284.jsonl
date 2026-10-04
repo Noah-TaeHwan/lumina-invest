@@ -1,0 +1,5 @@
+{"lid": "cf87ac571d", "label": "no_evidence", "passage": null, "reason": "문단 2는 건설기계산업을 굴삭기의 전방산업으로 언급하지만 동일금속의 주력 산업이라고 밝히지는 않는다."}
+{"lid": "1bb4eb2baf", "label": "contradicted", "passage": 1, "reason": "문단 1은 당사의 주력 생산품을 굴삭기용 부품이 아니라 크롤러 크레인용 트랙슈 어셈블리 부품으로 명시한다."}
+{"lid": "1655ab9543", "label": "contradicted", "passage": 5, "reason": "문단 5에서 당기 USD 환율 10% 하락의 손익 감소액은 402,323,881원이며 314,132,664원은 전기 값이다."}
+{"lid": "032f6beb72", "label": "contradicted", "passage": 5, "reason": "문단 5에서 당기 USD 환율 10% 상승의 손익 증가액은 402,323,881원이며 314,132,664원은 전기 값이다."}
+{"lid": "072ac69608", "label": "non_claim", "passage": null, "reason": "연구개발비 규모나 비율을 주장하는 대신 정보 부재를 알리는 면책성 문장이다."}

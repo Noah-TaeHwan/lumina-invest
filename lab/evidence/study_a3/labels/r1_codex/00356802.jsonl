@@ -1,0 +1,38 @@
+{"lid": "db32c04c9b", "label": "supported", "passage": 1, "reason": "생산설비를 보유하지 않고 외주 가공으로 최종 제품을 납품받으며 생산업체에 뉴로메카가 포함된다."}
+{"lid": "13576569c8", "label": "supported", "passage": 3, "reason": "의료로봇 사업을 당사의 핵심사업이라고 명시한다."}
+{"lid": "51b90c5a97", "label": "contradicted", "passage": 1, "reason": "제품 생산업체는 비케이전자·일산·뉴로메카로 명시되어 레인보우로보틱스로 바꾼 제조사 정보와 다르다."}
+{"lid": "29cd24e20a", "label": "supported", "passage": 1, "reason": "자체 생산설비 없이 외주 가공으로 최종 제품을 납품받고 생산업체에 (주)뉴로메카가 명시된다."}
+{"lid": "67c526a535", "label": "supported", "passage": 4, "reason": "보고서 작성 기준일 현재 의료로봇·임플란트·무역의 세 사업부문으로 구성된다고 명시한다."}
+{"lid": "f6047fe34e", "label": "supported", "passage": 7, "reason": "의료로봇사업부문이 큐비스-스파인을 판매하며 해당 제품을 척추수술로봇으로 명시한다."}
+{"lid": "f7a77f326e", "label": "supported", "passage": 4, "reason": "의료로봇 전문기업의 주요 제품으로 큐비스-조인트·큐비스-스파인·모닝워크를 열거한다."}
+{"lid": "ff953ad62f", "label": "contradicted", "passage": 7, "reason": "큐비스-스파인은 의료로봇사업부문의 판매 제품이며 임플란트사업부문은 인공관절보형물을 판매한다고 명시한다."}
+{"lid": "a6a49d2f5e", "label": "no_evidence", "passage": null, "reason": "수술 정확도 향상과 회복 기간 단축은 사업의 목표로 제시될 뿐 큐비스-조인트의 실제 기여 결과는 확인되지 않는다."}
+{"lid": "365d8efd5a", "label": "supported", "passage": 7, "reason": "큐비스-스파인을 의료로봇사업부문이 판매하는 척추수술로봇으로 명시한다."}
+{"lid": "d1a6d3eb6d", "label": "supported", "passage": 1, "reason": "모닝워크를 보행재활로봇으로 명시하여 보행 능력 회복을 돕는 재활 용도를 지지한다."}
+{"lid": "9113e2e882", "label": "supported", "passage": 4, "reason": "큐비스-스파인을 척추수술로봇으로 열거하고 의료로봇 사업의 정밀한 수술 지원 용도를 설명한다."}
+{"lid": "18d3165c01", "label": "no_evidence", "passage": null, "reason": "수출 매출액은 제시되지만 24.6% 증가율과 사업부문별 매출 비중은 제시되지 않으며 문단에 없는 계산값은 근거로 삼을 수 없다."}
+{"lid": "c489b8ad30", "label": "no_evidence", "passage": null, "reason": "제시된 문단에 무역사업부문의 매출 비중 1%가 없다."}
+{"lid": "e71ffb7411", "label": "no_evidence", "passage": null, "reason": "큐비스-조인트는 큐렉소의 주요 제품으로 소개되며 미래컴퍼니의 제품에 관한 사실은 제시되지 않는다."}
+{"lid": "2baa00b0b9", "label": "supported", "passage": 3, "reason": "큐렉소의 주요 제품으로 인공관절 수술로봇 큐비스-조인트(Cuvis-joint)를 명시한다."}
+{"lid": "dec55a17e5", "label": "no_evidence", "passage": null, "reason": "제시된 문단에 의료로봇사업부문의 매출 비중 74.5%가 없다."}
+{"lid": "d5367d8375", "label": "supported", "passage": 3, "reason": "주요 제품 중 인공관절 수술로봇 큐비스-조인트가 명시된다."}
+{"lid": "df7144c18e", "label": "no_evidence", "passage": null, "reason": "제시된 문단에 임플란트사업부문의 매출 비중 24.6%가 없다."}
+{"lid": "380e089d45", "label": "supported", "passage": 1, "reason": "의료로봇사업부문의 큐비스-조인트 등 제조 부품 당기 매입액은 백만원 단위로 20,298이다."}
+{"lid": "82ba2e01cb", "label": "supported", "passage": 1, "reason": "의료사업부문은 생산설비를 보유하지 않고 외주 가공 형태로 생산된 제품을 납품받는다고 명시한다."}
+{"lid": "4328ae16f8", "label": "contradicted", "passage": 1, "reason": "해당 제조 부품의 당기 매입액 20,298백만원은 정밀기계사업부문이 아니라 의료로봇사업부문에 귀속된다."}
+{"lid": "1fd4484541", "label": "no_evidence", "passage": null, "reason": "세 업체는 최종 제품의 생산업체로 제시되지만 제조 부품 자체의 외주 가공을 맡았다는 사실은 명시되지 않는다."}
+{"lid": "6b36c9ddf0", "label": "supported", "passage": 1, "reason": "의료로봇사업부문의 큐비스-조인트·큐비스-스파인·모닝워크 제조 부품 매입액은 20,298백만원이다."}
+{"lid": "f39f5ffe7c", "label": "supported", "passage": 7, "reason": "의료로봇사업의 국내 판매경로를 큐비스-조인트 중심으로 정한다고 명시한다."}
+{"lid": "48e9991b24", "label": "supported", "passage": 7, "reason": "국내시장에서 큐비스-조인트를 중심으로 의료로봇사업 판매경로를 정한다고 명시한다."}
+{"lid": "f5e676c254", "label": "contradicted", "passage": 7, "reason": "국내 판매경로의 중심 제품은 마코가 아니라 큐비스-조인트로 명시된다."}
+{"lid": "e2b69b9d10", "label": "supported", "passage": 5, "reason": "외환위험 중 특히 달러화와 관련된 환율변동위험에 노출된다고 명시한다."}
+{"lid": "444529c0ff", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 환율 5% 변동에 대한 환산손익 변동률이나 민감도 수치가 없다."}
+{"lid": "55bdfac5c6", "label": "supported", "passage": 1, "reason": "모닝워크 등 의료사업부문 제품은 외주 생산되며 생산업체에 비케이전자가 포함된다."}
+{"lid": "0bd2cd99e7", "label": "supported", "passage": 7, "reason": "2016~2017년 연구개발 실적의 반영제품으로 보행재활로봇 모닝워크 개발을 명시한다."}
+{"lid": "3fe00922b4", "label": "supported", "passage": 7, "reason": "2016~2017년 연구과제의 결과 및 기대효과에 뇌졸중 환자 다기관 임상연구와 질환별 치료프로토콜 개발을 명시한다."}
+{"lid": "f031a649d8", "label": "supported", "passage": 1, "reason": "모닝워크 등 제품을 외주 가공으로 납품받고 생산업체로 비케이전자·일산·뉴로메카를 명시한다."}
+{"lid": "f481283109", "label": "no_evidence", "passage": null, "reason": "이 질문에 제시된 8개 문단에는 2025년 연구개발비의 매출액 대비 비율 4.4%가 없다."}
+{"lid": "181c5e6ab6", "label": "no_evidence", "passage": null, "reason": "제시된 8개 문단에 연구개발비 규모가 없다는 것만으로 보고서 전체에도 명시되지 않았다고 판단할 수 없다."}
+{"lid": "302c6a4975", "label": "contradicted", "passage": 1, "reason": "제품 생산업체는 비케이전자·일산·뉴로메카로 명시되어 유진로봇으로 바꾼 제조사 정보와 다르다."}
+{"lid": "d727d997a3", "label": "supported", "passage": 7, "reason": "2016~2017년 연구과제의 결과 및 기대효과에 전국 7개 병원 운영 중인 제품의 실증을 명시한다."}
+{"lid": "3a93ca263a", "label": "non_claim", "passage": null, "reason": "뒤에 제시할 연구과제 목록을 소개하는 안내 문장이다."}

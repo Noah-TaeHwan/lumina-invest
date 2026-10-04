@@ -1,0 +1,33 @@
+{"lid": "c0a8fa117a", "label": "no_evidence", "passage": null, "reason": "문단은 슈피겐코리아의 아마존 판매 사업을 설명하며 한샘의 사업에 관한 근거는 없다."}
+{"lid": "c00890f304", "label": "supported", "passage": 5, "reason": "아마존이라는 글로벌 유통채널을 통한 스마트폰 액세서리 판매 사업을 명시한다."}
+{"lid": "2961176b15", "label": "supported", "passage": 5, "reason": "슈피겐코리아가 아마존을 통해 스마트폰 액세서리 판매 사업을 영위한다고 명시한다."}
+{"lid": "2fc3bff1f5", "label": "supported", "passage": 2, "reason": "스마트폰 케이스·보호필름·기타 모바일 액세서리를 아마존을 통해 판매한다고 명시한다."}
+{"lid": "2f9a4666fd", "label": "supported", "passage": 8, "reason": "주 매출원인 케이스 부문을 100% 외주 생산한다고 명시한다."}
+{"lid": "fa9826325b", "label": "contradicted", "passage": 8, "reason": "주 매출원으로 명시된 부문은 반도체가 아니라 케이스 부문이다."}
+{"lid": "44d12693a7", "label": "supported", "passage": 8, "reason": "주 매출원인 케이스 부문의 100% 외주 생산은 전량 외주 생산과 같다."}
+{"lid": "5d2b351f2f", "label": "supported", "passage": 1, "reason": "주요 사업 제품으로 스마트폰 케이스·보호필름·기타 모바일 액세서리를 모두 제시한다."}
+{"lid": "cbf21fdfb7", "label": "supported", "passage": 2, "reason": "모빌리티 디스플레이 보호필름을 포함한 제품 포트폴리오 확대를 설명한다."}
+{"lid": "6ed870c064", "label": "supported", "passage": 1, "reason": "북미 아마존의 슬림 프로텍션 케이스로 브랜딩을 시작하고 유럽·인도·일본으로 확장했다고 명시한다."}
+{"lid": "b994f52a9e", "label": "no_evidence", "passage": null, "reason": "제품 확대 목록은 제시되지만 폴더블 스마트폰 케이스 등을 기타 모바일 액세서리 제품군으로 분류한 근거는 없다."}
+{"lid": "1b7ef6344f", "label": "no_evidence", "passage": null, "reason": "21,280원과 19,908원은 케이스 품목 가격이며 보조배터리 품목 가격은 제시되지 않는다."}
+{"lid": "a472b7b8ce", "label": "supported", "passage": 6, "reason": "케이스 가격은 2025년 21,280원, 2024년 19,908원으로 제시되어 2025년 가격이 더 높다."}
+{"lid": "00a8156cd1", "label": "non_claim", "passage": null, "reason": "제공 문헌의 정보 한계를 알리는 안내 문장이다."}
+{"lid": "42ad5f8cf0", "label": "non_claim", "passage": null, "reason": "매입처 정보에 대한 보고서의 근거 한계를 알리는 안내 문장이다."}
+{"lid": "b922487871", "label": "contradicted", "passage": 2, "reason": "2025년 12월 15일 A- 등급을 부여한 기관은 한국기업평가가 아니라 이크레더블이다."}
+{"lid": "a382791935", "label": "supported", "passage": 2, "reason": "이크레더블의 신용평가와 평가일 2025/12/15, 신용등급 A-를 함께 명시한다."}
+{"lid": "b1dfdf71a2", "label": "supported", "passage": 4, "reason": "제품개발·제품설계 조직의 신규 제품 개발·설계·제작과 자체 연구개발을 명시한다."}
+{"lid": "a1c2afc56f", "label": "supported", "passage": 2, "reason": "(주)이크레더블이 2025/12/15에 A- 신용등급을 부여했다고 명시한다."}
+{"lid": "74bf7ef976", "label": "supported", "passage": 5, "reason": "다수의 자체 특허기술을 바탕으로 제품을 개발한다고 명시한다."}
+{"lid": "2c060a28aa", "label": "supported", "passage": 1, "reason": "연결회사가 환위험을 주기적으로 모니터링·평가·보고한다고 명시한다."}
+{"lid": "7f258fd8de", "label": "supported", "passage": 1, "reason": "연결회사의 투기적 외환거래 금지 정책을 명시한다."}
+{"lid": "6de1bd2804", "label": "non_claim", "passage": null, "reason": "구체적인 비율이나 변화 내용을 담지 않은 후속 목록의 도입 문장이다."}
+{"lid": "25f2d4cce1", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에는 2023년 연구개발비 금액이 제시되지 않는다."}
+{"lid": "8b6f9911fa", "label": "non_claim", "passage": null, "reason": "구체적인 연구개발비 규모나 변화 내용을 담지 않은 후속 목록의 도입 문장이다."}
+{"lid": "7d3e92a6ab", "label": "no_evidence", "passage": null, "reason": "북미·유럽 온라인 판매와 슈피겐 브랜드 확대는 슈피겐코리아의 설명이며 코웨이에 관한 근거는 없다."}
+{"lid": "55e0beae00", "label": "supported", "passage": 5, "reason": "북미·유럽을 중심으로 온라인에서 모바일 액세서리를 판매하며 슈피겐 브랜드 파워를 확대한다고 명시한다."}
+{"lid": "73b0390495", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에는 2025년 매출액 대비 연구개발비 비율이 제시되지 않는다."}
+{"lid": "7f69e80078", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에는 2025년 연구개발비 금액이 제시되지 않는다."}
+{"lid": "92cdefc8e5", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에는 2023년 매출액 대비 연구개발비 비율이 제시되지 않는다."}
+{"lid": "785a11dac5", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에는 2024년 매출액 대비 연구개발비 비율이 제시되지 않는다."}
+{"lid": "8455af1fc9", "label": "supported", "passage": 5, "reason": "북미·유럽 중심의 온라인 모바일 액세서리 판매와 슈피겐(Spigen) 브랜드 파워 확대를 명시한다."}
+{"lid": "6db2b105b2", "label": "no_evidence", "passage": null, "reason": "이 질문의 문단에는 2024년 연구개발비 금액이 제시되지 않는다."}

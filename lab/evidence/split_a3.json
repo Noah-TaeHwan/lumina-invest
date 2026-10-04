@@ -1,0 +1,690 @@
+{
+ "seed": 20261204,
+ "corpcode_sha256": "ac58482aae3c5d6f804f1b94477a6f359d4d1b83cca4da41ffb49e181d13b308",
+ "a1_split_sha256": "a93cd93b85b65c1d1d6adeca9311e9f99fd8c6bc0011f6ef2991397d1872ba66",
+ "a2_split_sha256": "bd243c7cb7d0759cca44329238f8fb126287c3d48a7ed028f5344b73bfe1e1b6",
+ "companies": [
+  {
+   "corp_code": "00104537",
+   "corp_name": "국영지앤엠",
+   "stock_code": "006050",
+   "rcept_no": "20260316001289",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 20756,
+   "self_aliases": [
+    "KUK YOUNG G M"
+   ],
+   "cluster": 0,
+   "split": "check"
+  },
+  {
+   "corp_code": "00109587",
+   "corp_name": "대륙제관",
+   "stock_code": "004780",
+   "rcept_no": "20260319000299",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 31819,
+   "self_aliases": [
+    "DaeryukCan"
+   ],
+   "cluster": 1,
+   "split": "check"
+  },
+  {
+   "corp_code": "00117027",
+   "corp_name": "알루코",
+   "stock_code": "001780",
+   "rcept_no": "20260318001554",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 48676,
+   "self_aliases": [
+    "ALUKO CO.,LTD."
+   ],
+   "cluster": 2,
+   "split": "check"
+  },
+  {
+   "corp_code": "00118284",
+   "corp_name": "동일금속",
+   "stock_code": "109860",
+   "rcept_no": "20260626000141",
+   "report_nm": "[기재정정]사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 29990,
+   "self_aliases": [
+    "DONGIL METAL CO., LTD."
+   ],
+   "cluster": 3,
+   "split": "check"
+  },
+  {
+   "corp_code": "00127802",
+   "corp_name": "삼익THK",
+   "stock_code": "004380",
+   "rcept_no": "20260319001288",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 46208,
+   "self_aliases": [
+    "SAMICK THK CO.,LTD"
+   ],
+   "cluster": 4,
+   "split": "check"
+  },
+  {
+   "corp_code": "00140955",
+   "corp_name": "한솔케미칼",
+   "stock_code": "014680",
+   "rcept_no": "20260318001424",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 23294,
+   "self_aliases": [
+    "Hansol Chemical Co., Ltd"
+   ],
+   "cluster": 5,
+   "split": "check"
+  },
+  {
+   "corp_code": "00142661",
+   "corp_name": "우성",
+   "stock_code": "006980",
+   "rcept_no": "20260814003673",
+   "report_nm": "[기재정정]사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 24190,
+   "self_aliases": [
+    "WOOSUNG CO., LTD."
+   ],
+   "cluster": 6,
+   "split": "check"
+  },
+  {
+   "corp_code": "00153861",
+   "corp_name": "태영건설",
+   "stock_code": "009410",
+   "rcept_no": "20260318001574",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 99062,
+   "self_aliases": [
+    "TAEYOUNG ENGINEERING & CONSTRUCTION"
+   ],
+   "cluster": 7,
+   "split": "check"
+  },
+  {
+   "corp_code": "00159193",
+   "corp_name": "한국전력공사",
+   "stock_code": "015760",
+   "rcept_no": "20260317000686",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 242432,
+   "self_aliases": [
+    "KOREA ELECTRIC POWER CORPORATION"
+   ],
+   "cluster": 8,
+   "split": "check"
+  },
+  {
+   "corp_code": "00160010",
+   "corp_name": "한국큐빅",
+   "stock_code": "021650",
+   "rcept_no": "20260313000831",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 18789,
+   "self_aliases": [
+    "CUBIC KOREA INC."
+   ],
+   "cluster": 9,
+   "split": "check"
+  },
+  {
+   "corp_code": "00216498",
+   "corp_name": "성도이엔지",
+   "stock_code": "037350",
+   "rcept_no": "20260319001406",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 21734,
+   "self_aliases": [
+    "SUNGDO Engineering & Construction."
+   ],
+   "cluster": 10,
+   "split": "check"
+  },
+  {
+   "corp_code": "00218575",
+   "corp_name": "황금에스티",
+   "stock_code": "032560",
+   "rcept_no": "20260323000918",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 18484,
+   "self_aliases": [
+    "Hwang Kum Steel & Technology Co., Ltd"
+   ],
+   "cluster": 11,
+   "split": "check"
+  },
+  {
+   "corp_code": "00265421",
+   "corp_name": "인지디스플레",
+   "stock_code": "037330",
+   "rcept_no": "20260415000660",
+   "report_nm": "[기재정정]사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 20413,
+   "self_aliases": [
+    "INZI DISPLAY COMPANY LIMITED"
+   ],
+   "cluster": 12,
+   "split": "check"
+  },
+  {
+   "corp_code": "00356802",
+   "corp_name": "큐렉소",
+   "stock_code": "060280",
+   "rcept_no": "20260317000027",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 36936,
+   "self_aliases": [
+    "CUREXO, INC."
+   ],
+   "cluster": 13,
+   "split": "check"
+  },
+  {
+   "corp_code": "00356839",
+   "corp_name": "메디콕스",
+   "stock_code": "054180",
+   "rcept_no": "20260324000120",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 20040,
+   "self_aliases": [
+    "MEDICOX Co., Ltd."
+   ],
+   "cluster": 14,
+   "split": "check"
+  },
+  {
+   "corp_code": "00379229",
+   "corp_name": "에스에이티",
+   "stock_code": "060540",
+   "rcept_no": "20260320001380",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 35420,
+   "self_aliases": [
+    "SystemandApplicationTechnologiesInc."
+   ],
+   "cluster": 15,
+   "split": "check"
+  },
+  {
+   "corp_code": "00393469",
+   "corp_name": "메티스",
+   "stock_code": "065560",
+   "rcept_no": "20260323001575",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 15015,
+   "self_aliases": [
+    "Metis Co., Ltd."
+   ],
+   "cluster": 16,
+   "split": "check"
+  },
+  {
+   "corp_code": "00397191",
+   "corp_name": "팬엔터테인먼트",
+   "stock_code": "068050",
+   "rcept_no": "20260318001133",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 24536,
+   "self_aliases": [
+    "PANENTERTAINMENTCO.,LTD."
+   ],
+   "cluster": 17,
+   "split": "check"
+  },
+  {
+   "corp_code": "00608802",
+   "corp_name": "텔콘RF제약",
+   "stock_code": "200230",
+   "rcept_no": "20260319001306",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 46889,
+   "self_aliases": [
+    "TELCON RF PHARMACEUTICAL. Inc."
+   ],
+   "cluster": 18,
+   "split": "check"
+  },
+  {
+   "corp_code": "00626011",
+   "corp_name": "아이텍",
+   "stock_code": "119830",
+   "rcept_no": "20260323001195",
+   "report_nm": "[기재정정]사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 22949,
+   "self_aliases": [
+    "ITEK, Inc."
+   ],
+   "cluster": 19,
+   "split": "check"
+  },
+  {
+   "corp_code": "00652007",
+   "corp_name": "메카로",
+   "stock_code": "241770",
+   "rcept_no": "20260318001611",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 35592,
+   "self_aliases": [
+    "MECARO.CO.,LTD."
+   ],
+   "cluster": 20,
+   "split": "check"
+  },
+  {
+   "corp_code": "00693554",
+   "corp_name": "티케이케미칼",
+   "stock_code": "104480",
+   "rcept_no": "20260323001373",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 22106,
+   "self_aliases": [
+    "TK CHEMICAL CORPORATION"
+   ],
+   "cluster": 21,
+   "split": "check"
+  },
+  {
+   "corp_code": "00763358",
+   "corp_name": "스마트솔루션즈",
+   "stock_code": "136510",
+   "rcept_no": "20260331003117",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 25630,
+   "self_aliases": [
+    "Smart Solutions Co.,Ltd."
+   ],
+   "cluster": 22,
+   "split": "check"
+  },
+  {
+   "corp_code": "00791209",
+   "corp_name": "메타케어",
+   "stock_code": "118000",
+   "rcept_no": "20260317000732",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 31567,
+   "self_aliases": [
+    "METACARE Co., Ltd."
+   ],
+   "cluster": 23,
+   "split": "check"
+  },
+  {
+   "corp_code": "00875237",
+   "corp_name": "씨앤투스",
+   "stock_code": "352700",
+   "rcept_no": "20260318000989",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 35379,
+   "self_aliases": [
+    "CNTUS Co., Ltd"
+   ],
+   "cluster": 24,
+   "split": "check"
+  },
+  {
+   "corp_code": "00917861",
+   "corp_name": "슈피겐코리아",
+   "stock_code": "192440",
+   "rcept_no": "20260320001111",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 23053,
+   "self_aliases": [
+    "Spigen Korea Co., Ltd"
+   ],
+   "cluster": 25,
+   "split": "check"
+  },
+  {
+   "corp_code": "01011562",
+   "corp_name": "우성아이비",
+   "stock_code": "194610",
+   "rcept_no": "20260331002202",
+   "report_nm": "[첨부추가]사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 20433,
+   "self_aliases": [
+    "WOOSUNG  I.B.CO., LTD."
+   ],
+   "cluster": 26,
+   "split": "check"
+  },
+  {
+   "corp_code": "01032583",
+   "corp_name": "강동씨앤엘",
+   "stock_code": "198440",
+   "rcept_no": "20260318001156",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 18922,
+   "self_aliases": [
+    "KANGDONG C&L co., Ltd"
+   ],
+   "cluster": 27,
+   "split": "check"
+  },
+  {
+   "corp_code": "01042979",
+   "corp_name": "휴마시스",
+   "stock_code": "205470",
+   "rcept_no": "20260323001233",
+   "report_nm": "[기재정정]사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 43173,
+   "self_aliases": [
+    "HUMASIS CO., LTD."
+   ],
+   "cluster": 28,
+   "split": "check"
+  },
+  {
+   "corp_code": "01063884",
+   "corp_name": "솔디펜스",
+   "stock_code": "215090",
+   "rcept_no": "20260323001185",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 30935,
+   "self_aliases": [
+    "SolDefense Co., Ltd."
+   ],
+   "cluster": 29,
+   "split": "check"
+  },
+  {
+   "corp_code": "01068348",
+   "corp_name": "러셀",
+   "stock_code": "217500",
+   "rcept_no": "20260323000791",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 33110,
+   "self_aliases": [
+    "RUSSELL CO., LTD."
+   ],
+   "cluster": 30,
+   "split": "check"
+  },
+  {
+   "corp_code": "01134216",
+   "corp_name": "트루엔",
+   "stock_code": "417790",
+   "rcept_no": "20260312000578",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 42805,
+   "self_aliases": [
+    "TRUEN Co., Ltd"
+   ],
+   "cluster": 31,
+   "split": "check"
+  },
+  {
+   "corp_code": "01135057",
+   "corp_name": "녹십자웰빙",
+   "stock_code": "234690",
+   "rcept_no": "20260316001685",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 58566,
+   "self_aliases": [
+    "GC WellBeing Corporation"
+   ],
+   "cluster": 32,
+   "split": "check"
+  },
+  {
+   "corp_code": "01161432",
+   "corp_name": "레이저옵텍",
+   "stock_code": "199550",
+   "rcept_no": "20260320000782",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 13741,
+   "self_aliases": [
+    "Laseroptek Co., Ltd."
+   ],
+   "cluster": 33,
+   "split": "check"
+  },
+  {
+   "corp_code": "01326224",
+   "corp_name": "원바이오젠",
+   "stock_code": "307280",
+   "rcept_no": "20260323001342",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 76383,
+   "self_aliases": [
+    "Wonbiogen Co.,Ltd."
+   ],
+   "cluster": 34,
+   "split": "check"
+  },
+  {
+   "corp_code": "01396931",
+   "corp_name": "유엑스엔",
+   "stock_code": "337840",
+   "rcept_no": "20260323001181",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 64787,
+   "self_aliases": [
+    "UXN Co., Ltd."
+   ],
+   "cluster": 35,
+   "split": "check"
+  },
+  {
+   "corp_code": "01440153",
+   "corp_name": "넥사다이내믹스",
+   "stock_code": "351320",
+   "rcept_no": "20260323001172",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 16080,
+   "self_aliases": [
+    "Nexa Dynamics Co., Ltd."
+   ],
+   "cluster": 36,
+   "split": "check"
+  },
+  {
+   "corp_code": "01494154",
+   "corp_name": "지니너스",
+   "stock_code": "389030",
+   "rcept_no": "20260316001629",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 59745,
+   "self_aliases": [
+    "GENINUS Inc."
+   ],
+   "cluster": 37,
+   "split": "check"
+  },
+  {
+   "corp_code": "01507810",
+   "corp_name": "애니메디솔루션",
+   "stock_code": "390110",
+   "rcept_no": "20260324000083",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 45792,
+   "self_aliases": [
+    "anymedi Inc."
+   ],
+   "cluster": 38,
+   "split": "check"
+  },
+  {
+   "corp_code": "01686755",
+   "corp_name": "파인엠텍",
+   "stock_code": "441270",
+   "rcept_no": "20260318001161",
+   "report_nm": "사업보고서 (2025.12)",
+   "source": "random",
+   "chars": 42966,
+   "self_aliases": [
+    "Fine M-Tec Co.,Ltd."
+   ],
+   "cluster": 39,
+   "split": "check"
+  }
+ ],
+ "clusters": [
+  [
+   "00104537"
+  ],
+  [
+   "00109587"
+  ],
+  [
+   "00117027"
+  ],
+  [
+   "00118284"
+  ],
+  [
+   "00127802"
+  ],
+  [
+   "00140955"
+  ],
+  [
+   "00142661"
+  ],
+  [
+   "00153861"
+  ],
+  [
+   "00159193"
+  ],
+  [
+   "00160010"
+  ],
+  [
+   "00216498"
+  ],
+  [
+   "00218575"
+  ],
+  [
+   "00265421"
+  ],
+  [
+   "00356802"
+  ],
+  [
+   "00356839"
+  ],
+  [
+   "00379229"
+  ],
+  [
+   "00393469"
+  ],
+  [
+   "00397191"
+  ],
+  [
+   "00608802"
+  ],
+  [
+   "00626011"
+  ],
+  [
+   "00652007"
+  ],
+  [
+   "00693554"
+  ],
+  [
+   "00763358"
+  ],
+  [
+   "00791209"
+  ],
+  [
+   "00875237"
+  ],
+  [
+   "00917861"
+  ],
+  [
+   "01011562"
+  ],
+  [
+   "01032583"
+  ],
+  [
+   "01042979"
+  ],
+  [
+   "01063884"
+  ],
+  [
+   "01068348"
+  ],
+  [
+   "01134216"
+  ],
+  [
+   "01135057"
+  ],
+  [
+   "01161432"
+  ],
+  [
+   "01326224"
+  ],
+  [
+   "01396931"
+  ],
+  [
+   "01440153"
+  ],
+  [
+   "01494154"
+  ],
+  [
+   "01507810"
+  ],
+  [
+   "01686755"
+  ]
+ ]
+}

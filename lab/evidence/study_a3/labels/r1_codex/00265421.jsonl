@@ -1,0 +1,34 @@
+{"lid": "72e0f91e50", "label": "no_evidence", "passage": null, "reason": "문단 8에는 도장강판을 이용한 Chassis 성형공법 과제가 있으나 브래킷 성형공법 과제는 제시되지 않았다."}
+{"lid": "4aace293ed", "label": "supported", "passage": 1, "reason": "문단 1은 디스플레이 사업부와 자동차 사업부를 구분하여 각각의 작업시간을 제시한다."}
+{"lid": "e54f5605d6", "label": "supported", "passage": 8, "reason": "문단 8의 연구실적에 디스플레이 기술연구소의 2021년 도장강판을 이용한 Chassis 성형공법 개발이 명시되어 있다."}
+{"lid": "04ff31f05a", "label": "supported", "passage": 8, "reason": "문단 8은 당사 디스플레이 기술연구소의 2021년 도장강판을 이용한 Chassis 성형공법 개발을 제시한다."}
+{"lid": "8a3745ca26", "label": "no_evidence", "passage": null, "reason": "두 사업부의 작업시간과 연구개발은 나오지만 양쪽 사업부의 생산 제품을 모두 확인하는 단일 문단은 없다."}
+{"lid": "7f05e4d922", "label": "no_evidence", "passage": null, "reason": "문단 6의 공급계약 상대는 현대/기아자동차와 자동차 부품회사이며 KG모빌리티의 계약조건은 제시되지 않았다."}
+{"lid": "cb100355e6", "label": "supported", "passage": 8, "reason": "문단 8은 당사의 주 제품을 자동차 엔진/변속기 알루미늄 다이캐스팅 부품이라고 명시한다."}
+{"lid": "41ce5cd8b6", "label": "supported", "passage": 6, "reason": "문단 6은 현대/기아자동차 등과 기본거래조건으로 계약하고 기간·품명·계약금액을 별도로 체결하지 않는다고 밝힌다."}
+{"lid": "075667fdbc", "label": "supported", "passage": 6, "reason": "문단 6은 현대/기아자동차 등 공급계약에서 기본거래조건만 체결하며 기간·품명·계약금액은 별도 체결하지 않는다고 명시한다."}
+{"lid": "c14a615319", "label": "supported", "passage": 6, "reason": "문단 6은 현대/기아자동차와 자동차 부품회사를 공급계약 상대 업체로 제시한다."}
+{"lid": "07ce4e20fe", "label": "non_claim", "passage": null, "reason": "뒤이어 사업부별 매출 내역을 제시하겠다는 안내로 구체적인 사실을 주장하지 않는다."}
+{"lid": "86cf60a166", "label": "contradicted", "passage": 1, "reason": "문단 7은 주장 수치를 제시하지만 문단 1은 같은 2025년 해외사업부 CHASSIS 제품매출을 413,939백만원으로 제시한다."}
+{"lid": "e130f63484", "label": "contradicted", "passage": 7, "reason": "문단 7의 자동차사업부 제품매출은 248,264백만원·35.66%이며 412,868백만원·59.31%는 해외 디스플레이사업부 수치다."}
+{"lid": "57a7eed74d", "label": "contradicted", "passage": 1, "reason": "문단 7은 주장 수치를 지지하지만 문단 1의 2025년 해외사업부 CHASSIS 제품매출은 413,939백만원으로 다르다."}
+{"lid": "2022f19402", "label": "contradicted", "passage": 1, "reason": "문단 1의 37,476은 백만원 단위의 디스플레이 국내사업부 소계이며 회사 총매출도 7,218억원이라 주장과 다르다."}
+{"lid": "63e9ffacef", "label": "non_claim", "passage": null, "reason": "앞선 설명의 참고 문단을 안내하는 인용 문장으로 독립적인 사업 사실 주장이 아니다."}
+{"lid": "972c6f4e2f", "label": "contradicted", "passage": 1, "reason": "문단 1의 해외사업부 제품매출 413,939는 백만원 단위이며 억원 단위가 아니다."}
+{"lid": "2d3a560232", "label": "no_evidence", "passage": null, "reason": "문단 1에는 2025년 총매출 7,218억원이 있지만 영업이익 1,213억원은 어느 문단에도 제시되지 않았다."}
+{"lid": "7da4c82ab8", "label": "non_claim", "passage": null, "reason": "제공된 자료에 질문 관련 정보가 없음을 알리는 답변의 한계 안내다."}
+{"lid": "5e760f4771", "label": "non_claim", "passage": null, "reason": "문단 1에 있는 내용의 위치를 안내하는 문장으로 독립적인 회사 사실 주장이 아니다."}
+{"lid": "2c2d548e5d", "label": "supported", "passage": 1, "reason": "문단 1은 당기 중 생산과 영업에 중요한 시설·설비·부동산·전산시스템 등에 512억원을 투자했다고 명시한다."}
+{"lid": "635cd123d4", "label": "no_evidence", "passage": null, "reason": "문단 1의 투자 주체는 인지디스플레이이며 삼보모터스의 당기 투자금은 제시되지 않았다."}
+{"lid": "afdad16e08", "label": "supported", "passage": 1, "reason": "문단 1은 인지디스플레이가 당기 생산·영업용 주요 시설·설비·부동산·전산시스템 등에 투자한 금액을 512억원으로 제시한다."}
+{"lid": "33c2a6d0e9", "label": "supported", "passage": 6, "reason": "문단 6은 디스플레이 사업부의 생산능력 산정에 하루 16시간, 주간과 야간 각각 8시간을 적용했다고 명시한다."}
+{"lid": "ddf4012e8e", "label": "supported", "passage": 6, "reason": "문단 6은 디스플레이 사업부의 하루 작업시간을 주간 8시간과 야간 8시간을 합친 16시간으로 산정했다고 밝힌다."}
+{"lid": "dc3c711ee2", "label": "no_evidence", "passage": null, "reason": "문단 4는 선도거래를 통한 외환위험 관리를 설명하지만 외환위험이 수익성에 미치는 영향은 명시하지 않는다."}
+{"lid": "4eea65e53c", "label": "no_evidence", "passage": null, "reason": "문단 6의 하루 16시간 작업 기준은 디스플레이 사업부이며 반도체 사업부의 산정 기준은 제시되지 않았다."}
+{"lid": "ddf574de3a", "label": "no_evidence", "passage": null, "reason": "문단 6은 소재기술팀의 존재만 제시하며 소재 및 기술 개발이라는 담당 업무는 설명하지 않는다."}
+{"lid": "6cdec1eeed", "label": "no_evidence", "passage": null, "reason": "문단 6은 공정기술팀을 조직 구성에 포함하지만 공정 개발을 담당한다는 업무 설명은 없다."}
+{"lid": "ec5af22a9c", "label": "supported", "passage": 8, "reason": "문단 8은 TV 부품 및 자동차부품의 생산설비·공정기술 등과 관련한 특허와 실용신안 취득을 명시한다."}
+{"lid": "39eeb8ddd6", "label": "supported", "passage": 6, "reason": "문단 6은 PM팀의 신규제품 설계·개발, 견적·단가 책정, 개발품 일정 관리와 고객 맞춤형 개발 기획을 모두 설명한다."}
+{"lid": "bd39a2aad9", "label": "supported", "passage": 6, "reason": "문단 6은 자동차사업 연구소가 PM팀·소재기술팀·공정기술팀으로 나뉜다고 명시한다."}
+{"lid": "8bc9f15c28", "label": "no_evidence", "passage": null, "reason": "문단 8에는 TV 부품과 자동차부품 관련 특허·실용신안 취득이 있으며 냉장고 부품 관련 취득은 제시되지 않았다."}
+{"lid": "1bbaf7d4e0", "label": "supported", "passage": 8, "reason": "문단 8은 TV 부품 및 자동차부품의 생산설비·공정기술 관련 특허와 실용신안 취득을 명시한다."}

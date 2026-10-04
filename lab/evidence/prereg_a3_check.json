@@ -1,0 +1,28 @@
+{
+ "split_sha256": "e0c12d167524b7d0143aeb0daf7ed02c13ed3e13b1849de6bb072d293dc9b354",
+ "passages_manifest_sha256": "68db305b6bb0f9de49de9121d0b68b7001cade704e633951e41fa146375c944d",
+ "dart_ledger_sha256": "a0a247ad74a0cd534fa5676de7133a2aa14e62aa0bb687548e009311821c1cbb",
+ "questions_sha256": "b6c7f4f2ef91dfeeac11da683050b10521f27976ba7fe8650a02108247df925d",
+ "retrieval_sha256": "cac53bbfd5e52d8ba290e7b2a3a7b2f0df7bf5f781edad8ceaabd830b570341e",
+ "answers_sha256": "c01e7a9776677b61345764b1fd57239dae669ef9d54e7e69eb82d5d5b57eb711",
+ "claims_sha256": "c5f795b3b89336222bb93acc678df4877de4549b81ce873d95640825ff8e5cfd",
+ "labels_sha256": "02d7540caecd9f68b2f9c849eed16955a4af34045587eb93ae0a379b81d62f3a",
+ "prompts_sha256": {
+  "labeler.md": "40e84ce81104f5db1f076196d2405725da341f4e5338e2472bdac5c1950cdc38",
+  "question_writer.md": "a5b290594089b370808a5355d1e2d831516e1b7da702a1fea5cc3b8359742f90",
+  "controlled_writer_a3.md": "6689c80c50017165525cab28f1bf93d8652430c534b36bf9c892bef7ee8e1e14"
+ },
+ "prereg_sha256": "fbca582ee1d143292f5b8269e432404044fd6c3aa2ee68679dc673fd2aeab454",
+ "code_sha256": "2d8abcb5d7d30d44888dea278ae50201931d972aa34aef7a18c77271c9fe0cb4",
+ "models": {
+  "jev": "jev-1.13.0",
+  "generator": "llama3.1:8b@46e0c10c039e",
+  "embedder": "nomic-embed-text@0a109f422b47",
+  "labelers": {
+   "opus": "Claude Opus (Claude Code subagent)",
+   "codex": "codex exec"
+  }
+ },
+ "code_commit": "b00d8ec2e77cea3dfbc3721364cba44acd1bfba7",
+ "frozen_at": "2026-10-04T22:20:16.618342+00:00"
+}

@@ -1,0 +1,25 @@
+{"lid":"dbebe298b5","label":"supported","passage":1,"reason":"문단 1에 1989년 9월 26일 한국거래소 유가증권시장 상장이 명시되어 있다."}
+{"lid":"f27c09b218","label":"contradicted","passage":1,"reason":"문단 1은 1965년 설립 목적을 LM가이드가 아니라 수공용 줄의 생산·판매로 밝힌다."}
+{"lid":"6c1be18dad","label":"supported","passage":1,"reason":"문단 1에 설립일 1965년 10월 5일과 수공용 줄 생산·판매 목적이 함께 명시되어 있다."}
+{"lid":"3260d1c9db","label":"supported","passage":1,"reason":"문단 1은 삼익THK(주)가 1965년 수공용 줄 생산·판매를 목적으로 설립되었다고 밝힌다."}
+{"lid":"4792e920cf","label":"supported","passage":1,"reason":"문단 1에 1965년 설립과 수공용 줄 생산·판매 목적이 명시되어 있다."}
+{"lid":"ea88a6ebd7","label":"supported","passage":7,"reason":"문단 7은 솔루션 부문을 스마트 팩토리·로봇 기술로 설명하며 현장 경험 기반 최적 설계와 로봇 기술 초격차 유지를 명시한다."}
+{"lid":"8e328128c5","label":"no_evidence","passage":null,"reason":"제시된 문단은 삼익THK의 사업을 설명하며 현대위아의 솔루션사업부문 제품에 관한 근거는 없다."}
+{"lid":"c9241d50d4","label":"supported","passage":3,"reason":"문단 3의 표에 솔루션사업부문 주요제품으로 트랜스퍼 로봇·빅데이터 기반 이력 관리시스템·스마트 팩토리가 명시되어 있다."}
+{"lid":"64205831b0","label":"supported","passage":3,"reason":"문단 3의 표가 솔루션사업부문 주요제품 세 가지를 모두 명시한다."}
+{"lid":"5cc6138b92","label":"no_evidence","passage":null,"reason":"문단 5는 주요제품을 나열할 뿐 품목별 매출 비중이나 최대 비중 품목을 제시하지 않는다."}
+{"lid":"8fd722c81a","label":"supported","passage":5,"reason":"문단 5에 2025년 매출 2,222억원 달성이 명시되어 있다."}
+{"lid":"2b49376bc6","label":"contradicted","passage":7,"reason":"문단 7의 원재료 표에서 97.28%를 차지하는 품목은 리니어모터가 아니라 LM시스템이다."}
+{"lid":"6d7049703a","label":"supported","passage":8,"reason":"문단 8의 계약 표에 순매출액의 2% 로얄티와 매반기 지불이 함께 명시되어 있다."}
+{"lid":"b01af16433","label":"supported","passage":7,"reason":"문단 7의 원재료 표에 LM시스템 매입 비율 97.28%가 명시되어 있다."}
+{"lid":"37cf6316c8","label":"no_evidence","passage":null,"reason":"문단 7은 LM시스템 원재료의 공급처를 THK 외로 표시할 뿐 LM가이드 원소재를 주로 THK에서 조달한다고 명시하지 않는다."}
+{"lid":"38a271ca92","label":"supported","passage":7,"reason":"문단 7의 원재료 표에 삼익THK의 LM시스템 매입 비율 97.28%가 명시되어 있다."}
+{"lid":"b38ab8c47a","label":"supported","passage":4,"reason":"문단 4는 일본 THK사와의 합작을 통한 LM시스템 제품군 국산화를 명시한다."}
+{"lid":"78c143f75c","label":"contradicted","passage":4,"reason":"문단 4는 LM시스템 국산화의 합작 상대방을 일본 NSK사가 아니라 일본 THK사로 밝힌다."}
+{"lid":"ee21cd9544","label":"supported","passage":4,"reason":"문단 4에 일본 THK사와의 합작을 통한 LM시스템 제품군 국산화가 명시되어 있다."}
+{"lid":"e40b4659d1","label":"no_evidence","passage":null,"reason":"제시된 문단에는 환위험 관리를 위한 파생상품 계약의 체결 여부가 나타나지 않는다."}
+{"lid":"41e703b576","label":"supported","passage":5,"reason":"문단 5의 표에 모션사업부문 주요제품으로 LM가이드·볼나사·줄이 명시되어 있다."}
+{"lid":"0ba895eabe","label":"contradicted","passage":5,"reason":"문단 5는 LM가이드·볼나사·줄을 모션사업부문 제품으로, 솔루션사업부문 제품은 트랜스퍼 로봇·이력 관리시스템·스마트 팩토리로 구분한다."}
+{"lid":"3ef7023e5f","label":"non_claim","passage":null,"reason":"로열티 조건 자체를 주장하지 않고 제공된 정보의 한계를 알리는 답변 안내이다."}
+{"lid":"853ce27132","label":"supported","passage":5,"reason":"삼익THK의 영문 명칭으로 지칭한 동일 회사의 모션사업부문 주요제품 세 가지가 문단 5의 표에 명시되어 있다."}
+{"lid":"d31682e5e6","label":"no_evidence","passage":null,"reason":"문단 5의 일본 THK사 합작·국산화 설명만으로 LM가이드·볼나사 기술도입계약의 상대방까지 확인할 수 없다."}

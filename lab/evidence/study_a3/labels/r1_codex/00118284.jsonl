@@ -1,0 +1,27 @@
+{"lid":"2827e5c73a","label":"contradicted","passage":2,"reason":"문단 2는 같은 개발 시점·80톤급 부품의 공급처를 삼성중공업이 아닌 현대중공업으로 명시한다."}
+{"lid":"cf87ac571d","label":"supported","passage":2,"reason":"문단 2는 동일금속의 굴삭기용 부품 생산·공급과 그 전방산업인 건설기계산업을 설명한다."}
+{"lid":"27e2c72e1e","label":"supported","passage":2,"reason":"문단 2에 2008년 11월 80톤용 아이들러·트랙스프링 어셈블리 개발 완료와 현대중공업 공급이 모두 명시되어 있다."}
+{"lid":"a0620f25ea","label":"supported","passage":2,"reason":"문단 2의 개발 시점·80톤급 부품·현대중공업 공급이 모두 일치하며 ㈜ 표기는 공급처의 의미를 바꾸지 않는다."}
+{"lid":"1bb4eb2baf","label":"no_evidence","passage":null,"reason":"굴삭기용 부품 생산은 문단 2에 있으나 이를 주력으로 명시하지 않으며 문단 1의 주력 생산품은 크롤러 크레인용 부품이다."}
+{"lid":"a554418727","label":"supported","passage":6,"reason":"문단 6에 국내 3사의 명칭과 굴삭기용 부품의 국내 3사·일본 2사·미국 2사 거래가 함께 명시되어 있다."}
+{"lid":"a09e022d08","label":"supported","passage":8,"reason":"문단 8은 히타치건기의 6개 모델과 동일금속이 공급하는 180·250·360·550·800톤급 트랙슈를 명시한다."}
+{"lid":"bc76028926","label":"supported","passage":1,"reason":"문단 1은 크롤러 크레인용 트랙슈 어셈블리 부품을 당사의 주력 생산품이라고 명시한다."}
+{"lid":"d09ab8e597","label":"contradicted","passage":8,"reason":"문단 8에서 해당 6개 모델의 제작사와 다섯 모델의 납품 대상은 고마츠건기가 아닌 히타치건기이다."}
+{"lid":"f5a198514c","label":"supported","passage":8,"reason":"문단 8의 히타치건기 6개 모델 중 180·250·360·550·800톤급 트랙슈 공급 내용과 일치한다."}
+{"lid":"ae259e1576","label":"supported","passage":7,"reason":"문단 7에 내수 17.5% 증가·수출 20.9% 감소·전체 매출 13.7% 감소가 모두 명시되어 있다."}
+{"lid":"7890643bac","label":"no_evidence","passage":null,"reason":"문단 7의 매출 수치는 동일금속에 관한 것이며 진성티이씨의 2025년 매출과 전년 대비 변동은 제시되지 않는다."}
+{"lid":"e5b9fa0cf9","label":"supported","passage":7,"reason":"문단 7에 2025년 매출 619억 원·전년 매출 717억 원·13.7% 감소가 명시되어 있으며 2025년의 전년은 2024년이다."}
+{"lid":"b6d3dadd4d","label":"supported","passage":7,"reason":"문단 7의 동일금속 2025년 매출 619억 원과 전년 717억 원 대비 13.7% 감소에 일치한다."}
+{"lid":"77105fa9c2","label":"supported","passage":4,"reason":"문단 4의 동일금속 사업현황 표는 각 주요 제품의 원재료를 고철·합금철로 명시한다."}
+{"lid":"a5e6edd402","label":"supported","passage":4,"reason":"문단 4는 크롤러 크레인용 부품을 미국·일본으로 전량 수출한다고 명시한다."}
+{"lid":"15b66c7207","label":"no_evidence","passage":null,"reason":"미국·일본 전량 수출은 크롤러 크레인용 부품에 관한 내용이며 타워 크레인용 부품의 생산·수출은 제시되지 않는다."}
+{"lid":"6ba83ad01f","label":"supported","passage":4,"reason":"문단 4에서 동일금속의 크롤러 크레인용 부품 미국·일본 전량 수출이 명시되며 (주) 표기는 동일 주체를 뜻한다."}
+{"lid":"36aa7b86e1","label":"supported","passage":7,"reason":"문단 7의 원재료 비중 표에서 크롤러크레인용 트랙슈의 고철 비중은 2025·2024·2023년 모두 98%이다."}
+{"lid":"833497ab69","label":"supported","passage":7,"reason":"문단 7에 해당 제품의 2023~2025년 고철 비중이 모두 98%로 제시되며 제품명의 띄어쓰기는 의미를 바꾸지 않는다."}
+{"lid":"945ef0001a","label":"no_evidence","passage":null,"reason":"문단 7의 고철 98%는 크롤러크레인용 트랙슈에 관한 수치이며 휠로더용 버킷의 원재료 비중은 제시되지 않는다."}
+{"lid":"1655ab9543","label":"no_evidence","passage":null,"reason":"문단 5의 USD 민감도에는 10% 하락 시 402,323,881원과 314,132,664원 감소가 함께 있어 기간·통화가 없는 일반적인 손익 감소액을 314,132,664원으로 확정할 수 없다."}
+{"lid":"e36f2a893f","label":"non_claim","passage":null,"reason":"구체적인 손익 변동 내용을 제시하지 않고 뒤따를 설명을 안내하는 도입 문장이다."}
+{"lid":"032f6beb72","label":"no_evidence","passage":null,"reason":"문단 5의 USD 민감도에는 10% 상승 시 402,323,881원과 314,132,664원 증가가 함께 있어 기간·통화가 없는 일반적인 손익 증가액을 314,132,664원으로 확정할 수 없다."}
+{"lid":"02b2f4419b","label":"supported","passage":6,"reason":"문단 6의 현대티엠씨 사업현황 표에 굴삭기용 BOOM·ARM, 원재료 철판, 주요고객 볼보가 모두 명시되어 있다."}
+{"lid":"d995783e69","label":"contradicted","passage":6,"reason":"문단 6은 같은 현대티엠씨의 제품·원재료에 대한 주요고객을 얀마가 아닌 볼보로 명시한다."}
+{"lid":"072ac69608","label":"no_evidence","passage":null,"reason":"이 질문의 8개 문단에는 연구개발비 규모가 없지만 그것만으로 보고서 전체에 명시되지 않았다고 확인할 수는 없다."}

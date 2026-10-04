@@ -1,0 +1,32 @@
+{"lid": "c54f37a9b1", "label": "supported", "passage": 3, "reason": "신용평가 표: 2023.06.20 이크레더블 BB"}
+{"lid": "ef9096cdfc", "label": "supported", "passage": 3, "reason": "신용평가 표: 2023.06.20 이크레더블 BB"}
+{"lid": "0649b1940f", "label": "no_evidence", "passage": null, "reason": "문단 2는 산업 개요일 뿐, 회사가 피부미용·성형용 레이저기기를 주로 생산한다는 진술은 없음"}
+{"lid": "4d0cbadd01", "label": "contradicted", "passage": 3, "reason": "2023.06.20 BB 평가의 평가회사는 나이스디앤비가 아니라 이크레더블"}
+{"lid": "65d9e55612", "label": "no_evidence", "passage": null, "reason": "문단 3은 의료용 레이저기기 제조업을 영위 사업으로 나열할 뿐, 이를 주력으로 한다는 진술은 없음"}
+{"lid": "31f90953bb", "label": "supported", "passage": 4, "reason": "지역별 독점 대리점과 협력해 병의원 네트워크로 판매하고, 북미·유럽·중동·아시아 등 50개국 대리점 파트너와 거래"}
+{"lid": "f3a48d18c2", "label": "supported", "passage": 3, "reason": "신용평가 표: 2025.06.11 한국평가데이터 BB+"}
+{"lid": "1d2fe64fb3", "label": "contradicted", "passage": 3, "reason": "2025.06.11 BB+ 평가의 평가회사는 이크레더블이 아니라 한국평가데이터"}
+{"lid": "df438d6c81", "label": "supported", "passage": 3, "reason": "신용평가 표: 2025.06.11 한국평가데이터 BB+ (띄어쓰기 차이)"}
+{"lid": "7f7430a03d", "label": "non_claim", "passage": null, "reason": "정보를 찾을 수 없다는 면책 문장"}
+{"lid": "b79115e6b2", "label": "contradicted", "passage": 8, "reason": "합계 수출 13,245는 맞지만 합계 내수는 12,011(문단 8)이고 1,829는 기타 매출 소계"}
+{"lid": "0f3ee348cf", "label": "no_evidence", "passage": null, "reason": "감소액은 문단에 없는 계산값(24,590-13,245=11,345로 10,641과도 다름)"}
+{"lid": "fd5e9fe827", "label": "no_evidence", "passage": null, "reason": "문단은 클래시스에 대해 말하지 않음(주체 불일치)"}
+{"lid": "c87422ed56", "label": "supported", "passage": 2, "reason": "합계 수출: 2025년 13,245, 2024년 24,590"}
+{"lid": "a96a2c0dfd", "label": "supported", "passage": 5, "reason": "피부미용 의료기기 내수 2025년 8,729"}
+{"lid": "0c147501ff", "label": "supported", "passage": 8, "reason": "2025년 생산능력 1,027대, 생산실적 594대"}
+{"lid": "2cbacbcfb3", "label": "no_evidence", "passage": null, "reason": "57.6%는 문단에 없는 계산값(문단 4 가동율 57.83%는 연도 표기 없이 제시되고 값도 다름)"}
+{"lid": "fa69591da6", "label": "contradicted", "passage": 5, "reason": "2025년 내수 8,729는 치과용이 아니라 피부미용 의료기기 부문 매출"}
+{"lid": "289957e3b5", "label": "supported", "passage": 5, "reason": "피부미용 의료기기 내수 2025년 8,729"}
+{"lid": "c18b5a3300", "label": "no_evidence", "passage": null, "reason": "환율 영향이 신용·유동성·파생상품 위험에서 발생한다는 진술은 문단에 없음"}
+{"lid": "4acf4cd565", "label": "contradicted", "passage": 1, "reason": "당기 10% 상승 시 영향은 946,269천원이고 1,132,995천원은 전기말 값"}
+{"lid": "cd9a4394b6", "label": "supported", "passage": 8, "reason": "연구과제 HELIOS IV 785: 785nm 피코초 펄스 추가, 19.01~21.04"}
+{"lid": "3f2f91a9ef", "label": "contradicted", "passage": 8, "reason": "19.01~21.04 785nm 피코초 펄스 과제의 제품은 PicoSure가 아니라 HELIOS IV 785"}
+{"lid": "dbcd62d859", "label": "supported", "passage": 1, "reason": "당기 10% 하락 시 세전이익 (946,269)천원"}
+{"lid": "f93d53e7e5", "label": "non_claim", "passage": null, "reason": "뒤 내용을 안내하는 도입 문장"}
+{"lid": "420ed628d9", "label": "supported", "passage": 8, "reason": "연구과제 HELIOS IV 785: 785nm 피코초 펄스 추가, 19.01~21.04"}
+{"lid": "1e3019b488", "label": "supported", "passage": 1, "reason": "당기 10% 상승 시 세전이익 946,269천원 증가"}
+{"lid": "79c08ce2e4", "label": "contradicted", "passage": 1, "reason": "당기 10% 하락 시 영향은 (946,269)천원이고 1,132,995천원은 전기말 값"}
+{"lid": "e9f8e886c1", "label": "contradicted", "passage": 6, "reason": "2025.06.11 BB+ 평가의 평가회사는 한국기업데이터가 아니라 한국평가데이터"}
+{"lid": "21bb58d9ea", "label": "supported", "passage": 4, "reason": "연구개발비 합계 2025년 1,314백만원"}
+{"lid": "5afd043cdb", "label": "supported", "passage": 4, "reason": "매출액 대비 비율 2025년 5.20%"}
+{"lid": "f1e2850e3c", "label": "supported", "passage": 6, "reason": "신용평가 표: 2025.06.11 한국평가데이터 BB+"}

@@ -1,0 +1,32 @@
+{"lid": "c54f37a9b1", "label": "supported", "passage": 3, "reason": "문단 3은 2023년 6월 20일 평가회사 이크레더블과 신용등급 BB를 명시한다."}
+{"lid": "ef9096cdfc", "label": "supported", "passage": 3, "reason": "문단 3의 평가일, 평가회사 이크레더블, 신용등급 BB가 모두 일치한다."}
+{"lid": "0649b1940f", "label": "no_evidence", "passage": null, "reason": "문단 2는 산업 전반의 피부미용·성형 시술 동향이며 회사가 해당 기기를 주로 생산·판매한다는 근거는 없다."}
+{"lid": "4d0cbadd01", "label": "contradicted", "passage": 3, "reason": "문단 3의 2023년 6월 20일 BB 평가회사는 이크레더블로, 주장한 나이스디앤비와 다르다."}
+{"lid": "65d9e55612", "label": "no_evidence", "passage": null, "reason": "문단 3은 의료용 레이저기기 제조를 영위사업으로 제시하지만 의료기기 제조가 주력이라는 사실은 명시하지 않는다."}
+{"lid": "31f90953bb", "label": "supported", "passage": 4, "reason": "문단 4는 지역별 대리점과 병의원 네트워크를 통한 판매 및 북미·유럽·중동·아시아 등 50개국 파트너 관계를 함께 설명한다."}
+{"lid": "f3a48d18c2", "label": "supported", "passage": 3, "reason": "문단 3은 2025년 6월 11일 평가회사 한국평가데이터와 신용등급 BB+를 명시한다."}
+{"lid": "1d2fe64fb3", "label": "contradicted", "passage": 3, "reason": "문단 3의 2025년 6월 11일 BB+ 평가회사는 한국평가데이터로, 이크레더블이 아니다."}
+{"lid": "df438d6c81", "label": "supported", "passage": 3, "reason": "한국 평가데이터는 문단 3의 한국평가데이터와 공백만 다르며 평가일과 BB+ 등급도 일치한다."}
+{"lid": "7f7430a03d", "label": "non_claim", "passage": null, "reason": "제공된 텍스트에서 답변 정보를 찾지 못했다는 응답 한계 안내이다."}
+{"lid": "b79115e6b2", "label": "contradicted", "passage": 8, "reason": "문단 8의 2025년 전체 내수 매출은 12,011백만원이며, 1,829백만원은 문단 2의 기타 매출 소계이다."}
+{"lid": "0f3ee348cf", "label": "no_evidence", "passage": null, "reason": "문단 2는 연도별 수출액만 제시하며 10,641백만원이라는 전년 대비 감소액을 제시하지 않는다."}
+{"lid": "fd5e9fe827", "label": "no_evidence", "passage": null, "reason": "제시된 수출액은 레이저옵텍의 수치이며 클래시스의 수출 매출에 대한 문단은 없다."}
+{"lid": "c87422ed56", "label": "supported", "passage": 2, "reason": "문단 2의 전체 수출 매출은 2025년 13,245백만원, 2024년 24,590백만원으로 감소 방향도 일치한다."}
+{"lid": "a96a2c0dfd", "label": "supported", "passage": 5, "reason": "문단 5의 피부미용 의료기기 2025년 내수 매출은 8,729백만원이다."}
+{"lid": "0c147501ff", "label": "supported", "passage": 8, "reason": "문단 8은 2025년 생산능력 1,027대와 생산실적 594대를 같은 표에 제시한다."}
+{"lid": "2cbacbcfb3", "label": "no_evidence", "passage": null, "reason": "해당 질문의 문단에는 생산능력과 생산실적만 있고 약 57.6%라는 비율은 제시되어 있지 않다."}
+{"lid": "fa69591da6", "label": "no_evidence", "passage": null, "reason": "문단 5의 8,729백만원은 피부미용 의료기기 내수 매출이며 치과용 의료기기 부문의 매출 근거는 없다."}
+{"lid": "289957e3b5", "label": "supported", "passage": 5, "reason": "㈜라는 법인 표기는 주체를 바꾸지 않으며 문단 5의 피부미용 의료기기 2025년 내수 매출 8,729백만원과 일치한다."}
+{"lid": "c18b5a3300", "label": "no_evidence", "passage": null, "reason": "문단들은 신용위험 등을 언급하지만 그 위험들이 환율 변동에 따른 세전이익 영향을 발생시킨다는 인과관계는 설명하지 않는다."}
+{"lid": "4acf4cd565", "label": "contradicted", "passage": 1, "reason": "문단 1에서 환율 10% 상승에 따른 당기 세전이익 증가는 946,269천원이며 1,132,995천원은 전기 수치이다."}
+{"lid": "cd9a4394b6", "label": "supported", "passage": 8, "reason": "문단 8은 HELIOS IV 785에 785nm 피코초 펄스를 추가한 개발과 연구기간 19.01~21.04를 함께 명시한다."}
+{"lid": "3f2f91a9ef", "label": "no_evidence", "passage": null, "reason": "문단 8은 해당 기간과 785nm 피코초 펄스에 관한 HELIOS IV 785 개발을 설명하며 PicoSure 개발은 언급하지 않는다."}
+{"lid": "dbcd62d859", "label": "supported", "passage": 1, "reason": "문단 1에서 환율 10% 하락에 따른 당기 세전이익 감소는 946,269천원이다."}
+{"lid": "f93d53e7e5", "label": "supported", "passage": 1, "reason": "문단 1은 환율 10% 변동에 따른 당기 세전이익 증가·감소 영향을 제시한다."}
+{"lid": "420ed628d9", "label": "supported", "passage": 8, "reason": "문단 8의 HELIOS IV 785 개발 설명, 785nm 피코초 펄스 추가 및 19.01~21.04 연구기간이 모두 일치한다."}
+{"lid": "1e3019b488", "label": "supported", "passage": 1, "reason": "문단 1에서 환율 10% 상승에 따른 당기 세전이익 증가는 946,269천원이다."}
+{"lid": "79c08ce2e4", "label": "contradicted", "passage": 1, "reason": "문단 1에서 환율 10% 하락에 따른 당기 세전이익 감소는 946,269천원이며 1,132,995천원은 전기 수치이다."}
+{"lid": "e9f8e886c1", "label": "contradicted", "passage": 6, "reason": "문단 6의 2025년 6월 11일 BB+ 평가회사는 한국평가데이터이며 한국기업데이터라는 명칭의 동일성을 뒷받침하는 설명은 없다."}
+{"lid": "21bb58d9ea", "label": "supported", "passage": 4, "reason": "문단 4의 연구개발비용 합계는 2025년 1,314백만원이다."}
+{"lid": "5afd043cdb", "label": "supported", "passage": 4, "reason": "문단 4의 연구개발비용 표는 2025년 매출액 대비 비율을 5.20%로 제시한다."}
+{"lid": "f1e2850e3c", "label": "supported", "passage": 6, "reason": "문단 6은 한국평가데이터의 2025년 6월 11일 신용등급 확인 결과를 BB+로 명시한다."}

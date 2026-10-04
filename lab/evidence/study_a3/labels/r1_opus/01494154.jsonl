@@ -1,0 +1,40 @@
+{"lid": "dd9d7c1908", "label": "supported", "passage": 3, "reason": "문단 3에 같은 문장이 그대로 있다."}
+{"lid": "33fc70d7b9", "label": "contradicted", "passage": 6, "reason": "문단 6은 2025년 1월 공개한 공간전사체 웹 솔루션 이름을 SpaceInsight라고 하며, TissueMapper가 아니다."}
+{"lid": "4234cb83b0", "label": "no_evidence", "passage": null, "reason": "문단 1은 업계가 데이터 기반으로 전환하고 있다는 설명일 뿐이고, 회사 설립 목적은 어느 문단에도 없다."}
+{"lid": "3e265eaa7f", "label": "supported", "passage": 6, "reason": "문단 6: '25.1에 클라우드 웹 기반 공간전사체 분석 솔루션 SpaceInsight를 오픈했고 웹 브라우저로 대용량 데이터를 확인·분석할 수 있다."}
+{"lid": "c39a1703cc", "label": "supported", "passage": 1, "reason": "문단 1에 같은 문장이 있다."}
+{"lid": "1b645ea8ec", "label": "supported", "passage": 6, "reason": "문단 6: '25.1 SpaceInsight 오픈, 웹 브라우저로 대용량 공간전사체 데이터 확인·분석."}
+{"lid": "df87bef633", "label": "no_evidence", "passage": null, "reason": "문단 8의 계약조건은 한양대학교 산학협력단과의 계약이고, 고려대학교 산학협력단과의 계약은 어느 문단에도 없다."}
+{"lid": "fb57d88061", "label": "supported", "passage": 5, "reason": "문단 5는 IntelliMed를 통합 분석 플랫폼으로 소개하고 주요 고객이 대형 제약사라고 한다."}
+{"lid": "6c08fbba0e", "label": "supported", "passage": 5, "reason": "문단 5에 같은 문장이 있다."}
+{"lid": "f22094b76b", "label": "supported", "passage": 8, "reason": "문단 8: 한양대학교 산학협력단 계약은 선급기술료를 계약 체결에 따라 지급하고 별도 경상기술료는 없다."}
+{"lid": "da2dfea4f2", "label": "supported", "passage": 8, "reason": "문단 8: 한양대학교 산학협력단 계약은 선급기술료를 계약 체결에 따라 지급하고 별도 경상기술료는 없다."}
+{"lid": "84d28aa7b3", "label": "non_claim", "passage": null, "reason": "뒤에 오는 목록을 여는 도입 문장이며 그 자체로 사실을 주장하지 않는다."}
+{"lid": "014d2f8721", "label": "supported", "passage": 6, "reason": "문단 6: 2025년 기타 매출 1,928백만원, 비율 18%."}
+{"lid": "84750e5f1e", "label": "supported", "passage": 6, "reason": "문단 6: 2025년 (암)유전체 분석 솔루션 매출 1,599백만원, 비율 15%. 매출실적 표(문단 5)에서도 같은 품목을 유전체 분석 솔루션이라고 부른다."}
+{"lid": "e4d5c2e670", "label": "supported", "passage": 6, "reason": "문단 6: 2025년 단일세포 분석 솔루션 매출 6,328백만원, 비율 61%."}
+{"lid": "939cc20a77", "label": "contradicted", "passage": 6, "reason": "문단 6에서 2025년 암유전체 분석 솔루션은 1,599백만원(15%)이고, 6,328백만원(61%)은 단일세포 분석 솔루션이다."}
+{"lid": "c21c83d965", "label": "supported", "passage": 6, "reason": "문단 6에서 단일세포 61%, 기타 18%, 암유전체 15%이므로 단일세포 분석 솔루션의 비중이 가장 크다."}
+{"lid": "5c6d9211e8", "label": "supported", "passage": 6, "reason": "문단 6: 2025년 단일세포 분석 솔루션 매출 6,328백만원, 비율 61%."}
+{"lid": "de45e72446", "label": "non_claim", "passage": null, "reason": "뒤에 오는 목록을 여는 도입 문장이다."}
+{"lid": "2945d7bf35", "label": "no_evidence", "passage": null, "reason": "문단 5의 매입액은 당사(지니너스) 수치이고, 마크로젠에 관한 내용은 어느 문단에도 없다."}
+{"lid": "c5cbe75028", "label": "supported", "passage": 5, "reason": "문단 5: 단일세포 분석관련 시약 매입액 2023년 472,934, 2024년 532,211, 2025년 669,067(천원)으로 해마다 늘었다."}
+{"lid": "9cc0db65cd", "label": "supported", "passage": 5, "reason": "문단 5: 2023년도(제6기) 472,934천원."}
+{"lid": "4abec75ff0", "label": "supported", "passage": 5, "reason": "문단 5: 2025년도(제8기) 669,067천원."}
+{"lid": "534fb9468e", "label": "supported", "passage": 5, "reason": "문단 5: 2024년도(제7기) 532,211천원."}
+{"lid": "9906601bff", "label": "supported", "passage": 5, "reason": "문단 5: 단일세포 분석관련 시약 매입액 472,934, 532,211, 669,067(천원)으로 해마다 늘었다."}
+{"lid": "a46c55478b", "label": "supported", "passage": 3, "reason": "문단 3: 사업운영본부의 사업팀에서 오믹스사업 및 진단사업을 수행한다."}
+{"lid": "4c80021604", "label": "supported", "passage": 3, "reason": "문단 3: 사업운영본부의 사업팀에서 오믹스사업 및 진단사업을 수행한다."}
+{"lid": "958b401ee4", "label": "no_evidence", "passage": null, "reason": "부채비율이나 그 변화는 어느 문단에도 없다."}
+{"lid": "827b9ce2a0", "label": "contradicted", "passage": 3, "reason": "문단 3에서 사업팀이 수행하는 사업은 오믹스사업과 진단사업이며, 화장품사업이 아니다."}
+{"lid": "6b6e87ad62", "label": "no_evidence", "passage": null, "reason": "2020년 연구개발비 비율 24.7%는 어느 문단에도 없는 계산값이다. 2,751,029천원은 전기말 매출채권 순장부금액이지 매출액이 아니다."}
+{"lid": "192382dc0f", "label": "no_evidence", "passage": null, "reason": "2022년 비율 35.4%는 어느 문단에도 없는 계산값이다. 3,675,964천원은 당기말 매출채권 순장부금액이지 매출액이 아니다."}
+{"lid": "5f2e8f3139", "label": "no_evidence", "passage": null, "reason": "678,641은 전기말 매출채권 기대손실이며, 2020년 연구개발비는 어느 문단에도 없다."}
+{"lid": "ff841fc293", "label": "no_evidence", "passage": null, "reason": "1,301,543은 당기말 매출채권 기대손실이며, 2021년 연구개발비는 어느 문단에도 없다."}
+{"lid": "4bee3509d1", "label": "non_claim", "passage": null, "reason": "뒤에 오는 목록을 여는 도입 문장이다."}
+{"lid": "5d821819e9", "label": "no_evidence", "passage": null, "reason": "문단 1의 삼성서울병원 대상기술 목록에 메틸화 분석은 없다. 다만 삼성서울병원과의 계약이 여러 건(문단 7)이어서 다른 계약의 대상기술 목록이 없는 이상 반박으로 볼 수 없다."}
+{"lid": "3d38e9c455", "label": "non_claim", "passage": null, "reason": "뒤에 오는 목록을 여는 도입 문장이다."}
+{"lid": "7f69834d09", "label": "supported", "passage": 1, "reason": "문단 1: 삼성서울병원 계약의 대상기술에 유전자 복제 수 변이(CNV)를 분석하는 방법 및 장치가 있다."}
+{"lid": "6f01123fa6", "label": "no_evidence", "passage": null, "reason": "1,301,543은 당기말 매출채권 기대손실이며, 2022년 연구개발비는 어느 문단에도 없다."}
+{"lid": "4b3de59b7f", "label": "supported", "passage": 1, "reason": "문단 1: 삼성서울병원 계약의 대상기술에 유전자 복제 수 변이(CNV)를 분석하는 방법 및 장치가 있다."}
+{"lid": "789ca4d287", "label": "no_evidence", "passage": null, "reason": "2021년 비율 35.4%는 어느 문단에도 없는 계산값이다. 3,675,964천원은 매출채권 순장부금액이지 매출액이 아니다."}

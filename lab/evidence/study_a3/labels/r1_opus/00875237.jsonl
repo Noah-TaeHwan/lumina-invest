@@ -1,0 +1,27 @@
+{"lid": "a87043db11", "label": "supported", "passage": 5, "reason": "문단 5: 지역 국내, (주)씨앤투스인베스트 주요내용 투자자문업"}
+{"lid": "6a1b9c543b", "label": "no_evidence", "passage": null, "reason": "플래시 방사 부직포·양전하 필터는 개발 중으로 기재되어 생산·판매 근거가 없고, 제품 목록 전체를 한 문단이 지지하지 않음"}
+{"lid": "2516fb497b", "label": "contradicted", "passage": 5, "reason": "문단 5: (주)아에르의 주요내용은 투자자문업이 아니라 B2C 판매업"}
+{"lid": "a1757f3fdf", "label": "supported", "passage": 5, "reason": "문단 5: 지역 국내, (주)씨앤투스인베스트 주요내용 투자자문업"}
+{"lid": "456bc9e873", "label": "supported", "passage": 2, "reason": "문단 2에 같은 문장(폴리에틸렌 사용, 100% 재활용, 다양한 분야 적용)이 있음"}
+{"lid": "635f25a588", "label": "no_evidence", "passage": null, "reason": "울산 제3공장은 문단 1에서 (주)씨앤투스 사업장이며 코웨이에 대한 언급은 없음"}
+{"lid": "36763af03b", "label": "supported", "passage": 2, "reason": "문단 2에 같은 문장(인장강도, 고차단성, 투습·방습성)이 있음"}
+{"lid": "f74b09184d", "label": "supported", "passage": 1, "reason": "문단 1: (주)씨앤투스 울산 제3공장 자동차용필터, 수처리필터 제조"}
+{"lid": "a720261f4a", "label": "supported", "passage": 1, "reason": "문단 1: (주)씨앤투스 울산 제3공장 자동차용필터, 수처리필터 제조"}
+{"lid": "ae8dc0385f", "label": "supported", "passage": 2, "reason": "문단 2 표 행과 동일: 씨앤투스 울산 제1공장 공기청정기용 필터·산업용 마스크 제조 및 공급"}
+{"lid": "d394127dc5", "label": "non_claim", "passage": null, "reason": "문단 표지 조각으로 사실 주장이 아님"}
+{"lid": "438dec2f07", "label": "supported", "passage": 8, "reason": "문단 8: 해외 CNTUS VIET NAM 베트남생산센터 진공청소기용·공기청정기용·자동차용 필터 제조"}
+{"lid": "99f3e5c50a", "label": "supported", "passage": 8, "reason": "문단 8: CNTUS VIET NAM 베트남생산센터 진공청소기용·공기청정기용·자동차용 필터 제조"}
+{"lid": "daa9f5b5f7", "label": "contradicted", "passage": 8, "reason": "문단 8: 사업장은 하노이생산센터가 아니라 베트남생산센터(주소지 호치민)"}
+{"lid": "a6125ed0b5", "label": "supported", "passage": 4, "reason": "문단 4 표와 동일: 연구개발비/매출액비율 제23기 3.43%, 제22기 3.82%, 제21기 4.59%"}
+{"lid": "03f6bd3a0c", "label": "non_claim", "passage": null, "reason": "문단 표지 조각으로 사실 주장이 아님"}
+{"lid": "50d87b5be3", "label": "no_evidence", "passage": null, "reason": "비율은 문단 4와 같으나 공기청정기용 필터 매출 감소는 어느 문단에도 없음"}
+{"lid": "52e82bc209", "label": "no_evidence", "passage": null, "reason": "문단 3은 MB 원단의 핵심 원재료 PP 국내 전량 매입을 말할 뿐 스펀레이스 원단은 언급 없음"}
+{"lid": "946ecbe6fb", "label": "supported", "passage": 3, "reason": "문단 3: MB 제조 핵심 원재료 폴리프로필렌(PP)을 국내에서 전량 매입"}
+{"lid": "aeac9819eb", "label": "supported", "passage": 3, "reason": "문단 3: 'MB' 제조를 위한 핵심 원재료는 폴리프로필렌(PP)"}
+{"lid": "5669d66dba", "label": "supported", "passage": 3, "reason": "문단 3: 핵심 원재료 PP는 국내에서 전량 매입"}
+{"lid": "9f53876add", "label": "supported", "passage": 3, "reason": "문단 3: MB 제조 핵심 원재료 폴리프로필렌(PP)을 국내에서 전량 매입"}
+{"lid": "bea1abe4d5", "label": "no_evidence", "passage": null, "reason": "문단 7의 청산완료 연결제외 자회사는 DONGGUAN CLEANFILTER이며 DONGGUAN AIRTECH는 언급 없음"}
+{"lid": "13f055251d", "label": "supported", "passage": 7, "reason": "문단 7: 연결제외 DONGGUAN CLEANFILTER CO.,LTD 사유 청산완료"}
+{"lid": "8f3a8d56a0", "label": "supported", "passage": 7, "reason": "문단 7: 연결제외 DONGGUAN CLEANFILTER CO.,LTD 사유 청산완료"}
+{"lid": "191231831c", "label": "contradicted", "passage": 3, "reason": "문단 3 표 첫 열(당기로 보임)의 10% 상승시 순효과는 1,060,862천원이고 1,153,777천원은 둘째 열(전기로 보임) 값"}
+{"lid": "d246afd689", "label": "supported", "passage": 4, "reason": "문단 4: 연구개발비/매출액비율 제23기 3.43%"}

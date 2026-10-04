@@ -1,0 +1,34 @@
+{"lid": "a45a077042", "label": "supported", "passage": 7, "reason": "문단 7: 당사의 하악재건술 가이드는 2021년 4월 신의료기술로 승인"}
+{"lid": "02626d52ab", "label": "no_evidence", "passage": null, "reason": "정밀의료 패러다임 확장은 산업 설명일 뿐 회사 설립 배경이라는 서술은 없음"}
+{"lid": "d434dea853", "label": "supported", "passage": 8, "reason": "문단 8(주요 제품): 환자 영상정보(조영 CT)를 이용해 환자 맞춤형 수술 가이드를 제작"}
+{"lid": "8ca386b551", "label": "no_evidence", "passage": null, "reason": "문단 7은 당사의 가이드를 말하며 세브란스병원에 대한 언급은 없음"}
+{"lid": "c4a502cc77", "label": "supported", "passage": 7, "reason": "문단 7: 당사의 하악재건술 가이드는 2021년 4월 신의료기술로 승인"}
+{"lid": "111533e0ee", "label": "supported", "passage": 1, "reason": "문단 1: 환자의 의료영상을 분석해 그 데이터로 수술 가이드를 삼차원 프린팅으로 제작"}
+{"lid": "7d1462383e", "label": "supported", "passage": 4, "reason": "문단 4: 코 수술 솔루션에 CT에서 잘 안 보이는 연골 등 연부조직을 성별·나이에 맞게 추정해 설계에 반영하는 기술 적용"}
+{"lid": "19cc3d6d4d", "label": "supported", "passage": 4, "reason": "문단 4: 대동맥 재건·관절치환 수술 가이드에 수술 후 형태 예측 모델링·조직 박리 손실 최소화 설계 기술 적용"}
+{"lid": "2cc0a0e7d4", "label": "no_evidence", "passage": null, "reason": "시뮬레이터가 3D 프린팅으로 환자 맞춤 제작된다는 문단 없음(문단 4는 분할 기술만 언급)"}
+{"lid": "a9aa8f1069", "label": "supported", "passage": 1, "reason": "문단 1: 세계 최초의 연조직 수술 가이드로 2021년 8월 혁신의료기술 선정"}
+{"lid": "6e56e35870", "label": "contradicted", "passage": 1, "reason": "문단 1은 세계 최초 연조직 수술 가이드·2021년 8월 혁신의료기술 선정을 유방암부분절제술가이드로 기술"}
+{"lid": "da40f0bd88", "label": "no_evidence", "passage": null, "reason": "모든 제품에 해당 기술이 적용된다는 서술과 수술 결과 향상을 함께 지지하는 단일 문단 없음"}
+{"lid": "80d4294406", "label": "no_evidence", "passage": null, "reason": "의료영상 기반 맞춤형 설계 기술은 연구과제명이며 제품군 구분이라는 서술은 없음"}
+{"lid": "9f824c73f2", "label": "supported", "passage": 1, "reason": "문단 1: 세계 최초의 연조직 수술 가이드로 2021년 8월 혁신의료기술 선정"}
+{"lid": "dfaa0ce78f", "label": "contradicted", "passage": 5, "reason": "문단 5: 2025년 코스메틱AI 매출 소계는 966,732천원이며 103,600천원(=10,360만원)은 한 매출처 금액, 7.6% 비중은 없음"}
+{"lid": "10bde95608", "label": "supported", "passage": 5, "reason": "문단 5: 2025년 코스메틱AI(이노핏) 소계 966,732천원이 메디컬AI 소계 750,088천원보다 큼"}
+{"lid": "5453cc7f7f", "label": "supported", "passage": 3, "reason": "문단 3: 제품개발센터는 신제품 개발, 제품설계 및 생산, 공정관리, 인허가 담당"}
+{"lid": "a32f7e240e", "label": "non_claim", "passage": null, "reason": "뒤 내용을 안내하는 도입 문장"}
+{"lid": "218ed22835", "label": "supported", "passage": 3, "reason": "문단 3: 제품개발센터는 신제품 개발, 제품설계 및 생산, 공정관리, 인허가 담당"}
+{"lid": "6394b6930f", "label": "no_evidence", "passage": null, "reason": "품질보증센터 언급 없음(문단 3은 해당 업무를 제품개발센터로 기술)"}
+{"lid": "3e4bb34f3b", "label": "no_evidence", "passage": null, "reason": "문단 4는 생산능력 1,944만 제시, 생산실적·가동률 100%는 문단에 없는 계산값"}
+{"lid": "10ff2fa94c", "label": "no_evidence", "passage": null, "reason": "가동률이나 생산실적에 대한 문단 없음"}
+{"lid": "744e5b4314", "label": "supported", "passage": 1, "reason": "문단 1: 2021년 당사의 미용성형 보형물인 이노핏 런칭"}
+{"lid": "f8173508e9", "label": "no_evidence", "passage": null, "reason": "30%는 연구개발비/매출액 비율, 552,411천원은 연구개발비용이며 부채비율·차입금 서술 없음"}
+{"lid": "960c327962", "label": "contradicted", "passage": 1, "reason": "문단 1: 2021년 런칭한 당사 미용성형 보형물은 이노핏"}
+{"lid": "c3dfe7b095", "label": "no_evidence", "passage": null, "reason": "문단 5의 고정 환율 계약은 환율 변동 리스크 대응이며 유동성위험 관리 서술 없음"}
+{"lid": "a19359a8e1", "label": "supported", "passage": 1, "reason": "문단 1: 2021년 당사의 미용성형 보형물인 이노핏 런칭"}
+{"lid": "d9622b28ad", "label": "supported", "passage": 1, "reason": "문단 1: 3차원 인공의안 생성 방법 특허 권리자에 울산대학교 산학협력단과 애니메디솔루션 포함"}
+{"lid": "5260d8c1cf", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 연구개발비용·매출액·비율 수치 없음"}
+{"lid": "feec1c003e", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 2022년 연구개발비용·매출액·비율 없음"}
+{"lid": "333b0d001c", "label": "no_evidence", "passage": null, "reason": "보여 준 문단에 2023년 연구개발비용·매출액·비율 없음"}
+{"lid": "1ed020d646", "label": "contradicted", "passage": 1, "reason": "문단 1: 해당 특허 권리자는 울산대학교 산학협력단·애니메디솔루션·아산사회복지재단으로 부산대 아님"}
+{"lid": "e9909fb638", "label": "no_evidence", "passage": null, "reason": "연구개발비 비율 추이에 대한 문단 없음"}
+{"lid": "40a433aeff", "label": "non_claim", "passage": null, "reason": "뒤 내용을 안내하는 도입 문장"}

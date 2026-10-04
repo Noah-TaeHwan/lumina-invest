@@ -1,0 +1,31 @@
+{"lid": "4fa36d6d11", "label": "supported", "passage": 6, "reason": "문단 6이 국내 시스템 반도체 테스트 대표 기업 4개 중 하나로 아이텍을 명시"}
+{"lid": "b2ac9c4a27", "label": "supported", "passage": 6, "reason": "문단 6이 국내 시스템 반도체 테스트 대표 기업 4개 중 하나로 아이텍을 명시"}
+{"lid": "1bcd9ce60f", "label": "no_evidence", "passage": null, "reason": "반도체 테스트 사업부문(문단 4)과 반도체 인프라·콜드체인(문단 7)이 서로 다른 문단에 있어 한 문단이 전체를 지지하지 않음"}
+{"lid": "35e5aa9189", "label": "no_evidence", "passage": null, "reason": "4개 대표 업체 언급은 시스템 반도체 테스트 분야이며 배터리 안전 관리 시스템 분야 대표 업체에 관한 문단은 없음"}
+{"lid": "c14182e651", "label": "supported", "passage": 2, "reason": "문단 2가 에이티세미콘·테스나·지엠테스트·아이텍을 국내 시스템 반도체 테스트 대표 기업으로 명시"}
+{"lid": "8c65bb7606", "label": "contradicted", "passage": 2, "reason": "문단 2의 대표 기업 4개는 에이티세미콘·테스나·지엠테스트·아이텍이며 한미반도체는 없음"}
+{"lid": "f82fc7ffce", "label": "no_evidence", "passage": null, "reason": "문단 2는 테스트 산업에 프로그램 개발 능력이 필요하다는 일반론일 뿐 아이텍이 그 능력을 갖췄다고 말하지 않음"}
+{"lid": "6b1aa5f694", "label": "supported", "passage": 2, "reason": "문단 2가 아이텍을 에이티세미콘·테스나·지엠테스트와 함께 대표 기업으로 명시"}
+{"lid": "2dff20e975", "label": "supported", "passage": 2, "reason": "문단 2의 문장과 동일"}
+{"lid": "d576ee93f0", "label": "supported", "passage": 7, "reason": "문단 7이 동우텍 주요 사업으로 O&M, MRO, IoT 센서 기술 접목 콜드체인 솔루션을 명시"}
+{"lid": "a01287d77e", "label": "supported", "passage": 2, "reason": "문단 2 표의 2025년 반도체 테스트 37,637,224천원(77.6%)과 일치"}
+{"lid": "dd811de8ff", "label": "contradicted", "passage": 7, "reason": "문단 7은 IoT 센서 기술을 접목한 주요 사업을 콜드체인 솔루션으로 명시하며 스마트팜이 아님"}
+{"lid": "1aa77046f3", "label": "supported", "passage": 5, "reason": "문단 5 표의 2025년 매출 합계 48,517,802천원과 일치"}
+{"lid": "abb36133c6", "label": "supported", "passage": 7, "reason": "문단 7이 동우텍 주요 사업으로 IoT 센서 기술 접목 콜드체인 솔루션을 명시"}
+{"lid": "6b1c53984d", "label": "no_evidence", "passage": null, "reason": "문단 6은 2023~2025년 가동률만 제시하며 2021·2022년 값은 없음"}
+{"lid": "bcc7c50402", "label": "supported", "passage": 6, "reason": "문단 6이 비에이에너지 배터리 세이프티 박스의 IP55(방진,방수) 인증을 명시"}
+{"lid": "73fd249f3d", "label": "supported", "passage": 6, "reason": "문단 6이 ㈜비에이에너지 배터리 세이프티 박스의 IP55(방진,방수) 인증을 명시"}
+{"lid": "2715b32430", "label": "no_evidence", "passage": null, "reason": "문단 6은 2023~2025년 가동률만 제시하며 2021·2022년 값은 없음"}
+{"lid": "803d5a72c7", "label": "non_claim", "passage": null, "reason": "뒤에 올 내용을 예고하는 도입 문장으로 사실 주장이 없음"}
+{"lid": "c0a782420a", "label": "no_evidence", "passage": null, "reason": "문단 6의 IP55 인증 제품은 배터리 세이프티 박스이며 배터리 쿨링 캐비닛은 어느 문단에도 없음"}
+{"lid": "58d07890ce", "label": "no_evidence", "passage": null, "reason": "문단 4는 경쟁수단을 나열할 뿐 가동률 변화의 원인으로 제시하지 않음"}
+{"lid": "3af423f669", "label": "supported", "passage": 3, "reason": "문단 3이 칩 설계 업체 의뢰 제품의 웨이퍼·패키지 테스트 후 전량 직접 납품을 명시"}
+{"lid": "cdfe0758ff", "label": "no_evidence", "passage": null, "reason": "위험관리 및 파생거래를 어느 항목에서 설명하는지 말하는 문단이 없음"}
+{"lid": "f5e124710f", "label": "contradicted", "passage": 3, "reason": "문단 3은 의뢰 주체를 완성차 업체가 아니라 칩 설계 업체로 명시"}
+{"lid": "145d6a1013", "label": "supported", "passage": 3, "reason": "문단 3이 칩 설계 업체 의뢰 제품의 웨이퍼·패키지 테스트 후 전량 직접 납품을 명시"}
+{"lid": "41010e3a1e", "label": "no_evidence", "passage": null, "reason": "위험관리·파생거래 설명 위치를 기타 참고사항으로 지지하는 문단이 없음"}
+{"lid": "18e653a619", "label": "supported", "passage": 6, "reason": "문단 6이 고객사 의뢰로 연간 100여건의 테스트 프로그램 개발을 명시"}
+{"lid": "640d60d211", "label": "supported", "passage": 6, "reason": "문단 6이 고객사 의뢰로 연간 100여건의 테스트 프로그램 개발을 명시"}
+{"lid": "00fe3a8794", "label": "contradicted", "passage": 6, "reason": "문단 6은 연간 100여건 개발 대상을 배터리 안전 관리 시스템이 아니라 테스트 프로그램으로 명시"}
+{"lid": "1198f75366", "label": "supported", "passage": 6, "reason": "문단 6 연구개발 담당조직 표의 업무 영역 5개와 일치"}
+{"lid": "641475402f", "label": "supported", "passage": 6, "reason": "문단 6의 문장과 동일"}

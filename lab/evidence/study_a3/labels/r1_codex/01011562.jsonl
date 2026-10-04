@@ -1,0 +1,29 @@
+{"lid": "36ff0188b8", "label": "supported", "passage": 8, "reason": "문단 8은 경기·레저용 물놀이 보트 기구의 제조·판매를 주사업 목적으로 1992년 1월에 설립되었다고 명시한다."}
+{"lid": "b6f963d279", "label": "contradicted", "passage": 8, "reason": "문단 8의 주사업 목적은 경기·레저용 물놀이 보트 기구의 제조·판매이며 골프용품이 아니다."}
+{"lid": "89c1c1a0ee", "label": "supported", "passage": 1, "reason": "문단 1은 1992년 설립과 수상레저 및 스포츠용 보트 제조 전문 기업이라는 사실을 모두 명시한다."}
+{"lid": "bb0f5eca16", "label": "supported", "passage": 8, "reason": "문단 8은 1992년 1월 설립과 경기·레저용 물놀이 보트 기구 제조·판매라는 주사업 목적을 명시한다."}
+{"lid": "9fc8517519", "label": "contradicted", "passage": 8, "reason": "문단 8에서 2015.05~2017.05에 우성아이비가 주관해 시제품을 완성한 과제는 수중 드론이 아니라 다기능 SUP 보드 개발이다."}
+{"lid": "d9472ee815", "label": "supported", "passage": 2, "reason": "문단 2는 수상레저기구와 공기주입식 무동력 수상레저기구 제조 및 공기주입식 보트 제조 기술을 활용한 제품 제조·판매를 사업 목적으로 설명한다."}
+{"lid": "a29dee4b94", "label": "supported", "passage": 8, "reason": "문단 8은 다기능 SUP 보드 개발의 연구기간을 2015.05~2017.05, 주관기관을 우성아이비, 시제품 상태를 제작완료로 명시한다."}
+{"lid": "3e96f24f2d", "label": "supported", "passage": 8, "reason": "문단 8에 다기능 SUP 보드 개발의 기간, 우성아이비 주관 및 시제품 제작완료가 모두 기재되어 있다."}
+{"lid": "ad13f99fa8", "label": "supported", "passage": 2, "reason": "문단 2는 우성아이비를 수상레저 및 스포츠용 보트 제조 전문 기업으로 명시한다."}
+{"lid": "7cf48ae12e", "label": "supported", "passage": 3, "reason": "문단 3은 갈산동 토지·건물의 취득일 2023-03-30, 취득처 (주)우리일렉, 취득사유 본사 및 공장 이전을 명시한다."}
+{"lid": "86eb46e840", "label": "contradicted", "passage": 3, "reason": "문단 3의 해당 갈산동 토지·건물 취득처는 (주)한솔테크가 아니라 (주)우리일렉이다."}
+{"lid": "26df6d7bd8", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 2023년의 수출·내수 매출 비중이 없으며, 현재 생산제품의 수출 비중을 해당 연도의 매출 비중으로 볼 수 없다."}
+{"lid": "285b1972a6", "label": "non_claim", "passage": null, "reason": "뒤에 제시할 매출 추이 설명을 소개하는 안내 문장으로 구체적인 매출 사실을 주장하지 않는다."}
+{"lid": "1e04321ca0", "label": "supported", "passage": 8, "reason": "문단 8은 1992년 산업 진출 당시 해외시장 진출에 주력했고 현재 60여개국에 생산제품의 70% 이상을 수출한다고 설명한다."}
+{"lid": "93520ac1af", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 2021년의 수출·내수 매출 비중이 없으며 현재 생산제품 수출 비중만 언급한다."}
+{"lid": "4e3c1bbe6a", "label": "no_evidence", "passage": null, "reason": "제시된 문단에는 2022년의 수출·내수 매출 비중이 없으며 현재 생산제품 수출 비중만 언급한다."}
+{"lid": "c7f685f2e9", "label": "no_evidence", "passage": null, "reason": "인용한 산업용 제품 생산 설명은 문단 2에 있으나 문단 7에 있다는 출처 주장까지 지지하는 문단은 없다."}
+{"lid": "edc00ee5ec", "label": "contradicted", "passage": 8, "reason": "문단 8의 셀폼 부력보조복 개발 기간은 2019.10~2020.06이며, 주장한 2020.02~2020.07은 음압텐트 개발 기간이다."}
+{"lid": "40630b433f", "label": "supported", "passage": 8, "reason": "문단 8은 음압텐트 개발 기간 2020.02~2020.07, 우성아이비 주관 및 시제품 제작완료를 명시한다."}
+{"lid": "b350379c90", "label": "supported", "passage": 8, "reason": "문단 8에 우성아이비가 주관한 음압텐트 개발의 기간과 시제품 제작완료가 모두 기재되어 있다."}
+{"lid": "2fb048240b", "label": "non_claim", "passage": null, "reason": "답변에 필요한 원재료·생산 거점 정보가 제시되지 않았음을 알리는 정보 부족 안내이다."}
+{"lid": "e2adf740ba", "label": "supported", "passage": 4, "reason": "문단 4의 USD 환율 민감도 표는 1% 상승 시 당기손익 영향이 양수 85,186천원이라고 명시한다."}
+{"lid": "cb2ec2cc78", "label": "non_claim", "passage": null, "reason": "환율 민감도 설명을 소개하는 안내 문장으로 구체적인 영향 수치를 주장하지 않는다."}
+{"lid": "50232564aa", "label": "supported", "passage": 4, "reason": "문단 4는 외화표시 화폐성자산과 화폐성부채의 원화 장부금액을 각각 12,044,636천원과 3,526,034천원으로 제시한다."}
+{"lid": "a43639570e", "label": "supported", "passage": 4, "reason": "문단 4에 USD 환율 1% 상승 시 당기손익 영향이 85,186천원으로 기재되어 있다."}
+{"lid": "326e203d84", "label": "supported", "passage": 4, "reason": "문단 4의 USD 환율 1% 하락 시 영향 (85,186)천원은 음수 -85,186천원과 같다."}
+{"lid": "86f9968099", "label": "supported", "passage": 4, "reason": "문단 4는 우성아이비의 USD 환율 1% 상승 시 당기손익 영향이 양수 85,186천원이라고 명시한다."}
+{"lid": "d4f2df2574", "label": "no_evidence", "passage": null, "reason": "제시된 문단은 우성아이비의 환율 민감도를 설명하며 삼익악기의 해당 추정에 관한 근거는 없다."}
+{"lid": "89e7a43e51", "label": "supported", "passage": 6, "reason": "문단 6은 우성아이비가 보트 제조 및 수출 주력 기업으로서 고도의 숙련된 인력을 확보하고 있다고 명시한다."}
