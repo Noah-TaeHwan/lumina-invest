@@ -317,7 +317,10 @@ def _take(P: Paths, client, key, corp, source: str, check=None) -> tuple[str, di
         return "no_annual_report", None, ""
     if source == "random" and sp.is_finance(dart.company_info(client, key, corp.corp_code).get("induty_code", "")):
         return "finance", None, ""
-    path = dart.download_document(client, key, rep["rcept_no"], P.priv / "docs", P.jsonl("dart_ledger.jsonl"))
+    try:  # 공시 원문이 없으면(DART status 014 등) 사업보고서가 없는 것과 같이 뺀다
+        path = dart.download_document(client, key, rep["rcept_no"], P.priv / "docs", P.jsonl("dart_ledger.jsonl"))
+    except ValueError as exc:
+        return f"document: {exc}"[:200], None, ""
     try:
         ps = passages.build_passages(corp.corp_code, rep["rcept_no"], path.read_text(encoding="utf-8", errors="ignore"))
     except ValueError as exc:

@@ -57,3 +57,21 @@ def test_a2_assign_puts_whole_clusters_in_check_up_to_cap():
     assert len(flat) <= 20 and sorted(flat + sum(tune, [])) == sorted(sum(cl, []))
     big = [f"g{i}" for i in range(10)]
     assert big in check or big in tune  # 군집은 쪼개지지 않는다
+
+
+def test_take_excludes_report_whose_document_is_missing(tmp_path, monkeypatch):
+    """DART가 원문 대신 오류 XML(status 014 '파일이 존재하지 않습니다')을 주면 추첨을 멈추지 않고 그 회사만 뺀다."""
+    from app.services.evidence import dart
+    from lab.evidence import __main__ as cli
+
+    monkeypatch.setattr(dart, "list_annual_reports", lambda *a, **k: [])
+    monkeypatch.setattr(dart, "pick_annual_report", lambda items: {"rcept_no": "1", "report_nm": "사업보고서"})
+    monkeypatch.setattr(dart, "company_info", lambda *a, **k: {"induty_code": "264"})
+
+    def missing(*a, **k):
+        raise ValueError("DART 응답이 zip이 아니다: b'<result><status>014</status>'")
+
+    monkeypatch.setattr(dart, "download_document", missing)
+    corp = dart.Corp("00000001", "가나다", "000001")
+    result, row, text = cli._take(cli.Paths(tmp_path), None, "K", corp, "random")
+    assert result.startswith("document:") and "014" in result and row is None and text == ""
