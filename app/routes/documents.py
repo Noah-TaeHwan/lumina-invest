@@ -169,12 +169,21 @@ class DocSearchBody(BaseModel):
 async def search_documents(
     body: DocSearchBody,
     user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_pg_session),
 ):
-    """업로드된 문서 컬렉션에서 쿼리와 유사한 청크를 검색한다."""
+    """로그인 사용자가 업로드한 문서 청크 중 쿼리와 유사한 것을 검색한다(남의 문서는 보지 않는다)."""
+    result = await db.execute(
+        select(UploadedDoc.source_key).where(UploadedDoc.user_id == uuid.UUID(user["id"]))
+    )
+    sources = sorted(set(result.scalars().all()))
+    if body.source is not None:
+        sources = [body.source] if body.source in sources else []
+    if not sources:
+        return {"ok": True, "hits": []}
     hits = await rag_search(
         body.query,
         top_k=body.top_k,
         collection=settings.DOCUMENT_COLLECTION,
-        filter_source=body.source,
+        filter_source=sources,
     )
     return {"ok": True, "hits": hits}

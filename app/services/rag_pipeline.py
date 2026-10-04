@@ -17,7 +17,9 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_ollama import ChatOllama
 from qdrant_client import AsyncQdrantClient
-from qdrant_client.http.models import Distance, FieldCondition, Filter, MatchValue, PointStruct, VectorParams
+from qdrant_client.http.models import (
+    Distance, FieldCondition, Filter, MatchAny, MatchValue, PointStruct, VectorParams,
+)
 
 from app.config import settings
 
@@ -75,9 +77,9 @@ def _hit(payload: dict, score: float) -> dict:
     }
 
 
-def _source_filter(source: str) -> Filter:
-    """source가 같은 점: 크롤링 배치는 최상위 source, LangChain 배치는 metadata.source에 있다."""
-    match = MatchValue(value=source)
+def _source_filter(source: str | list[str]) -> Filter:
+    """source가 같은(목록이면 그중 하나인) 점: 크롤링 배치는 최상위 source, LangChain 배치는 metadata.source에 있다."""
+    match = MatchAny(any=list(source)) if isinstance(source, list) else MatchValue(value=source)
     return Filter(should=[FieldCondition(key="source", match=match),
                           FieldCondition(key=f"{METADATA_KEY}.source", match=match)])
 
@@ -88,7 +90,7 @@ async def rag_search(
     query:      str,
     top_k:      int  = 5,
     collection: str | None = None,
-    filter_source: str | None = None,
+    filter_source: str | list[str] | None = None,
 ) -> list[dict]:
     """
     Qdrant에서 유사 문서를 검색한다(임베딩은 LangChain OllamaEmbeddings).
@@ -97,7 +99,7 @@ async def rag_search(
         query:         검색 쿼리
         top_k:         반환할 최대 문서 수
         collection:    Qdrant 컬렉션명 (None이면 settings.QDRANT_COLLECTION 사용)
-        filter_source: 특정 source만 필터링 (예: "upload", "github:...")
+        filter_source: 특정 source만 필터링 (예: "upload", "github:..."). 목록이면 그중 하나
 
     Returns:
         [{"text": ..., "url": ..., "title": ..., "source": ..., "score": ...}, ...]

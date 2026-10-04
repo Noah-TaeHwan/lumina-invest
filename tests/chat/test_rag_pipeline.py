@@ -7,52 +7,16 @@ LangChain 키(page_content) 불일치.
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import json
 import logging
 
-import numpy as np
 import pytest
-from qdrant_client import AsyncQdrantClient
 from qdrant_client.http.models import Distance, PointStruct, VectorParams
 
 from app.services import rag_pipeline as rp
+from tests.chat.conftest import DIM, vec
 
 COLL = "test_rag"
-DIM = 768  # rag_pipeline이 만드는 컬렉션 차원
-
-
-def vec(text: str) -> list[float]:
-    """텍스트마다 다른 결정적 벡터."""
-    seed = int.from_bytes(hashlib.sha256(text.encode()).digest()[:8], "big")
-    return np.random.default_rng(seed).normal(size=DIM).tolist()
-
-
-class FakeEmbeddings:
-    async def aembed_query(self, text):
-        return vec(text)
-
-    async def aembed_documents(self, texts):
-        return [vec(t) for t in texts]
-
-
-@pytest.fixture
-def qdrant(monkeypatch):
-    """rag_pipeline이 매번 만드는 클라이언트를 공유 메모리 클라이언트 하나로 바꾼다(close는 기록만)."""
-    shared = AsyncQdrantClient(location=":memory:")
-    closed = []
-
-    async def close(*a, **k):
-        closed.append(True)
-
-    def factory(*a, **k):
-        shared.close = close
-        return shared
-
-    monkeypatch.setattr(rp, "AsyncQdrantClient", factory)
-    monkeypatch.setattr(rp, "_make_embeddings", lambda: FakeEmbeddings())
-    shared.closed = closed
-    return shared
 
 
 def run(coro):
