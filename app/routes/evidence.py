@@ -44,6 +44,7 @@ from app.routes.conversations import _assert_owner
 from app.services.conversation_threads import get_or_create_conversation
 from app.services.evidence import background, records
 from app.services.evidence.generate import generate_answer
+from app.services.journal.entries import journal_entry_ids
 
 log = logging.getLogger("app.evidence.api")
 
@@ -130,6 +131,11 @@ async def _owned_run(db: AsyncSession, run_id: str, user: dict) -> EvidenceRun:
     if run is None:
         raise HTTPException(404, "판정 기록을 찾을 수 없습니다.")
     return run
+
+
+async def _journal_ids(db: AsyncSession, user: dict, run_ids: list[uuid.UUID]) -> dict[uuid.UUID, str]:
+    """실행마다 내 판단 기록 id(모듈 C 결정 5-6). 일지가 꺼져 있으면 일지 표(0010)를 조회하지 않는다."""
+    return await journal_entry_ids(db, user["id"], run_ids) if settings.JOURNAL_ENABLED else {}
 
 
 async def _launch(db: AsyncSession, run: EvidenceRun, runner, factory) -> None:
@@ -278,7 +284,9 @@ async def get_run(run_id: str, user=Depends(get_current_user_any), db: AsyncSess
     claims = (await records.load_claims(db, [run.id]))[run.id]
     ahead = await records.runs_ahead(db, run) if run.status in records.ACTIVE else 0
     latest = run.id in await records.latest_run_ids(db, [run.chat_id])
-    return records.serialize_run(run, claims, records.poll_until_s(ahead), latest=latest)
+    journal = await _journal_ids(db, user, [run.id])
+    return records.serialize_run(run, claims, records.poll_until_s(ahead), latest=latest,
+                                 journal_entry_id=journal.get(run.id))
 
 
 @router.post("/evidence/runs/{run_id}/retry", status_code=201, summary="다시 판정(failed·partial)")
@@ -356,8 +364,10 @@ async def conversation_evidence(
         await db.commit()
     claims = await records.load_claims(db, [r.id for r in runs])
     latest = await records.latest_run_ids(db, list({r.chat_id for r in runs}))
+    journal = await _journal_ids(db, user, [r.id for r in runs])
     out = []
     for r in runs:
         ahead = await records.runs_ahead(db, r) if r.status in records.ACTIVE else 0
-        out.append(records.serialize_run(r, claims[r.id], records.poll_until_s(ahead), latest=r.id in latest))
+        out.append(records.serialize_run(r, claims[r.id], records.poll_until_s(ahead), latest=r.id in latest,
+                                         journal_entry_id=journal.get(r.id)))
     return {"conversation_id": str(conv.id), "runs": out}

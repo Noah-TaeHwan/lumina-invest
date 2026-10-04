@@ -120,12 +120,13 @@ def make_app(factory, who: Who, *, search=None, llm=None, runner=None, companies
     from app.lib.jwt_auth import get_current_user_any
     from app.lib.llm_client import get_llm_client
     from app.lib.session import get_current_user
-    from app.routes import admin, conversations, evidence
+    from app.routes import admin, conversations, evidence, journal
 
     app = FastAPI()
     app.include_router(evidence.router)
     app.include_router(conversations.router)
     app.include_router(admin.router)
+    app.include_router(journal.router)
 
     async def session():
         async with factory() as db:

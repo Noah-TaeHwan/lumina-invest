@@ -227,9 +227,10 @@ def serialize_claim(c: EvidenceClaim, policy_version: str | None = None) -> dict
 
 
 def serialize_run(run: EvidenceRun, claims: list[EvidenceClaim], poll_until: int | None = None,
-                  latest: bool = True) -> dict:
+                  latest: bool = True, journal_entry_id: str | None = None) -> dict:
     """판정 실행 조회 응답. 진행 중이면 폴링 간격과 서버가 권하는 폴링 상한을 함께 준다.
-    latest: 이 실행이 그 메시지의 최신 실행인가(다시 판정은 최신 실행에만)."""
+    latest: 이 실행이 그 메시지의 최신 실행인가(다시 판정은 최신 실행에만).
+    journal_entry_id: 이 실행에 대한 내 판단 기록 id(모듈 C 결정 5-6). 호출자가 JOURNAL_ENABLED일 때만 조회한다."""
     active = run.status in ACTIVE
     return {
         "id": str(run.id), "chat_id": str(run.chat_id), "conversation_id": str(run.conversation_id),
@@ -244,6 +245,7 @@ def serialize_run(run: EvidenceRun, claims: list[EvidenceClaim], poll_until: int
         "claims": [serialize_claim(c, run.policy_version) for c in claims],
         "poll_interval_ms": POLL_INTERVAL_MS if active else None,
         "poll_until_s": poll_until if active else None,
+        "journal_entry_id": journal_entry_id,
     }
 
 
