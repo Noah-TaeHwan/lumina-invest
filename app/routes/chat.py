@@ -169,6 +169,7 @@ async def chat_async(
 
     task = run_agent_task.delay(
         user_id=user_id,
+        client_id=user.get("client_id", ""),
         conversation_id=conversation_id,
         question=body.question,
         history=history,
