@@ -487,6 +487,8 @@ def test_rejudge_previous_policy_run_without_calls(pg, enabled):
     assert body["id"] != str(old.id) and body["chat_id"] == str(old.chat_id)
     assert (body["trigger"], body["policy_version"], body["status"]) == ("rejudge", "a2-v1", "done")
     assert (body["calls"], body["cache_hits"], body["input_tokens"]) == (0, 0, 0) and jev_client.calls == 0
+    # 판정 작업을 돌리지 않았으므로 시작 시각이 없다(관리자 통계 실행 시간·시작 지연에서 빠진다)
+    assert body["started_at"] is None and body["finished_at"] is not None
     # 저장된 s=0.8은 새 τ_s 0.85에 못 미친다. 경로(jev)와 확률·문단 스냅샷은 그대로 옮긴다
     assert [(c["status"], c["route"]) for c in body["claims"]] == [
         ("no_evidence", "jev"), ("no_evidence", "jev"), ("not_claim", "rule_not_claim")]

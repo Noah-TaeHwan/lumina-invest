@@ -115,7 +115,7 @@ def rejudge_run(run: EvidenceRun, claims: list[EvidenceClaim], policy: Policy = 
         status=result.status, error_code=result.error_code, trigger=result.trigger, company=run.company,
         corp_code=run.corp_code, rcept_no=run.rcept_no, passages=[dict(p) for p in run.passages],
         policy_version=result.policy_version, jev_model=run.jev_model, generator_model=run.generator_model,
-        calls=0, cache_hits=0, input_tokens=0, created_at=at, started_at=at, finished_at=at,
+        calls=0, cache_hits=0, input_tokens=0, created_at=at, finished_at=at,  # started_at 없음: 판정 작업을 돌리지 않았다
     )
     new.claims = [EvidenceClaim(idx=c.idx, text=c.text, start=c.start, end=c.end, status=c.status, route=c.route,
                                 reason=c.reason, source_idx=c.source_idx, s=c.s, c=c.c, lex=c.lex,
