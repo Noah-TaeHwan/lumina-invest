@@ -53,3 +53,4 @@
 {"at": "2026-10-04T11:31:13.350245+00:00", "event": "freeze-holdout", "study": "a2", "claims": 567}
 {"at": "2026-10-04T11:33:22.395340+00:00", "event": "judge", "study": "a2", "tag": "check", "split": "check", "claims": 501, "failed": 0, "used_tokens": 3426815}
 {"at": "2026-10-04T11:33:36.727172+00:00", "event": "a2-report", "study": "a2", "policy": {"version": "a2-v1", "tau_s": 0.85, "tau_c": 0.35, "theta_low": null, "theta_high": 0.95, "precision_target_confirmed": false}, "h_prec": false, "h_low": false, "h_high": true, "h_tier": false}
+{"at": "2026-10-04T11:37:20.892950+00:00", "event": "ruling", "study": "a2", "why": "확인 세트 H-prec가 ✅ 예측 144 < 150으로 기술 통계가 되어 사전등록 규칙대로 τ_s 0.85가 정해졌다. 이 폴백은 조정값(0.90)보다 낮아 '보수적 폴백'이라는 설계 의도와 역전된다. 사전등록대로 a2-v1은 0.85로 두고(재선택 안 함), 0.85 운영점을 저장된 확률로 기술 통계 계산해 해석 문서에 적었다. 폴백 규칙 결함은 다음 사전등록에서 max(조정값, 폴백)으로 고친다. P6 적용 여부는 별도 결정.", "supplementary": "lab/evidence/results/a2-check-supplementary.json (추가 JEV 호출 없음)"}
