@@ -1,11 +1,15 @@
 """Neo4j 그래프 관련 API 라우터."""
 from __future__ import annotations
-from fastapi import APIRouter, HTTPException, Query
+import json
+import logging
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
+from app.lib.jwt_auth import get_current_user_any
 from app.services import graph_service
 from app.services.graph_rag import graph_rag_search, graph_rag_answer
 
 router = APIRouter(prefix="/api/graph", tags=["graph"])
+log = logging.getLogger("app.graph")
 
 
 @router.get("/related/{symbol}")
@@ -72,13 +76,17 @@ class GraphRagRequest(BaseModel):
 
 
 @router.post("/rag")
-async def graph_rag(body: GraphRagRequest):
-    """GraphRAG: 벡터 검색 + 그래프 컨텍스트를 결합해 검색하거나 LLM 답변을 생성한다."""
+async def graph_rag(body: GraphRagRequest, user=Depends(get_current_user_any)):
+    """GraphRAG: 벡터 검색 + 그래프 컨텍스트를 결합해 검색하거나 LLM 답변을 생성한다.
+
+    로그인이 필요하다. 벡터 검색은 공용 문서와 요청자가 올린 문서만 본다."""
     try:
         if body.answer:
-            text = await graph_rag_answer(body.query, top_k=body.top_k)
+            text = await graph_rag_answer(body.query, top_k=body.top_k, viewer_user_id=user["id"])
             return {"answer": text}
-        result = await graph_rag_search(body.query, top_k=body.top_k)
+        result = await graph_rag_search(body.query, top_k=body.top_k, viewer_user_id=user["id"])
         return result
     except Exception as exc:
-        raise HTTPException(503, f"GraphRAG 실패: {exc}") from exc
+        # 예외 메시지(접속 주소 등)는 응답에 싣지 않는다
+        log.error(json.dumps({"event": "graph_rag_failed", "error": type(exc).__name__}))
+        raise HTTPException(503, "GraphRAG 실패") from exc

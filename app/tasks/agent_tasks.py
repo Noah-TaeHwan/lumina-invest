@@ -32,6 +32,7 @@ def run_agent_task(
     history: list,
     llm_model: str,
     rag_context: str = "",
+    client_id: str = "",  # 기본값: 이 인자 없이 큐에 들어간 메시지도 처리한다
 ) -> dict:
     """LangGraph ReAct 에이전트를 워커에서 실행하고 채팅 기록을 PostgreSQL에 저장한다."""
 
@@ -60,6 +61,7 @@ def run_agent_task(
                 try:
                     db.add(Chat(
                         user_id=uuid.UUID(user_id),
+                        client_id=client_id,
                         conversation_id=uuid.UUID(conversation_id),
                         question=question,
                         answer=result["answer"],
