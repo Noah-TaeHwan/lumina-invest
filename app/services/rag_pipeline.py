@@ -18,7 +18,8 @@ from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 from langchain_ollama import ChatOllama
 from qdrant_client import AsyncQdrantClient
 from qdrant_client.http.models import (
-    Distance, FieldCondition, Filter, MatchAny, MatchValue, PointStruct, VectorParams,
+    Distance, FieldCondition, Filter, IsEmptyCondition, MatchAny, MatchValue, PayloadField, PointStruct,
+    VectorParams,
 )
 
 from app.config import settings
@@ -31,6 +32,8 @@ log = logging.getLogger("app.rag")
 # 저장 payload는 LangChain 배치(page_content + metadata)를 따른다(build_rag_chain이 읽는 모양).
 CONTENT_KEY = QdrantVectorStore.CONTENT_KEY
 METADATA_KEY = QdrantVectorStore.METADATA_KEY
+# 업로드 문서 소유자(users.id). 업로드 점에만 있고 크롤링 점(공용)에는 없다. 검색은 공용 + 요청자 본인 것만 본다.
+OWNER_KEY = "owner_user_id"
 
 
 # ── 내부 팩토리 ───────────────────────────────────────────────────────────────
@@ -84,6 +87,21 @@ def _source_filter(source: str | list[str]) -> Filter:
                           FieldCondition(key=f"{METADATA_KEY}.source", match=match)])
 
 
+def _visibility_filter(viewer_user_id: str | None) -> Filter:
+    """요청자가 볼 수 있는 점: 소유자 없음(공용 크롤링) 또는 소유자 == 요청자. 요청자를 모르면 공용만."""
+    public = IsEmptyCondition(is_empty=PayloadField(key=OWNER_KEY))
+    if viewer_user_id is None:
+        return Filter(must=[public])
+    return Filter(should=[public, FieldCondition(key=OWNER_KEY, match=MatchValue(value=str(viewer_user_id)))])
+
+
+def _search_filter(viewer_user_id: str | None, source: str | list[str] | None) -> Filter:
+    must = [_visibility_filter(viewer_user_id)]
+    if source:
+        must.append(_source_filter(source))
+    return Filter(must=must)
+
+
 # ── 공개 함수 ─────────────────────────────────────────────────────────────────
 
 async def rag_search(
@@ -91,6 +109,7 @@ async def rag_search(
     top_k:      int  = 5,
     collection: str | None = None,
     filter_source: str | list[str] | None = None,
+    viewer_user_id: str | None = None,
 ) -> list[dict]:
     """
     Qdrant에서 유사 문서를 검색한다(임베딩은 LangChain OllamaEmbeddings).
@@ -100,6 +119,7 @@ async def rag_search(
         top_k:         반환할 최대 문서 수
         collection:    Qdrant 컬렉션명 (None이면 settings.QDRANT_COLLECTION 사용)
         filter_source: 특정 source만 필터링 (예: "upload", "github:..."). 목록이면 그중 하나
+        viewer_user_id: 요청자(users.id). 공용 점과 이 사용자가 올린 점만 본다. None이면 공용만
 
     Returns:
         [{"text": ..., "url": ..., "title": ..., "source": ..., "score": ...}, ...]
@@ -116,7 +136,7 @@ async def rag_search(
             coll,
             query=vector,
             limit=top_k,
-            query_filter=_source_filter(filter_source) if filter_source else None,
+            query_filter=_search_filter(viewer_user_id, filter_source),
             with_payload=True,
         )
         return [_hit(p.payload or {}, p.score) for p in res.points]
@@ -131,9 +151,12 @@ async def store_chunks(
     chunks:     list[str],
     metadata:   dict,
     collection: str | None = None,
+    owner_user_id: str | None = None,
 ) -> int:
     """
     텍스트 청크 목록을 OllamaEmbeddings로 임베딩하여 Qdrant에 저장한다.
+
+    owner_user_id를 주면 payload에 남겨 그 사용자의 검색에만 보이게 한다(업로드 문서).
 
     Returns:
         실제 저장된 청크 수 (실패하면 예외를 올린다)
@@ -148,7 +171,8 @@ async def store_chunks(
         vectors = await _make_embeddings().aembed_documents(chunks)
         points = [
             PointStruct(id=uuid.uuid4().hex, vector=v,
-                        payload={CONTENT_KEY: chunk, METADATA_KEY: dict(metadata)})
+                        payload={CONTENT_KEY: chunk, METADATA_KEY: dict(metadata),
+                                 **({OWNER_KEY: str(owner_user_id)} if owner_user_id else {})})
             for chunk, v in zip(chunks, vectors)
         ]
         await client.upsert(collection_name=coll, points=points)

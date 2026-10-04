@@ -22,7 +22,7 @@ async def _upload(factory, who: dict, filename: str, chunks: list[str]) -> str:
     """업로드 라우트가 남기는 것과 같은 source_key로 벡터와 메타를 만든다."""
     key = f"upload:{who['user']['id']}:{filename}"
     await rp.store_chunks(chunks, {"url": f"upload://{filename}", "title": filename, "source": key},
-                          collection=settings.DOCUMENT_COLLECTION)
+                          collection=settings.DOCUMENT_COLLECTION, owner_user_id=who["user"]["id"])
     async with factory() as db:
         db.add(UploadedDoc(filename=filename, uploader="x", user_id=uuid.UUID(who["user"]["id"]), source_key=key,
                            chunks=len(chunks), file_size=1, ext=".txt"))

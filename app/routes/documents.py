@@ -40,7 +40,7 @@ async def upload_document(
 
     - 지원 형식: pptx, ppt, docx, doc, xlsx, xls, pdf, md, txt
     - 이미지 슬라이드/페이지는 Ollama VLM(llava)이 자동으로 설명 텍스트 생성
-    - 청크는 메인 Qdrant 컬렉션에 저장되며 채팅 RAG 검색에 즉시 반영됨
+    - 청크는 메인 Qdrant 컬렉션에 owner_user_id와 함께 저장되며 업로드한 사용자 본인의 채팅 RAG 검색에만 반영됨
     """
     from pathlib import Path
     ext = Path(file.filename or "").suffix.lower()
@@ -76,7 +76,7 @@ async def upload_document(
         "uploader": user["email"],
     }
 
-    stored = await store_chunks(chunks, meta, collection=settings.DOCUMENT_COLLECTION)
+    stored = await store_chunks(chunks, meta, collection=settings.DOCUMENT_COLLECTION, owner_user_id=user["id"])
 
     doc = UploadedDoc(
         filename=file.filename,
@@ -185,5 +185,6 @@ async def search_documents(
         top_k=body.top_k,
         collection=settings.DOCUMENT_COLLECTION,
         filter_source=sources,
+        viewer_user_id=user["id"],
     )
     return {"ok": True, "hits": hits}

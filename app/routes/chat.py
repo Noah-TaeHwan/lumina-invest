@@ -78,7 +78,7 @@ async def chat(
     rag_context = ""
     if body.use_rag:
         try:
-            docs = await rag_search(body.question, top_k=settings.TOP_K)
+            docs = await rag_search(body.question, top_k=settings.TOP_K, viewer_user_id=user_id)
             if docs:
                 rag_context = "\n\n".join(
                     f"[{d['title']}] {d['text'][:500]}" for d in docs
@@ -166,7 +166,7 @@ async def chat_async(
     rag_context = ""
     if body.use_rag:
         try:
-            docs = await rag_search(body.question, top_k=settings.TOP_K)
+            docs = await rag_search(body.question, top_k=settings.TOP_K, viewer_user_id=user_id)
             if docs:
                 rag_context = "\n\n".join(
                     f"[{d['title']}] {d['text'][:500]}" for d in docs
