@@ -57,9 +57,17 @@ def _fail(event: str, collection: str, exc: Exception) -> None:
 
 
 def _hit(payload: dict, score: float) -> dict:
-    meta = payload.get(METADATA_KEY) or {}
+    """두 payload 배치를 모두 읽는다.
+
+    - LangChain 배치(store_chunks·문서 업로드): {"page_content": 본문, "metadata": {url, title, source, ...}}
+    - 크롤링 배치(app/services/crawl.py _store_qdrant, QDRANT_COLLECTION): {"text": 본문, url, title, source, ...}
+    """
+    if CONTENT_KEY in payload or METADATA_KEY in payload:
+        meta, text = payload.get(METADATA_KEY) or {}, payload.get(CONTENT_KEY, "")
+    else:
+        meta, text = payload, payload.get("text", "")
     return {
-        "text":   payload.get(CONTENT_KEY, ""),
+        "text":   text,
         "url":    meta.get("url", ""),
         "title":  meta.get("title", ""),
         "source": meta.get("source", ""),
@@ -68,7 +76,10 @@ def _hit(payload: dict, score: float) -> dict:
 
 
 def _source_filter(source: str) -> Filter:
-    return Filter(must=[FieldCondition(key="source", match=MatchValue(value=source))])
+    """source가 같은 점: 크롤링 배치는 최상위 source, LangChain 배치는 metadata.source에 있다."""
+    match = MatchValue(value=source)
+    return Filter(should=[FieldCondition(key="source", match=match),
+                          FieldCondition(key=f"{METADATA_KEY}.source", match=match)])
 
 
 # ── 공개 함수 ─────────────────────────────────────────────────────────────────

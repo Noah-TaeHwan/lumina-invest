@@ -135,3 +135,43 @@ def test_connection_error_is_not_mistaken_for_missing_collection(qdrant, monkeyp
     with pytest.raises(ConnectionError):
         run(rp.rag_search("q", collection=COLL))
     assert created == []
+
+
+# ── 크롤링 payload 키(text, 평평한 메타)와 LangChain 키(page_content, metadata.*) 불일치 ────────
+
+# app/services/crawl.py _store_qdrant가 QDRANT_COLLECTION에 쓰는 모양
+CRAWL_POINT = PointStruct(id=2, vector=vec("금리 인하 기대"), payload={
+    "url": "https://example.com/n1", "title": "뉴스", "source": "github:o/r", "text": "금리 인하 기대",
+    "chunk_index": 0})
+
+
+def test_search_reads_crawl_layout(qdrant):
+    async def go():
+        await _seed(qdrant, [CRAWL_POINT, LC_POINT])
+        return await rp.rag_search("금리 인하 기대", top_k=1, collection=COLL)
+
+    hits = run(go())
+    assert [(h["text"], h["title"], h["url"], h["source"]) for h in hits] == [
+        ("금리 인하 기대", "뉴스", "https://example.com/n1", "github:o/r")]
+
+
+def test_filter_source_matches_both_layouts(qdrant):
+    async def go():
+        await _seed(qdrant, [CRAWL_POINT, LC_POINT])
+        lc = await rp.rag_search("x", top_k=5, collection=COLL, filter_source="upload:u1:a.pdf")
+        crawl = await rp.rag_search("x", top_k=5, collection=COLL, filter_source="github:o/r")
+        return [h["text"] for h in lc], [h["text"] for h in crawl]
+
+    assert run(go()) == (["메모리 반도체"], ["금리 인하 기대"])
+
+
+def test_delete_by_source_removes_stored_chunks(qdrant):
+    """store_chunks로 올린 문서를 source로 지우면 벡터도 사라진다(예전 key='source' 필터는 metadata.source를 못 맞혔다)."""
+    async def go():
+        await rp.store_chunks(["c1", "c2"], {"source": "upload:u1:c.pdf"}, collection=COLL)
+        await rp.store_chunks(["d1"], {"source": "upload:u1:d.pdf"}, collection=COLL)
+        await rp.delete_chunks_by_source("upload:u1:c.pdf", collection=COLL)
+        res = await qdrant.scroll(COLL, with_payload=True)
+        return sorted(p.payload["page_content"] for p in res[0])
+
+    assert run(go()) == ["d1"]
