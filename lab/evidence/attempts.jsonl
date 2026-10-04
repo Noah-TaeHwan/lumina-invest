@@ -61,3 +61,5 @@
 {"at": "2026-10-04T21:32:01.799278+00:00", "event": "controlled-check", "study": "a3", "accepted": 225, "rejected": 15}
 {"at": "2026-10-04T22:17:27.103205+00:00", "event": "labels-merge", "study": "a3", "split": "check", "labeled": 1322, "disputed": 50, "kappa_binary_r1": 0.9536}
 {"at": "2026-10-04T22:20:16.622775+00:00", "event": "freeze-holdout", "study": "a3", "claims": 1322}
+{"at": "2026-10-04T22:25:03.524743+00:00", "event": "judge", "study": "a3", "tag": "check", "split": "check", "claims": 1203, "failed": 0, "used_tokens": 5508934}
+{"at": "2026-10-04T22:25:21.530140+00:00", "event": "a3-report", "study": "a3", "h_swap": false, "h_recall": false, "h_prec": true, "switch_default": false}
