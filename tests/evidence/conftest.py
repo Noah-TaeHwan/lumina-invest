@@ -69,7 +69,8 @@ def jev_payload():
 # EVIDENCE_TEST_DATABASE_URL로 주면 0001→head 마이그레이션을 적용하고 테스트마다 표를 비운다.
 # 없으면 DB 테스트만 이유를 밝히고 건너뛴다.
 PG_ENV = "EVIDENCE_TEST_DATABASE_URL"
-_TABLES = "judgment_updates, judgment_entries, evidence_claims, evidence_runs, chats, conversations, audit_events, users"
+_TABLES = ("watchlist_items, judgment_updates, judgment_entries, evidence_claims, evidence_runs, chats, conversations, "
+           "audit_events, users")
 
 
 def _alembic(url: str):
