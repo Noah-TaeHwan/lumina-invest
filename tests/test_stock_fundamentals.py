@@ -50,7 +50,7 @@ def quote_summary(*, currency=None, financial_currency=None, price=100.0, cap=3.
 def yahoo(monkeypatch):
     """Yahoo·캐시를 가짜로 바꾼다. state["summary"]를 응답으로 주고, state["cache"]를 캐시로 쓴다."""
     state: dict = {"summary": None, "cache": {}, "requests": [], "status": 200,
-                   "now": datetime(2026, 10, 5, 5, 32, 7, tzinfo=timezone.utc)}
+                   "now": datetime(2026, 10, 5, 5, 32, 7, 481932, tzinfo=timezone.utc)}
 
     def handler(request: httpx.Request) -> httpx.Response:
         state["requests"].append(str(request.url))
@@ -165,7 +165,7 @@ def test_source_and_fetched_at_added_with_currencies_kept(yahoo):
     yahoo["summary"] = quote_summary(currency="USD", financial_currency="KRW")
     d = fetch("PKX")
     assert d["source"] == "Yahoo Finance"
-    assert d["fetched_at"] == "2026-10-05T05:32:07+00:00"
+    assert d["fetched_at"] == "2026-10-05T05:32:07.481932+00:00"
     parsed = datetime.fromisoformat(d["fetched_at"])
     assert parsed.utcoffset() == timedelta(0), "fetched_at은 UTC ISO 8601"
     assert d["currency"] == "USD" and d["financial_currency"] == "KRW"
@@ -186,7 +186,7 @@ def test_cache_hit_keeps_first_fetched_at(yahoo):
     yahoo["now"] = yahoo["now"] + timedelta(hours=3)
     second = fetch("AAPL")
     assert len(yahoo["requests"]) == n, "캐시 적중이면 Yahoo를 부르지 않는다"
-    assert second["fetched_at"] == first["fetched_at"] == "2026-10-05T05:32:07+00:00"
+    assert second["fetched_at"] == first["fetched_at"] == "2026-10-05T05:32:07.481932+00:00"
 
 
 def test_old_v2_entry_without_fetched_at_is_refetched_and_overwritten_under_same_key(yahoo):
@@ -200,7 +200,7 @@ def test_old_v2_entry_without_fetched_at_is_refetched_and_overwritten_under_same
     yahoo["summary"] = quote_summary(currency="USD", financial_currency="USD")
     d = fetch("AAPL")
     assert yahoo["requests"], "fetched_at 없는 옛 v2 행을 쓰지 않고 Yahoo를 다시 불러야 한다"
-    assert d["price"] == 100.0 and d["fetched_at"] == "2026-10-05T05:32:07+00:00"
+    assert d["price"] == 100.0 and d["fetched_at"] == "2026-10-05T05:32:07.481932+00:00"
     assert set(yahoo["cache"]) == {key}, "새 키를 만들지 않고 v2 키를 쓴다"
     stored = yahoo["cache"][key]
     for k in ("currency", "financial_currency", "source", "fetched_at", "quarter_ends"):
