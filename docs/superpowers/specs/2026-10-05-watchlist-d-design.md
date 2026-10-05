@@ -1,8 +1,11 @@
 # Lumina 관심종목과 지표 출처·시점 — 설계 (모듈 D)
 
 - 작성일: 2026-10-05
-- 상태: 초안 1판. 코드 변경 없음. 구현은 이 문서를 리드가 검토한 다음 계획 문서(`docs/superpowers/plans/`)에서 단계별로 한다.
-- 작성: AI(Claude Code)가 작성한 설계 초안이다. 결정권자는 노아다. **1~7의 골격 결정(저장 방식·열·연결·매핑·출처 표시·범위·단계)은 리드(노아)가 내린 결정을 그대로 옮겼고**, 세부(검증 규칙·오류 코드·화면 위치 등)는 AI가 기존 코드 패턴에 맞춰 채웠다. 리드 결정과 코드 사실이 어긋나거나 반론 근거가 있는 곳은 결정을 바꾸지 않고 12절 열린 질문으로 남겼다.
+- 상태: 2판(리드 검토 반영) — 구현 가능. 코드 변경 없음. 구현은 이 문서를 바탕으로 계획 문서(`docs/superpowers/plans/`)에서 단계별로 한다.
+- 작성: AI(Claude Code)가 작성한 설계 문서다.
+- 결정: 노아가 프로젝트 진행을 위임한 AI 리드(Claude Code)가 내렸다. 노아는 방향(관심종목·출처 시점 우선 순서)을 승인했다.
+  - 골격 결정(저장 방식·열·연결·매핑·출처 표시·범위·단계)은 AI 리드 결정(노아 위임)을 그대로 옮겼다. 세부(검증 규칙·오류 코드·화면 위치 등)는 작성 AI가 기존 코드 패턴에 맞춰 채웠고, 1판의 열린 질문 6개는 AI 리드가 2판 검토에서 닫았다(12절·13절).
+- 2판 변경: 결정 주체 표기 정정, main의 PR #39(기업 지표 통화 필드·캐시 키 v2) 반영, 열린 질문 Q1~Q6 결정, P4에 `PORTFOLIO_LOCAL.md` 문장 정정 추가.
 - 선행 문서:
   - 판단 일지 설계 [`2026-10-04-judgment-journal-c-design.md`](2026-10-04-judgment-journal-c-design.md)(이하 "C spec") — 메모 비전송 원칙(결정 7-4), 메모 없는 422(결정 5-5의 7), 관리자 초기화(결정 5-7)
   - A-2 설계 [`2026-10-02-evidence-chat-a2-design.md`](2026-10-02-evidence-chat-a2-design.md) — 근거 모드 회사 선택
@@ -30,13 +33,15 @@ README의 제품 목표 흐름은 "관심종목 → 기업 자료(출처·시점
 
 | 사실 | 위치 |
 |---|---|
-| `async def get_fundamentals(symbol: str) -> dict` — Yahoo quoteSummary v10(crumb·쿠키) 한 번 | `app/services/stock.py:126,139` |
-| 캐시 키 `fundamentals:{symbol}`, `cache_get(..., max_age_hours=6)` / `cache_set` | `app/services/stock.py:133-136,210` |
+| `async def get_fundamentals(symbol: str) -> dict` — Yahoo quoteSummary v10(crumb·쿠키) 한 번 | `app/services/stock.py:126,143-162` |
+| 캐시 키 `fundamentals:v2:{symbol}`(PR #39에서 v2로 올림, 옛 키 행은 읽지 않음), `cache_get(..., max_age_hours=6)` / `cache_set` | `app/services/stock.py:136-140,216` |
+| **캐시에서 읽은 dict에 필수 키(`currency`·`financial_currency`)가 없으면 미스로 보고 다시 받는다** | `app/services/stock.py:139` |
 | 캐시 저장소는 **PostgreSQL `data_cache` 표**(JSONB `data`, `updated_at`)다. Redis·메모리가 아니다. `cache_set`은 upsert로 `updated_at=now()`를 쓴다 | `app/services/data_cache.py:32-68`, `app/models/reference.py:90-97` |
 | `cache_info(key)`가 `{updated_at, age_minutes}`를 주지만 지표 경로에서 부르지 않는다 | `app/services/data_cache.py:71-89` |
-| 오류 응답은 캐시하지 않는다(조기 반환이 `cache_set` 앞) → 캐시 행의 `updated_at`은 곧 Yahoo에서 마지막으로 성공적으로 받은 시각이다 | `app/services/stock.py:155,158` |
-| 응답 키: `symbol, name, price, chg, cap, per, pbr, eps, bps, roe, roa, debt, div, divYield, opMargin, revenue[], op[], net[], quarters[], assets, equity, liabilities, cash`. **출처·조회 시각 칸이 없다** | `app/services/stock.py:185-209` |
-| **분기 실적은 분기 끝 날짜를 갖고 있지 않다.** Yahoo `endDate`를 읽어 `"24Q1"` 같은 라벨만 만들고 날짜는 버린다 | `app/services/stock.py:174-177` |
+| 오류 응답은 캐시하지 않는다(조기 반환이 `cache_set` 앞) → 캐시 행의 `updated_at`은 곧 Yahoo에서 마지막으로 성공적으로 받은 시각이다 | `app/services/stock.py:159,162` |
+| 응답 키: `symbol, name, currency, financial_currency, price, chg, cap, per, pbr, eps, bps, roe, roa, debt, div, divYield, opMargin, revenue[], op[], net[], quarters[], assets, equity, liabilities, cash`. `currency`는 가격·주당 값, `financial_currency`는 재무제표 금액의 통화(없으면 None). **출처·조회 시각 칸이 없다** | `app/services/stock.py:189-215` |
+| **분기 실적은 분기 끝 날짜를 갖고 있지 않다.** Yahoo `endDate`를 읽어 `"24Q1"` 같은 라벨만 만들고 날짜는 버린다 | `app/services/stock.py:178-181` |
+| 지표 단위 테스트(고정 quoteSummary 픽스처, 외부 호출 없음)와 기업 화면 e2e(통화 단위)가 있다 | `tests/test_stock_fundamentals.py`, `tests/e2e/company_views.py` |
 | 경로 `GET /api/stocks/fundamentals?symbol=` — **인증 의존성 없음**, Yahoo 오류는 502 | `app/routes/stocks.py:29,138-144` |
 
 ### 2.2 기업 화면(`public/js/company.js`)
@@ -46,8 +51,8 @@ README의 제품 목표 흐름은 "관심종목 → 기업 자료(출처·시점
 | 종목 탭 목록 `dashboardStocks`는 목업 회사 5개(`COMPANIES`)에서 `NNNNNN.KS`로 만든 **모듈 변수**다. localStorage에도 저장하지 않는다 → 새로 고치면 추가한 종목이 사라진다 | `public/js/company.js:6-12,55-56` |
 | `addAndSelectCompany(symbol, name)`은 목록에 없으면 넣고 고른다. **export·`window` 노출이 없다** | `public/js/company.js:82-87` |
 | 브라우저 쪽 지표 캐시 `companyFundCache = {}`(세션 동안 유지) | `public/js/company.js:57` |
-| 지표 카드는 `renderCompanyData(d)`가 `#co-overview`·`#co-valuation`·`#co-profitability`·`#co-quarterly`·`#co-balance`에 그린다 | `public/js/company.js:109-179`, `public/app.html:1117-1155` |
-| 종목 검색 모달은 `/api/stocks/search?q=` 결과 `{symbol, name, exchange, type}`를 준다. 국내 종목 심볼은 `f"{code}.{suffix}"`(`.KS`/`.KQ`) | `public/js/company.js:226-314`, `app/services/krx_companies.py:59` |
+| 지표 카드는 `renderCompanyData(d)`가 `#co-overview`·`#co-valuation`·`#co-profitability`·`#co-quarterly`·`#co-balance`에 그린다(PR #39 뒤 통화별 단위 표시) | `public/js/company.js:125-207`, `public/app.html:1117-1155` |
+| 종목 검색 모달은 `/api/stocks/search?q=` 결과 `{symbol, name, exchange, type}`를 준다. 국내 종목 심볼은 `f"{code}.{suffix}"`(`.KS`/`.KQ`) | `public/js/company.js:254-342`, `app/services/krx_companies.py:59` |
 | 기업 화면은 GNB `company`("투자 인디케이터")의 LNB `company-dashboard` 뷰다 | `public/js/core.js:68-80`, `public/app.html:1117` |
 | 쓰는 localStorage 키는 안내 접힘, 비교 트레이, 로보 성향뿐이다 | `public/js/core.js:271,291,303,306`, `public/js/robo.js:156,165` |
 
@@ -115,7 +120,7 @@ README의 제품 목표 흐름은 "관심종목 → 기업 자료(출처·시점
 
 ## 4. 데이터 모델
 
-### 결정 4-1. 관심종목은 서버에 사용자별로 저장한다 (리드 결정)
+### 결정 4-1. 관심종목은 서버에 사용자별로 저장한다 (AI 리드 결정)
 
 - **추천:** 새 표 `watchlist_items`, Alembic **`0011_watchlist`**(`revision="0011"`, `down_revision="0010"`). 모델은 `app/models/watchlist.py`의 `WatchlistItem(Base, UUIDPkMixin, CreatedAtMixin)`, `app/models/__init__.py`에서 다시 내보낸다.
 
@@ -142,7 +147,7 @@ README의 제품 목표 흐름은 "관심종목 → 기업 자료(출처·시점
 - **근거:** 목록 API가 한 번에 전부 돌려주고(페이지 없음), 화면이 줄마다 일지 개수를 물을 수 있어(결정 7-3) 행 수에 상한이 있어야 비용이 묶인다. 개인 리서치 목록으로 100개면 넉넉하다.
 - **틀렸을 때 비용:** 100개 넘게 쓰려는 사용자가 정리해야 한다. 상수 하나를 바꾸면 늘릴 수 있다. 동시 추가로 101개가 되는 경쟁 상태는 막지 않는다(행 수 확인과 삽입 사이) — 피해가 한두 행이라 잠금을 두지 않는다.
 
-### 결정 4-3. corp_code 매핑: Yahoo → stock_code → 근거 모드 기업 목록 (리드 결정)
+### 결정 4-3. corp_code 매핑: Yahoo → stock_code → 근거 모드 기업 목록 (AI 리드 결정)
 
 - **추천:**
   1. 심볼이 `^\d{6}\.(KS|KQ)$`이면 앞 6자리를 `stock_code`로 쓴다. 아니면(해외·지수·ETF 형식 밖) `corp_code = null`.
@@ -163,7 +168,7 @@ README의 제품 목표 흐름은 "관심종목 → 기업 자료(출처·시점
 |---|---|
 | `GET /api/watchlist` | 내 관심종목 전부, `created_at` 오름차순(추가한 순서). 결정 4-3의 나중에 채우기를 여기서 한다 |
 | `POST /api/watchlist` | 추가. 201과 항목 |
-| `PATCH /api/watchlist/{id}` | **메모만** 고친다(AI 추가 — 12절 Q3) |
+| `PATCH /api/watchlist/{id}` | **메모만** 고친다(Q3 결정, P1) |
 | `DELETE /api/watchlist/{id}` | 삭제. 204 |
 
 - 남의 항목·없는 id·UUID 형식이 아닌 id는 모두 404 "관심종목을 찾을 수 없습니다."(존재 여부를 드러내지 않는다, `_uuid_or_404`·`_owned_entry`와 같은 방식).
@@ -223,30 +228,31 @@ README의 제품 목표 흐름은 "관심종목 → 기업 자료(출처·시점
 - **근거:** 감사 로그 `payload`는 관리자에게 그대로 보인다(C spec 2.3). 종목 목록 자체가 개인의 투자 관심이고, 남길 운영상 이유(보안 사건)가 없다. 일지는 삭제·내보내기 같은 되돌릴 수 없는 동작이 있어 개수만 남겼지만, 관심종목은 그런 동작이 없다.
 - **틀렸을 때 비용:** "누가 언제 관심종목을 지웠나"를 알 수 없다. 필요해지면 `{count}`만 남기는 사건을 더한다.
 
-### 결정 5-5. 기능 플래그를 새로 만들지 않는다 (리드 결정)
+### 결정 5-5. 기능 플래그를 새로 만들지 않는다 (AI 리드 결정)
 
 - **추천:** 관심종목은 기본 기능이다. `WATCHLIST_ENABLED` 같은 설정을 두지 않는다. 라우터는 항상 붙는다.
-- **근거(리드 결정에 AI가 더한 사실):** 일지가 플래그를 둔 이유 중 하나는 0010 미적용 DB에서 판정 API가 깨지지 않게 하는 것이었다(C spec 결정 5-6). 관심종목 표는 다른 API가 조회하지 않으므로 0011이 없어도 관심종목 경로만 실패하고, 실스택 app 컨테이너는 시작할 때 마이그레이션을 실행한다(`PORTFOLIO_LOCAL.md:74`). 근거 모드·일지처럼 외부 판정이나 개인 기록 삭제권 문제도 없다.
-- **틀렸을 때 비용:** 0011을 적용하지 않은 환경(수동 실행)에서 패널이 "불러오지 못했습니다"를 띄운다(3.2) — 지표 화면 나머지는 동작한다. 반론은 12절 Q1.
+- **근거(AI 리드 결정에 작성 AI가 더한 사실):** 일지가 플래그를 둔 이유 중 하나는 0010 미적용 DB에서 판정 API가 깨지지 않게 하는 것이었다(C spec 결정 5-6). 관심종목 표는 다른 API가 조회하지 않으므로 0011이 없어도 관심종목 경로만 실패하고, 실스택 app 컨테이너는 시작할 때 마이그레이션을 실행한다(`PORTFOLIO_LOCAL.md:74`). 근거 모드·일지처럼 외부 판정이나 개인 기록 삭제권 문제도 없다.
+- **틀렸을 때 비용:** 0011을 적용하지 않은 환경(수동 실행)에서 패널이 "불러오지 못했습니다"를 띄운다(3.2) — 지표 화면 나머지는 동작한다. 반론은 12절 Q1에서 검토했고 그대로 가기로 했다.
 
 ### 결정 5-6. 관리자 초기화·테스트 표 목록에 넣는다
 
 - **추천:** `app/routes/admin.py`의 `USER_MODELS`에 `WatchlistItem`을 더한다(부모 `users`보다 앞, 자식 없음). `tests/evidence/conftest.py`의 `_TABLES`에 `watchlist_items`를 더한다.
 - **근거:** 관리자 초기화가 사용자 자료를 비우는데 관심종목 메모만 남으면 의미가 어긋난다(C spec 결정 5-7과 같은 이유). `/api/admin/stats`에는 행 수만 나온다. `_TABLES`에 없으면 DB 테스트끼리 행이 섞인다.
-- **틀렸을 때 비용:** 시연 DB 초기화 때 노아의 관심종목도 지워진다(100개 이하라 다시 담으면 된다).
+- **틀렸을 때 비용:** 시연 DB 초기화 때 시연 계정의 관심종목도 지워진다(100개 이하라 다시 담으면 된다).
 
 ## 6. 지표 출처·시점
 
-### 결정 6-1. `get_fundamentals` 응답에 `source`·`fetched_at`을 더한다 (리드 결정)
+### 결정 6-1. `get_fundamentals` 응답에 `source`·`fetched_at`을 더한다 (AI 리드 결정)
 
 - **추천:**
   - Yahoo에서 받아 응답을 만든 직후, `cache_set` **전에** 응답 dict에 `"source": "Yahoo Finance"`, `"fetched_at": "<UTC ISO 8601>"`을 넣는다. 캐시에서 읽을 때는 저장된 값을 그대로 돌려주므로 처음 받은 시각이 유지된다.
-  - **옛 캐시 행(필드 없음) 처리(AI 세부):** 캐시에서 읽은 dict에 `fetched_at`이 없으면 캐시 미스로 보고 Yahoo에서 다시 받는다. `cache_info()`의 `updated_at`으로 채우는 방법도 있지만(오류는 캐시하지 않으므로 그 값이 곧 받은 시각이다, 2.1), 배포 직후 최대 6시간 동안만 생기는 경우를 위해 조회 경로를 하나 더 두지 않는다.
+  - **옛 캐시 행(필드 없음) 처리:** PR #39가 이미 쓰는 방식(캐시 dict에 필수 키가 없으면 미스, `stock.py:139`)에 `fetched_at`을 필수 키로 더한다. 즉 `currency`·`financial_currency`·`fetched_at`(그리고 Q2로 더하는 `quarter_ends`) 중 하나라도 없으면 Yahoo에서 다시 받는다. `cache_info()`의 `updated_at`으로 채우는 방법도 있지만(오류는 캐시하지 않으므로 그 값이 곧 받은 시각이다, 2.1), 배포 직후 최대 6시간 동안만 생기는 경우를 위해 조회 경로를 하나 더 두지 않는다.
+  - **캐시 키:** 옛 v2 행에는 `fetched_at`이 없으므로 위 필수 키 확인만으로 미스가 된다 — 그렇다면 키는 `fundamentals:v2:{symbol}`을 유지한다. 키를 v3으로 다시 올릴지는 P3에서 "옛 v2 형식 dict → 미스 → 재요청 → 새 형식으로 덮어씀"을 테스트로 확인해 확정한다(테스트가 통과하면 키 유지).
   - 오류 응답(`{"symbol", "error"}`)에는 넣지 않는다(502로 바뀌므로 화면에 지표가 없다).
   - Yahoo 요청이 실패하면 지금처럼 오류다. 6시간 지난 캐시를 "옛 값"으로 대신 보여 주는 경로는 만들지 않는다(지금도 없다).
-- **분기 끝 날짜(AI 세부, 리드 전제 정정):** 리드 전제는 "분기 실적은 이미 분기 끝 날짜가 있음"이었으나 실제로는 라벨(`"24Q1"`)만 있다(2.1). 추천은 같은 반복문에서 버리던 `endDate`를 `quarter_ends: ["2025-12-31", …]`(`quarters`와 같은 순서·길이, 없으면 `""`)로 함께 돌려주고, 분기 실적 표 머리 칸 툴팁에 `분기 끝 2025-12-31`을 보이는 것이다. 외부 호출이 늘지 않는다. 리드가 라벨만으로 충분하다고 보면 이 칸은 빼도 된다(12절 Q2).
+- **분기 끝 날짜(P3에서 더한다, Q2 결정):** 1판의 전제는 "분기 실적은 이미 분기 끝 날짜가 있음"이었으나 실제로는 라벨(`"24Q1"`)만 있다(2.1). 같은 반복문에서 버리던 `endDate`를 `quarter_ends: ["2025-12-31", …]`(`quarters`와 같은 순서·길이, 없으면 `""`)로 함께 돌려주고, 분기 실적 표 머리 칸 툴팁에 `분기 끝 2025-12-31`을 보인다. 외부 호출이 늘지 않는다.
 - **근거:** 지표 숫자가 어디서 온 언제 값인지 모르면 사용자는 실시간 값으로 오해한다. 캐시가 6시간이라 "조회 시각"을 화면이 읽은 시각으로 쓰면 최대 6시간을 속인다 — 그래서 Yahoo에서 받은 시각을 데이터와 함께 저장한다.
-- **틀렸을 때 비용:** 배포 직후 6시간 안에 열린 종목은 Yahoo를 한 번 더 부른다(종목당 1회). 응답 키가 두세 개 는다(기존 화면은 모르는 키를 무시한다).
+- **틀렸을 때 비용:** 배포 직후 6시간 안에 열린 종목은 Yahoo를 한 번 더 부른다(종목당 1회). 응답 키가 세 개 는다(기존 화면은 모르는 키를 무시한다).
 
 ### 결정 6-2. 화면 출처 줄과 고지
 
@@ -258,8 +264,8 @@ README의 제품 목표 흐름은 "관심종목 → 기업 자료(출처·시점
 
   - 시각은 화면에서 KST로 바꿔 `YYYY-MM-DD HH:mm`으로 쓴다(`journal.js`의 `kstDate`와 같은 방식으로 `Asia/Seoul` 변환, 분 단위). `fetched_at`이 없으면 "조회 시각 확인 불가"(3.2).
   - 관심종목 패널에도 고지 한 줄을 접지 않고 둔다: "관심종목은 내가 고른 목록입니다. 이 서비스는 종목을 추천하지 않습니다."
-  - 브라우저 캐시 `companyFundCache`(2.2)는 그대로 두되, 출처 줄은 캐시된 응답의 `fetched_at`을 쓰므로 표시 시각은 실제 받은 시각과 어긋나지 않는다. 다만 탭을 오래 열어 두면 6시간보다 오래된 값이 보일 수 있다(12절 Q4).
-- **근거:** 리드가 정한 문구 그대로다. "최대 6시간"은 서버 캐시 TTL(2.1)에서 나온 숫자라, TTL을 바꾸면 이 문구도 함께 바꾼다(P3 계획에 상수 하나로 묶는다).
+  - 브라우저 캐시 `companyFundCache`(2.2): 출처 줄은 캐시된 응답의 `fetched_at`을 쓰므로 표시 시각은 실제 받은 시각과 어긋나지 않는다. 탭을 오래 열어 두어 6시간보다 오래된 값이 보이지 않도록, **뷰를 다시 열거나 종목을 다시 고를 때 캐시된 응답의 `fetched_at`이 6시간 지났으면 그 항목을 버리고 다시 받는다**(P3, Q4 결정). `fetched_at`이 없는 응답도 다시 받는다.
+- **근거:** AI 리드가 정한 문구 그대로다. "최대 6시간"은 서버 캐시 TTL(2.1)에서 나온 숫자라, TTL을 바꾸면 이 문구도 함께 바꾼다(P3 계획에 상수 하나로 묶는다).
 - **틀렸을 때 비용:** 카드 아래 두 줄을 쓴다.
 
 ## 7. 화면 흐름과 연결
@@ -270,7 +276,7 @@ README의 제품 목표 흐름은 "관심종목 → 기업 자료(출처·시점
 - **근거:** 관심종목의 첫 동작이 "지표 보기"이고, 별 버튼은 지표를 본 직후 누르는 자리라 같은 뷰에 있어야 왕복이 없다. 새 GNB 탭을 만들면 내비게이션 구조(`core.js:6-115`)를 넓혀야 한다.
 - **틀렸을 때 비용:** 에이전트 채팅·일지에서 관심종목을 바로 볼 수 없다. 필요하면 같은 패널 컴포넌트를 다른 뷰에 한 번 더 붙인다.
 
-### 결정 7-2. 연결 버튼 세 개와 숨김 규칙 (리드 결정)
+### 결정 7-2. 연결 버튼 세 개와 숨김 규칙 (AI 리드 결정)
 
 | 버튼 | 보이는 조건 | 동작 |
 |---|---|---|
@@ -281,8 +287,8 @@ README의 제품 목표 흐름은 "관심종목 → 기업 자료(출처·시점
 - **켜짐 판단:** 설정 API가 없으므로(2.3) 기존 탐지를 그대로 쓴다. 근거 모드는 `/api/evidence/notice`, 일지는 `/api/journal?limit=1`이 404면 꺼짐. 각 모듈의 기존 탐지 함수(`evidence.js` `probe`, `journal.js` `initJournal`·`evidenceAvailable`)를 재사용하고, 패널이 새 탐지 요청을 따로 만들지 않는다. 탐지 오류(5xx)는 꺼짐과 같이 숨긴다.
 - **꺼진 기능의 버튼은 그리지 않는다**(비활성 회색 버튼도 두지 않는다).
 - **(c)의 개수:** 줄마다 `GET /api/journal?corp_code=X&limit=1`의 `total`(기록 수)과 `GET /api/journal?corp_code=X&due=true&limit=1`의 `total`(다시 볼 때 된 수)을 쓴다. `due_count`는 사용자 전체 값이라 쓰지 않는다(2.3). corp_code가 있는 줄만 묻고, 동시 요청은 4개로 묶는다. 같은 `corp_code` 줄은 한 번만 묻는다.
-- **근거:** 리드 결정. 꺼진 기능 버튼을 보여 주면 눌러서 404 오류를 보게 된다. 기존 일지 API를 그대로 쓰면 서버 변경이 없다.
-- **틀렸을 때 비용:** corp_code가 있는 종목 수 × 2 요청이 패널을 열 때마다 난다. corp_code는 근거 모드 적재 회사(수십 개 규모)에만 붙으므로 실제로는 수 개~수십 개 요청이다. 늘어나면 요약 경로를 더한다(12절 Q6).
+- **근거:** AI 리드 결정. 꺼진 기능 버튼을 보여 주면 눌러서 404 오류를 보게 된다. 기존 일지 API를 그대로 쓰면 서버 변경이 없다.
+- **틀렸을 때 비용:** corp_code가 있는 종목 수 × 2 요청이 패널을 열 때마다 난다. corp_code는 근거 모드 적재 회사(수십 개 규모)에만 붙으므로 실제로는 수 개~수십 개 요청이다. 요약 경로는 이번 범위에서 만들지 않고, 요청 수가 문제 되면 다시 연다(Q6 결정).
 
 ### 결정 7-3. 별 버튼 동작
 
@@ -292,7 +298,7 @@ README의 제품 목표 흐름은 "관심종목 → 기업 자료(출처·시점
 
 ## 8. 보안·개인정보
 
-### 결정 8-1. 관심종목 메모는 어디로도 나가지 않는다 (리드 결정)
+### 결정 8-1. 관심종목 메모는 어디로도 나가지 않는다 (AI 리드 결정)
 
 - **추천:** 메모(`note`)와 관심종목 목록은 JEV, Ollama(LLM·임베딩), 에이전트 채팅 프롬프트, 알림 `dispatch`, 감사 로그 `payload`, 구조화 로그에 넣지 않는다. 422 응답에도 메모를 되돌려 주지 않는다(결정 5-2). 근거 모드로 질문(b)할 때도 메모를 질문 칸에 채우지 않는다.
 - **근거:** C spec 결정 7-4와 같은 원칙이다. 메모에는 보유 여부·매수 계획 같은 사적인 내용이 들어가기 쉽다.
@@ -306,7 +312,7 @@ README의 제품 목표 흐름은 "관심종목 → 기업 자료(출처·시점
 - 지표 경로 `GET /api/stocks/fundamentals`는 지금처럼 인증 없이 둔다(2.1). 이 모듈은 그 경로에 사용자 정보를 더하지 않으므로 공개 범위가 바뀌지 않는다.
 - 계정 삭제 API는 없다(C spec 2.3). 사용자는 관심종목을 하나씩 지울 수 있다. 전체 삭제 경로는 두지 않는다(100개 이하, 12절에 열지 않음).
 
-## 9. 범위 밖 (리드 결정)
+## 9. 범위 밖 (AI 리드 결정)
 
 - 가격 알림, 실시간 시세(목록 API에 가격·등락을 넣지 않는다), 포트폴리오 수익률·보유 수량.
 - 외부 알림(메일·푸시·텔레그램 등).
@@ -323,7 +329,8 @@ README의 제품 목표 흐름은 "관심종목 → 기업 자료(출처·시점
 |---|---|
 | `tests/evidence/test_watchlist_api.py` | `p2_support.make_app`에 관심종목 라우터를 붙여(하네스 확장) DB 테스트. 아래 수용 기준 1~7 |
 | `tests/evidence/test_watchlist_mapping.py` | 매핑 순수 함수 단위 테스트(DB 없음): `.KS`/`.KQ`/해외/형식 밖/적재 목록에 없음/중복 `stock_code`/저장소 None·예외 |
-| `tests/test_fundamentals_source.py`(위치는 P3 계획에서 기존 stock 테스트 옆으로) | `httpx` 가짜 응답·`cache_get`/`cache_set` 가짜로 `source`·`fetched_at`·`quarter_ends`, 캐시 적중 시 시각 유지, 옛 캐시 행 → 미스 |
+| `tests/test_stock_fundamentals.py`(PR #39가 만든 파일을 넓힌다) | 기존 고정 quoteSummary 픽스처로 `source`·`fetched_at`·`quarter_ends`, 캐시 적중 시 시각 유지, `fetched_at` 없는 옛 v2 형식 dict → 미스 → 재요청 → 새 형식으로 덮어씀(이 결과로 캐시 키 v2 유지를 확정, 결정 6-1) |
+| `tests/e2e/company_views.py`(PR #39) | 출처 줄 KST 표시·시각 모름·고지 문구, 브라우저 캐시의 `fetched_at`이 6시간 지난 뒤 뷰를 다시 열면 지표를 다시 요청함 |
 | `tests/e2e/watchlist_views.py` | `journal_views.JournalApi`를 이어받은 가짜 API(`/api/watchlist`, `/api/stocks/fundamentals`, `/api/journal`, `/api/evidence/notice`)로 3.2 상태 전부. 근거 모드·일지 각각 404일 때 (b)·(c) 버튼이 DOM에 없음 |
 | `tests/e2e/layout_views.py` | `HASHES`에 `company-dashboard`를 더하고 `LayoutApi`가 관심종목·지표 가짜 응답을 준다. 375/768/1280 폭에서 가로 넘침 없음, 375에서 줄의 연결 버튼이 줄바꿈되어 보임 |
 
@@ -336,47 +343,54 @@ README의 제품 목표 흐름은 "관심종목 → 기업 자료(출처·시점
 5. 메모 201자·잘못된 심볼·필수 `symbol` 누락 → 422, 응답 본문에 보낸 메모·심볼 문자열이 없음.
 6. 관심종목 경로에서 JEV·LLM 클라이언트·`notification.dispatch`·`audit()`가 불리지 않음(가짜 호출 수 0). 로그 출력에 메모 문자열이 없음.
 7. 관리자 초기화가 `watchlist_items`를 비우고 `/api/admin/stats`에 행 수만 나옴. 0011 `downgrade` → 표만 사라지고 0010 상태로 돌아감(`alembic_downgrade`).
-8. 지표: Yahoo 응답으로 만든 dict에 `source == "Yahoo Finance"`, `fetched_at`(UTC ISO), `len(quarter_ends) == len(quarters)`. 캐시 적중 응답의 `fetched_at`은 처음 값과 같음. `fetched_at` 없는 캐시 dict → Yahoo 재요청. 오류 응답에는 두 칸이 없음.
-9. 화면: 출처 줄이 `fetched_at`을 KST `YYYY-MM-DD HH:mm`으로 보임(UTC 자정 근처 값으로 날짜 넘어감 확인), `fetched_at` 없으면 "조회 시각 확인 불가". 고지 문구 두 개가 접히지 않고 보임.
+8. 지표: Yahoo 응답으로 만든 dict에 `source == "Yahoo Finance"`, `fetched_at`(UTC ISO), `len(quarter_ends) == len(quarters)`, 기존 `currency`·`financial_currency` 유지. 캐시 적중 응답의 `fetched_at`은 처음 값과 같음. `fetched_at`(또는 다른 필수 키) 없는 캐시 dict → Yahoo 재요청 후 새 형식으로 저장. 오류 응답에는 새 칸이 없음.
+9. 화면: 출처 줄이 `fetched_at`을 KST `YYYY-MM-DD HH:mm`으로 보임(UTC 자정 근처 값으로 날짜 넘어감 확인), `fetched_at` 없으면 "조회 시각 확인 불가". 고지 문구 두 개가 접히지 않고 보임. 브라우저 캐시의 `fetched_at`이 6시간 지났으면 뷰를 다시 열 때 지표를 다시 요청하고, 6시간 안이면 요청하지 않음.
 10. 화면: 근거 모드 꺼짐 → (b) 없음, 일지 꺼짐 → (c) 없음, `corp_code` null → (b)·(c) 없음. (b) 누르면 `prefillEvidenceChat`이 회사와 빈 질문으로 불리고 채팅 전송 요청이 나가지 않음. (c)의 숫자가 `corp_code`별 `total` 두 값과 같음.
 11. 화면: 프런트에서 `/api/` 밖(외부) 요청이 없음(기존 e2e의 CDN 차단 방식으로 확인). 이름·메모의 `<script>` 문자열이 텍스트로만 보임.
 12. 기존 `tests/evidence`와 저장소 전체 테스트가 그대로 통과(**모든 단계**의 완료 기준).
 
-## 11. 구현 단계 (리드 결정 — 각각 PR 하나)
+## 11. 구현 단계 (AI 리드 결정 — 각각 PR 하나)
 
 | 단계 | 내용 | 어디서 | 완료 기준 |
 |---|---|---|---|
 | P1. 모델·마이그레이션·API | `0011_watchlist`, `WatchlistItem`, `app/routes/watchlist.py`(목록·추가·메모·삭제, 메모 없는 422, 409 두 종류), 매핑 함수, `USER_MODELS`·`_TABLES`, `p2_support` 하네스 확장 | 클라우드(docker postgres) | 10.1의 1~7·12, DB 테스트 skip 0, 전체 테스트 수치 보고 |
 | P2. 화면 | 관심종목 패널·별 버튼·연결 버튼(3.2 전부), `addAndSelectCompany` export, `openJournalForCompany` export, 고지 | 클라우드(e2e 가짜 응답) + 로컬 실화면 1회 | 10.1의 10·11·12, `watchlist_views.py`·`layout_views.py` 통과 |
-| P3. 지표 출처·시점 | `get_fundamentals`의 `source`·`fetched_at`(·`quarter_ends`, Q2 결과에 따라), 출처 줄·고지 | 클라우드 | 10.1의 8·9·12 |
-| P4. 문서·실스택 종단 확인 | README 목표 흐름 표·체크박스 갱신(AI 작성 표시), `compose.portfolio.yml` 실스택에서 종목 검색 → ☆ → 새로 고침 뒤 남아 있음 → (b) 근거 모드 회사 선택 확인 → (c) 일지 거르기 → 출처 줄 시각 확인 한 바퀴 | 리드 로컬(Yahoo·근거 모드 적재 데이터 필요). 문서 수정은 클라우드 가능 | 한 바퀴 결과를 PR에 적고 10.1의 12 통과 |
+| P3. 지표 출처·시점 | `get_fundamentals`의 `source`·`fetched_at`·`quarter_ends`(필수 키 확인에 더함, 캐시 키 v2 유지 여부를 테스트로 확정), 출처 줄·고지, 분기 표 툴팁, 브라우저 캐시 6시간 재요청 | 클라우드 | 10.1의 8·9·12 |
+| P4. 문서·실스택 종단 확인 | README 목표 흐름 표·체크박스 갱신(AI 작성 표시), `PORTFOLIO_LOCAL.md` 5절 끝의 "해외 기업의 원화 표시 오류 … 남아 있다" 문장을 PR #39로 고쳐진 사실에 맞게 고침, `compose.portfolio.yml` 실스택에서 종목 검색 → ☆ → 새로 고침 뒤 남아 있음 → (b) 근거 모드 회사 선택 확인 → (c) 일지 거르기 → 출처 줄 시각 확인 한 바퀴 | 리드 로컬(Yahoo·근거 모드 적재 데이터 필요). 문서 수정은 클라우드 가능 | 한 바퀴 결과를 PR에 적고 10.1의 12 통과 |
 
 - P1이 끝나야 P2를 시작한다. **P3은 P1·P2와 독립**이라 나란히 할 수 있다(관심종목 표를 쓰지 않는다).
 - 어느 단계도 클라우드에서 Yahoo·JEV·OpenDART·Ollama를 부르지 않는다(지표 테스트는 가짜 httpx).
 
-## 12. 열린 질문 (리드 결정을 바꾸지 않고 남긴 반론·확인 사항)
+## 12. 1판 열린 질문과 결정 (2판에서 모두 닫음)
 
-- **Q1. 플래그 없이 가도 되나?** 리드 결정은 "플래그 없음"이고 이 spec도 그대로 따랐다(결정 5-5). 반론 근거: 근거 모드·일지는 모두 기본 꺼짐 플래그로 들어왔고, 플래그가 있으면 0011 미적용 환경이나 P2 화면이 덜 된 상태에서 메뉴를 숨길 수 있다. 다만 관심종목 표는 다른 API가 조회하지 않고 실스택은 시작 시 마이그레이션을 하므로 위험이 작다고 본다. 리드가 그대로 가면 닫는다.
-- **Q2. 분기 끝 날짜(`quarter_ends`)를 더할까?** 리드 전제("이미 있음")와 달리 지금은 `"24Q1"` 라벨만 있다(2.1). 추가 비용은 같은 반복문 한 줄이고 외부 호출이 없다. 라벨로 충분하면 빼고 출처 줄만 둔다.
-- **Q3. 메모 수정 `PATCH`를 둘까?** 리드가 정한 API는 추가·삭제·목록이다. 별 버튼은 메모 없이 추가하므로 수정 경로가 없으면 메모 칸을 쓸 길이 "지우고 다시 추가"뿐이라 AI가 메모 전용 `PATCH`를 더했다. 빼면 메모는 패널의 추가 양식에서만 쓴다.
-- **Q4. 오래 열어 둔 탭의 브라우저 캐시.** `companyFundCache`는 세션 동안 유지되어, 탭을 6시간 넘게 열어 두면 "최대 6시간 지난 값"보다 오래된 값이 보일 수 있다(시각 표시는 정확하다). 뷰를 다시 열 때 `fetched_at`이 6시간 지났으면 다시 받는 처리를 P3에 넣을지 정한다(추천: 넣는다, 코드 몇 줄).
-- **Q5. 목업 종목 탭(`COMPANIES` 5개)을 관심종목으로 바꿀까?** 로그인 사용자에게는 관심종목이 더 쓸모 있지만, 비교·섹터 화면이 같은 목업을 쓴다(`company.js:14-50`). 이번에는 두고 패널을 따로 둔다.
-- **Q6. 일지 개수 요약 경로.** (c)는 줄마다 요청 2개다(결정 7-2). 근거 모드 적재 회사가 많아지면 `GET /api/journal/summary?corp_code=…`(기록 수·due 수 묶음) 같은 일지 쪽 경로를 더할지 — 이번 범위에서는 만들지 않는다.
+1판이 남긴 질문 6개를 AI 리드가 2판 검토에서 아래처럼 정했다. 열린 질문은 남아 있지 않다.
+
+| # | 질문 | 결정 | 반영 |
+|---|---|---|---|
+| Q1 | 플래그 없이 가도 되나 | **그대로 간다**(플래그 없음). 관심종목 표는 다른 API가 조회하지 않고 실스택은 시작 시 마이그레이션을 한다 | 결정 5-5. 닫음 |
+| Q2 | 분기 끝 날짜 `quarter_ends`를 더할까 | **더한다** | 결정 6-1, P3 |
+| Q3 | 메모 수정 `PATCH`를 둘까 | **둔다**(메모만 고침) | 결정 5-1, P1 |
+| Q4 | 오래 열어 둔 탭의 브라우저 캐시 | **뷰를 다시 열 때 `fetched_at`이 6시간 지났으면 다시 받는다** | 결정 6-2, P3 |
+| Q5 | 목업 종목 탭을 관심종목으로 바꿀까 | **유지**(비교·섹터 화면이 같은 목업을 쓴다) | 결정 7-1. 닫음 |
+| Q6 | 일지 개수 요약 경로 | **이번 범위에서 만들지 않는다.** 근거 모드 적재 회사가 늘어 요청 수가 문제 되면 다시 연다 | 결정 7-2. 닫음 |
 
 ## 13. 결정 기록
 
 | # | 결정 | 누가 |
 |---|---|---|
-| 1 | 관심종목 서버 저장, 0011 표, 열 구성, (user_id, symbol) 유일, 100개 상한, `get_current_user_any`, 플래그 없음 | 리드(노아) 결정을 AI가 옮김 |
-| 2 | 연결 (a)(b)(c), 꺼진 기능 버튼 숨김 | 리드 결정을 AI가 옮김 |
-| 3 | corp_code 매핑 규칙, 실패·해외는 null | 리드 결정을 AI가 옮김 |
-| 4 | `source`·`fetched_at`, 출처 줄 문구 | 리드 결정을 AI가 옮김 |
-| 5 | 범위 밖, 메모 비전송 | 리드 결정을 AI가 옮김 |
-| 6 | P1~P4 단계, 테스트 계획 항목 | 리드 결정을 AI가 옮김 |
-| 7 | 중복 409(`code`·`item_id`), 메모 없는 422, 감사 로그 없음, 입력 검증 규칙, `market` 서버 계산 | AI(기존 일지 패턴에 맞춤) |
-| 8 | 목록 조회 때 null corp_code 나중에 채우기 | AI(근거 모드 꺼짐 동안 추가한 종목 대응) |
-| 9 | 옛 캐시 행은 미스 처리, `quarter_ends` 추천 | AI(리드 전제 정정 포함, Q2) |
-| 10 | 메모 `PATCH` 추가 | AI(Q3) |
-| 11 | 패널 위치(기업 지표 화면 맨 위), 목업 탭 유지, 켜짐 판단은 기존 탐지 재사용, (c) 개수는 `total` 두 번 | AI(코드 사실에 맞춤, Q5·Q6) |
+| 1 | 관심종목 서버 저장, 0011 표, 열 구성, (user_id, symbol) 유일, 100개 상한, `get_current_user_any`, 플래그 없음 | AI 리드 결정(노아 위임)을 옮김 |
+| 2 | 연결 (a)(b)(c), 꺼진 기능 버튼 숨김 | AI 리드 결정(노아 위임)을 옮김 |
+| 3 | corp_code 매핑 규칙, 실패·해외는 null | AI 리드 결정(노아 위임)을 옮김 |
+| 4 | `source`·`fetched_at`, 출처 줄 문구 | AI 리드 결정(노아 위임)을 옮김 |
+| 5 | 범위 밖, 메모 비전송 | AI 리드 결정(노아 위임)을 옮김 |
+| 6 | P1~P4 단계, 테스트 계획 항목 | AI 리드 결정(노아 위임)을 옮김 |
+| 7 | 중복 409(`code`·`item_id`), 메모 없는 422, 감사 로그 없음, 입력 검증 규칙, `market` 서버 계산 | 작성 AI(기존 일지 패턴에 맞춤), AI 리드 2판 검토 통과 |
+| 8 | 목록 조회 때 null corp_code 나중에 채우기 | 작성 AI(근거 모드 꺼짐 동안 추가한 종목 대응), AI 리드 2판 검토 통과 |
+| 9 | 옛 캐시 행은 필수 키 확인으로 미스 처리(PR #39 방식에 `fetched_at` 추가), 캐시 키 v2 유지 여부는 P3 테스트로 확정 | AI 리드 결정(노아 위임), 2판 |
+| 10 | 메모 `PATCH` 둔다(Q3) | AI 리드 결정(노아 위임), 2판 |
+| 11 | 패널 위치(기업 지표 화면 맨 위), 켜짐 판단은 기존 탐지 재사용, (c) 개수는 `total` 두 번 | 작성 AI(코드 사실에 맞춤), AI 리드 2판 검토 통과 |
+| 12 | Q1 플래그 없음 유지, Q5 목업 탭 유지, Q6 요약 경로 만들지 않음(닫음) | AI 리드 결정(노아 위임), 2판 |
+| 13 | Q2 `quarter_ends` 추가, Q4 브라우저 캐시 6시간 지나면 다시 받기(P3) | AI 리드 결정(노아 위임), 2판 |
+| 14 | P4에서 `PORTFOLIO_LOCAL.md` 5절 "해외 기업의 원화 표시 오류" 문장을 PR #39 반영 사실로 고침 | AI 리드 결정(노아 위임), 2판 |
 
-이 문서는 AI(Claude Code)가 작성했다. 결정 1~6은 리드가 내린 결정이고, 7~11은 AI가 채운 세부로 리드 검토 대상이다.
+이 문서는 AI(Claude Code)가 작성했다. 결정은 노아가 프로젝트 진행을 위임한 AI 리드(Claude Code)가 내렸고, 노아는 방향(관심종목·출처 시점 우선 순서)을 승인했다.
