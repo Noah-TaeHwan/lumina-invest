@@ -76,9 +76,11 @@ def policy_fields(p: Policy) -> dict:
 
 
 def assigned(qid: str, all_qids: list[str]) -> tuple[str, str]:
-    """전체 질문을 qid 순으로 정렬한 순번으로 (주체 교체 하위 유형 9칸 순환, 표기 변형 유형 3칸 순환)."""
+    """전체 질문을 qid 순으로 정렬한 순번 i로 (주체 교체 하위 유형 SWAP_CYCLE[i mod 9], 표기 변형 유형
+    NOTATION_TYPES[(i div 9) mod 3]). 9가 3의 배수라 같은 i mod로 돌리면 두 순환이 묶여(회사 칸은 늘 법인 표기) 일부 칸이 영영
+    나오지 않는다. 표기는 9칸 한 바퀴마다 넘겨 연속 27개에서 9×3 모든 칸이 한 번씩 나오게 한다(교체 하위 유형 비율은 그대로)."""
     i = sorted(all_qids).index(qid)
-    return SWAP_CYCLE[i % len(SWAP_CYCLE)], NOTATION_TYPES[i % len(NOTATION_TYPES)]
+    return SWAP_CYCLE[i % len(SWAP_CYCLE)], NOTATION_TYPES[(i // len(SWAP_CYCLE)) % len(NOTATION_TYPES)]
 
 
 def split_halves(clusters: list[list[str]], seed: int = HALF_SEED,
@@ -128,8 +130,23 @@ def annotate(rows: list[dict], signal: str, tau_d: float, arms=tuple(ARMS)) -> l
     return out
 
 
+def _high_first(r: dict, theta_high: float | None) -> int | None:
+    """제품이 주 판정 전에 따로 묻는 상단 구간 최고 점수 문단(lex ≥ θ_high ∧ high_ok ∧ ①c 통과), 없으면 None."""
+    high = r["high_ok"] and r["best"] is not None and theta_high is not None and r["lex"] >= theta_high
+    return r["best"] if high and r["code"]["c"][r["best"]] else None
+
+
+def followup_requests(r: dict, theta_high: float | None = BASE.theta_high) -> list[list[int]]:
+    """평가의 후속 요청 묶음 — 제품 실행기와 같은 문맥(측정값 = 운영값): 상단 구간이면 최고 점수 문단 하나만 먼저 따로 묻고
+    ([best]), a2-v1 ✅ 후보(숫자 확인 ∧ s ≥ τ_s, 반박·미판정 제외)는 이미 물은 문단을 뺀 두 번째 요청으로 묻는다.
+    (제품은 첫 요청이 통과하면 두 번째를 보내지 않지만, 평가는 보조 팔 계산을 위해 보낸다.)"""
+    first = _high_first(r, theta_high)
+    rest = [i for i in sa.candidate_passages(r["s"], r["c"], r["valid"], BASE.tau_s, BASE.tau_c) if i != first]
+    return [x for x in ([first] if first is not None else [], rest) if x]
+
+
 def followup_candidates(r: dict, theta_high: float | None = BASE.theta_high) -> list[int]:
-    """평가의 후속 요청 후보 문단: a2-v1 ✅ 후보(숫자 확인 ∧ s ≥ τ_s, 반박·미판정 제외) ∪ 상단 구간 최고 점수 문단."""
+    """후속 요청에서 묻는 문단 전부(오름차순): a2-v1 ✅ 후보 ∪ 상단 구간 최고 점수 문단."""
     high = r["high_ok"] and r["best"] is not None and theta_high is not None and r["lex"] >= theta_high
     return sa.candidate_passages(r["s"], r["c"], r["valid"], BASE.tau_s, BASE.tau_c, best=r["best"] if high else None)
 
@@ -161,10 +178,11 @@ def check_confirm_cap(cap: int) -> int:
     return cap
 
 
-def check_prompt_versions(versions: list[str]) -> None:
-    """문구 판은 최대 3개(수정 최대 2회, 결정 2-2 전환 포함)."""
-    if len(set(versions)) > MAX_PROMPT_VERSIONS:
-        raise SystemExit(f"prompt versions {sorted(set(versions))} exceed {MAX_PROMPT_VERSIONS}")
+def check_prompt_versions(pairs: list[tuple[str, str]]) -> None:
+    """판은 (문구 판, 문맥) 쌍으로 센다. 최대 3개(판 고침 최대 2회 — 결정 2-2의 '문단 8개 전부' 전환도 1회로 센다)."""
+    got = sorted({tuple(p) for p in pairs})
+    if len(got) > MAX_PROMPT_VERSIONS:
+        raise SystemExit(f"prompt versions (version, context) {got} exceed {MAX_PROMPT_VERSIONS}")
 
 
 def measure(rows: list[dict]) -> dict:
@@ -203,9 +221,15 @@ def _acc(rows: list[dict], arm: str) -> float | None:
     return sum(r["dec"][arm] != "supported" for r in rows) / len(rows) if rows else None
 
 
-def explore_grid(natural: list[dict], swaps: list[dict], signals=SIGNALS, grid=TAU_D_GRID) -> list[dict]:
-    """(신호 × τ_d)마다 C·A·B의 설계용·점검용 자연 주장 손실과 관문 대상 주체 교체 정확도(모든 조합 공개).
-    설계용 = A-2 조정 세트 + A-3 설계용 반, 점검용 = A-3 점검용 반(행의 set: a2-tune / a3-design / a3-check)."""
+HALVES = {"design": ("a2-tune", "a3-design"), "check": ("a3-check",)}
+
+
+def explore_grid(natural: list[dict], swaps: list[dict], signals=SIGNALS, grid=TAU_D_GRID,
+                 halves=("design", "check")) -> list[dict]:
+    """(신호 × τ_d)마다 C·A·B의 자연 주장 손실과 관문 대상 주체 교체 정확도(모든 조합 공개).
+    설계용 = A-2 조정 세트 + A-3 설계용 반, 점검용 = A-3 점검용 반(행의 set: a2-tune / a3-design / a3-check).
+    a4-explore는 halves=("design",)로 설계용만 계산한다. 점검용은 a4-proceed가 한 번만 본다.
+    자연 주장 손실의 분모는 후속 실패 행을 뺀 것이다(호출 쪽에서 뺀다)."""
     out = []
     for sig in signals:
         for t in grid:
@@ -213,7 +237,8 @@ def explore_grid(natural: list[dict], swaps: list[dict], signals=SIGNALS, grid=T
             arms = {}
             for arm in ("C", "A", "B"):
                 arms[arm] = {}
-                for half, sets in (("design", ("a2-tune", "a3-design")), ("check", ("a3-check",))):
+                for half in halves:
+                    sets = HALVES[half]
                     n = [r for r in nat if r["set"] in sets]
                     s = [r for r in sw if r["set"] in sets]
                     arms[arm][half] = {**_loss(n, arm), "swap_n": len(s), "swap_accuracy": _acc(s, arm)}
@@ -233,14 +258,29 @@ def choose(grid: list[dict]) -> dict | None:
     return {"signal": best["signal"], "tau_d": best["tau_d"]}
 
 
+def choose_all(grids: dict[tuple[str, str], list[dict]]) -> dict | None:
+    """판·문맥도 설계용 격자 합본에서 6.2 규칙으로 고른다: 설계용 C 손실률 ≤ 1.0%인 (판, 문맥, 신호, τ_d) 중 설계용 교체
+    정확도가 가장 높은 것. 같으면 P(diff), 큰 τ_d, 먼저 탐색한 판(grids 순서). 해당 없으면 None."""
+    best, key = None, None
+    for order, ((version, context), grid) in enumerate(grids.items()):
+        for g in grid:
+            d = g["arms"]["C"]["design"]
+            if d["loss_rate"] is None or d["loss_rate"] > DESIGN_MAX_LOSS_RATE:
+                continue
+            k = (d["swap_accuracy"] or 0.0, g["signal"] == "p_diff", g["tau_d"], -order)
+            if key is None or k > key:
+                best, key = {"version": version, "context": context, "signal": g["signal"], "tau_d": g["tau_d"]}, k
+    return best
+
+
 def max_explore_loss(denominator: int) -> int:
-    """진행 기준 재현율 손실 허용 건수: ⌊0.01 × 분모⌋(spec 4.2-4에 적힌 식 그대로. 분모 397이면 3건이고, spec 본문의
-    '4건 이하'와 1건 다르다 — 사전등록 확정 ruling에서 정한다)."""
-    return math.floor(PROCEED_LOSS_RATE * denominator + 1e-9)
+    """진행 기준 재현율 손실 허용 건수: floor(0.01 × 분모 + 0.5)(리드 ruling, 분모 397이면 4건 — 결정 기록 4번과 작동 특성 표
+    0.95/0.63/0.29/0.10/0.01이 재현되는 값)."""
+    return math.floor(PROCEED_LOSS_RATE * denominator + 0.5)
 
 
 def proceed(natural: list[dict], swaps: list[dict], signal: str, tau_d: float) -> dict:
-    """진행 기준(spec 4.2-4, 모두 만족해야 확정): 재현율(두 탐색 세트 합산 C 손실 ≤ ⌊0.01 × 분모⌋건), 교체(점검용 반 C 관문
+    """진행 기준(spec 4.2-4, 모두 만족해야 확정): 재현율(두 탐색 세트 합산 C 손실 ≤ floor(0.01 × 분모 + 0.5)건), 교체(점검용 반 C 관문
     대상 정확도 ≥ 0.92), 방향(A-3 확인 세트 전체에서 C 부문·사업과 제품·브랜드 정확도가 각각 a3보다 높음)."""
     nat, sw = annotate(natural, signal, tau_d), annotate(_gated(swaps), signal, tau_d)
     loss = _loss(nat, "C")
@@ -267,7 +307,11 @@ def proceed(natural: list[dict], swaps: list[dict], signal: str, tau_d: float) -
 
 def audit(natural: list[dict], swaps: list[dict], signal: str, tau_d: float) -> dict:
     """탐색 감사 목록: 'a2-v1 ✅ → C ❔' 자연 주장과 C가 놓친 관문 대상 교체. 기계적 원인(가 ①c 코드, 나 ② '다름',
-    다 ② 'unclear')만 채우고 ai_cause(라·마·바 포함)는 비워 둔다 — AI가 분류하고 AI 작성임을 밝힌다."""
+    다 ② 'unclear')만 채우고 ai_cause(라·마·바 포함)는 비워 둔다 — AI가 분류하고 AI 작성임을 밝힌다.
+    판 고침·문맥 전환의 근거라 설계용 절반 행만 쓴다(점검용 행은 받아도 뺀다)."""
+    design = HALVES["design"]
+    natural = [r for r in natural if r["set"] in design]
+    swaps = [r for r in swaps if r["set"] in design]
     nat = annotate(natural, signal, tau_d)
     out_n = []
     for r in nat:
@@ -361,17 +405,21 @@ def _three(nat: list[dict], sw: list[dict], arm: str, n_boot: int, seed: int, fo
     return {"h_swap": h_swap, "h_recall": h_recall, "h_prec": h_prec}
 
 
-def check_gates(natural: list[dict], swaps: list[dict], signal: str, tau_d: float, n_boot: int = BOOTSTRAP_N,
+def check_gates(rows: list[dict], signal: str, tau_d: float, n_boot: int = BOOTSTRAP_N,
                 seed: int = SEED, main_failed: int = 0) -> dict:
-    """A-4 관문(spec 5.1): C(a4-subject-exp) 대 a2-v1. natural: 판정 가능 자연 주장(y 라벨), swaps: 통제 주체 교체 주장.
+    """A-4 관문(spec 5.1): C(a4-subject-exp) 대 a2-v1. rows: 판정 대상 전부(이견 없는 판정 주장 — 자연·c1·c2·c3, 주 판정이
+    성공한 행). 자연 주장(source natural, y 라벨)과 통제 주체 교체 주장(variant '주체 교체:*')을 안에서 나눈다.
 
-    후속 호출이 실패한 행(q_failed)은 모든 정책·팔에서 짝으로 빼고 수를 보고한다. 주 판정 실패(main_failed, 이미 뺀 행)와
-    합쳐 판정 대상의 1%를 넘으면 세 관문 모두 기술 통계만(실패). '문단 안 교체'는 관문 밖(다섯 정책 기술 통계). 보조 팔 a3·A·B의 세 관문 값은 기술 통계이고
+    판정 실패 1% 규칙의 분자·분모는 같은 집합(이견 없는 판정 주장 전부)이다: 분모 = 행 수 + 주 판정 실패(main_failed, 이미 뺀
+    행), 분자 = main_failed + 후속 호출이 실패한 행(q_failed). 실패 행은 모든 정책·팔에서 짝으로 빼고 수를 보고한다. 1%를
+    넘으면 세 관문 모두 기술 통계만(실패). '문단 안 교체'는 관문 밖(다섯 정책 기술 통계). 보조 팔 a3·A·B의 세 관문 값은 기술 통계이고
     권고(recommendation)에 쓰지 않는다. H-swap 민감도(최종 라벨이 supported·disputed가 아닌 c2만)는 관문이 아니다."""
     from lab.evidence.metrics import cluster_bootstrap
 
-    judged = len(natural) + len(swaps) + main_failed
-    failed = sum(1 for r in natural + swaps if r.get("q_failed")) + main_failed
+    natural = [r for r in rows if r.get("source") == "natural"]
+    swaps = [r for r in rows if _is_swap(r)]
+    judged = len(rows) + main_failed
+    failed = sum(1 for r in rows if r.get("q_failed")) + main_failed
     over = judged > 0 and failed / judged > FOLLOWUP_FAIL_MAX
     keep = lambda rs: [r for r in rs if not r.get("q_failed")]  # noqa: E731
     nat = annotate(keep(natural), signal, tau_d)
@@ -399,6 +447,7 @@ def check_gates(natural: list[dict], swaps: list[dict], signal: str, tau_d: floa
     out["in_passage_swap"] = {"n": len(inside), "accuracy": {arm: _accf(arm)(inside) for arm in FIVE}}
     out["arms"] = {arm: _three(nat, sw, arm, n_boot, seed, over) for arm in AUX}
     out["followup_failed_excluded"] = failed
+    out["judged"] = judged
     out["judge_failed_over"] = over
     return out
 
@@ -502,10 +551,21 @@ def fallback_violations(kind: str, tuned: float, fallback: float, n: int = 2000,
     return bad
 
 
-def check_registrable(pre: dict) -> None:
-    """사전등록을 registered로 바꾸기 전 검사: τ_d·신호가 정해졌고(격자 안), 폴백 운영점이 있으면 R2를 지킨다."""
+def check_registrable(pre: dict, selection: dict | None = None, require_selection: bool = False) -> None:
+    """사전등록을 registered로 바꾸기 전(그리고 split·a4-report에서 다시) 검사: τ_d·신호가 격자 안에서 정해졌고, a4-proceed
+    결과의 선택(판·문맥·신호·τ_d)과 같고 진행 기준을 통과했으며, 폴백 운영점이 있으면 R2를 지킨다."""
     if pre.get("tau_d") not in TAU_D_GRID or pre.get("signal") not in SIGNALS:
         raise SystemExit("cannot register: tau_d·signal must be chosen from the grid in exploration")
+    if selection is None and require_selection:
+        raise SystemExit("cannot register: no a4-proceed selection in attempts.jsonl")
+    if selection is not None:
+        sq = pre.get("subject_question") or {}
+        mine = (sq.get("version"), sq.get("context"), pre["signal"], pre["tau_d"])
+        theirs = tuple(selection.get(k) for k in ("version", "context", "signal", "tau_d"))
+        if mine != theirs:
+            raise SystemExit(f"cannot register: prereg {mine} differs from the a4-proceed selection {theirs}")
+        if not selection.get("proceed"):
+            raise SystemExit("cannot register: a4-proceed criteria not met (proceed is false)")
     for f in pre.get("fallbacks") or []:
         v = fallback_violations(f["kind"], f["tuned"], f["fallback"])
         if v:

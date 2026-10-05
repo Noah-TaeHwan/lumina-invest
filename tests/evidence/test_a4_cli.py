@@ -43,6 +43,16 @@ def _P(tmp_path, status="draft", **extra):
     return P
 
 
+SEL = {"version": "v1", "context": "candidates", "signal": "p_diff", "tau_d": 0.5}
+REG = {"tau_d": 0.5, "signal": "p_diff", "fallbacks": [],
+       "subject_question": {"sha": subject_a4.SUBJECT_QUESTION_SHA, "version": "v1", "context": "candidates"}}
+
+
+def _proceed_line(P, proceed=True, **sel):
+    """a4-proceed 원장 줄(선택·진행 기준). 확정·추첨·리포트가 이것과 대조한다."""
+    cli.log_attempt(P, "a4-proceed", selection={**SEL, **sel}, proceed=proceed)
+
+
 def _mock_client(answer, counter):
     """주 판정(p*)·후속(s*) 질문에 답하는 JEV 가짜 전송. answer(qid) → 확률."""
     def handle(request):
@@ -89,9 +99,15 @@ def test_study_only_commands(tmp_path):
 
 
 def test_split_a4_draws_45_excluding_120_prior(tmp_path, monkeypatch):
-    P = _P(tmp_path, "registered")
+    P = _P(tmp_path, "registered", **REG)
     seen = {}
     monkeypatch.setattr(cli, "verify_prereg_code", lambda P: None)
+    with pytest.raises(SystemExit, match="a4-proceed"):  # 진행 기준 선택 없이 추첨하지 않는다
+        cli.cmd_split(P, None)
+    _proceed_line(P, tau_d=0.4)
+    with pytest.raises(SystemExit, match="a4-proceed"):  # 사전등록 τ_d가 선택과 다르면 거부
+        cli.cmd_split(P, None)
+    _proceed_line(P)
     monkeypatch.setattr(cli, "prior_texts", lambda P, studies: seen.setdefault("studies", studies) and ({}, {}))
     monkeypatch.setattr(cli, "_draw_random", lambda P, n_, b_, **kw: seen.update(kw))
     cli.cmd_split(P, None)
@@ -194,7 +210,13 @@ def test_measure_counts_without_calls_and_logs_half_split(tmp_path):
     assert m["sets"]["a2-tune"]["claims"] == 1 and m["sets"]["a2-tune"]["followup"] == 1
     assert m["all"]["m_mean"] == 1.0 and m["all"]["followup_ratio"] == 1.0
     assert lines.index(half) < lines.index(m)
+    assert half["sha256"] == m["half_split_sha256"] and len(half["sha256"]) == 64
     cli.cmd_a4_measure(P, A)  # 다시 돌려도 반분은 같아야 한다(원장의 첫 반분과 대조)
+    _P(tmp_path, exploration={"token_cap": 200_000, "half_split": {"sha256": "0" * 64}})
+    with pytest.raises(SystemExit, match="half split"):  # 사전등록에 적은 반분 해시와 다르면 거부
+        cli.cmd_a4_measure(P, A)
+    _P(tmp_path, exploration={"token_cap": 200_000, "half_split": {"sha256": half["sha256"]}})
+    cli.cmd_a4_measure(P, A)
     _P(tmp_path, "registered")
     with pytest.raises(SystemExit, match="draft"):
         cli.cmd_a4_measure(P, A)
@@ -217,10 +239,16 @@ def test_explore_reads_tune_and_a3_check_only_and_writes_own_ledger(tmp_path, mo
     assert len(cli.read_jsonl(P.explore_calls)) == 51 and not P.calls.exists()
     out = json.loads((P.priv / "a4_explore_v1-candidates.json").read_text())
     assert len(out["grid"]) == 12 and out["n"]["a2-tune"] == 1  # x(확인 세트)는 읽지 않는다
-    assert out["selected"] is None and out["proceed"] is None  # 지지 주장을 모두 잃어 해당 없음 → 멈춤
+    assert out["selected"] is None and "proceed" not in out  # 지지 주장을 모두 잃어 해당 없음
+    # F1: 탐색은 설계용 절반만 계산·출력·기록한다(점검용은 a4-proceed 한 번만)
+    assert all(set(g["arms"][arm]) == {"design"} for g in out["grid"] for arm in ("C", "A", "B"))
+    assert all(x["set"] != "a3-check" for x in out["audit"]["natural"] + out["audit"]["swaps"])
     last = json.loads(P.attempts.read_text().splitlines()[-1])
     assert last["event"] == "a4-explore" and last["prompt_version"] == "v1" and len(last["grid"]) == 12
+    assert "proceed" not in last and not any(k.endswith("_check") for g in last["grid"] for k in g)
     assert last["subject_question_sha"] == subject_a4.SUBJECT_QUESTION_SHA
+    assert set(last["code_sha256"]) == {"app/services/evidence/subject_a4.py", "lab/evidence/a4.py"}  # F7
+    assert last["q_sha256"] == hashlib.sha256((P.priv / "explore_q/v1-candidates.jsonl").read_bytes()).hexdigest()
     n_calls = len(seen)
     cli.cmd_a4_explore(P, A)  # 같은 판을 다시: 캐시만(유료 호출 0)
     assert len(seen) == n_calls
@@ -251,14 +279,76 @@ def test_explore_refuses_fourth_prompt_version_and_after_registration(tmp_path, 
     P = _P(tmp_path)
     _explore_fixture(tmp_path)
     cli.cmd_a4_measure(P, A)
-    for v in ("v1", "v2", "v3"):
-        cli.log_attempt(P, "a4-explore", prompt_version=v, context="candidates")
-    monkeypatch.setitem(subject_a4.PROMPTS, "v4", subject_a4.PROMPTS["v1"])
-    with pytest.raises(SystemExit, match="exceed 3"):
-        cli.cmd_a4_explore(P, type("B", (A,), {"prompt_version": "v4"}))
+    for v, ctx in (("v1", "candidates"), ("v2", "candidates"), ("v2", "all")):
+        cli.log_attempt(P, "a4-explore", prompt_version=v, context=ctx)
+    monkeypatch.setitem(subject_a4.PROMPTS, "v3", subject_a4.PROMPTS["v1"])
+    with pytest.raises(SystemExit, match="exceed 3"):  # F3: (판, 문맥) 쌍으로 센다
+        cli.cmd_a4_explore(P, type("B", (A,), {"prompt_version": "v3"}))
     _P(tmp_path, "registered")
     with pytest.raises(SystemExit, match="draft"):
         cli.cmd_a4_explore(P, A)
+
+
+def test_context_all_needs_ruling_line_with_cause_ma_majority(tmp_path, monkeypatch):
+    """F3: '문단 8개 전부'(--context all)는 설계용 절반 C 손실 중 원인 (마) 건수 ruling 줄이 있고 절반 이상일 때만."""
+    P = _P(tmp_path, exploration={"token_cap": 300_000})
+    _explore_fixture(tmp_path)
+    seen = []
+    _use_mock(monkeypatch, lambda q: SAME, seen)
+    cli.cmd_a4_measure(P, A)
+    ALL = type("B", (A,), {"context": "all"})
+    with pytest.raises(SystemExit, match="ruling"):
+        cli.cmd_a4_explore(P, ALL)
+    cli.log_attempt(P, "ruling", topic="context-all", design_c_loss=4, cause_ma=1)
+    with pytest.raises(SystemExit, match="ruling"):
+        cli.cmd_a4_explore(P, ALL)
+    cli.log_attempt(P, "ruling", topic="context-all", design_c_loss=4, cause_ma=2)
+    cli.cmd_a4_explore(P, ALL)
+    assert seen and all(len(q) for q in seen)
+    assert json.loads(P.attempts.read_text().splitlines()[-1])["context"] == "all"
+
+
+def _explore_once(tmp_path, monkeypatch, answer=lambda q: SAME):
+    P = _P(tmp_path)
+    _explore_fixture(tmp_path)
+    seen = []
+    _use_mock(monkeypatch, answer, seen)
+    cli.cmd_a4_measure(P, A)
+    return P, seen
+
+
+def test_proceed_runs_once_over_all_explored_versions(tmp_path, monkeypatch):
+    """F1: a4-proceed는 한 번만. 탐색한 모든 (판, 문맥)의 설계용 격자 합본에서 6.2 규칙으로 고르고, 그 선택에만 점검용 절반·
+    진행 기준을 계산한다. 모든 조합의 격자(점검용 포함)를 공개한다. 이 뒤에는 a4-explore가 거부된다."""
+    P, seen = _explore_once(tmp_path, monkeypatch)
+    with pytest.raises(SystemExit, match="a4-explore"):
+        cli.cmd_a4_proceed(P, A)
+    cli.cmd_a4_explore(P, A)
+    n_calls = len(seen)
+    cli.cmd_a4_proceed(P, A)
+    assert len(seen) == n_calls  # 호출 없음
+    last = json.loads(P.attempts.read_text().splitlines()[-1])
+    assert last["event"] == "a4-proceed"
+    assert last["selection"] == {"version": "v1", "context": "candidates", "signal": "p_diff", "tau_d": 0.7}
+    assert last["proceed"] is False and last["criteria"]["swap"]["accuracy"] == 0.0  # 점검용 교체를 하나도 못 막음
+    assert set(last["grids"]) == {"v1-candidates"}
+    assert {h for g in last["grids"]["v1-candidates"] for h in g if h.startswith("C_")} == {"C_design", "C_check"}
+    out = json.loads((P.priv / "a4_proceed.json").read_text())
+    assert out["selection"] == last["selection"] and all(x["set"] != "a3-check" for x in out["audit"]["natural"])
+    with pytest.raises(SystemExit, match="already ran"):
+        cli.cmd_a4_proceed(P, A)
+    with pytest.raises(SystemExit, match="a4-proceed"):
+        cli.cmd_a4_explore(P, A)
+
+
+def test_proceed_refuses_if_explore_answers_changed(tmp_path, monkeypatch):
+    P, _ = _explore_once(tmp_path, monkeypatch)
+    cli.cmd_a4_explore(P, A)
+    q = P.priv / "explore_q/v1-candidates.jsonl"
+    q.write_text(q.read_text().replace("0.9", "0.8"))
+    with pytest.raises(SystemExit, match="changed"):
+        cli.cmd_a4_proceed(P, A)
+    assert not any(json.loads(x)["event"] == "a4-proceed" for x in P.attempts.read_text().splitlines())
 
 
 def test_explore_requires_concluded_a3(tmp_path):
@@ -283,10 +373,11 @@ def _sha(rel):
 def _check_fixture(tmp_path, monkeypatch):
     exp = replace(a4.EXP, tau_d=0.5, subject_signal="p_diff")
     monkeypatch.setattr(a4, "EXP", exp)
-    P = _P(tmp_path, "registered", tau_d=0.5, signal="p_diff", fallbacks=[],
+    P = _P(tmp_path, "registered", **REG,
            policies={"base": a4.policy_fields(a4.BASE), "exp": a4.policy_fields(exp), "a3": a4.policy_fields(a4.A3)},
-           subject_question={"sha": subject_a4.SUBJECT_QUESTION_SHA}, labels={"labelers": {"opus": "o", "codex": "c"}},
+           labels={"labelers": {"opus": "o", "codex": "c"}},
            budget={"followup_tokens_p95_estimate": 2000, "followup_ratio": 0.65})
+    _proceed_line(P)
     code = tmp_path / "app/services/evidence/subject_a4.py"
     code.parent.mkdir(parents=True)
     code.write_text("x")
@@ -346,6 +437,10 @@ def test_freeze_needs_swap_tags_then_judge_and_report_end_to_end(tmp_path, monke
     assert json.loads(P.attempts.read_text().splitlines()[-1])["event"] == "a4-report"
     with pytest.raises(SystemExit, match="already ran"):
         cli.cmd_judge(P, A)
+    _proceed_line(P, version="v2")  # 사전등록 판이 a4-proceed 선택과 다르면 거부
+    with pytest.raises(SystemExit, match="a4-proceed"):
+        cli.cmd_a4_report(P, None)
+    _proceed_line(P)
     monkeypatch.setattr(a4, "EXP", replace(a4.EXP, tau_d=0.6))  # 사전등록 τ_d와 제품 상수가 다르면 거부
     with pytest.raises(SystemExit, match="policy"):
         cli.cmd_a4_report(P, None)
@@ -397,7 +492,7 @@ def test_committed_prereg_a4_draft_matches_code():
         "llama3.1:8b", "46e0c10c039e", generate.PROMPT_SHA, generate.OPTIONS)
     assert pre["draw"]["seed"] == a4.SEED == 20261305 and pre["draw"]["random_n"] == a4.RANDOM_N == 45
     assert pre["draw"]["exclude_prior_studies"] == list(a4.PRIOR_STUDIES)
-    assert pre["exploration"]["half_split"] == {"seed": a4.HALF_SEED, "design_companies": a4.HALF_N}
+    assert pre["exploration"]["half_split"] == {"seed": a4.HALF_SEED, "design_companies": a4.HALF_N, "sha256": None}
     assert pre["exploration"]["tau_d_grid"] == list(a4.TAU_D_GRID) and pre["exploration"]["signals"] == list(a4.SIGNALS)
     assert pre["exploration"]["token_cap_max"] == a4.EXPLORE_CAP_MAX and pre["exploration"]["token_cap"] is None
     assert pre["token_cap_max"] == a4.TOKEN_CAP_MAX and pre["token_cap"] is None
@@ -423,9 +518,20 @@ def test_committed_prereg_a4_draft_matches_code():
     assert {"all_pass", "all_pass_cost_over", "h_swap_fail", "h_recall_fail", "h_prec_fail_only",
             "judge_failed"} <= set(pre["product_mapping"]["cases"])
     assert len(pre["decisions"]) == 6 and pre["fallbacks"] == []
+    # 리뷰 반영(F1·F2·F3·F5·F6): 점검용 한 번, 손실 한도 ruling, (판, 문맥) 쌍, 순환 독립, 1% 규칙 분모
+    assert "floor(0.01·n + 0.5)" in pre["decisions"][3]["decision"] and "open_question" not in p
+    assert "floor(0.01·n + 0.5)" in p["rule"] and "a4-proceed" in p["check_once"]
+    assert "a4-proceed" in pre["exploration"]["selection"] and "판·문맥" in pre["exploration"]["selection"]
+    assert "후속 실패" in pre["exploration"]["recall_denominator"]
+    assert "a4-proceed" in pre["subject_question"]["filled_by"] and "(판, 문맥)" in pre["subject_question"]["max_versions_rule"]
+    assert "ruling" in pre["subject_question"]["context_all_rule"]
+    assert "(i div 9) mod 3" in pre["controlled"]["assignment"]
+    assert "c1·c3" in pre["gate_measure"]["failures"]
+    assert any("a4-proceed" in x for x in pre["order"])
     assert {"app/services/evidence/subject_a4.py", "lab/evidence/a4.py", "app/services/evidence/subject.py",
             "lab/evidence/a3.py", "app/services/evidence/judge.py",
-            "app/services/evidence/lexical.py"} <= set(pre["code_sha256"])
+            "app/services/evidence/lexical.py", "lab/evidence/metrics.py",
+            "app/services/evidence/runner.py"} <= set(pre["code_sha256"])
     for rel, sha in pre["code_sha256"].items():
         assert _sha(rel) == sha, rel
     assert pre["seeds_distinct"] is True and a3.SEED != a4.SEED

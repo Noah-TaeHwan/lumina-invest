@@ -411,7 +411,12 @@ def cmd_split(P: Paths, args) -> None:
         if not prereg_registered(P):
             raise SystemExit(f"split needs {P.prereg.name} registered (status: registered)")
         verify_prereg_code(P)
-        return _split_a3(P) if P.study == "a3" else _split_a4(P)
+        if P.study == "a4":
+            from lab.evidence import a4
+
+            a4.check_registrable(json.loads(P.prereg.read_text()), _a4_selection(P), require_selection=True)
+            return _split_a4(P)
+        return _split_a3(P)
     if P.study == "a2":
         verify_prereg_code(P)
         return _split_a2(P)
@@ -2056,6 +2061,12 @@ def _a4_explore_rows(P: Paths) -> tuple[list[dict], dict, dict]:
     return rows, n, failed
 
 
+def _halves_sha(design: list[list[str]], check: list[list[str]]) -> str:
+    """반분 목록의 SHA-256(사전등록 exploration.half_split.sha256과 대조)."""
+    return hashlib.sha256(json.dumps({"design": design, "check": check}, ensure_ascii=False, sort_keys=True)
+                          .encode()).hexdigest()
+
+
 def _require_draft(P: Paths, cmd: str) -> dict:
     pre = json.loads(P.prereg.read_text())
     if pre.get("status") == "registered":
@@ -2068,11 +2079,15 @@ def cmd_a4_measure(P: Paths, args) -> None:
     비율·후보 문단 수 m(평균·p95)을 세어 탐색 상한·확인 미리 멈춤 식 값을 다시 계산한다. 값은 prereg_a4.json 초안에 옮긴다."""
     from lab.evidence import a4
 
-    _require_draft(P, "a4-measure")
+    pre = _require_draft(P, "a4-measure")
     rows, n, failed = _a4_explore_rows(P)  # 데이터를 먼저 다 읽는다(빠진 것이 있으면 원장에 아무것도 남기지 않는다)
     design, rest = _a4_halves(P)
+    half_sha = _halves_sha(design, rest)
+    want = ((pre.get("exploration") or {}).get("half_split") or {}).get("sha256")
+    if want and want != half_sha:
+        raise SystemExit(f"half split sha256 {half_sha} differs from prereg_a4.json exploration.half_split")
     if not any(r.get("event") == "a4-half-split" and r.get("study") == "a4" for r in read_jsonl(P.attempts)):
-        log_attempt(P, "a4-half-split", seed=a4.HALF_SEED, design=design, check=rest,
+        log_attempt(P, "a4-half-split", seed=a4.HALF_SEED, design=design, check=rest, sha256=half_sha,
                     design_companies=sum(map(len, design)), check_companies=sum(map(len, rest)))
     sets = {k: a4.measure([r for r in rows if r["set"] == k]) for k in ("a2-tune", "a3-design", "a3-check")}
     allm = a4.measure(rows)
@@ -2082,7 +2097,7 @@ def cmd_a4_measure(P: Paths, args) -> None:
            "confirm_judge_n": confirm_n,
            "confirm_estimate": a4.confirm_estimate(confirm_n, confirm_n, allm["followup_ratio"] or 0.0,
                                                    allm["followup_tokens_p95_estimate"])}
-    out = {"sets": sets, "all": allm, "jev_failed_excluded": failed, "estimates": est}
+    out = {"sets": sets, "all": allm, "jev_failed_excluded": failed, "estimates": est, "half_split_sha256": half_sha}
     path = P.priv / "a4_measure.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n")
@@ -2101,79 +2116,163 @@ def _explore_cap(pre: dict) -> int:
     return int(cap)
 
 
+def _a4_selection(P: Paths) -> dict | None:
+    """원장의 a4-proceed 선택(판·문맥·신호·τ_d)과 진행 기준 통과 여부. 없으면 None."""
+    lines = [r for r in read_jsonl(P.attempts) if r.get("event") == "a4-proceed" and r.get("study") == "a4"]
+    if not lines or not lines[-1].get("selection"):
+        return None
+    return {**lines[-1]["selection"], "proceed": lines[-1]["proceed"]}
+
+
+def _a4_proceeded(P: Paths) -> bool:
+    return any(r.get("event") == "a4-proceed" and r.get("study") == "a4" for r in read_jsonl(P.attempts)) \
+        or (P.priv / "a4_proceed.json").exists()
+
+
+A4_CODE = ("app/services/evidence/subject_a4.py", "lab/evidence/a4.py")
+
+
+def _context_all_ruled(P: Paths) -> bool:
+    """결정 2-2: 원장에 설계용 절반 C 손실 중 원인 (마) 건수 ruling 줄이 있고 (마)가 절반 이상이어야 '문단 8개 전부'로 바꾼다."""
+    rul = [r for r in read_jsonl(P.attempts) if r.get("event") == "ruling" and r.get("study") == "a4"
+           and r.get("topic") == "context-all"]
+    if not rul:
+        return False
+    loss, ma = int(rul[-1].get("design_c_loss") or 0), int(rul[-1].get("cause_ma") or 0)
+    return loss > 0 and 2 * ma >= loss
+
+
+def _compact(grid: list[dict]) -> list[dict]:
+    return [{"signal": g["signal"], "tau_d": g["tau_d"],
+             **{f"{arm}_{h}": {k: v[k] for k in ("loss", "denominator", "swap_accuracy", "swap_n")}
+                for arm, halves in g["arms"].items() for h, v in halves.items()}} for g in grid]
+
+
 def cmd_a4_explore(P: Paths, args) -> None:
     """확정 전 탐색(spec 4.2): 두 탐색 세트의 ✅ 후보 주장에 후속 주체 질문만 새로 부른다(별도 원장 jev_calls_explore.jsonl,
-    A-3 원장·결과는 읽기만). 상한에 닿으면 어떤 지표도 계산하지 않는다. 다 부르면 (신호 × τ_d) 모든 조합의 설계용·점검용 값,
-    설계용에서만 고른 신호·τ_d, 점검용 반 진행 기준, 감사 목록(AI 분류 칸 비움)을 비공개 파일과 원장에 남긴다."""
+    A-3 원장·결과는 읽기만). 상한에 닿으면 어떤 지표도 계산하지 않는다. 다 부르면 **설계용 절반만**: (신호 × τ_d) 모든 조합의
+    설계용 격자, 설계용 선택(참고), 설계용 감사(AI 분류 칸 비움)를 비공개 파일과 원장에 남긴다. 점검용 절반은 계산하지 않는다
+    (a4-proceed가 한 번만 본다). a4-proceed 뒤에는 거부한다."""
     from app.lib.jev import TokenCapExceeded, request_key
     from app.services.evidence import subject_a4 as sa
     from lab.evidence import a2, a4
 
     pre = _require_draft(P, "a4-explore")
+    if _a4_proceeded(P):
+        raise SystemExit("exploration is closed: a4-proceed already ran")
     if not any(r.get("event") == "a4-measure" and r.get("study") == "a4" for r in read_jsonl(P.attempts)):
         raise SystemExit("run a4-measure first (1a: half split and measured caps)")
     cap = _explore_cap(pre)
     version, context = args.prompt_version, args.context
     if version not in sa.PROMPTS:
         raise SystemExit(f"unknown prompt version {version} (subject_a4.PROMPTS)")
-    used_versions = [r["prompt_version"] for r in read_jsonl(P.attempts)
-                     if r.get("event") == "a4-explore" and r.get("study") == "a4"]
-    a4.check_prompt_versions(used_versions + [version])
+    used = [(r["prompt_version"], r.get("context", "candidates")) for r in read_jsonl(P.attempts)
+            if r.get("event") == "a4-explore" and r.get("study") == "a4"]
+    a4.check_prompt_versions(used + [(version, context)])
+    if context == "all" and not _context_all_ruled(P):
+        raise SystemExit("--context all needs a ruling line (topic context-all) with cause (마) ≥ half of design C loss")
     p95 = (pre.get("budget") or {}).get("followup_tokens_p95_estimate")
     if p95 is None:
         raise SystemExit("prereg_a4.json budget.followup_tokens_p95_estimate is empty: run a4-measure and fill it")
     if context == "all":
         p95 = a4.FOLLOWUP_HEAD + a4.K * a4.FOLLOWUP_PER_PASSAGE
     rows, n, failed = _a4_explore_rows(P)
-    reqs = []
-    for r in rows:
-        cand = a4.followup_candidates(r)
-        if cand:
-            reqs.append((r, *sa.build_followup(r["company"], r["text"], r["passages"], cand, context, version)))
+    reqs = [(r, *sa.build_followup(r["company"], r["text"], r["passages"], cand, context, version))
+            for r in rows for cand in a4.followup_requests(r)]
     calls = read_jsonl(P.explore_calls)
-    used = sum(c["input_tokens"] for c in calls)
+    spent = sum(c["input_tokens"] for c in calls)
     cached = {c["key"] for c in calls if c["ok"]}
-    a2.check_budget(used, sum(request_key(st, qs) not in cached for _, st, qs, _ in reqs) * int(p95), cap)
+    a2.check_budget(spent, sum(request_key(st, qs) not in cached for _, st, qs, _ in reqs) * int(p95), cap)
     client = _jev_client(P.explore_calls, cap)
-    out_q = []
+    for r in rows:
+        r["q"], r["q_failed"] = {}, False
     try:
         for r, st, qs, qmap in reqs:
             res = client.ask(st, qs, tag=f"explore-{version}-{context}")
-            r["q"] = sa.followup_probs(res.answers, qmap) if res.ok else None
-            r["q_failed"] = not res.ok
-            out_q.append({"cid": r["cid"], "q": r["q"], "q_failed": r["q_failed"]})
+            if res.ok:
+                r["q"].update(sa.followup_probs(res.answers, qmap))
+            else:
+                r["q_failed"] = True
     except TokenCapExceeded:
-        write_jsonl(P.priv / "explore_q" / f"{version}-{context}.partial.jsonl", out_q)
-        log_attempt(P, "a4-explore-incomplete", prompt_version=version, context=context, done=len(out_q),
-                    todo=len(reqs), used_tokens=client.used_tokens, cap=cap)
+        log_attempt(P, "a4-explore-incomplete", prompt_version=version, context=context, todo=len(reqs),
+                    used_tokens=client.used_tokens, cap=cap)
         raise SystemExit("explore incomplete: token cap reached; no metrics computed (AI lead ruling needed)")
-    write_jsonl(P.priv / "explore_q" / f"{version}-{context}.jsonl", out_q)
-    for r in rows:
-        r.setdefault("q", {})
-        r.setdefault("q_failed", False)
-    ok = [r for r in rows if not r["q_failed"]]
-    nat = [r for r in ok if r["source"] == "natural"]
-    sw = [r for r in ok if (r.get("variant") or "").startswith("주체 교체")]
-    grid = a4.explore_grid(nat, sw)
+    qpath = P.priv / "explore_q" / f"{version}-{context}.jsonl"
+    write_jsonl(qpath, [{"cid": r["cid"], "q": None if r["q_failed"] else r["q"], "q_failed": r["q_failed"]}
+                        for r in rows])
+    nat, sw = _a4_split_rows(rows)
+    grid = a4.explore_grid(nat, sw, halves=("design",))
     sel = a4.choose(grid)
-    prog = a4.proceed(nat, sw, sel["signal"], sel["tau_d"]) if sel else None
-    aud = a4.audit(nat, sw, sel["signal"], sel["tau_d"]) if sel else None
+    # 감사 기준점: 설계용 선택, 없으면 가장 덜 막는 설정(P(diff), 최대 τ_d) — 판 고침 근거라 선택이 없을 때도 낸다
+    at = sel or {"signal": "p_diff", "tau_d": max(a4.TAU_D_GRID)}
+    aud = {**a4.audit(nat, sw, at["signal"], at["tau_d"]), "at": at}
+    code = {rel: _file_sha(P.root / rel) for rel in A4_CODE}
     res = {"prompt_version": version, "context": context, "subject_question_sha": sa.question_sha(version),
-           "n": n, "jev_failed_excluded": failed, "followup_calls": len(reqs),
+           "code_sha256": code, "n": n, "jev_failed_excluded": failed, "followup_calls": len(reqs),
            "followup_failed": sum(r["q_failed"] for r in rows), "used_tokens": client.used_tokens, "cap": cap,
-           "grid": grid, "selected": sel, "proceed": prog, "audit": aud, "x0_audit": a4.x0_audit(sw),
-           "note": "τ_d·신호는 설계용(A-2 조정 + A-3 설계용 반)에서만 골랐다. 감사 ai_cause는 AI가 채우고 AI 작성임을 밝힌다."}
+           "grid": grid, "selected": sel, "audit": aud, "x0_audit": a4.x0_audit([r for r in sw if r["set"] != "a3-check"]),
+           "note": "설계용 절반(A-2 조정 + A-3 설계용 반)만 계산했다. 점검용 절반은 a4-proceed가 한 번만 본다. "
+                   "손실 분모는 후속 실패 행을 뺀다. 감사 ai_cause는 AI가 채우고 AI 작성임을 밝힌다."}
     path = P.priv / f"a4_explore_{version}-{context}.json"
     path.write_text(json.dumps(res, ensure_ascii=False, indent=1, default=str) + "\n")
-    compact = [{"signal": g["signal"], "tau_d": g["tau_d"],
-                **{f"{arm}_{h}": {k: g["arms"][arm][h][k] for k in ("loss", "denominator", "swap_accuracy", "swap_n")}
-                   for arm in ("C", "A", "B") for h in ("design", "check")}} for g in grid]
     log_attempt(P, "a4-explore", prompt_version=version, context=context, subject_question_sha=res["subject_question_sha"],
-                n=n, followup_calls=len(reqs), followup_failed=res["followup_failed"], used_tokens=client.used_tokens,
-                grid=compact, selected=sel, x0_more_supported=res["x0_audit"]["more_supported"],
-                proceed=None if prog is None else {k: prog[k] for k in ("recall", "swap", "direction", "optimism",
-                                                                        "proceed")})
-    print(json.dumps({"selected": sel, "proceed": None if prog is None else prog["proceed"]}, ensure_ascii=False))
+                code_sha256=code, q_sha256=_file_sha(qpath), n=n, followup_calls=len(reqs),
+                followup_failed=res["followup_failed"], used_tokens=client.used_tokens, grid=_compact(grid),
+                selected_design=sel, x0_more_supported=res["x0_audit"]["more_supported"])
+    print(json.dumps({"selected_design": sel}, ensure_ascii=False))
+
+
+def _a4_split_rows(rows: list[dict]) -> tuple[list[dict], list[dict]]:
+    """후속 실패 행을 뺀 자연 주장·통제 주체 교체 주장(탐색 손실 분모는 후속 실패 행을 뺀다)."""
+    ok = [r for r in rows if not r.get("q_failed")]
+    return ([r for r in ok if r["source"] == "natural"],
+            [r for r in ok if (r.get("variant") or "").startswith("주체 교체")])
+
+
+def cmd_a4_proceed(P: Paths, args) -> None:
+    """진행 기준(spec 4.2-4, 6.2) — 한 번만. 지금까지 탐색한 모든 (판, 문맥)의 설계용 격자를 합쳐 6.2 규칙으로 판·문맥·신호·
+    τ_d를 고르고(a4.choose_all), 그 선택에만 점검용 절반과 진행 기준을 계산한다. 모든 조합의 격자(점검용 포함)를 공개한다.
+    호출 없음(탐색 후속 응답 파일을 원장의 해시와 대조해 읽는다). 이 뒤에는 a4-explore가 거부되고, 사전등록 확정은 이 선택과
+    같아야 한다(a4.check_registrable)."""
+    from lab.evidence import a4
+
+    _require_draft(P, "a4-proceed")
+    if _a4_proceeded(P):
+        raise SystemExit("a4-proceed already ran (the check half is looked at once)")
+    lines = [r for r in read_jsonl(P.attempts) if r.get("event") == "a4-explore" and r.get("study") == "a4"
+             and r.get("q_sha256")]
+    if not lines:
+        raise SystemExit("run a4-explore first")
+    latest: dict[tuple[str, str], str] = {}
+    for r in lines:  # 처음 탐색한 순서를 지키고, 같은 판을 다시 돌렸으면 마지막 응답 해시
+        latest[(r["prompt_version"], r.get("context", "candidates"))] = r["q_sha256"]
+    base, n, failed = _a4_explore_rows(P)
+    per = {}
+    for (v, ctx), sha in latest.items():
+        qpath = P.priv / "explore_q" / f"{v}-{ctx}.jsonl"
+        if _file_sha(qpath) != sha:
+            raise SystemExit(f"explore answers changed after a4-explore: {qpath.name}")
+        q = {r["cid"]: r for r in read_jsonl(qpath)}
+        rows = [{**r, "q": None if q[r["cid"]]["q"] is None else {int(k): p for k, p in q[r["cid"]]["q"].items()},
+                 "q_failed": q[r["cid"]]["q_failed"]} for r in base]
+        per[(v, ctx)] = _a4_split_rows(rows)
+    design = {k: a4.explore_grid(*nat_sw, halves=("design",)) for k, nat_sw in per.items()}
+    sel = a4.choose_all(design)
+    full = {f"{v}-{ctx}": a4.explore_grid(*nat_sw) for (v, ctx), nat_sw in per.items()}
+    crit = aud = None
+    if sel:
+        nat, sw = per[(sel["version"], sel["context"])]
+        crit = a4.proceed(nat, sw, sel["signal"], sel["tau_d"])
+        aud = a4.audit(nat, sw, sel["signal"], sel["tau_d"])
+    ok = bool(crit and crit["proceed"])
+    res = {"selection": sel, "proceed": ok, "criteria": crit, "grids": full, "audit": aud, "n": n,
+           "jev_failed_excluded": failed,
+           "note": "판·문맥·신호·τ_d는 설계용 격자 합본에서만 골랐다(6.2). 점검용 절반은 이 선택에만, 이 명령에서 한 번만 봤다."}
+    (P.priv / "a4_proceed.json").write_text(json.dumps(res, ensure_ascii=False, indent=1, default=str) + "\n")
+    log_attempt(P, "a4-proceed", selection=sel, proceed=ok,
+                criteria=None if crit is None else {k: crit[k] for k in ("recall", "swap", "direction", "optimism")},
+                grids={k: _compact(g) for k, g in full.items()})
+    print(json.dumps({"selection": sel, "proceed": ok}, ensure_ascii=False))
 
 
 def _check_swap_tags(P: Paths, codes: set[str]) -> None:
@@ -2235,12 +2334,16 @@ def _judge_a4(P: Paths, args) -> None:
             if r.ok:
                 row["s"] = [r.answers[f"p{j}"]["supports"] for j in range(1, n + 1)]
                 row["c"] = [r.answers[f"p{j}"]["contradicts"] for j in range(1, n + 1)]
-                cand = a4.followup_candidates({**f, "s": row["s"], "c": row["c"]})
-                if cand:
+                for cand in a4.followup_requests({**f, "s": row["s"], "c": row["c"]}):  # 제품과 같은 문맥(F8)
                     st, qs, qmap = sa.build_followup(f["company"], f["text"], f["passages"], cand, context, version)
                     fr = client.ask(st, qs, use_cache=not args.no_cache, tag=f"{args.tag}-followup")
-                    row.update(m=len(cand), q=sa.followup_probs(fr.answers, qmap) if fr.ok else None,
-                               q_failed=not fr.ok, followup_tokens=fr.input_tokens, followup_latency_ms=fr.latency_ms)
+                    row["m"] += len(cand)
+                    row["followup_tokens"] += fr.input_tokens
+                    row["followup_latency_ms"] += fr.latency_ms
+                    if fr.ok and not row["q_failed"]:
+                        row["q"].update(sa.followup_probs(fr.answers, qmap))
+                    else:
+                        row["q"], row["q_failed"] = None, True
             out.append(row)
     except TokenCapExceeded:
         write_jsonl(P.priv / "scores" / f"{args.tag}.partial.jsonl", out)
@@ -2368,7 +2471,7 @@ def cmd_a4_report(P: Paths, args) -> None:
     pre = json.loads(P.prereg.read_text())
     if pre.get("status") != "registered":
         raise SystemExit("a4-report needs prereg_a4.json registered")
-    a4.check_registrable(pre)
+    a4.check_registrable(pre, _a4_selection(P), require_selection=True)
     want = {"base": a4.policy_fields(a4.BASE), "exp": a4.policy_fields(a4.EXP), "a3": a4.policy_fields(a4.A3)}
     if pre.get("policies") != want or (pre["tau_d"], pre["signal"]) != (a4.EXP.tau_d, a4.EXP.subject_signal):
         raise SystemExit(f"policy constants differ from prereg_a4.json: {want}")
@@ -2380,7 +2483,7 @@ def cmd_a4_report(P: Paths, args) -> None:
     natural = [r for r in rows if r["source"] == "natural"]
     ctrl = [r for r in rows if r["source"] == "controlled"]
     swaps = [r for r in ctrl if (r["variant"] or "").startswith("주체 교체")]
-    g = a4.check_gates(natural, swaps, signal, tau_d, main_failed=failed)
+    g = a4.check_gates(rows, signal, tau_d, main_failed=failed)  # 1% 규칙 분모 = 이견 없는 판정 주장 전부(F6)
     cost = a4.cost_summary(rows)
     d = a4.annotate([r for r in natural if not r["q_failed"]], signal, tau_d, arms=("a2-v1", "C"))
     y = [r["y"] for r in d]
@@ -2401,11 +2504,12 @@ def cmd_a4_report(P: Paths, args) -> None:
     print(json.dumps({k: g[k]["pass"] for k in ("h_swap", "h_recall", "h_prec")}))
 
 
-COMMANDS.update({"a4-measure": cmd_a4_measure, "a4-explore": cmd_a4_explore, "a4-report": cmd_a4_report})
+COMMANDS.update({"a4-measure": cmd_a4_measure, "a4-explore": cmd_a4_explore, "a4-proceed": cmd_a4_proceed,
+                 "a4-report": cmd_a4_report})
 A1_ONLY = {"stage0-report", "stage1-tune", "stage1-freeze-config", "stage1-report", "baselines", "claim-embed"}
 A2_ONLY = {"a2-tune", "a2-report"}
 A3_ONLY = {"a3-report", "a3-explore"}
-A4_ONLY = {"a4-measure", "a4-explore", "a4-report"}
+A4_ONLY = {"a4-measure", "a4-explore", "a4-proceed", "a4-report"}
 
 
 def main(argv: list[str] | None = None) -> None:

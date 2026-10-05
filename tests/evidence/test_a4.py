@@ -24,7 +24,7 @@ def row(cid, *, y=1, s=(0.9,), c=(0.0,), valid=None, code=None, q=0, variant=Non
             "valid": list(valid or [True] * n), "code": masks, "q": {0: SAME} if q == 0 else q, "q_failed": q_failed,
             "variant": variant, "expected": "not_supported" if variant else None,
             "label": label or ("supported" if y else "no_evidence"), "lex": lex, "high_ok": high_ok, "best": best,
-            "swap_tag": tag, "set": set_}
+            "swap_tag": tag, "set": set_, "source": "controlled" if variant else "natural"}
 
 
 def test_policies_are_the_product_constants():
@@ -44,8 +44,23 @@ def test_assignment_cycles_nine_slots():
     got = [a4.assigned(q, qids)[0] for q in sorted(qids)]
     assert a4.SWAP_CYCLE == ("회사", "부문·사업", "제품·브랜드", "거래상대·자회사") * 2 + (a4.IN_PASSAGE,)
     assert got == [a4.SWAP_CYCLE[i % 9] for i in range(11)] and got[8] == a4.IN_PASSAGE
-    assert [a4.assigned(q, qids)[1] for q in sorted(qids)] == [a3.NOTATION_TYPES[i % 3] for i in range(11)]
+    assert [a4.assigned(q, qids)[1] for q in sorted(qids)] == [a3.NOTATION_TYPES[(i // 9) % 3] for i in range(11)]
     assert a4.SWAP_SUBTYPES == a3.SWAP_SUBTYPES  # 하위 유형 이름은 A-3와 같다(배정 비율만 바뀐다)
+
+
+def test_swap_and_notation_cycles_are_independent():
+    """F5: 9칸 교체 순환과 3칸 표기 순환이 같은 인덱스로 묶이지 않는다 — 연속 27개에서 9×3 모든 칸이 한 번씩."""
+    qids = [f"q{i:03d}" for i in range(54)]
+    for start in (0, 27):
+        got = [a4.assigned(q, qids) for q in qids[start:start + 27]]
+        assert [sw for sw, _ in got] == [a4.SWAP_CYCLE[i % 9] for i in range(27)]
+        cells = {(i % 9, nt) for i, (_, nt) in enumerate(got)}  # 9칸 자리 × 표기 3종
+        assert len(cells) == 27 == len(a4.SWAP_CYCLE) * len(a4.NOTATION_TYPES)
+        assert {sw for sw, _ in got} == set(a4.SWAP_CYCLE)
+        for st in a4.GATED_SUBTYPES:  # 관문 하위 유형마다 세 표기 유형을 모두 받는다
+            assert {nt for sw, nt in got if sw == st} == set(a4.NOTATION_TYPES)
+    swaps = [a4.assigned(q, qids)[0] for q in qids[:27]]
+    assert {st: swaps.count(st) for st in a4.GATED_SUBTYPES} == {st: 6 for st in a4.GATED_SUBTYPES}  # 비율 보존
 
 
 def test_half_split_is_cluster_level_seeded_and_deterministic():
@@ -80,6 +95,18 @@ def test_lex_high_row_needs_question_on_best():
     assert a4.decide_row(r, "C", "p_diff", 0.5)[3] == "jev" and a4.decide_row(r, "C", "p_diff", 0.5)[0] == "no_evidence"
 
 
+def test_followup_requests_match_product_contexts():
+    """F8: 상단 구간은 제품처럼 최고 문단 하나만 따로 묻고(①c 통과 때), 나머지 ✅ 후보는 그 문단을 뺀 두 번째 요청으로 묻는다."""
+    r = row("k", s=(0.9, 0.2, 0.86), valid=[True, True, True], lex=0.99, high_ok=True, best=1)
+    assert a4.followup_requests(r) == [[1], [0, 2]]
+    r = row("k", s=(0.9, 0.95), lex=0.99, high_ok=True, best=1)
+    assert a4.followup_requests(r) == [[1], [0]]  # 최고 문단이 s 후보여도 두 번째 요청에 다시 넣지 않는다
+    r = row("k", s=(0.9, 0.95), lex=0.99, high_ok=True, best=1, code={"c": [True, False]})
+    assert a4.followup_requests(r) == [[0, 1]]  # ①c 실패면 제품도 상단 후속을 하지 않는다
+    assert a4.followup_requests(row("k", s=(0.9, 0.2))) == [[0]]
+    assert a4.followup_requests(row("k", s=(0.2,))) == []
+
+
 def test_followup_candidates_include_lex_high_best():
     r = row("k", s=(0.9, 0.2, 0.86), valid=[True, True, False], lex=0.99, high_ok=True, best=1)
     assert a4.followup_candidates(r) == [0, 1]
@@ -110,10 +137,12 @@ def test_explore_cap_stops_above_max():
     assert a4.check_confirm_cap(9_000_000) == 9_000_000
 
 
-def test_prompt_versions_capped_at_three():
-    a4.check_prompt_versions(["v1", "v2", "v3"])
-    with pytest.raises(SystemExit, match="3"):
-        a4.check_prompt_versions(["v1", "v2", "v3", "v4"])
+def test_prompt_versions_capped_at_three_pairs():
+    """F3: 판은 (문구 판, 문맥) 쌍으로 센다 — 문단 8개 전환도 판 고침 2회 중 하나."""
+    a4.check_prompt_versions([("v1", "candidates"), ("v2", "candidates"), ("v2", "all")])
+    a4.check_prompt_versions([("v1", "candidates"), ("v1", "candidates")])
+    with pytest.raises(SystemExit, match="exceed 3"):
+        a4.check_prompt_versions([("v1", "candidates"), ("v1", "all"), ("v2", "candidates"), ("v2", "all")])
 
 
 # --- 탐색 격자·선택·진행 기준 ---------------------------------------------------------------------------------
@@ -143,6 +172,24 @@ def test_grid_reports_every_combination_by_half():
     assert u["arms"]["C"]["design"]["loss"] == 1 and u["arms"]["C"]["design"]["swap_accuracy"] == 1.0
 
 
+def test_explore_grid_can_omit_check_half():
+    """F1: 탐색은 설계용 절반만 계산한다(점검용은 a4-proceed 한 번만)."""
+    nat, sw = _explore_rows()
+    grid = a4.explore_grid(nat, sw, halves=("design",))
+    assert all(set(g["arms"][arm]) == {"design"} for g in grid for arm in ("C", "A", "B"))
+
+
+def test_choose_across_explored_versions_uses_design_grids():
+    """F1: 판·문맥 선택도 설계용 격자 합본에 6.2 규칙(정확도 → P(diff) → 큰 τ_d → 먼저 탐색한 판)."""
+    g = lambda sig, t, acc, loss=0.0: {"signal": sig, "tau_d": t,  # noqa: E731
+                                       "arms": {"C": {"design": {"loss_rate": loss, "swap_accuracy": acc}}}}
+    grids = {("v1", "candidates"): [g("p_diff", 0.5, 0.8), g("p_diff_unclear", 0.5, 0.95)],
+             ("v2", "candidates"): [g("p_diff", 0.4, 0.95), g("p_diff", 0.6, 0.95, loss=0.02)],
+             ("v2", "all"): [g("p_diff", 0.4, 0.95)]}
+    assert a4.choose_all(grids) == {"version": "v2", "context": "candidates", "signal": "p_diff", "tau_d": 0.4}
+    assert a4.choose_all({("v1", "candidates"): [g("p_diff", 0.5, 1.0, loss=0.5)]}) is None
+
+
 def test_choose_uses_design_only_and_breaks_ties():
     nat, sw = _explore_rows()
     grid = a4.explore_grid(nat, sw)
@@ -159,7 +206,9 @@ def test_choose_uses_design_only_and_breaks_ties():
 
 
 def test_max_explore_loss_rule():
-    assert a4.max_explore_loss(397) == 3 and a4.max_explore_loss(400) == 4 and a4.max_explore_loss(99) == 0
+    """F2 리드 ruling: floor(0.01·n + 0.5) — n = 397이면 4(결정 기록 4번·작동 특성 표와 같다)."""
+    assert a4.max_explore_loss(397) == 4 and a4.max_explore_loss(400) == 4 and a4.max_explore_loss(349) == 3
+    assert a4.max_explore_loss(99) == 1 and a4.max_explore_loss(49) == 0
 
 
 def test_proceed_criteria():
@@ -184,6 +233,14 @@ def test_audit_classifies_mechanical_cause_and_leaves_ai_cause_open():
     assert [(x["cid"], x["cause"], x["p_unclear"]) for x in au2["swaps"]] == [("d-q1-c2", "다", 0.5)]
 
 
+def test_audit_reads_design_half_only():
+    """F4: 감사와 판 고침·문맥 전환 근거는 설계용 절반 행만 쓴다."""
+    nat = [row("a-q1-n1", q={0: DIFF}, set_="a2-tune"), row("b-q1-n1", q={0: DIFF}, set_="a3-check")]
+    sw = [row("d-q1-c2", y=0, variant="주체 교체:회사", q={0: UNCL}, set_="a3-check")]
+    au = a4.audit(nat, sw, "p_diff", 0.5)
+    assert [x["cid"] for x in au["natural"]] == ["a-q1-n1"] and au["swaps"] == []
+
+
 # --- 확인 관문 ------------------------------------------------------------------------------------------------
 def _gate_rows(n_nat=160, n_sw=160, lose=0, miss=0):
     nat = [row(f"n{i}-q1-n1", cluster=i % 40, qid=f"n{i}-q1") for i in range(n_nat)]
@@ -202,7 +259,7 @@ def _gate_rows(n_nat=160, n_sw=160, lose=0, miss=0):
 def test_gates_pass_and_report_five_policies():
     nat, sw = _gate_rows()
     inside = [row("p1-q1-c2", y=0, variant=f"주체 교체:{a4.IN_PASSAGE}", q={0: DIFF})]
-    g = a4.check_gates(nat, sw + inside, "p_diff", 0.5, n_boot=50)
+    g = a4.check_gates(nat + sw + inside, "p_diff", 0.5, n_boot=50)
     assert g["h_swap"]["pass"] and g["h_recall"]["pass"] and g["h_prec"]["descriptive_only"] is False
     assert g["h_swap"]["n"] == 160 and g["in_passage_swap"]["n"] == 1
     assert set(g["h_swap"]["by_subtype"]["부문·사업"]["accuracy"]) == set(a4.FIVE)
@@ -216,17 +273,17 @@ def test_gates_pass_and_report_five_policies():
 
 def test_gate_fail_and_descriptive_cases():
     nat, sw = _gate_rows(miss=30)
-    g = a4.check_gates(nat, sw, "p_diff", 0.5, n_boot=50)
+    g = a4.check_gates(nat + sw, "p_diff", 0.5, n_boot=50)
     assert not g["h_swap"]["pass"]
     nat, sw = _gate_rows(n_sw=100)
-    g = a4.check_gates(nat, sw, "p_diff", 0.5, n_boot=50)
+    g = a4.check_gates(nat + sw, "p_diff", 0.5, n_boot=50)
     assert g["h_swap"]["descriptive_only"] and not g["h_swap"]["pass"]
 
 
 def test_sensitivity_drops_supported_and_disputed_c2():
     nat, sw = _gate_rows()
     sw[0]["label"], sw[1]["label"] = "supported", "disputed"
-    g = a4.check_gates(nat, sw, "p_diff", 0.5, n_boot=50)
+    g = a4.check_gates(nat + sw, "p_diff", 0.5, n_boot=50)
     assert g["h_swap"]["n"] == 160 and g["h_swap_sensitivity"]["n"] == 158
     assert "pass" not in g["h_swap_sensitivity"]  # 관문 아님
 
@@ -235,19 +292,29 @@ def test_followup_failures_excluded_pairwise_and_over_one_percent_is_descriptive
     nat, sw = _gate_rows()
     nat[0]["q_failed"] = True
     nat[0]["q"] = None
-    g = a4.check_gates(nat, sw, "p_diff", 0.5, n_boot=50)
+    g = a4.check_gates(nat + sw, "p_diff", 0.5, n_boot=50)
     assert g["followup_failed_excluded"] == 1 and g["h_recall"]["positive"] == 159
     assert g["h_swap"]["pass"]  # 1/320 ≤ 1%
     for r in nat[:5]:
         r["q_failed"], r["q"] = True, None
-    g = a4.check_gates(nat, sw, "p_diff", 0.5, n_boot=50)
+    g = a4.check_gates(nat + sw, "p_diff", 0.5, n_boot=50)
     assert g["followup_failed_excluded"] == 5 and g["judge_failed_over"]
     assert all(g[k]["descriptive_only"] and not g[k]["pass"] for k in ("h_swap", "h_recall", "h_prec"))
+    # F6: 분모는 이견 없는 판정 주장 전부(c1·c3 포함). 같은 집합에서 주 판정 실패도 센다
+    c1 = [row(f"c{i}-q1-c1", cluster=i % 40, variant="의역") for i in range(200)]
+    for r in c1:
+        r["expected"] = "supported"
+    g = a4.check_gates(nat + sw + c1, "p_diff", 0.5, n_boot=50)
+    assert (g["judged"], g["followup_failed_excluded"], g["judge_failed_over"]) == (520, 5, False)
+    g = a4.check_gates(nat + sw + c1, "p_diff", 0.5, n_boot=50, main_failed=1)
+    assert (g["judged"], g["followup_failed_excluded"], g["judge_failed_over"]) == (521, 6, True)
+    c1[0]["q_failed"] = True  # 통제 c1의 후속 실패도 같은 분자에 든다
+    assert a4.check_gates(nat + sw + c1, "p_diff", 0.5, n_boot=50)["followup_failed_excluded"] == 6
 
 
 def test_recommendation_never_uses_arms_and_checks_cost():
     nat, sw = _gate_rows()
-    g = a4.check_gates(nat, sw, "p_diff", 0.5, n_boot=50)
+    g = a4.check_gates(nat + sw, "p_diff", 0.5, n_boot=50)
     g["h_prec"]["pass"] = True
     assert a4.recommendation(g, {"pass": True})["switch_default"] is True
     assert a4.recommendation(g, {"pass": False})["case"] == "all_pass_cost_over"
@@ -282,6 +349,21 @@ def test_fallback_monotonicity_r2():
                           "fallbacks": [{"kind": "tau_d", "tuned": 0.5, "fallback": 0.4}]})
     with pytest.raises(SystemExit, match="tau_d"):
         a4.check_registrable({"status": "registered", "tau_d": None, "signal": "p_diff", "fallbacks": []})
+
+
+def test_registration_must_match_a4_proceed_selection():
+    """F1: 확정은 a4-proceed 결과의 선택(판·문맥·신호·τ_d)과 같고 진행 기준을 통과했을 때만."""
+    pre = {"tau_d": 0.5, "signal": "p_diff", "fallbacks": [],
+           "subject_question": {"version": "v2", "context": "candidates"}}
+    sel = {"version": "v2", "context": "candidates", "signal": "p_diff", "tau_d": 0.5, "proceed": True}
+    a4.check_registrable(pre, sel)
+    for k, v in (("version", "v1"), ("context", "all"), ("signal", "p_diff_unclear"), ("tau_d", 0.4)):
+        with pytest.raises(SystemExit, match="a4-proceed"):
+            a4.check_registrable(pre, {**sel, k: v})
+    with pytest.raises(SystemExit, match="proceed"):
+        a4.check_registrable(pre, {**sel, "proceed": False})
+    with pytest.raises(SystemExit, match="a4-proceed"):
+        a4.check_registrable(pre, None, require_selection=True)
 
 
 def test_x0_audit_counts_swaps_that_become_supported_without_division_rule():
