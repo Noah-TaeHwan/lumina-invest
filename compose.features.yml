@@ -1,0 +1,25 @@
+# compose.portfolio.yml(+ compose.host-ollama.yml) 위에 겹쳐 쓰는 오버라이드: 공시 근거 모드와 판단 일지를 켠다.
+# 사용법·준비물·외부 전송 주의는 PORTFOLIO_LOCAL.md "7. 공시 근거 모드·판단 일지 켜기" 참고.
+#
+#   TYPESAFE_KEY_FILE="$HOME/.config/typesafe/api_key" \
+#   docker compose --env-file .env.portfolio -f compose.portfolio.yml -f compose.host-ollama.yml \
+#     -f compose.features.yml -p lumina-portfolio up -d --build app
+#
+# - TypeSafe JEV 키는 app/lib/jev.py의 load_api_key()가 TYPESAFE_API_KEY 환경 변수, 없으면
+#   ~/.config/typesafe/api_key(앱 컨테이너는 root라 /root/...)에서 읽고, 파일 권한이 0600이 아니면 거부한다.
+#   키 값이 Compose 설정·이미지·Git에 남지 않도록 환경 변수 대신 호스트 파일을 읽기 전용으로 마운트한다.
+# - TYPESAFE_KEY_FILE은 호스트의 키 파일 절대 경로다. 없으면 config·up이 아래 메시지로 실패한다.
+# - EVIDENCE_LLM_MODEL은 여기서 정하지 않는다(기본 llama3.1:8b, 바꾸려면 .env.portfolio에 적는다).
+
+services:
+  app:
+    environment:
+      EVIDENCE_CHAT_ENABLED: "true"
+      JOURNAL_ENABLED: "true"
+    volumes:
+      - type: bind
+        source: ${TYPESAFE_KEY_FILE:?Set TYPESAFE_KEY_FILE to the host path of the TypeSafe JEV key file (mode 0600)}
+        target: /root/.config/typesafe/api_key
+        read_only: true
+        bind:
+          create_host_path: false
