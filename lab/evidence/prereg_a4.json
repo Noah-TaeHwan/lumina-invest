@@ -399,7 +399,7 @@
   "half_split": {
    "seed": 20261306,
    "design_companies": 20,
-   "sha256": null
+   "sha256": "397765aa9404707c432b956866bac7d2152491274e43ab449a12830c71a11675"
   },
   "half_split_sha_rule": "a4-measure가 반분 목록({design, check})의 SHA-256을 원장(a4-half-split·a4-measure 줄)에 남긴다. 그 값을 half_split.sha256에 적으면 이후 a4-measure가 대조하고 다르면 멈춘다",
   "half_split_rule": "split_a3.json 교차 언급 군집을 목록 순번(오름차순)으로 random.Random(20261306)에 섞어 앞에서부터 기업 수가 20개에 이를 때까지 설계용, 나머지 점검용(a4.split_halves). 호출 전 a4-measure가 원장에 먼저 남긴다",
@@ -426,7 +426,7 @@
    "check_once": "a4-proceed가 한 번만 계산한다(exploration.check_once)"
   },
   "token_cap_max": 3000000,
-  "token_cap": null,
+  "token_cap": 2248170,
   "token_cap_rule": "실측 후속 수 × (100 + 실측 m 평균 × 645) × 문구 판 수(문단 8개 전부로 바꾼 판은 m = 8). 3,000,000을 넘으면 그 판의 호출 전에 멈춘다. 호출 전 미리 멈춤: 캐시에 없는 후속 요청 × 1a 실측 후속 토큰 p95 추정",
   "allowed_changes": "(1) 주체 질문 문구 — 최대 2회(문구 판 최대 3개, '문단 8개 전부' 전환 포함), (2) 신호 2종·τ_d 격자 안 선택, (3) ①c 규칙 N1·N2·X0·X1·X2의 구현 버그 수정(spec 문구와 구현이 다른 경우만, 실패하는 테스트 먼저). 그 밖은 고치지 않는다. 고칠 때마다 attempts.jsonl에 study a4 줄로 남긴다",
   "audit_causes": {
@@ -440,7 +440,8 @@
   "audit_note": "가·나·다는 a4.audit가 기계적으로 채우고 라·마·바는 AI가 분류한다(AI 작성 표시)",
   "publish_all": "시도한 모든 (문구 판 × 신호 × τ_d) 조합의 설계용·점검용 손실과 교체 정확도를 원장과 해석 문서에 낸다",
   "optimism": "선택한 설정의 손실률·교체 정확도를 설계용과 점검용으로 나눠 함께 보고한다(진행 기준 판정에는 쓰지 않는다)",
-  "results": null
+  "results": null,
+  "token_cap_note": "문구 판 3개(문맥 candidates) 기준 902 × (100 + 1.133 × 645) × 3. '문단 8개 전부' 판 하나는 902 × (100 + 8 × 645) = 4,744,520으로 혼자서 최대 3,000,000을 넘어 이 탐색에서는 쓸 수 없다"
  },
  "draw": {
   "seed": 20261305,
@@ -638,12 +639,13 @@
  "budget": {
   "ledger": "lab/data/evidence_a4/jev_calls.jsonl(주 판정 + 후속, 태그 check·check-followup으로 구분)",
   "explore_ledger": "lab/data/evidence_a4/jev_calls_explore.jsonl",
-  "followup_ratio": null,
-  "m_mean": null,
-  "m_p95": null,
-  "followup_tokens_p95_estimate": null,
+  "followup_ratio": 0.6402,
+  "m_mean": 1.133,
+  "m_p95": 2.0,
+  "followup_tokens_p95_estimate": 1390,
   "measured_note": "1a(a4-measure) 실측값을 채운다. 확정 때는 followup_tokens_p95_estimate를 탐색 실측 후속 입력 토큰 p95로 바꾼다",
-  "rule": "확인 판정 전 캐시에 없는 주장 × 5,070 + 판정 대상 × (실측 후속 비율 + 0.10) × 탐색 실측 후속 p95가 token_cap을 넘으면 호출하지 않는다. token_cap은 45개사 기준 재계산 값이고 9,600,000을 넘으면 확정하지 않는다. 판정 중 상한에 닿으면 결과는 불완전이라 a4-report가 거부하고 어떤 지표도 계산하지 않는다. 상한을 올리는 것은 AI 리드의 원장 ruling(토큰 합계만 보고)이고 최대값을 넘지 않는다. 통제 주장을 빼서 예산을 맞추지 않는다"
+  "rule": "확인 판정 전 캐시에 없는 주장 × 5,070 + 판정 대상 × (실측 후속 비율 + 0.10) × 탐색 실측 후속 p95가 token_cap을 넘으면 호출하지 않는다. token_cap은 45개사 기준 재계산 값이고 9,600,000을 넘으면 확정하지 않는다. 판정 중 상한에 닿으면 결과는 불완전이라 a4-report가 거부하고 어떤 지표도 계산하지 않는다. 상한을 올리는 것은 AI 리드의 원장 ruling(토큰 합계만 보고)이고 최대값을 넘지 않는다. 통제 주장을 빼서 예산을 맞추지 않는다",
+  "measured_at": "2026-10-05 a4-measure(호출 0): 1,409 주장 중 후속 902(설계용 A-2 256·A-3 설계 583, 점검용 570). 판당 탐색 추정 749,390 토큰, 확인 세트 추정 7,910,191(판정 대상 1,297)"
  },
  "product_mapping": {
   "cost_max_increase": 0.25,
@@ -698,7 +700,7 @@
  "mca_2_3b": "JEV 출력으로 어떤 모델도 학습·증류하지 않는다. τ_d는 JEV 확률 위의 임계값 선택이고 손실 여부의 정답은 AI 참조 라벨이다. ①c 규칙은 JEV 확률을 읽지 않는다.",
  "seeds_distinct": true,
  "code_sha256": {
-  "app/services/evidence/subject_a4.py": "ff9c1748de9e900d16db5fcb66e7b568245fad2a452e099545783144b368e98c",
+  "app/services/evidence/subject_a4.py": "204881021c01d7d583246bcb3fff5c67d459a1f8ae2f5c0992225da49d92f7e6",
   "app/services/evidence/subject.py": "c82fd7dd10cd7ccc37fe9f9321d30f38de2d27f95fd5d0f385f90cecbea5a3a3",
   "app/services/evidence/lexical.py": "40366b29426cd6ec8f7baeca373458f062844c1f515142e03bcf368627e82408",
   "app/services/evidence/claims.py": "b273c3e5b7a27901356181dd1641abf3e8003b351f0891de699f1bd6731d65e7",

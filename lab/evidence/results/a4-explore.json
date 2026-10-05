@@ -1,0 +1,1479 @@
+{
+ "study": "a4",
+ "kind": "exploration (a4-proceed, check half opened once)",
+ "generated_from": "lab/data/evidence_a4/a4_proceed.json(로컬 비공개 원본과 같은 값)",
+ "selection": {
+  "version": "v2",
+  "context": "candidates",
+  "signal": "p_diff_unclear",
+  "tau_d": 0.5
+ },
+ "proceed": false,
+ "criteria": {
+  "signal": "p_diff_unclear",
+  "tau_d": 0.5,
+  "recall": {
+   "denominator": 397,
+   "lost": 6,
+   "max_lost": 4,
+   "pass": false
+  },
+  "swap": {
+   "n": 84,
+   "accuracy": 0.9166666666666666,
+   "min": 0.92,
+   "pass": false
+  },
+  "direction": {
+   "부문·사업": {
+    "n": 39,
+    "C": 0.8974358974358975,
+    "a3": 0.7692307692307693
+   },
+   "제품·브랜드": {
+    "n": 37,
+    "C": 0.8918918918918919,
+    "a3": 0.7567567567567568
+   },
+   "pass": true
+  },
+  "optimism": {
+   "design": {
+    "denominator": 284,
+    "loss": 1,
+    "loss_rate": 0.0035211267605633804,
+    "swap_accuracy": 0.9506172839506173
+   },
+   "check": {
+    "denominator": 113,
+    "loss": 5,
+    "loss_rate": 0.04424778761061947,
+    "swap_accuracy": 0.9166666666666666
+   }
+  },
+  "proceed": false
+ },
+ "grids": {
+  "v1-candidates": [
+   {
+    "signal": "p_diff",
+    "tau_d": 0.2,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 9,
+       "loss_rate": 0.03169014084507042,
+       "swap_n": 81,
+       "swap_accuracy": 0.9506172839506173
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 5,
+       "loss_rate": 0.04424778761061947,
+       "swap_n": 84,
+       "swap_accuracy": 0.9285714285714286
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 9,
+       "loss_rate": 0.03169014084507042,
+       "swap_n": 81,
+       "swap_accuracy": 0.9259259259259259
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 5,
+       "loss_rate": 0.04424778761061947,
+       "swap_n": 84,
+       "swap_accuracy": 0.9166666666666666
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff",
+    "tau_d": 0.3,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 4,
+       "loss_rate": 0.014084507042253521,
+       "swap_n": 81,
+       "swap_accuracy": 0.9012345679012346
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 3,
+       "loss_rate": 0.02654867256637168,
+       "swap_n": 84,
+       "swap_accuracy": 0.9166666666666666
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 4,
+       "loss_rate": 0.014084507042253521,
+       "swap_n": 81,
+       "swap_accuracy": 0.8641975308641975
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 3,
+       "loss_rate": 0.02654867256637168,
+       "swap_n": 84,
+       "swap_accuracy": 0.8928571428571429
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff",
+    "tau_d": 0.4,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 3,
+       "loss_rate": 0.01056338028169014,
+       "swap_n": 81,
+       "swap_accuracy": 0.9012345679012346
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 2,
+       "loss_rate": 0.017699115044247787,
+       "swap_n": 84,
+       "swap_accuracy": 0.9047619047619048
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 3,
+       "loss_rate": 0.01056338028169014,
+       "swap_n": 81,
+       "swap_accuracy": 0.8395061728395061
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 2,
+       "loss_rate": 0.017699115044247787,
+       "swap_n": 84,
+       "swap_accuracy": 0.8214285714285714
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff",
+    "tau_d": 0.5,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 2,
+       "loss_rate": 0.007042253521126761,
+       "swap_n": 81,
+       "swap_accuracy": 0.9012345679012346
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 2,
+       "loss_rate": 0.017699115044247787,
+       "swap_n": 84,
+       "swap_accuracy": 0.8809523809523809
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 2,
+       "loss_rate": 0.007042253521126761,
+       "swap_n": 81,
+       "swap_accuracy": 0.8148148148148148
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 2,
+       "loss_rate": 0.017699115044247787,
+       "swap_n": 84,
+       "swap_accuracy": 0.7738095238095238
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff",
+    "tau_d": 0.6,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 81,
+       "swap_accuracy": 0.9012345679012346
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 2,
+       "loss_rate": 0.017699115044247787,
+       "swap_n": 84,
+       "swap_accuracy": 0.8571428571428571
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 81,
+       "swap_accuracy": 0.7901234567901234
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 2,
+       "loss_rate": 0.017699115044247787,
+       "swap_n": 84,
+       "swap_accuracy": 0.7261904761904762
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff",
+    "tau_d": 0.7,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 81,
+       "swap_accuracy": 0.8888888888888888
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 2,
+       "loss_rate": 0.017699115044247787,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 81,
+       "swap_accuracy": 0.7530864197530864
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 2,
+       "loss_rate": 0.017699115044247787,
+       "swap_n": 84,
+       "swap_accuracy": 0.6904761904761905
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff_unclear",
+    "tau_d": 0.2,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 32,
+       "loss_rate": 0.11267605633802817,
+       "swap_n": 81,
+       "swap_accuracy": 0.9753086419753086
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 20,
+       "loss_rate": 0.17699115044247787,
+       "swap_n": 84,
+       "swap_accuracy": 0.9404761904761905
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 32,
+       "loss_rate": 0.11267605633802817,
+       "swap_n": 81,
+       "swap_accuracy": 0.9629629629629629
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 20,
+       "loss_rate": 0.17699115044247787,
+       "swap_n": 84,
+       "swap_accuracy": 0.9404761904761905
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff_unclear",
+    "tau_d": 0.3,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 18,
+       "loss_rate": 0.06338028169014084,
+       "swap_n": 81,
+       "swap_accuracy": 0.9506172839506173
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 8,
+       "loss_rate": 0.07079646017699115,
+       "swap_n": 84,
+       "swap_accuracy": 0.9166666666666666
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 18,
+       "loss_rate": 0.06338028169014084,
+       "swap_n": 81,
+       "swap_accuracy": 0.9382716049382716
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 8,
+       "loss_rate": 0.07079646017699115,
+       "swap_n": 84,
+       "swap_accuracy": 0.9047619047619048
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff_unclear",
+    "tau_d": 0.4,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 7,
+       "loss_rate": 0.02464788732394366,
+       "swap_n": 81,
+       "swap_accuracy": 0.9382716049382716
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 6,
+       "loss_rate": 0.05309734513274336,
+       "swap_n": 84,
+       "swap_accuracy": 0.9166666666666666
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 7,
+       "loss_rate": 0.02464788732394366,
+       "swap_n": 81,
+       "swap_accuracy": 0.8765432098765432
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 6,
+       "loss_rate": 0.05309734513274336,
+       "swap_n": 84,
+       "swap_accuracy": 0.8928571428571429
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff_unclear",
+    "tau_d": 0.5,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 5,
+       "loss_rate": 0.017605633802816902,
+       "swap_n": 81,
+       "swap_accuracy": 0.9135802469135802
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 4,
+       "loss_rate": 0.035398230088495575,
+       "swap_n": 84,
+       "swap_accuracy": 0.8809523809523809
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 5,
+       "loss_rate": 0.017605633802816902,
+       "swap_n": 81,
+       "swap_accuracy": 0.8395061728395061
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 4,
+       "loss_rate": 0.035398230088495575,
+       "swap_n": 84,
+       "swap_accuracy": 0.7976190476190477
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff_unclear",
+    "tau_d": 0.6,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.9135802469135802
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 2,
+       "loss_rate": 0.017699115044247787,
+       "swap_n": 84,
+       "swap_accuracy": 0.8690476190476191
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8395061728395061
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 2,
+       "loss_rate": 0.017699115044247787,
+       "swap_n": 84,
+       "swap_accuracy": 0.75
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff_unclear",
+    "tau_d": 0.7,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 81,
+       "swap_accuracy": 0.9012345679012346
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 2,
+       "loss_rate": 0.017699115044247787,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 81,
+       "swap_accuracy": 0.7654320987654321
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 2,
+       "loss_rate": 0.017699115044247787,
+       "swap_n": 84,
+       "swap_accuracy": 0.6904761904761905
+      }
+     }
+    }
+   }
+  ],
+  "v2-candidates": [
+   {
+    "signal": "p_diff",
+    "tau_d": 0.2,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 15,
+       "loss_rate": 0.0528169014084507,
+       "swap_n": 81,
+       "swap_accuracy": 1.0
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 7,
+       "loss_rate": 0.061946902654867256,
+       "swap_n": 84,
+       "swap_accuracy": 0.9523809523809523
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 15,
+       "loss_rate": 0.0528169014084507,
+       "swap_n": 81,
+       "swap_accuracy": 0.9876543209876543
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 7,
+       "loss_rate": 0.061946902654867256,
+       "swap_n": 84,
+       "swap_accuracy": 0.9523809523809523
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff",
+    "tau_d": 0.3,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 6,
+       "loss_rate": 0.02112676056338028,
+       "swap_n": 81,
+       "swap_accuracy": 0.9506172839506173
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 6,
+       "loss_rate": 0.05309734513274336,
+       "swap_n": 84,
+       "swap_accuracy": 0.9404761904761905
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 6,
+       "loss_rate": 0.02112676056338028,
+       "swap_n": 81,
+       "swap_accuracy": 0.9382716049382716
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 6,
+       "loss_rate": 0.05309734513274336,
+       "swap_n": 84,
+       "swap_accuracy": 0.9404761904761905
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff",
+    "tau_d": 0.4,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 4,
+       "loss_rate": 0.014084507042253521,
+       "swap_n": 81,
+       "swap_accuracy": 0.9382716049382716
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 5,
+       "loss_rate": 0.04424778761061947,
+       "swap_n": 84,
+       "swap_accuracy": 0.9404761904761905
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 4,
+       "loss_rate": 0.014084507042253521,
+       "swap_n": 81,
+       "swap_accuracy": 0.9012345679012346
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 5,
+       "loss_rate": 0.04424778761061947,
+       "swap_n": 84,
+       "swap_accuracy": 0.9047619047619048
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff",
+    "tau_d": 0.5,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.9259259259259259
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 3,
+       "loss_rate": 0.02654867256637168,
+       "swap_n": 84,
+       "swap_accuracy": 0.9047619047619048
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8765432098765432
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 3,
+       "loss_rate": 0.02654867256637168,
+       "swap_n": 84,
+       "swap_accuracy": 0.8571428571428571
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff",
+    "tau_d": 0.6,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.9259259259259259
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 2,
+       "loss_rate": 0.017699115044247787,
+       "swap_n": 84,
+       "swap_accuracy": 0.8809523809523809
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8641975308641975
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 2,
+       "loss_rate": 0.017699115044247787,
+       "swap_n": 84,
+       "swap_accuracy": 0.7976190476190477
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff",
+    "tau_d": 0.7,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.9135802469135802
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 1,
+       "loss_rate": 0.008849557522123894,
+       "swap_n": 84,
+       "swap_accuracy": 0.8571428571428571
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8024691358024691
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 1,
+       "loss_rate": 0.008849557522123894,
+       "swap_n": 84,
+       "swap_accuracy": 0.75
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff_unclear",
+    "tau_d": 0.2,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 27,
+       "loss_rate": 0.09507042253521127,
+       "swap_n": 81,
+       "swap_accuracy": 1.0
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 10,
+       "loss_rate": 0.08849557522123894,
+       "swap_n": 84,
+       "swap_accuracy": 0.9523809523809523
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 27,
+       "loss_rate": 0.09507042253521127,
+       "swap_n": 81,
+       "swap_accuracy": 0.9876543209876543
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 10,
+       "loss_rate": 0.08849557522123894,
+       "swap_n": 84,
+       "swap_accuracy": 0.9523809523809523
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff_unclear",
+    "tau_d": 0.3,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 12,
+       "loss_rate": 0.04225352112676056,
+       "swap_n": 81,
+       "swap_accuracy": 0.9753086419753086
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 8,
+       "loss_rate": 0.07079646017699115,
+       "swap_n": 84,
+       "swap_accuracy": 0.9404761904761905
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 12,
+       "loss_rate": 0.04225352112676056,
+       "swap_n": 81,
+       "swap_accuracy": 0.9629629629629629
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 8,
+       "loss_rate": 0.07079646017699115,
+       "swap_n": 84,
+       "swap_accuracy": 0.9404761904761905
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff_unclear",
+    "tau_d": 0.4,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 5,
+       "loss_rate": 0.017605633802816902,
+       "swap_n": 81,
+       "swap_accuracy": 0.9629629629629629
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 6,
+       "loss_rate": 0.05309734513274336,
+       "swap_n": 84,
+       "swap_accuracy": 0.9404761904761905
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 5,
+       "loss_rate": 0.017605633802816902,
+       "swap_n": 81,
+       "swap_accuracy": 0.9382716049382716
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 6,
+       "loss_rate": 0.05309734513274336,
+       "swap_n": 84,
+       "swap_accuracy": 0.9404761904761905
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff_unclear",
+    "tau_d": 0.5,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.9506172839506173
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 5,
+       "loss_rate": 0.04424778761061947,
+       "swap_n": 84,
+       "swap_accuracy": 0.9166666666666666
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.9135802469135802
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 5,
+       "loss_rate": 0.04424778761061947,
+       "swap_n": 84,
+       "swap_accuracy": 0.8809523809523809
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff_unclear",
+    "tau_d": 0.6,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.9259259259259259
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 4,
+       "loss_rate": 0.035398230088495575,
+       "swap_n": 84,
+       "swap_accuracy": 0.8928571428571429
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8765432098765432
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 4,
+       "loss_rate": 0.035398230088495575,
+       "swap_n": 84,
+       "swap_accuracy": 0.8333333333333334
+      }
+     }
+    }
+   },
+   {
+    "signal": "p_diff_unclear",
+    "tau_d": 0.7,
+    "arms": {
+     "C": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.9135802469135802
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 3,
+       "loss_rate": 0.02654867256637168,
+       "swap_n": 84,
+       "swap_accuracy": 0.8571428571428571
+      }
+     },
+     "A": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8518518518518519
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 0,
+       "loss_rate": 0.0,
+       "swap_n": 84,
+       "swap_accuracy": 0.8452380952380952
+      }
+     },
+     "B": {
+      "design": {
+       "denominator": 284,
+       "loss": 1,
+       "loss_rate": 0.0035211267605633804,
+       "swap_n": 81,
+       "swap_accuracy": 0.8271604938271605
+      },
+      "check": {
+       "denominator": 113,
+       "loss": 3,
+       "loss_rate": 0.02654867256637168,
+       "swap_n": 84,
+       "swap_accuracy": 0.7738095238095238
+      }
+     }
+    }
+   }
+  ]
+ },
+ "audit": {
+  "natural": [
+   {
+    "cid": "00127875-q4-n1",
+    "set": "a2-tune",
+    "label": "no_evidence",
+    "source": 1,
+    "code_fail": false,
+    "q_fail": true,
+    "p_diff": 0.14,
+    "p_unclear": 0.78,
+    "cause": "다",
+    "ai_cause": null
+   },
+   {
+    "cid": "00140131-q1-n1",
+    "set": "a2-tune",
+    "label": "supported",
+    "source": 7,
+    "code_fail": false,
+    "q_fail": true,
+    "p_diff": 0.78,
+    "p_unclear": 0.02,
+    "cause": "나",
+    "ai_cause": null
+   },
+   {
+    "cid": "00218575-q4-n2",
+    "set": "a3-design",
+    "label": "no_evidence",
+    "source": 4,
+    "code_fail": true,
+    "q_fail": true,
+    "p_diff": 0.36,
+    "p_unclear": 0.2,
+    "cause": "가",
+    "ai_cause": null
+   },
+   {
+    "cid": "00397191-q5-n3",
+    "set": "a3-design",
+    "label": "no_evidence",
+    "source": 2,
+    "code_fail": false,
+    "q_fail": true,
+    "p_diff": 0.34,
+    "p_unclear": 0.25,
+    "cause": "나",
+    "ai_cause": null
+   },
+   {
+    "cid": "00791209-q1-n5",
+    "set": "a3-design",
+    "label": "no_evidence",
+    "source": 1,
+    "code_fail": false,
+    "q_fail": true,
+    "p_diff": 0.76,
+    "p_unclear": 0.0,
+    "cause": "나",
+    "ai_cause": null
+   }
+  ],
+  "swaps": [
+   {
+    "cid": "00153861-q6-c2",
+    "set": "a3-design",
+    "subtype": "제품·브랜드",
+    "source": 1,
+    "p_diff": 0.27,
+    "p_unclear": 0.16,
+    "cause": null,
+    "ai_cause": null
+   },
+   {
+    "cid": "00160010-q4-c2",
+    "set": "a3-design",
+    "subtype": "제품·브랜드",
+    "source": 7,
+    "p_diff": 0.26,
+    "p_unclear": 0.04,
+    "cause": null,
+    "ai_cause": null
+   },
+   {
+    "cid": "01068348-q2-c2",
+    "set": "a3-design",
+    "subtype": "부문·사업",
+    "source": 5,
+    "p_diff": 0.2,
+    "p_unclear": 0.02,
+    "cause": null,
+    "ai_cause": null
+   },
+   {
+    "cid": "01440153-q6-c2",
+    "set": "a3-design",
+    "subtype": "부문·사업",
+    "source": 2,
+    "p_diff": 0.23,
+    "p_unclear": 0.01,
+    "cause": null,
+    "ai_cause": null
+   }
+  ],
+  "causes": {
+   "가": "①c 코드",
+   "나": "② '다름'",
+   "다": "② 'unclear'(교체면 탈출구)",
+   "라": "연결 종속회사 사실을 '당사'로 서술한 주장을 ②가 '다름'으로 봄",
+   "마": "후보 문단만 보여 줘 약칭 정의를 못 봄",
+   "바": "기타"
+  }
+ },
+ "n": {
+  "a2-tune": 256,
+  "a3-check": 570,
+  "a3-design": 583
+ },
+ "jev_failed_excluded": {},
+ "note": "판·문맥·신호·τ_d는 설계용 격자 합본에서만 골랐다(6.2). 점검용 절반은 이 선택에만, 이 명령에서 한 번만 봤다."
+}

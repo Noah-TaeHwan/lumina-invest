@@ -138,6 +138,20 @@ def test_subject_question_schema_and_hash():
     assert sa.SUBJECT_QUESTION_SHA != judge.QUESTION_SHA  # 주 판정 질문과 문구를 나눴다
 
 
+def test_subject_question_v2_names_must_match():
+    """2판(탐색 1회 고침): 회사가 같아도 주장이 이름 붙인 부문·제품·과제가 문단과 다르면 different로 묻는다.
+    1판 문구·해시는 그대로 남는다(탐색 원장 v1 줄과 대조)."""
+    v1_sha = sa.question_sha("v1")
+    assert v1_sha == sa.SUBJECT_QUESTION_SHA
+    assert sa.question_sha("v2") != v1_sha
+    _, qs, _ = sa.build_followup("대원산업", "주장", ["p0", "p1"], [1], version="v2")
+    ins, crit = qs["s1"]["instructions"], qs["s1"]["criteria"]
+    assert "[Passage 1]" in ins and "'당사'" in ins
+    assert "same company is not enough" in ins
+    assert set(crit) == {"same_subject", "different_subject", "unclear"}
+    assert "even if it looks similar" in crit["different_subject"]
+
+
 def test_main_judge_question_unchanged():
     pre = json.loads((REPO / "lab/evidence/prereg_a3.json").read_text())
     assert judge.QUESTION_SHA == pre["judge_question_sha"]

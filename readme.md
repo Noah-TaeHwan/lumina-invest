@@ -2,7 +2,7 @@
 
 기업 지표 조회와 AI 채팅을 출발점으로 발전시키는 **투자 리서치 포트폴리오**입니다.
 
-**현재 단계: 초기 개발 · 로컬 기본 동작 확인 · JEV 실험 완료(가격 판단: 판정력 없음 / 공시 근거 판정: 판정력 확인, 최고 기준선과 실용적 동등 → 채팅 연결(A-2) → 주체 확인 실험(A-3) 관문 미통과) · 판단 일지 로컬 종단 확인**
+**현재 단계: 초기 개발 · 로컬 기본 동작 확인 · JEV 실험 완료(가격 판단: 판정력 없음 / 공시 근거 판정: 판정력 확인, 최고 기준선과 실용적 동등 → 채팅 연결(A-2) → 주체 확인 실험(A-3) 관문 미통과 → JEV 주체 질문(A-4) 탐색 진행 기준 미통과) · 판단 일지 로컬 종단 확인**
 
 [edumgt/lumina-invest](https://github.com/edumgt/lumina-invest)의 교육용 코드에서 출발했습니다. 원본 기반을 유지하면서 자료 확인, AI의 설명, 사용자의 판단 기록을 연결하는 경험을 개발합니다.
 
@@ -105,7 +105,9 @@ AI 답변의 문장마다 DART 사업보고서 문단이 그 문장을 뒷받침
 - 사전등록 규칙대로 기본 정책은 `a2-v1` 그대로이고 `a3-subject-exp`는 꺼진 실험 정책으로 남깁니다. 다음 후보는 JEV에 주체 질문을 더하는 방식(새 사전등록 필요)입니다([해석 문서](docs/lab/evidence-a3-interpretation.md), AI 작성).
 - 정답과 통제 주장은 AI(Claude·Codex)가 만든 참조 라벨·변형이며 사람 감사는 하지 않았습니다. 판정은 TypeSafe의 JEV 모델로 했고, 이 프로젝트는 TypeSafe와 제휴 관계가 아닙니다.
 
-리포트: [A-3 평가(자동)](docs/lab/evidence-a3-report.md) · [A-3 해석과 한계](docs/lab/evidence-a3-interpretation.md) · [A-2 평가(자동)](docs/lab/evidence-a2-report.md) · [A-2 해석과 한계](docs/lab/evidence-a2-interpretation.md) · [A-2 설계](docs/superpowers/specs/2026-10-02-evidence-chat-a2-design.md) · [Stage 1 홀드아웃](docs/lab/evidence-stage1-report.md) · [Stage 0 실현 가능성](docs/lab/evidence-stage0-report.md) · [설계](docs/superpowers/specs/2026-10-02-evidence-assistant-design.md)
+**A-4 탐색(JEV 주체 질문, 확인 세트 전 진행 기준)** — 부문·제품 이름 교체는 A-3보다 더 막았지만(A-3 확인 세트 전체 부문·사업 0.769 → 0.897, 제품·브랜드 0.757 → 0.892, 설정을 고르지 않은 절반만 보면 +2·+1건) 진행 기준 셋 중 둘(재현율 손실 6건 > 한도 4건, 점검용 교체 정확도 0.917 < 0.92)을 넘지 못해 사전등록을 확정하지 않고 확인 세트 전에 멈췄습니다. 기본 정책은 `a2-v1` 그대로입니다([탐색 해석](docs/lab/evidence-a4-exploration.md), AI 작성).
+
+리포트: [A-4 탐색 해석](docs/lab/evidence-a4-exploration.md) · [A-3 평가(자동)](docs/lab/evidence-a3-report.md) · [A-3 해석과 한계](docs/lab/evidence-a3-interpretation.md) · [A-2 평가(자동)](docs/lab/evidence-a2-report.md) · [A-2 해석과 한계](docs/lab/evidence-a2-interpretation.md) · [A-2 설계](docs/superpowers/specs/2026-10-02-evidence-chat-a2-design.md) · [Stage 1 홀드아웃](docs/lab/evidence-stage1-report.md) · [Stage 0 실현 가능성](docs/lab/evidence-stage0-report.md) · [설계](docs/superpowers/specs/2026-10-02-evidence-assistant-design.md)
 
 ## 원본 기반과 개인 작업
 
