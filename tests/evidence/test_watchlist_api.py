@@ -600,3 +600,114 @@ def test_admin_user_models_order():
     from app.routes import admin
 
     assert W in admin.USER_MODELS
+
+
+# ── 리뷰 M3: 저장소 시간 제한 ─────────────────────────────────────────────────
+
+def test_slow_store_does_not_block_add_or_list(pg, monkeypatch):
+    from app.services import watchlist as wl
+
+    monkeypatch.setattr(wl, "COMPANIES_TIMEOUT_S", 0.05)
+
+    class Slow(Companies):
+        async def __call__(self):
+            self.calls += 1
+            await asyncio.sleep(5)
+            return LOADED
+
+    slow = Slow()
+
+    async def go():
+        async with database(pg) as factory:
+            seed = await seed_user(factory, with_chat=False)
+            async with client(make_app(factory, Who(seed["user"]), companies=slow)) as c:
+                added = await asyncio.wait_for(c.post("/api/watchlist", json={"symbol": "005930.KS"}), 3)
+                listed = await asyncio.wait_for(c.get("/api/watchlist"), 3)
+            return added, listed
+
+    added, listed = asyncio.run(go())
+    assert added.status_code == 201 and added.json()["corp_code"] is None
+    assert listed.status_code == 200 and listed.json()["items"][0]["corp_code"] is None
+    assert slow.calls == 2
+
+
+# ── 리뷰 M1: 삽입 전 읽기 실패에 심볼이 로그·응답으로 나가지 않음(DB 없음) ──────────
+
+class _BrokenSession:
+    """n번째 scalar() 호출에서 심볼 파라미터를 담은 DB 오류를 낸다(SQLAlchemy 오류 문자열은 파라미터를 담는다)."""
+
+    def __init__(self, fail_at: int):
+        self.fail_at, self.n = fail_at, 0
+
+    async def scalar(self, stmt):
+        from sqlalchemy.exc import OperationalError
+
+        self.n += 1
+        if self.n == self.fail_at:
+            raise OperationalError("SELECT ... WHERE symbol = $1", {"symbol": "비밀심볼.KS"}, Exception("conn lost"))
+        return None if self.n == 1 else 0
+
+    async def rollback(self):
+        pass
+
+
+@pytest.mark.parametrize("fail_at", [1, 2])
+def test_pre_insert_read_failure_is_503_without_symbol(fail_at, caplog, capsys):
+    from app.database.postgres import get_pg_session
+
+    caplog.set_level(logging.DEBUG)
+    broken = _BrokenSession(fail_at)
+
+    async def session():
+        yield broken
+
+    async def go():
+        app = make_app(None, Who({"id": str(uuid.uuid4()), "client_id": "x", "roles": ["user"]}))
+        app.dependency_overrides[get_pg_session] = session
+        async with client(app) as c:
+            return await c.post("/api/watchlist", json={"symbol": "비밀심볼.KS".replace("비밀심볼", "SECRET")})
+
+    r = asyncio.run(go())
+    assert r.status_code == 503 and r.json() == {"detail": "관심종목을 불러오지 못했습니다."}
+    logged = "\n".join(x.getMessage() for x in caplog.records)
+    out = capsys.readouterr()
+    for blob in (r.text, logged, out.out, out.err):
+        assert "비밀심볼" not in blob and "SECRET" not in blob
+    events = [json.loads(x.getMessage()) for x in caplog.records if x.name == "app.watchlist.api"]
+    assert events == [{"event": "watchlist_read_failed", "error": "OperationalError"}]
+
+
+def test_race_requery_failure_is_503_without_symbol(pg, monkeypatch, caplog):
+    """유일 제약 경쟁 뒤 기존 id를 다시 읽다가 실패해도 503, 심볼은 로그에 없다."""
+    from app.routes import watchlist as routes
+    from app.services import watchlist as wl
+
+    caplog.set_level(logging.DEBUG)
+    real_existing, real_load = routes._existing_id, wl.load_companies
+    state = {"n": 0}
+
+    async def go():
+        async with database(pg) as factory:
+            seed = await seed_user(factory, with_chat=False)
+
+            async def racing(companies):
+                async with factory() as other:
+                    other.add(WatchlistItem(user_id=uuid.UUID(seed["user"]["id"]), symbol="005930.KS"))
+                    await other.commit()
+                return await real_load(companies)
+
+            async def existing(db, uid, symbol):
+                state["n"] += 1
+                if state["n"] == 2:  # 경쟁 뒤 다시 읽기
+                    from sqlalchemy.exc import OperationalError
+                    raise OperationalError("SELECT ... symbol = $1", {"symbol": "005930.KS-비밀"}, Exception("x"))
+                return await real_existing(db, uid, symbol)
+
+            monkeypatch.setattr(wl, "load_companies", racing)
+            monkeypatch.setattr(routes, "_existing_id", existing)
+            async with client(make_app(factory, Who(seed["user"]), companies=Companies())) as c:
+                return await c.post("/api/watchlist", json={"symbol": "005930.KS"})
+
+    r = asyncio.run(go())
+    assert r.status_code == 503 and "005930" not in r.text
+    assert "비밀" not in "\n".join(x.getMessage() for x in caplog.records)

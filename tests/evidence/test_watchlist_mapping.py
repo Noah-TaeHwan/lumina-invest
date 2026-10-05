@@ -77,3 +77,30 @@ def test_load_companies_exception_is_none_and_logs_only_type(caplog):
     assert asyncio.run(wl.load_companies(companies)) is None
     logged = [json.loads(r.getMessage()) for r in caplog.records if r.name.startswith("app.watchlist")]
     assert logged == [{"event": "watchlist_company_list_failed", "error": "RuntimeError"}]
+
+
+def test_load_companies_timeout_is_none_and_logs_only_type(caplog, monkeypatch):
+    """저장소가 멈춰 있으면 시간 제한 뒤 None(매핑 실패와 같다). 추가·목록이 막히지 않는다(리뷰 M3)."""
+    caplog.set_level(logging.DEBUG)
+    monkeypatch.setattr(wl, "COMPANIES_TIMEOUT_S", 0.05)
+
+    async def companies():
+        await asyncio.sleep(5)
+        return LOADED
+
+    async def go():
+        loop = asyncio.get_running_loop()
+        t0 = loop.time()
+        out = await wl.load_companies(companies)
+        return out, loop.time() - t0
+
+    out, took = asyncio.run(go())
+    assert out is None and took < 1.0
+    logged = [json.loads(r.getMessage()) for r in caplog.records if r.name.startswith("app.watchlist")]
+    assert logged == [{"event": "watchlist_company_list_failed", "error": "TimeoutError"}]
+
+
+def test_companies_timeout_matches_journal_store_timeout():
+    from app.services.journal import changes
+
+    assert wl.COMPANIES_TIMEOUT_S == changes.STORE_TIMEOUT_S

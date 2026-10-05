@@ -741,6 +741,38 @@
     .jr-form-actions { display: flex; justify-content: flex-end; gap: 8px; }
     .jr-save:disabled { opacity: 0.55; cursor: not-allowed; }
 
+    /* 관심종목 패널·별 버튼(모듈 D P2). Tailwind CDN 없이도 줄바꿈되게 여기서만 스타일을 준다 */
+    .wl-hidden { display: none !important; }
+    .wl-card { min-width: 0; }
+    .wl-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+    .wl-title { font-weight: 600; font-size: 14px; }
+    .wl-count { font-size: 12px; color: var(--text-mute); }
+    .wl-notice { margin-top: 4px; font-size: 12px; color: var(--text-mute); }
+    .wl-status { margin-top: 8px; font-size: 13px; color: var(--text-dim); }
+    .wl-status:empty { display: none; }
+    #wl-retry { margin-top: 6px; }
+    .wl-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+    .wl-list:empty { display: none; }
+    .wl-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 8px 10px; min-width: 0;
+              border: 1px solid var(--border); border-radius: 8px; background: var(--surf); font-size: 13px; }
+    .wl-main { flex: 1 1 220px; min-width: 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px;
+               overflow-wrap: anywhere; }
+    .wl-name { font-weight: 600; color: var(--text); }
+    .wl-meta, .wl-note { color: var(--text-dim); font-size: 12px; }
+    .wl-note { white-space: pre-wrap; }
+    .wl-links { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; max-width: 100%; }
+    .wl-links button, .wl-note-form button { padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border);
+              font-size: 12px; color: var(--text-dim); background: var(--surf); cursor: pointer; white-space: nowrap; }
+    .wl-links button:hover, .wl-note-form button:hover { border-color: var(--accent); color: var(--accent); }
+    .wl-note-form { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .wl-note-input { flex: 1 1 200px; min-width: 0; padding: 4px 8px; font-size: 13px; }
+    .wl-current { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+    .wl-current-name { font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
+    .wl-star { padding: 4px 12px; border-radius: 999px; border: 1px solid var(--border); font-size: 12px; font-weight: 600;
+               color: var(--text-dim); background: var(--surf); cursor: pointer; }
+    .wl-star[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+    .wl-star:disabled { opacity: 0.55; cursor: progress; }
+
     .jr-card { min-width: 0; }
     .jr-list, .jr-updates, .jr-ch-list, .jr-relied-list { list-style: none; margin: 0; padding: 0; }
     .jr-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 10px; }

@@ -96,8 +96,41 @@ function sourceLine(d) {
   return `${src} · 조회 ${at}(KST) · 최대 ${FUNDAMENTALS_CACHE_HOURS}시간 지난 값일 수 있음`;
 }
 
+// 종목 선택을 알릴 곳(관심종목 별 버튼, js/watchlist.js). company.js는 watchlist.js를 import하지 않는다(한 방향 의존)
+const selectionListeners = [];
+
+/**
+ * 지표 대시보드에서 종목이 골라질 때마다 부를 함수를 등록한다.
+ * @param {(stock: {symbol: string, name: string, exchange?: string}) => void} fn 고른 종목을 받는 함수
+ * @returns {void}
+ */
+function onCompanySelected(fn) {
+  selectionListeners.push(fn);
+}
+
+/**
+ * 지금 고른 종목(이름 줄·관심종목 별 버튼용).
+ * @returns {{symbol: string, name: string, exchange?: string}} 고른 종목. exchange는 검색으로 더한 종목에만 있다
+ */
+function getSelectedCompany() {
+  return dashboardStocks.find(c => c.symbol === selectedCompanySymbol)
+    || { symbol: selectedCompanySymbol, name: selectedCompanySymbol };
+}
+
+/**
+ * 고른 종목을 이름 줄에 쓰고 등록된 곳(관심종목 별 버튼)에 알린다.
+ * @returns {void}
+ */
+function notifySelected() {
+  const cur = getSelectedCompany();
+  const nameEl = document.getElementById("co-current-name");
+  if (nameEl) nameEl.textContent = cur.name && cur.name !== cur.symbol ? `${cur.name} · ${cur.symbol}` : cur.symbol;
+  for (const fn of selectionListeners) fn(cur);
+}
+
 function loadCompanyDashboard() {
   renderCompanyTabs();
+  notifySelected();
   fetchAndRenderCompany(selectedCompanySymbol);
 }
 
@@ -115,13 +148,24 @@ function renderCompanyTabs() {
 function selectCompany(symbol) {
   selectedCompanySymbol = symbol;
   renderCompanyTabs();
+  notifySelected();
   fetchAndRenderCompany(symbol);
 }
 window.selectCompany = selectCompany;
 
-function addAndSelectCompany(symbol, name) {
-  if (!dashboardStocks.some(c => c.symbol === symbol)) {
-    dashboardStocks.push({ symbol, name });
+/**
+ * 종목을 탭 목록에 (없으면) 더하고 고른다. 종목 검색 모달과 관심종목 '지표 보기'가 쓴다.
+ * @param {string} symbol Yahoo 심볼
+ * @param {string} name 표시 이름
+ * @param {string} [exchange] 검색 결과의 거래소(관심종목 추가 때 market 계산에 쓴다). 없으면 넣지 않는다
+ * @returns {void}
+ */
+function addAndSelectCompany(symbol, name, exchange) {
+  const hit = dashboardStocks.find(c => c.symbol === symbol);
+  if (!hit) {
+    dashboardStocks.push(exchange ? { symbol, name, exchange } : { symbol, name });
+  } else if (exchange && !hit.exchange) {
+    hit.exchange = exchange;
   }
   selectCompany(symbol);
 }
@@ -334,8 +378,8 @@ function loadCompanySector() {
     _resolve = null;
   }
 
-  function selectItem(symbol, name) {
-    if (_resolve) _resolve({ symbol, name });
+  function selectItem(symbol, name, exchange) {
+    if (_resolve) _resolve({ symbol, name, exchange });
     closeModal();
   }
 
@@ -352,7 +396,7 @@ function loadCompanySector() {
         return;
       }
       resultsEl.innerHTML = data.results.map(r => `
-        <div class="ssm-item" data-symbol="${escHtml(r.symbol)}" data-name="${escHtml(r.name)}">
+        <div class="ssm-item" data-symbol="${escHtml(r.symbol)}" data-name="${escHtml(r.name)}" data-exchange="${escHtml(r.exchange ?? "")}">
           <div>
             <div class="ssm-item-name">${escHtml(r.name)}</div>
             <div class="ssm-item-meta">${escHtml(r.exchange)} · ${escHtml(r.type)}</div>
@@ -361,7 +405,7 @@ function loadCompanySector() {
         </div>
       `).join("");
       resultsEl.querySelectorAll(".ssm-item").forEach(el => {
-        el.addEventListener("click", () => selectItem(el.dataset.symbol, el.dataset.name));
+        el.addEventListener("click", () => selectItem(el.dataset.symbol, el.dataset.name, el.dataset.exchange || undefined));
       });
     } catch (e) {
       resultsEl.innerHTML = `<div class="ssm-empty" style="color:var(--red);">오류: ${escHtml(e.message)}</div>`;
@@ -399,9 +443,9 @@ function loadCompanySector() {
 
   // 지표 대시보드 종목 검색 (기존 5개 목업 종목 외 임의 종목 추가)
   document.getElementById("company-search-btn")?.addEventListener("click", () => {
-    openModal(({ symbol, name }) => addAndSelectCompany(symbol, name));
+    openModal(({ symbol, name, exchange }) => addAndSelectCompany(symbol, name, exchange));
   });
 })();
 
 
-export { loadCompanyCompare, loadCompanyDashboard, loadCompanySector };
+export { addAndSelectCompany, getSelectedCompany, loadCompanyCompare, loadCompanyDashboard, loadCompanySector, onCompanySelected };

@@ -18,6 +18,7 @@ import { initFormulaView, onFormulaViewActivated } from "/js/formula.js";
 import { loadUsChart, loadUsDashboard, loadUsPortfolio, renderUsOrders } from "/js/us.js";
 import { initCompletionIndicator } from "/js/completion.js";
 import { initJournal, onJournalViewActivated } from "/js/journal.js";
+import { loadWatchlistPanel } from "/js/watchlist.js";
 
 // ── Boot ──────────────────────────────────────────────────────────
 async function boot() {
@@ -67,7 +68,7 @@ function onViewActivated(view) {
   if (view === "us-chart")      loadUsChart();
   if (view === "us-order")      renderUsOrders();
   if (view === "us-portfolio")  loadUsPortfolio();
-  if (view === "company-dashboard") loadCompanyDashboard();
+  if (view === "company-dashboard") { loadCompanyDashboard(); loadWatchlistPanel(); } // 관심종목 패널 (js/watchlist.js)
   if (view === "company-compare")   loadCompanyCompare();
   if (view === "company-sector")    loadCompanySector();
   if (view === "sysadmin-dashboard") loadSystemDashboard();

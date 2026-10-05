@@ -25,7 +25,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, ValidationError, field_validator
 from pydantic_core import PydanticCustomError
 from sqlalchemy import func, select, update
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.postgres import get_pg_session
@@ -221,6 +221,20 @@ async def _existing_id(db: AsyncSession, uid: uuid.UUID, symbol: str) -> uuid.UU
                                                           WatchlistItem.symbol == symbol))
 
 
+async def _read(aw):
+    """삽입 전 읽기(존재 확인·개수)를 감싼다. SQLAlchemy 오류 문자열에는 심볼 파라미터가 담기므로
+    예외를 그대로 올려 트레이스백에 남기지 않고, 예외 이름만 로그에 남긴 뒤 503으로 돌려준다(리뷰 M1).
+
+    @param aw DB를 읽는 awaitable
+    @returns 읽은 값
+    """
+    try:
+        return await aw
+    except SQLAlchemyError as exc:
+        log.error(json.dumps({"event": "watchlist_read_failed", "error": type(exc).__name__}))
+        raise HTTPException(503, "관심종목을 불러오지 못했습니다.") from None
+
+
 # ── 엔드포인트 ─────────────────────────────────────────────────────────────────
 
 @router.get("", summary="내 관심종목 목록")
@@ -277,10 +291,11 @@ async def add_item(request: Request, user=Depends(get_current_user_any), db: Asy
     """
     body: WatchlistCreate = await _parse(request, WatchlistCreate)  # type: ignore[assignment]
     uid = uuid.UUID(user["id"])
-    existing = await _existing_id(db, uid, body.symbol)
+    existing = await _read(_existing_id(db, uid, body.symbol))
     if existing is not None:
         return _duplicate(existing)
-    count = await db.scalar(select(func.count()).select_from(WatchlistItem).where(WatchlistItem.user_id == uid))
+    count = await _read(db.scalar(select(func.count()).select_from(WatchlistItem)
+                                  .where(WatchlistItem.user_id == uid)))
     if count >= MAX_ITEMS:
         return JSONResponse(status_code=409, content={"detail": f"관심종목은 {MAX_ITEMS}개까지 담을 수 있습니다.",
                                                       "code": "limit", "limit": MAX_ITEMS})
@@ -303,7 +318,7 @@ async def add_item(request: Request, user=Depends(get_current_user_any), db: Asy
             log.error(json.dumps({"event": "watchlist_save_failed", "error": type(exc).__name__}))
             raise HTTPException(500, "관심종목을 저장하지 못했습니다.")
         # 존재 확인과 커밋 사이에 같은 종목이 먼저 저장됐다
-        return _duplicate(await _existing_id(db, uid, body.symbol))
+        return _duplicate(await _read(_existing_id(db, uid, body.symbol)))
     except Exception as exc:  # noqa: BLE001
         await db.rollback()
         log.error(json.dumps({"event": "watchlist_save_failed", "error": type(exc).__name__}))
