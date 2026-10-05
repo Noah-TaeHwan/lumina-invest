@@ -123,6 +123,23 @@ def _raw(mod: dict | None, key: str) -> Any:
     return v
 
 
+# 기업 지표 서버 캐시 유효 시간(시간). 화면 문구 "최대 6시간 지난 값일 수 있음"과 브라우저 캐시
+# 재요청 기준(public/js/company.js FUNDAMENTALS_CACHE_HOURS)이 이 값을 따른다 — 바꾸면 함께 바꾼다.
+FUNDAMENTALS_CACHE_HOURS = 6
+FUNDAMENTALS_SOURCE = "Yahoo Finance"
+# 이 키가 하나라도 없는 캐시 행은 옛 형식으로 보고 다시 받는다(키 이름은 v2 유지).
+_FUNDAMENTALS_REQUIRED = ("currency", "financial_currency", "fetched_at", "quarter_ends")
+
+
+def _utc_now() -> datetime:
+    """현재 UTC 시각을 돌려준다(테스트에서 바꿔 끼우는 지점).
+
+    Returns:
+        tzinfo가 UTC인 datetime.
+    """
+    return datetime.now(timezone.utc)
+
+
 async def get_fundamentals(symbol: str) -> dict:
     """Yahoo Finance quoteSummary 기반 실제 기업 펀더멘털 (PER/PBR/ROE/분기실적 등).
 
@@ -132,11 +149,23 @@ async def get_fundamentals(symbol: str) -> dict:
 
     currency는 가격·주당 값(현재가·EPS·BPS·DPS·시가총액)의 통화, financial_currency는
     재무제표 금액(매출·이익·자산 등)의 통화다. Yahoo가 주지 않으면 None — 추정하지 않는다.
+
+    source는 "Yahoo Finance", fetched_at은 Yahoo에서 받아 응답을 만든 시각(UTC ISO 8601)이다.
+    캐시 적중 때는 저장된 값을 그대로 돌려주므로 처음 받은 시각이 유지된다. quarter_ends는
+    quarters와 같은 순서·길이의 분기 끝 날짜(YYYY-MM-DD, 없으면 "")다. 오류 응답
+    ({"symbol", "error"})에는 이 칸들을 넣지 않고 캐시하지도 않는다.
+
+    Args:
+        symbol: Yahoo 심볼(예: "005930.KS", "AAPL").
+
+    Returns:
+        지표 dict, 또는 실패 시 {"symbol", "error"}.
     """
     # v2: 통화 필드가 생긴 형식. 옛 키(fundamentals:{symbol})의 항목은 읽지 않는다.
+    # 출처·시점 칸이 없는 v2 행은 필수 키 확인으로 미스가 되어 같은 키에 새 형식으로 덮어쓴다.
     cache_key = f"fundamentals:v2:{symbol}"
-    cached = await cache_get(cache_key, max_age_hours=6)
-    if cached is not None and "currency" in cached and "financial_currency" in cached:
+    cached = await cache_get(cache_key, max_age_hours=FUNDAMENTALS_CACHE_HOURS)
+    if cached is not None and all(k in cached for k in _FUNDAMENTALS_REQUIRED):
         return cached
 
     session = await _get_yahoo_crumb()
@@ -174,11 +203,12 @@ async def get_fundamentals(symbol: str) -> dict:
         """통화 단위 -> 억 단위(KRW면 억원, USD면 억 달러). 기존 목업과 동일한 스케일."""
         return round(v / 1e8, 0) if v is not None else None
 
-    quarters, revenue, op, net = [], [], [], []
+    quarters, quarter_ends, revenue, op, net = [], [], [], [], []
     inc_history = list(reversed(r.get("incomeStatementHistoryQuarterly", {}).get("incomeStatementHistory", [])))
     for q in inc_history:
         end = q.get("endDate", {}).get("fmt", "")
         quarters.append(f"{end[2:4]}Q{(int(end[5:7]) - 1) // 3 + 1}" if end else "")
+        quarter_ends.append(end)
         revenue.append(_eok(_raw(q, "totalRevenue")))
         op.append(_eok(_raw(q, "operatingIncome")))
         net.append(_eok(_raw(q, "netIncome")))
@@ -208,10 +238,13 @@ async def get_fundamentals(symbol: str) -> dict:
         "op": op,
         "net": net,
         "quarters": quarters,
+        "quarter_ends": quarter_ends,
         "assets": _eok(_raw(bs, "totalAssets")),
         "equity": _eok(_raw(bs, "totalStockholderEquity")),
         "liabilities": _eok(_raw(bs, "totalLiab")),
         "cash": _eok(_raw(bs, "cash")),
+        "source": FUNDAMENTALS_SOURCE,
+        "fetched_at": _utc_now().isoformat(),
     }
     await cache_set(cache_key, fundamentals)
     return fundamentals
