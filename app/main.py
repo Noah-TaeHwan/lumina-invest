@@ -124,6 +124,9 @@ app.include_router(evidence_routes.router)
 # 투자 판단 일지 (JOURNAL_ENABLED=false면 404)
 from app.routes import journal as journal_routes  # noqa: E402
 app.include_router(journal_routes.router)
+# 관심종목 (플래그 없음, 로그인 필요)
+from app.routes import watchlist as watchlist_routes  # noqa: E402
+app.include_router(watchlist_routes.router)
 
 # 정적 파일 (프론트엔드)
 _public = os.path.join(os.path.dirname(__file__), "..", "public")

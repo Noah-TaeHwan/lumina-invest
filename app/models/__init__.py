@@ -25,6 +25,7 @@ from app.models.formula import FormulaIndicator, FormulaIndicatorVersion, Formul
 from app.models.chat import Conversation, Chat
 from app.models.evidence import EvidenceRun, EvidenceClaim
 from app.models.journal import JudgmentEntry, JudgmentUpdate
+from app.models.watchlist import WatchlistItem
 from app.models.misc import (
     AuditEvent,
     NotificationSettings,
@@ -73,6 +74,7 @@ __all__ = [
     "EvidenceClaim",
     "JudgmentEntry",
     "JudgmentUpdate",
+    "WatchlistItem",
     "AuditEvent",
     "NotificationSettings",
     "NotificationLog",
