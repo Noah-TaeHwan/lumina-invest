@@ -129,10 +129,14 @@ async def get_fundamentals(symbol: str) -> dict:
     일부 필드(특히 재무상태표 총자산/부채 상세)는 Yahoo가 국내 상장사에 대해
     제공하지 않는 경우가 있어 해당 값은 null로 반환한다 — 프론트엔드가 '데이터 없음'
     으로 표시하며, 값을 지어내지 않는다.
+
+    currency는 가격·주당 값(현재가·EPS·BPS·DPS·시가총액)의 통화, financial_currency는
+    재무제표 금액(매출·이익·자산 등)의 통화다. Yahoo가 주지 않으면 None — 추정하지 않는다.
     """
-    cache_key = f"fundamentals:{symbol}"
+    # v2: 통화 필드가 생긴 형식. 옛 키(fundamentals:{symbol})의 항목은 읽지 않는다.
+    cache_key = f"fundamentals:v2:{symbol}"
     cached = await cache_get(cache_key, max_age_hours=6)
-    if cached is not None:
+    if cached is not None and "currency" in cached and "financial_currency" in cached:
         return cached
 
     session = await _get_yahoo_crumb()
@@ -167,7 +171,7 @@ async def get_fundamentals(symbol: str) -> dict:
         return round(v * 100, 2) if v is not None else None
 
     def _eok(v: float | None) -> float | None:
-        """원 단위 -> 억원 단위 (기존 목업과 동일한 스케일)."""
+        """통화 단위 -> 억 단위(KRW면 억원, USD면 억 달러). 기존 목업과 동일한 스케일."""
         return round(v / 1e8, 0) if v is not None else None
 
     quarters, revenue, op, net = [], [], [], []
@@ -185,6 +189,8 @@ async def get_fundamentals(symbol: str) -> dict:
     fundamentals = {
         "symbol": symbol,
         "name": price_mod.get("longName") or price_mod.get("shortName") or symbol,
+        "currency": price_mod.get("currency") or None,
+        "financial_currency": fin.get("financialCurrency") or None,
         "price": _raw(price_mod, "regularMarketPrice"),
         "chg": _pct(price_mod, "regularMarketChangePercent"),
         "cap": _eok(_raw(price_mod, "marketCap") or _raw(summary, "marketCap")),

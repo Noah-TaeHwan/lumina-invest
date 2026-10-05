@@ -172,6 +172,7 @@ Docker Compose v2와 이미지·모델 다운로드가 가능한 네트워크가
 - 시작 시장 동기화 비활성화, 실주문 키·Celery/ingest 서비스·Docker socket 제외
 
 [로컬 실행 가이드](PORTFOLIO_LOCAL.md)에서 checkout, 비밀값 생성, 모델 준비, 기동과 기능 확인 순서를 안내합니다.
+macOS에서 채팅이 느리면 [채팅이 느릴 때(macOS)](PORTFOLIO_LOCAL.md#6-채팅이-느릴-때macos)의 호스트 Ollama 구성을 참고합니다.
 기본은 main clone이며, 병합 전 리뷰에는 해당 PR의 head 브랜치를 사용합니다.
 
 기본 [docker-compose.yml](docker-compose.yml)은 8966 포트와 백그라운드 ingest/Celery 구성이 포함된 원본 실행 경로입니다.

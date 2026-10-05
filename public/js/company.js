@@ -87,9 +87,25 @@ function addAndSelectCompany(symbol, name) {
 }
 
 // null-safe 포맷: 값 없으면 "N/A" (Yahoo가 국내 상장사 일부 지표를 제공하지 않는 경우가 있음)
-function nfmt(v, suffix = "") {
-  return (v === null || v === undefined) ? "N/A" : `${fmt(v)}${suffix}`;
+function nfmt(v, suffix = "", digits = 0) {
+  return (v === null || v === undefined) ? "N/A" : `${fmt(v, digits)}${suffix}`;
 }
+
+/**
+ * 통화 코드와 스케일로 화면에 붙일 단위 문자열을 만든다.
+ * KRW는 기존 표기(원·억원·조원), USD는 "달러·억 달러·조 달러", 그 밖의 통화는 ISO 코드("JPY·억 JPY·조 JPY").
+ * 통화를 모르면(null·빈 값) 단위를 지어내지 않고 빈 문자열을 돌려준다 — 호출부가 "통화 미확인"을 따로 표시한다.
+ * @param {string|null|undefined} currency ISO 4217 통화 코드(API의 currency 또는 financial_currency)
+ * @param {""|"억"|"조"} [scale=""] 금액 스케일. ""는 주당 값(현재가·EPS 등)
+ * @returns {string} 숫자 뒤에 붙일 단위(HTML 이스케이프됨). 통화 미확인이면 ""
+ */
+function currencyUnit(currency, scale = "") {
+  if (!currency) return "";
+  if (currency === "KRW") return `${scale}원`;
+  const name = currency === "USD" ? "달러" : escHtml(currency);
+  return scale ? `${scale} ${name}` : name;
+}
+const UNKNOWN_CURRENCY = "통화 미확인";
 
 async function fetchAndRenderCompany(symbol) {
   const overviewEl = document.getElementById("co-overview");
@@ -109,13 +125,25 @@ async function fetchAndRenderCompany(symbol) {
 function renderCompanyData(d) {
   const pctColor = (d.chg ?? 0) >= 0 ? "var(--green)" : "var(--red)";
   const sign = (d.chg ?? 0) >= 0 ? "+" : "";
+  // 주당 값·시가총액은 가격 통화(currency), 재무제표 금액은 재무 통화(financial_currency)
+  const cur = d.currency || null;
+  const fcur = d.financial_currency || null;
+  const ps = currencyUnit(cur);             // 주당 값 단위
+  const psDigits = cur === "KRW" ? 0 : 2;   // 원은 정수, 달러 등은 센트까지
+  const capUnit = currencyUnit(cur, "조");
+  const capText = d.cap == null ? "N/A"
+    : cur === "KRW" ? `${fmt(Math.round(d.cap/10000))}${capUnit}`
+    : `${fmt(d.cap/10000, 2)}${capUnit || "조"}`;  // 통화 미확인이면 스케일만
+  const finUnit = currencyUnit(fcur, "억");
+  const finHead = finUnit ? `(${finUnit})` : `(억 · ${UNKNOWN_CURRENCY})`;
+  const sp = ps && cur !== "KRW" ? " " : "";  // "100.00 달러"처럼 띄운다(원은 기존대로 붙인다)
 
   // 개요 카드 4개
   document.getElementById("co-overview").innerHTML = [
-    { label:"현재가", value:nfmt(d.price, "원"), sub:d.chg!=null?`${sign}${d.chg}%`:"", subColor:pctColor },
-    { label:"시가총액", value:d.cap!=null?`${fmt(Math.round(d.cap/10000))}조원`:"N/A", sub:d.name||"" },
-    { label:"EPS", value:nfmt(d.eps, "원"), sub:`PER ${d.per!=null?d.per.toFixed(1)+"x":"N/A"}` },
-    { label:"BPS", value:nfmt(d.bps, "원"), sub:`PBR ${d.pbr!=null?d.pbr.toFixed(2)+"x":"N/A"}` },
+    { label:"현재가", value:nfmt(d.price, sp+ps, psDigits), sub:(d.chg!=null?`${sign}${d.chg}%`:"") + (cur?"":` · ${UNKNOWN_CURRENCY}`), subColor:pctColor },
+    { label:"시가총액", value:capText, sub:d.name||"" },
+    { label:"EPS", value:nfmt(d.eps, sp+ps, psDigits), sub:`PER ${d.per!=null?d.per.toFixed(1)+"x":"N/A"}` },
+    { label:"BPS", value:nfmt(d.bps, sp+ps, psDigits), sub:`PBR ${d.pbr!=null?d.pbr.toFixed(2)+"x":"N/A"}` },
   ].map(c => `
     <div class="card" style="padding:16px;">
       <div class="text-xs" style="color:var(--text-mute);">${c.label}</div>
@@ -129,7 +157,7 @@ function renderCompanyData(d) {
     ["PER (주가수익비율)", d.per!=null ? `${d.per.toFixed(2)}x` : "N/A"],
     ["PBR (주가순자산비율)", d.pbr!=null ? `${d.pbr.toFixed(2)}x` : "N/A"],
     ["배당수익률", d.divYield!=null ? `${d.divYield}%` : "N/A"],
-    ["주당배당금 (DPS)", nfmt(d.div, "원")],
+    ["주당배당금 (DPS)", nfmt(d.div, sp+ps, psDigits)],
   ];
   document.getElementById("co-valuation").innerHTML = valRows.map(([k,v]) => `
     <div class="flex justify-between items-center" style="padding:7px 0; border-bottom:1px solid var(--border);">
@@ -158,9 +186,9 @@ function renderCompanyData(d) {
     <table>
       <thead><tr><th>구분</th>${qs.map(q=>`<th style="text-align:right;">${escHtml(q)}</th>`).join("")}</tr></thead>
       <tbody>
-        <tr><td style="color:var(--text-dim);font-size:12px;">매출액 (억원)</td>${d.revenue.map(v=>`<td style="text-align:right;font-weight:600;">${nfmt(v)}</td>`).join("")}</tr>
-        <tr><td style="color:var(--text-dim);font-size:12px;">영업이익 (억원)</td>${d.op.map(v=>`<td style="text-align:right;color:var(--green);font-weight:600;">${nfmt(v)}</td>`).join("")}</tr>
-        <tr><td style="color:var(--text-dim);font-size:12px;">순이익 (억원)</td>${d.net.map(v=>`<td style="text-align:right;color:var(--accent);font-weight:600;">${nfmt(v)}</td>`).join("")}</tr>
+        <tr><td style="color:var(--text-dim);font-size:12px;">매출액 ${finHead}</td>${d.revenue.map(v=>`<td style="text-align:right;font-weight:600;">${nfmt(v)}</td>`).join("")}</tr>
+        <tr><td style="color:var(--text-dim);font-size:12px;">영업이익 ${finHead}</td>${d.op.map(v=>`<td style="text-align:right;color:var(--green);font-weight:600;">${nfmt(v)}</td>`).join("")}</tr>
+        <tr><td style="color:var(--text-dim);font-size:12px;">순이익 ${finHead}</td>${d.net.map(v=>`<td style="text-align:right;color:var(--accent);font-weight:600;">${nfmt(v)}</td>`).join("")}</tr>
       </tbody>
     </table>` : `<div class="text-xs" style="color:var(--text-mute);">분기 실적 데이터 없음</div>`;
 
@@ -168,7 +196,7 @@ function renderCompanyData(d) {
   const hasBalance = d.assets != null;
   document.getElementById("co-balance").innerHTML = hasBalance ? `
     <table>
-      <thead><tr><th>항목</th><th style="text-align:right;">금액 (억원)</th><th style="text-align:right;">비중</th></tr></thead>
+      <thead><tr><th>항목</th><th style="text-align:right;">금액 ${finHead}</th><th style="text-align:right;">비중</th></tr></thead>
       <tbody>
         <tr><td style="color:var(--text-dim);font-size:12px;">총자산</td><td style="text-align:right;font-weight:700;">${fmt(d.assets)}</td><td style="text-align:right;">100%</td></tr>
         <tr><td style="color:var(--text-dim);font-size:12px;">자기자본</td><td style="text-align:right;font-weight:600;color:var(--green);">${nfmt(d.equity)}</td><td style="text-align:right;">${d.equity!=null?(d.equity/d.assets*100).toFixed(1)+"%":"N/A"}</td></tr>
