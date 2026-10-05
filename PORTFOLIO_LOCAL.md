@@ -88,6 +88,7 @@ docker compose --env-file .env.portfolio -f compose.portfolio.yml -p lumina-port
 
 모델과 데이터는 이 프로젝트의 전용 volume에 남는다. Qdrant 서버와 임베딩 모델이 준비돼도 검색할 문서가 자동으로 적재되는 것은 아니다.
 로컬 확인에서 CPU 채팅 한 요청은 약 420초가 걸렸다(2026-10-01 단일 관측). 평균이나 다른 PC의 응답 시간 보장이 아니다.
+macOS에서 이렇게 느리면 [6. 채팅이 느릴 때(macOS)](#6-채팅이-느릴-때macos)의 호스트 Ollama 구성을 참고한다.
 화면에서 기다림이 길거나 요청이 끝나지 않으면 대화 이력과 해당 앱 상태를 확인한 뒤 재시도 여부를 판단한다.
 
 ## 5. 기능 확인
@@ -122,3 +123,43 @@ python3 tests/test_startup_data_sync.py
 이 검사는 실제 lifespan의 활성/비활성 분기와 종료 cleanup을 외부 서비스 없이 확인한다.
 2026-10-01 별도 로컬 실행에서 위 기본 사용자 흐름을 확인했으며, 이 문서 편집 중 새 clone이나 앱을 다시 실행하지는 않았다.
 해외 기업의 원화 표시 오류, 일부 재무 필드 누락, RAG 출처 링크 부재가 남아 있다. 전체 원본 기능·전체 CI·공개 배포·투자 성과는 검증하지 않았다.
+
+## 6. 채팅이 느릴 때(macOS)
+
+macOS의 Docker 컨테이너는 GPU(Metal)를 쓰지 못해 컨테이너 Ollama가 CPU로만 돈다. 4절의 420초 관측과 같은 현상이다.
+이때는 호스트(macOS)에 Ollama를 설치해 Metal로 돌리고, app이 그 서버를 보게 하는 오버라이드 [compose.host-ollama.yml](compose.host-ollama.yml)을 겹쳐 쓴다.
+오버라이드는 app의 `OLLAMA_BASE_URL`을 `http://host.docker.internal:11434`로 바꾸고, app의 `depends_on`에서 ollama만 뺀다. 기본 구성의 ollama 서비스 정의는 그대로 남는다.
+
+**호스트 Ollama 준비.** 호스트에 Ollama를 설치하고 실행한 뒤 모델을 받는다. 컨테이너의 `ollama_models` volume에 받아 둔 모델은 호스트 Ollama가 재사용하지 않으므로 다시 받는다.
+
+```sh
+ollama pull llama3.2:1b        # 채팅(LLM_MODEL)
+ollama pull nomic-embed-text   # 임베딩(EMBED_MODEL)
+ollama pull llama3.1:8b        # 공시 근거 모드 생성기(EVIDENCE_LLM_MODEL 기본값), 근거 모드를 쓸 때만
+ollama list
+```
+
+**오버라이드로 기동.** 대상 서비스를 `app`으로 지정하면 app과 나머지 의존 서비스(PostgreSQL·Redis·Neo4j·Qdrant)만 뜨고 컨테이너 ollama는 뜨지 않는다.
+
+```sh
+docker compose --env-file .env.portfolio -f compose.portfolio.yml -f compose.host-ollama.yml -p lumina-portfolio config --quiet
+docker compose --env-file .env.portfolio -f compose.portfolio.yml -f compose.host-ollama.yml -p lumina-portfolio up -d --build app
+docker compose --env-file .env.portfolio -f compose.portfolio.yml -f compose.host-ollama.yml -p lumina-portfolio ps
+```
+
+- 기본 구성으로 이미 띄워 컨테이너 ollama가 돌고 있으면 `docker compose --env-file .env.portfolio -f compose.portfolio.yml -p lumina-portfolio stop ollama`로 멈춘다. 오버라이드 없이 `up -d`를 다시 하면 다시 뜬다.
+- 오버라이드는 Compose 병합 태그 `!override`를 쓴다. 사용하는 Compose가 이 태그를 거부하면 오버라이드 파일의 `depends_on` 블록을 지우고 쓴 뒤, 위 `stop ollama`로 컨테이너 ollama를 멈춘다(app의 ollama 의존 때문에 함께 뜬다).
+- 기본 구성으로 돌아가려면 오버라이드 없이 원래 3절 명령으로 기동한다.
+- Linux에서는 `extra_hosts: host.docker.internal:host-gateway`로 이름은 풀리지만, 호스트 Ollama가 127.0.0.1에만 열려 있으면 컨테이너에서 닿지 않는다(`OLLAMA_HOST=0.0.0.0` 등으로 Docker 브리지에서 닿게 연다). macOS Docker Desktop은 별도 설정 없이 닿는다.
+
+**근거 모드도 같은 서버를 쓴다(코드 확인).** 공시 근거 모드(`POST /api/evidence/chat`)의 생성기는 `get_llm_client`를 주입받고([evidence.py](app/routes/evidence.py)), `LLM_PROVIDER=ollama`이면 `OllamaClient(settings.OLLAMA_BASE_URL, …)`를 만든다([llm_client.py](app/lib/llm_client.py)). 모델만 `EVIDENCE_LLM_MODEL`(기본 `llama3.1:8b`)로 다르다. 문단 임베딩도 같은 `OLLAMA_BASE_URL`을 쓴다([store.py](app/services/evidence/store.py)). 따라서 이 오버라이드 하나로 채팅·근거 모드 생성·임베딩이 모두 호스트 Ollama로 간다. 모델이 없으면 근거 모드는 `ollama pull <모델>`을 안내하는 503을 돌려준다.
+
+**로컬 실측(2026-10-05, 단일 세션).** Apple Silicon Mac, 같은 질문 3개, 모델 `llama3.2:1b`, 새 계정, `POST /api/chat`.
+
+| 구성 | 결과 |
+|---|---|
+| 기본 `compose.portfolio.yml`(컨테이너 Ollama, CPU 전용) | 528.0초 504 시간 초과 / 95.7초(답 128자) / 252.3초(답 163자) — 가운데값 252초 |
+| 호스트 Ollama(Metal) — app에 `OLLAMA_BASE_URL=http://host.docker.internal:11434`, 컨테이너 ollama 멈춤 | 50.9초 / 50.6초 / 41.9초, 답 3,582~4,392자 — 가운데값 51초, 실패 0 |
+
+이 측정에서 가운데값은 252초 → 51초였다. 측정 중 호스트 부하가 높았다(load 11~130, 다른 앱 포함). 단일 세션 관측이며 평균이나 다른 PC의 응답 시간 보장이 아니다.
+측정은 별도 로컬 실행에서 했고, 이 절과 오버라이드 파일 작성 중에는 스택을 기동하지 않았다(Compose 설정 병합만 확인). 이 절은 AI가 작성했다.
