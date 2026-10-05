@@ -5,6 +5,7 @@ Yahoo 심볼 → stock_code → 근거 모드 문단 저장소의 적재 회사 
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import re
@@ -15,6 +16,9 @@ log = logging.getLogger("app.watchlist.mapping")
 KR_SYMBOL = re.compile(r"^(\d{6})\.(KS|KQ)$")
 MARKETS = {".KS": "KOSPI", ".KQ": "KOSDAQ"}
 MARKET_MAX = 16
+# 저장소가 멈춰 있으면 기다리지 않고 매핑 실패(null)로 본다.
+# 판단 일지 변화 비교(journal.changes.STORE_TIMEOUT_S)와 같은 값
+COMPANIES_TIMEOUT_S = 5.0
 
 CompanyList = Callable[[], Awaitable[list[dict]]]
 
@@ -60,12 +64,12 @@ async def load_companies(companies: Optional[CompanyList]) -> Optional[list[dict
     """근거 모드 적재 회사 목록을 한 번 불러온다. 저장소가 없거나 실패하면 None(추가·목록을 막지 않는다).
 
     @param companies 문단 저장소의 companies(근거 모드가 꺼져 연결이 없으면 None)
-    @returns 적재 회사 목록, 저장소 없음·예외면 None. 로그에는 예외 이름만 남긴다
+    @returns 적재 회사 목록, 저장소 없음·예외·시간 초과(COMPANIES_TIMEOUT_S)면 None. 로그에는 예외 이름만 남긴다
     """
     if companies is None:
         return None
     try:
-        return await companies()
+        return await asyncio.wait_for(companies(), COMPANIES_TIMEOUT_S)
     except Exception as exc:  # noqa: BLE001
         log.warning(json.dumps({"event": "watchlist_company_list_failed", "error": type(exc).__name__}))
         return None
