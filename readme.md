@@ -120,7 +120,10 @@ AI 답변의 문장마다 DART 사업보고서 문단이 그 문장을 뒷받침
 | 개인 작업 — 확인 | 회원가입·로그인, 종목 조회·지표 표시, 시드 그래프, 채팅 응답·저장 | 2026-10-01 로컬 확인 |
 | 개인 작업 — JEV Gate Lab | 데이터 로더·익명 특징·돌파 규칙·JEV 게이트·사전등록·판정력 통계·CLI와 테스트 | [PR #4](https://github.com/Noah-TaeHwan/lumina-invest/pull/4)·[#5](https://github.com/Noah-TaeHwan/lumina-invest/pull/5)·[#6](https://github.com/Noah-TaeHwan/lumina-invest/pull/6)·[#7](https://github.com/Noah-TaeHwan/lumina-invest/pull/7), 독립 리뷰 반영 |
 | 개인 작업 — 근거 판정 엔진 | DART 수집·문단 분해·숫자 대조·JEV 판정기·기준선 4종·군집 분할·AI 참조 라벨·홀드아웃 2단 봉인·CLI와 테스트 | [PR #9](https://github.com/Noah-TaeHwan/lumina-invest/pull/9)·[#10](https://github.com/Noah-TaeHwan/lumina-invest/pull/10)·[#11](https://github.com/Noah-TaeHwan/lumina-invest/pull/11)·[#12](https://github.com/Noah-TaeHwan/lumina-invest/pull/12), 독립 리뷰 반영 |
-| 다음 개발 | 채팅 화면에 문장별 근거 배지 연결, 영속 관심종목, 자료 출처·시점, 기업별 판단 노트 | 계획 |
+| 개인 작업 — 공시 근거 모드(A-2) | 채팅 답변 문장마다 ✅·⚠️·❔ 배지와 근거 문단, 판정 저장·재판정, 사전등록 평가(정책 a2-v1) | [PR #17](https://github.com/Noah-TaeHwan/lumina-invest/pull/17)·[#18](https://github.com/Noah-TaeHwan/lumina-invest/pull/18)·[#19](https://github.com/Noah-TaeHwan/lumina-invest/pull/19)·[#20](https://github.com/Noah-TaeHwan/lumina-invest/pull/20)·[#22](https://github.com/Noah-TaeHwan/lumina-invest/pull/22)·[#23](https://github.com/Noah-TaeHwan/lumina-invest/pull/23)·[#24](https://github.com/Noah-TaeHwan/lumina-invest/pull/24), 독립 리뷰 반영 |
+| 개인 작업 — 판단 일지(C) | 판정 한 건에서 판단 기록·스냅샷 보존·다시 볼 날짜·공시 변화 비교·내보내기 | [PR #29](https://github.com/Noah-TaeHwan/lumina-invest/pull/29)·[#30](https://github.com/Noah-TaeHwan/lumina-invest/pull/30)·[#31](https://github.com/Noah-TaeHwan/lumina-invest/pull/31)·[#33](https://github.com/Noah-TaeHwan/lumina-invest/pull/33), 로컬 실스택 종단 확인 |
+| 개인 작업 — 관심종목·지표 출처(D) | 서버 저장 관심종목(DART 고유번호 자동 매핑)과 근거 모드·일지 연결 버튼, 지표 출처·조회 시각·분기 끝 날짜, 종목 통화별 단위 표시 | [PR #39](https://github.com/Noah-TaeHwan/lumina-invest/pull/39)·[#41](https://github.com/Noah-TaeHwan/lumina-invest/pull/41)·[#42](https://github.com/Noah-TaeHwan/lumina-invest/pull/42)·[#43](https://github.com/Noah-TaeHwan/lumina-invest/pull/43)·[#44](https://github.com/Noah-TaeHwan/lumina-invest/pull/44), 로컬 실스택 종단 확인(2026-10-05) |
+| 개인 작업 — 로컬 채팅 지연 | macOS용 호스트 Ollama 오버라이드와 실측(가운데값 252초 → 51초, 단일 세션) | [PR #40](https://github.com/Noah-TaeHwan/lumina-invest/pull/40) |
 
 기능을 추가할 때 이 표에 개인 변경과 확인 근거를 함께 갱신합니다.
 
@@ -201,12 +204,12 @@ macOS에서 채팅이 느리면 [채팅이 느릴 때(macOS)](PORTFOLIO_LOCAL.md
 
 ## 다음 개발
 
-- [ ] 해외 기업 통화·단위 표시 개선
-- [ ] AI 응답 지연 원인 개선 및 실제 사용자 요청으로 확인
-- [ ] 기업 자료의 출처·조회 시각 표시
-- [ ] 관심종목과 기업별 판단 노트 저장
-- [ ] AI 답변에 근거 링크 전달·표시(판정 엔진 완료, 채팅 연결 예정)
-- [ ] 위 기능을 연결한 대표 리서치 흐름과 검증 근거 준비
+- [x] 해외 기업 통화·단위 표시 개선([#39](https://github.com/Noah-TaeHwan/lumina-invest/pull/39))
+- [x] AI 응답 지연 원인 확인과 macOS 개선 경로([#40](https://github.com/Noah-TaeHwan/lumina-invest/pull/40), 호스트 Ollama — 기본 컨테이너 구성은 여전히 CPU라 느림)
+- [x] 기업 자료의 출처·조회 시각 표시([#42](https://github.com/Noah-TaeHwan/lumina-invest/pull/42))
+- [x] 관심종목과 기업별 판단 노트 저장([#43](https://github.com/Noah-TaeHwan/lumina-invest/pull/43)·[#44](https://github.com/Noah-TaeHwan/lumina-invest/pull/44), 판단 일지 [#29](https://github.com/Noah-TaeHwan/lumina-invest/pull/29)~[#33](https://github.com/Noah-TaeHwan/lumina-invest/pull/33))
+- [x] AI 답변에 근거 링크 전달·표시(공시 근거 모드, 기능 플래그 `EVIDENCE_CHAT_ENABLED`)
+- [ ] 위 기능을 연결한 대표 리서치 흐름 시연(README 첫 화면·화면 기록)과 새 clone 실행 확인
 
 ## 상세 자료
 
