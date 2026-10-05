@@ -711,3 +711,43 @@ def test_race_requery_failure_is_503_without_symbol(pg, monkeypatch, caplog):
     r = asyncio.run(go())
     assert r.status_code == 503 and "005930" not in r.text
     assert "비밀" not in "\n".join(x.getMessage() for x in caplog.records)
+
+
+@pytest.mark.parametrize("method", ["PATCH", "DELETE"])
+def test_patch_delete_race_with_concurrent_delete_is_not_500(pg, monkeypatch, caplog, method):
+    """읽은 뒤 다른 요청이 같은 항목을 지우면: PATCH는 404(없는 항목과 같은 문구), DELETE는 이미 지워진 것이라 204.
+
+    PR #43 리뷰의 PATCH·DELETE 경쟁. 전에는 PATCH 커밋이 StaleDataError로 500이 됐다. 메모는 로그에 남지 않는다.
+    """
+    from app.routes import watchlist as routes
+
+    caplog.set_level(logging.DEBUG)
+    real_owned = routes._owned_item
+
+    async def go():
+        async with database(pg) as factory:
+            seed = await seed_user(factory, with_chat=False)
+
+            async def racing(db, item_id, user):
+                item = await real_owned(db, item_id, user)
+                async with factory() as other:  # 다른 요청이 먼저 지운다
+                    await other.execute(WatchlistItem.__table__.delete().where(WatchlistItem.id == item.id))
+                    await other.commit()
+                return item
+
+            async with client(make_app(factory, Who(seed["user"]), companies=Companies())) as c:
+                iid = (await c.post("/api/watchlist", json={"symbol": "AAPL", "note": "처음 메모"})).json()["id"]
+                monkeypatch.setattr(routes, "_owned_item", racing)
+                if method == "PATCH":
+                    r = await c.patch(f"/api/watchlist/{iid}", json={"note": NOTE})
+                else:
+                    r = await c.delete(f"/api/watchlist/{iid}")
+            return r, await _count(factory)
+
+    r, left = asyncio.run(go())
+    if method == "PATCH":
+        assert r.status_code == 404 and r.json() == {"detail": "관심종목을 찾을 수 없습니다."}
+    else:
+        assert r.status_code == 204
+    assert left == 0
+    assert NOTE not in "\n".join(x.getMessage() for x in caplog.records) and NOTE not in r.text
