@@ -282,3 +282,11 @@ def test_fallback_monotonicity_r2():
                           "fallbacks": [{"kind": "tau_d", "tuned": 0.5, "fallback": 0.4}]})
     with pytest.raises(SystemExit, match="tau_d"):
         a4.check_registrable({"status": "registered", "tau_d": None, "signal": "p_diff", "fallbacks": []})
+
+
+def test_x0_audit_counts_swaps_that_become_supported_without_division_rule():
+    """spec 2.1 감사 항목: a3 규칙에 X0만 적용한 팔(a3x0)에서 a3 대비 ✅가 늘어난 관문 대상 교체를 직접 센다."""
+    sw = [row("a-q1-c2", y=0, variant="주체 교체:부문·사업", code={"a3": [False], "a3x0": [True]}),
+          row("b-q1-c2", y=0, variant="주체 교체:회사", code={"a3": [False], "a3x0": [False]}),
+          row("c-q1-c2", y=0, variant=f"주체 교체:{a4.IN_PASSAGE}", code={"a3": [False], "a3x0": [True]})]
+    assert a4.x0_audit(sw) == {"n": 2, "more_supported": 1, "by_subtype": {"부문·사업": 1}, "cids": ["a-q1-c2"]}

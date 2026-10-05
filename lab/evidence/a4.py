@@ -294,6 +294,17 @@ def audit(natural: list[dict], swaps: list[dict], signal: str, tau_d: float) -> 
     return {"natural": out_n, "swaps": out_s, "causes": CAUSES}
 
 
+def x0_audit(swaps: list[dict]) -> dict:
+    """spec 2.1 감사 항목: A-3 규칙에 X0만 적용한 팔(a3x0)에서 a3 대비 ✅가 늘어난 관문 대상 교체(X0으로 코드가 더는 막지 못해 ②가
+    막아야 하는 부문 교체 수). JEV 후속 확률을 읽지 않는다."""
+    sw = annotate(_gated(swaps), "p_diff", 1.0, arms=("a3", "a3x0"))
+    more = [r for r in sw if r["dec"]["a3x0"] == "supported" and r["dec"]["a3"] != "supported"]
+    by: dict[str, int] = {}
+    for r in more:
+        by[_subtype(r)] = by.get(_subtype(r), 0) + 1
+    return {"n": len(sw), "more_supported": len(more), "by_subtype": by, "cids": [r["cid"] for r in more]}
+
+
 # --- 확인 관문 ------------------------------------------------------------------------------------------------
 def _rate(rows, pred):
     return sum(1 for r in rows if pred(r)) / len(rows) if rows else None
@@ -351,16 +362,16 @@ def _three(nat: list[dict], sw: list[dict], arm: str, n_boot: int, seed: int, fo
 
 
 def check_gates(natural: list[dict], swaps: list[dict], signal: str, tau_d: float, n_boot: int = BOOTSTRAP_N,
-                seed: int = SEED) -> dict:
+                seed: int = SEED, main_failed: int = 0) -> dict:
     """A-4 관문(spec 5.1): C(a4-subject-exp) 대 a2-v1. natural: 판정 가능 자연 주장(y 라벨), swaps: 통제 주체 교체 주장.
 
-    후속 호출이 실패한 행(q_failed)은 모든 정책·팔에서 짝으로 빼고 수를 보고한다. 그 수가 판정 대상의 1%를 넘으면 세 관문
-    모두 기술 통계만(실패). '문단 안 교체'는 관문 밖(다섯 정책 기술 통계). 보조 팔 a3·A·B의 세 관문 값은 기술 통계이고
+    후속 호출이 실패한 행(q_failed)은 모든 정책·팔에서 짝으로 빼고 수를 보고한다. 주 판정 실패(main_failed, 이미 뺀 행)와
+    합쳐 판정 대상의 1%를 넘으면 세 관문 모두 기술 통계만(실패). '문단 안 교체'는 관문 밖(다섯 정책 기술 통계). 보조 팔 a3·A·B의 세 관문 값은 기술 통계이고
     권고(recommendation)에 쓰지 않는다. H-swap 민감도(최종 라벨이 supported·disputed가 아닌 c2만)는 관문이 아니다."""
     from lab.evidence.metrics import cluster_bootstrap
 
-    judged = len(natural) + len(swaps)
-    failed = sum(1 for r in natural + swaps if r.get("q_failed"))
+    judged = len(natural) + len(swaps) + main_failed
+    failed = sum(1 for r in natural + swaps if r.get("q_failed")) + main_failed
     over = judged > 0 and failed / judged > FOLLOWUP_FAIL_MAX
     keep = lambda rs: [r for r in rs if not r.get("q_failed")]  # noqa: E731
     nat = annotate(keep(natural), signal, tau_d)
