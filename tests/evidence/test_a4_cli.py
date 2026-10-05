@@ -492,9 +492,12 @@ def test_committed_prereg_a4_draft_matches_code():
         "llama3.1:8b", "46e0c10c039e", generate.PROMPT_SHA, generate.OPTIONS)
     assert pre["draw"]["seed"] == a4.SEED == 20261305 and pre["draw"]["random_n"] == a4.RANDOM_N == 45
     assert pre["draw"]["exclude_prior_studies"] == list(a4.PRIOR_STUDIES)
-    assert pre["exploration"]["half_split"] == {"seed": a4.HALF_SEED, "design_companies": a4.HALF_N, "sha256": None}
+    half = pre["exploration"]["half_split"]  # sha256·token_cap은 a4-measure 실측 뒤 채운다(그 전엔 비어 있다)
+    assert (half["seed"], half["design_companies"]) == (a4.HALF_SEED, a4.HALF_N)
+    assert half["sha256"] is None or len(half["sha256"]) == 64
     assert pre["exploration"]["tau_d_grid"] == list(a4.TAU_D_GRID) and pre["exploration"]["signals"] == list(a4.SIGNALS)
-    assert pre["exploration"]["token_cap_max"] == a4.EXPLORE_CAP_MAX and pre["exploration"]["token_cap"] is None
+    cap = pre["exploration"]["token_cap"]
+    assert pre["exploration"]["token_cap_max"] == a4.EXPLORE_CAP_MAX and (cap is None or 0 < cap <= a4.EXPLORE_CAP_MAX)
     assert pre["token_cap_max"] == a4.TOKEN_CAP_MAX and pre["token_cap"] is None
     assert pre["gates"] == a4.GATES
     assert pre["bootstrap"] == {"levels": ["cluster", "question"], "n": a4.BOOTSTRAP_N, "seed": a4.SEED}

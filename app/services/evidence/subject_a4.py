@@ -56,8 +56,26 @@ SUBJECT_CRITERIA = {
                          "from the one the passage describes for those facts.",
     "unclear": "The passage does not name the claim's subject clearly enough to compare.",
 }
+# 2판(탐색 1회 고침, 설계용 절반 감사 근거): 1판은 회사가 같으면 same으로 답하고 주장에 이름 붙은 부문·제품·과제가 문단과
+# 다른 것을 보지 않았다. 이름 비교를 문구로 분명히 한다(특정 낱말 쌍은 넣지 않는다).
+SUBJECT_INSTRUCTIONS_V2 = (
+    "The state has one [Claim] about a Korean listed company and numbered [Passage] blocks from its annual report. "
+    "[Company] wrote the report, and '당사' in a passage means [Company]. Is the [Claim] about the same entity as "
+    "[Passage {j}]? Compare only whom or what the facts are about. The same company is not enough: for each business "
+    "division or segment, business line, product or brand, project, counterparty or subsidiary that the claim names, "
+    "find the name the passage uses for the same facts and check that it is the same name. Do not judge whether the "
+    "numbers or other facts match. Judge only from that passage.")
+SUBJECT_CRITERIA_V2 = {
+    "same_subject": "Every company, division, business line, product, brand, project, counterparty or subsidiary that the "
+                    "claim names is the one the passage names for those facts, possibly written differently (abbreviation, "
+                    "spacing, legal suffix, '당사'). A claim that names nothing beyond the company is about the company.",
+    "different_subject": "The claim names a division, business line, product, brand, project, counterparty, subsidiary or "
+                         "company where the passage names a different one for those facts, even if it looks similar or "
+                         "belongs to the same company.",
+    "unclear": "The passage does not name the claim's subject clearly enough to compare.",
+}
 PROMPT_VERSION = "v1"
-PROMPTS = {"v1": (SUBJECT_INSTRUCTIONS, SUBJECT_CRITERIA)}
+PROMPTS = {"v1": (SUBJECT_INSTRUCTIONS, SUBJECT_CRITERIA), "v2": (SUBJECT_INSTRUCTIONS_V2, SUBJECT_CRITERIA_V2)}
 
 
 def question_sha(version: str = PROMPT_VERSION) -> str:
