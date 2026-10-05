@@ -586,6 +586,17 @@ async function doInitEvidence() {
   await probe();
 }
 
+/**
+ * 근거 모드를 쓸 수 있는가(관심종목 패널의 '근거 모드로 질문' 표시용, 모듈 D 결정 7-2).
+ * 새 탐지 요청을 만들지 않고 채팅 화면과 같은 기능 확인(initEvidence → probe)을 기다린다.
+ * 404(꺼짐)·5xx·네트워크 오류는 모두 false다.
+ * @returns {Promise<boolean>} 쓸 수 있으면 true
+ */
+export async function evidenceModeAvailable() {
+  await initEvidence();
+  return state.available;
+}
+
 /** 판단 일지의 '같은 질문 다시 묻기'(spec 3.1-8): 근거 모드를 켜고 회사·질문을 채우기만 한다. 보내기는 사용자가 누른다.
  *  근거 모드를 쓸 수 없으면 false. 고지를 아직 확인하지 않았으면 고지 대화상자를 띄운다(확인하면 켜진다). */
 export async function prefillEvidenceChat(company, question) {

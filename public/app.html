@@ -1116,6 +1116,17 @@
     <!-- 7-1. 지표 대시보드 -->
     <div class="view" data-view="company-dashboard">
       <div class="space-y-4">
+        <!-- 관심종목 패널(모듈 D 결정 7-1). 이름·메모는 textContent로만 넣는다(js/watchlist.js) -->
+        <section id="wl-card" class="card wl-card" aria-labelledby="wl-title">
+          <div class="wl-head">
+            <h3 id="wl-title" class="wl-title">⭐ 관심종목</h3>
+            <span id="wl-count" class="wl-count"></span>
+          </div>
+          <p id="wl-notice" class="wl-notice">관심종목은 내가 고른 목록입니다. 이 서비스는 종목을 추천하지 않습니다.</p>
+          <p id="wl-status" class="wl-status" role="status"></p>
+          <button id="wl-retry" type="button" class="btn-secondary text-xs wl-hidden">다시 시도</button>
+          <ul id="wl-list" class="wl-list" aria-label="관심종목 목록"></ul>
+        </section>
         <!-- 종목 선택 탭 -->
         <div class="card" style="padding:14px 18px;">
           <div class="flex items-center gap-3 flex-wrap">
@@ -1125,6 +1136,11 @@
               <i class="fa-solid fa-magnifying-glass"></i> 종목 검색
             </button>
           </div>
+        </div>
+        <!-- 고른 종목 이름과 관심종목 별 버튼(결정 7-3) -->
+        <div class="wl-current">
+          <span id="co-current-name" class="wl-current-name"></span>
+          <button id="wl-star" type="button" class="wl-star wl-hidden" aria-pressed="false">☆ 관심종목</button>
         </div>
         <!-- 핵심 지표 개요 -->
         <div id="co-overview" class="grid grid-cols-4 gap-3"></div>

@@ -778,6 +778,27 @@ function openEntry(id) {
   navigate("journal");
 }
 
+/**
+ * 관심종목 줄의 '판단 기록' 버튼에서(모듈 D 결정 7-2 (c)): 일지 탭을 이 회사로 걸러 연다.
+ * 버튼 숫자(기록 수·다시 볼 때 된 수)와 목록이 어긋나지 않게 다른 거르기(다시 볼 때·최근 판단)는 푼다.
+ * 거르기 선택 상자에 회사가 아직 없으면 넣는다. 기능 확인은 탭이 열릴 때(onJournalViewActivated) 한다.
+ * @param {string} corpCode DART 고유번호
+ * @param {string} company 선택 상자에 보일 회사 이름
+ * @returns {void}
+ */
+export function openJournalForCompany(corpCode, company) {
+  if (!corpCode) return;
+  jr.filters = { due: false, corp: corpCode, decision: "" };
+  if (!jr.companies.has(corpCode)) jr.companies.set(corpCode, company || corpCode);
+  $("jr-f-due").checked = false;
+  document.querySelectorAll(".jr-f-decision button").forEach(b =>
+    b.setAttribute("aria-pressed", String(b.dataset.decision === "")));
+  renderCompanies();
+  jr.pendingOpen = null;
+  showList();
+  navigate("journal");
+}
+
 /** 일지 탭이 열릴 때마다. 기능이 꺼져 있으면 상담 화면으로 돌린다(탭 없음, spec 3.2). */
 export async function onJournalViewActivated() {
   const state = await initJournal();
