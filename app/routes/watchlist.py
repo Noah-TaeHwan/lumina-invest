@@ -27,6 +27,7 @@ from pydantic_core import PydanticCustomError
 from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm.exc import StaleDataError
 
 from app.database.postgres import get_pg_session
 from app.lib.jwt_auth import get_current_user_any
@@ -335,7 +336,7 @@ async def update_note(item_id: str, request: Request, user=Depends(get_current_u
     @param request 본문 `{"note"}`
     @param user 현재 사용자
     @param db DB 세션
-    @returns 200과 항목
+    @returns 200과 항목. 읽은 뒤 다른 요청이 지웠으면(StaleDataError) 없는 항목과 같은 404
     """
     body: WatchlistNote = await _parse(request, WatchlistNote)  # type: ignore[assignment]
     item = await _owned_item(db, item_id, user)
@@ -343,6 +344,9 @@ async def update_note(item_id: str, request: Request, user=Depends(get_current_u
     out = _item(item)
     try:
         await db.commit()
+    except StaleDataError:  # 읽기와 커밋 사이에 다른 요청이 지웠다(PR #43 리뷰)
+        await db.rollback()
+        raise HTTPException(404, NOT_FOUND) from None
     except Exception as exc:  # noqa: BLE001
         await db.rollback()
         log.error(json.dumps({"event": "watchlist_note_save_failed", "error": type(exc).__name__}))

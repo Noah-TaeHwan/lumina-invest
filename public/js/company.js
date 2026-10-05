@@ -448,4 +448,4 @@ function loadCompanySector() {
 })();
 
 
-export { addAndSelectCompany, getSelectedCompany, loadCompanyCompare, loadCompanyDashboard, loadCompanySector, onCompanySelected };
+export { addAndSelectCompany, loadCompanyCompare, loadCompanyDashboard, loadCompanySector, onCompanySelected };

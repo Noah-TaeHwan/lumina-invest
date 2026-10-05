@@ -64,6 +64,7 @@ class WatchlistApi(cv.CompanyApi):
         self.limit = limit
         self.wl_calls: list[tuple[str, str, dict | None]] = []
         self.count_queries: list[dict] = []
+        self.count_inflight = self.count_peak = 0  # 관심종목 개수 요청(offset 없는 corp_code 조회) 동시 수·최대
 
     def respond(self, method, path, query, body):
         if path == "/api/stocks/search":
@@ -122,8 +123,8 @@ class WatchlistApi(cv.CompanyApi):
 
 
 async def open_wl(browser, base, fake: WatchlistApi, *, hash_="company-dashboard", width=1280, height=900,
-                  hold_list: asyncio.Event | None = None, post_delay_s=0.0):
-    """jv.open_app과 같은 방식에 204 응답·목록 붙잡기(불러오는 중 상태)·추가 지연을 더한다."""
+                  hold_list: asyncio.Event | None = None, post_delay_s=0.0, hold_counts: asyncio.Event | None = None):
+    """jv.open_app과 같은 방식에 204 응답·목록 붙잡기(불러오는 중 상태)·추가 지연·개수 요청 붙잡기를 더한다."""
     ctx = await browser.new_context(viewport={"width": width, "height": height})
     ctx.set_default_timeout(WAIT_MS)
     page = await ctx.new_page()
@@ -149,10 +150,22 @@ async def open_wl(browser, base, fake: WatchlistApi, *, hash_="company-dashboard
             await hold_list.wait()
         if path == "/api/watchlist" and method == "POST" and post_delay_s:
             await asyncio.sleep(post_delay_s)
-        status, payload = fake.respond(method, path, query, body)
-        if status == 204:
-            return await route.fulfill(status=204, body="")
-        await route.fulfill(status=status, content_type="application/json", body=json.dumps(payload))
+        is_count = path == "/api/journal" and method == "GET" and "corp_code=" in query and "offset=" not in query
+        if is_count:
+            fake.count_inflight += 1
+            fake.count_peak = max(fake.count_peak, fake.count_inflight)
+        try:
+            if is_count:
+                if hold_counts is not None:
+                    await hold_counts.wait()
+                await asyncio.sleep(0.02)  # 겹침이 보이게 조금씩 붙잡는다
+            status, payload = fake.respond(method, path, query, body)
+            if status == 204:
+                return await route.fulfill(status=204, body="")
+            await route.fulfill(status=status, content_type="application/json", body=json.dumps(payload))
+        finally:
+            if is_count:
+                fake.count_inflight -= 1
 
     await page.route("**/*", handle)
     page.fake = fake
@@ -188,6 +201,24 @@ async def wait_star(page, text: str):
 
 async def toast(page) -> str:
     return await page.evaluate("document.getElementById('_toast_el')?.innerText || ''")
+
+
+async def eventually(page, js: str, arg=None, ms: int = 3000) -> bool:
+    """조건이 ms 안에 참이 되면 True(기다림 실패를 예외 대신 확인 실패로 남긴다)."""
+    try:
+        await page.wait_for_function(js, arg=arg, timeout=ms)
+        return True
+    except Exception:  # noqa: BLE001
+        return False
+
+
+async def until(cond, ms: int = 3000) -> bool:
+    """파이썬 쪽 조건(가짜 API 상태)이 ms 안에 참이 되면 True."""
+    for _ in range(ms // 20):
+        if cond():
+            return True
+        await asyncio.sleep(0.02)
+    return cond()
 
 
 # ── 시나리오 ─────────────────────────────────────────────────────────────────
@@ -421,9 +452,11 @@ async def s_star(browser, base, ck: ev.Checks):
     ctx, page = await open_wl(browser, base, fake)
     await wait_rows(page, 1)
     await wait_star(page, "☆ 관심종목")
+    ck.ok((await page.inner_text("#wl-count")).strip() == "1 / 1", f"개수 표시는 서버 limit을 쓴다 "
+          f"{(await page.inner_text('#wl-count')).strip()!r}")
     await page.click("#wl-star")
-    await page.wait_for_function("(document.getElementById('_toast_el')?.innerText || '').includes('100개까지')")
-    ck.ok(await toast(page) == "관심종목은 100개까지 담을 수 있습니다", f"상한 토스트 {await toast(page)!r}")
+    await page.wait_for_function("(document.getElementById('_toast_el')?.innerText || '').includes('개까지')")
+    ck.ok(await toast(page) == "관심종목은 1개까지 담을 수 있습니다", f"상한 토스트는 서버 limit {await toast(page)!r}")
     ck.ok(await star_text(page) == "☆ 관심종목" and not await page.is_disabled("#wl-star"), "상한: ☆로 돌아온다")
     # 다른 탭에서 먼저 추가한 경우: 409 duplicate → 조용히 ★
     fake.limit = 100
@@ -486,22 +519,136 @@ async def s_memo(browser, base, ck: ev.Checks):
     await ctx.close()
 
 
+async def s_count_dedupe_focus(browser, base, ck: ev.Checks):
+    print("[watchlist] 개수 요청 중 별 추가: corp_code별 중복 없음·전체 동시 4개·편집 중 메모 칸 유지")
+    hold = asyncio.Event()
+    fake = WatchlistApi(items=[item("w2", "000660.KS", "SK하이닉스", corp="00164779", market="KOSPI"),
+                               item("w3", "035420.KS", "NAVER", corp="00266961", market="KOSPI")], acked=True)
+    ctx, page = await open_wl(browser, base, fake, hold_counts=hold)
+    await wait_rows(page, 2)
+    ck.ok(await until(lambda: fake.count_inflight == 4), f"첫 개수 요청 4개가 붙잡혀 있다 ({fake.count_inflight})")
+    await wait_star(page, "☆ 관심종목")
+    await page.click("#wl-star")  # 현재 종목 005930.KS 추가 → 개수를 다시 채운다
+    await wait_rows(page, 3)
+    r = await row(page, "000660.KS")
+    await r.locator(".wl-note-edit").click()
+    await r.locator(".wl-note-input").fill("편집 중 메모")
+    await page.evaluate("""() => {
+      const i = document.querySelector('#wl-list .wl-row[data-symbol="000660.KS"] .wl-note-input');
+      i.focus(); i.setSelectionRange(3, 3); window.__wlInput = i;
+    }""")
+    hold.set()
+    ok = await eventually(page, "(document.querySelector('#wl-list .wl-row[data-symbol=\"005930.KS\"] .wl-journal')"
+                                "?.innerText || '').trim() === '판단 기록 1 · 다시 볼 때 1'")
+    await wait_links(page)
+    await page.wait_for_timeout(200)
+    ck.ok(ok, "추가한 줄의 개수도 채워진다")
+    per = {}
+    for q in fake.count_queries:
+        if "offset" not in q:
+            per[q["corp_code"]] = per.get(q["corp_code"], 0) + 1
+    ck.ok(per and all(n <= 2 for n in per.values()), f"corp_code당 개수 요청은 2회를 넘지 않는다 {per}")
+    ck.ok(fake.count_peak <= 4, f"개수 요청 동시 실행은 전체에서 4개까지 ({fake.count_peak})")
+    focus = await page.evaluate("""() => {
+      const a = document.activeElement;
+      return { same: a === window.__wlInput, connected: !!window.__wlInput?.isConnected,
+               value: a?.value ?? null, caret: a?.selectionStart ?? null };
+    }""")
+    ck.ok(focus == {"same": True, "connected": True, "value": "편집 중 메모", "caret": 3},
+          f"개수 도착 뒤에도 같은 메모 입력 칸에 포커스·커서가 남는다 {focus}")
+    ck.ok(not page.errors, f"페이지 오류 없음 {page.errors[:2]}")
+    await ctx.close()
+
+    print("[watchlist] 개수 요청 401 → 로그인 안 됨")
+    fake = WatchlistApi(items=rows_default()[:1], count_status=401)
+    ctx, page = await open_wl(browser, base, fake)
+    ok = await eventually(page, "document.getElementById('wl-card')?.dataset.state === 'unauthorized'")
+    ck.ok(ok and not await page.is_visible("#wl-card") and not await page.is_visible("#wl-star"),
+          "개수 401: 패널·별을 숨긴다(다른 경로와 같다)")
+    ck.ok(not page.errors, f"페이지 오류 없음 {page.errors[:2]}")
+    await ctx.close()
+
+    print("[watchlist] 409 duplicate 뒤 목록 재조회 실패 → 그래도 ★")
+    fake = WatchlistApi(items=[item("w2", "000660.KS", "SK하이닉스", corp="00164779", market="KOSPI")])
+    ctx, page = await open_wl(browser, base, fake)
+    await wait_rows(page, 1)
+    await wait_star(page, "☆ 관심종목")
+    fake.items.append(item("w10", "005930.KS", "삼성전자", corp="00126380", market="KOSPI", note=SECRET_NOTE))
+    fake.list_status = 500
+    await page.click("#wl-star")
+    ok = await eventually(page, "(document.getElementById('wl-star')?.innerText || '').trim() === '★ 관심종목'")
+    ck.ok(ok and await toast(page) == "", f"재조회 실패해도 토스트 없이 ★ {await star_text(page)!r}")
+    ck.ok(await (await row(page, "005930.KS")).count() == 1, "응답 item_id로 줄이 생긴다")
+    # 메모를 모르는 줄: 지울 때 확인한다(서버에 메모가 있을 수 있다)
+    page.once("dialog", lambda d: (page.dialogs.append(d.message), asyncio.ensure_future(d.dismiss())))
+    await page.click("#wl-star")
+    await page.wait_for_timeout(300)
+    ck.ok(bool(page.dialogs) and not [1 for m, _, _ in fake.wl_calls if m == "DELETE"],
+          f"메모를 모르는 줄 삭제는 확인을 받는다 {page.dialogs}")
+    page.once("dialog", lambda d: (page.dialogs.append(d.message), asyncio.ensure_future(d.accept())))
+    await page.click("#wl-star")
+    await wait_star(page, "☆ 관심종목")
+    ck.ok([p for m, p, _ in fake.wl_calls if m == "DELETE"] == ["/api/watchlist/w10"], "확인 → item_id로 DELETE")
+    ck.ok(not page.errors, f"페이지 오류 없음 {page.errors[:2]}")
+    await ctx.close()
+
+
+async def s_journal_company_name(browser, base, ck: ev.Checks):
+    print("[watchlist] (c) 일지 회사 거르기 이름: 일지가 아는 이름 · 기록 0건 회사는 남기지 않는다")
+    rows = [item("w1", "005930.KS", "Samsung Electronics", corp="00126380", market="KOSPI"),
+            item("w3", "035420.KS", "NAVER", corp="00266961", market="KOSPI")]
+    fake = WatchlistApi(items=rows, acked=True)
+    ctx, page = await open_wl(browser, base, fake)
+    await wait_rows(page, 2)
+    await wait_links(page)
+    await (await row(page, "005930.KS")).locator(".wl-journal").click()
+    await page.wait_for_function("document.querySelector('.view.active')?.dataset.view === 'journal'")
+    await page.wait_for_function("document.querySelectorAll('#jr-list .jr-row').length === 1")
+    sel = await page.evaluate("(() => { const s = document.getElementById('jr-f-company');"
+                              " return [s.value, s.selectedOptions[0]?.textContent]; })()")
+    ck.ok(sel == ["00126380", "삼성전자"], f"일지 목록이 아는 회사 이름을 쓴다(관심종목 이름 아님) {sel}")
+    await page.evaluate("location.hash = 'company-dashboard'")
+    await wait_rows(page, 2)
+    await wait_links(page)
+    await (await row(page, "035420.KS")).locator(".wl-journal").click()
+    await page.wait_for_function("document.querySelector('.view.active')?.dataset.view === 'journal'")
+    await page.wait_for_function("document.getElementById('jr-f-company')?.value === '00266961'")
+    await page.wait_for_timeout(300)
+    ck.ok(await page.evaluate("document.getElementById('jr-f-company').selectedOptions[0]?.textContent") == "NAVER",
+          "기록 0건 회사도 거르는 동안은 선택 상자에 보인다")
+    await page.select_option("#jr-f-company", "")
+    await page.wait_for_function("document.querySelectorAll('#jr-list .jr-row').length >= 2")
+    opts = await page.evaluate("[...document.querySelectorAll('#jr-f-company option')].map(o => o.value)")
+    ck.ok("00266961" not in opts and "00126380" in opts, f"거르기를 풀면 기록 0건 회사는 상자에서 빠진다 {opts}")
+    ck.ok(not page.errors, f"페이지 오류 없음 {page.errors[:2]}")
+    await ctx.close()
+
+
 async def s_map_limit(browser, base, ck: ev.Checks):
-    print("[watchlist] 동시 요청 4개 제한(mapLimit)")
+    print("[watchlist] 동시 요청 4개 제한(createLimiter)")
     fake = WatchlistApi(items=[])
     ctx, page = await open_wl(browser, base, fake)
     got = await page.evaluate("""async () => {
-      const { mapLimit } = await import('/js/watchlist.js');
+      const { createLimiter } = await import('/js/watchlist.js');
+      const run = createLimiter(4);
       let now = 0, peak = 0;
-      const out = await mapLimit([...Array(11).keys()], 4, async x => {
+      const job = async x => {
         now++; peak = Math.max(peak, now);
         await new Promise(r => setTimeout(r, 20 + (x % 3) * 10));
-        now--; return x * 2;
-      });
+        now--;
+        if (x === 5) throw new Error("x");
+        return x * 2;
+      };
+      // 두 묶음을 따로 넣어도 상한은 하나다
+      const a = Promise.allSettled([...Array(6).keys()].map(x => run(() => job(x))));
+      const b = Promise.allSettled([6, 7, 8, 9, 10].map(x => run(() => job(x))));
+      const out = [...await a, ...await b].map(r => r.status === "fulfilled" ? r.value : "err");
       return { peak, out };
     }""")
-    ck.ok(got["peak"] == 4, f"mapLimit: 동시 실행 최대 4 ({got['peak']})")
-    ck.ok(got["out"] == [x * 2 for x in range(11)], "mapLimit: 결과는 입력 순서")
+    ck.ok(got["peak"] == 4, f"createLimiter: 두 묶음 합쳐 동시 실행 최대 4 ({got['peak']})")
+    ck.ok(got["out"] == [0, 2, 4, 6, 8, "err", 12, 14, 16, 18, 20], f"createLimiter: 결과·실패 전달 {got['out']}")
+    exported = await page.evaluate("import('/js/company.js').then(m => 'getSelectedCompany' in m)")
+    ck.ok(exported is False, "company.js: 쓰이지 않는 getSelectedCompany를 내보내지 않는다")
     await ctx.close()
 
 
@@ -510,7 +657,8 @@ async def main() -> int:
     ck = ev.Checks()
     async with async_playwright() as p:
         browser = await p.chromium.launch(executable_path=ev._chromium())
-        for scenario in (s_states, s_list_links, s_flags_off, s_star, s_memo, s_map_limit):
+        for scenario in (s_states, s_list_links, s_flags_off, s_star, s_memo, s_count_dedupe_focus,
+                         s_journal_company_name, s_map_limit):
             try:
                 await scenario(browser, base, ck)
             except Exception as exc:  # noqa: BLE001 — 한 시나리오가 죽어도 나머지를 본다
