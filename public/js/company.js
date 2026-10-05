@@ -56,6 +56,46 @@ let dashboardStocks = COMPANIES.map(c => ({ symbol: `${c.code}.KS`, name: c.name
 let selectedCompanySymbol = dashboardStocks[0].symbol;
 const companyFundCache = {};
 
+// 기업 지표 캐시 유효 시간(시간). 서버 캐시(app/services/stock.py FUNDAMENTALS_CACHE_HOURS)와 같은 값이어야 한다 —
+// 출처 줄의 "최대 N시간" 문구와 브라우저 캐시 재요청 기준이 모두 이 값을 쓴다.
+const FUNDAMENTALS_CACHE_HOURS = 6;
+const FUNDAMENTALS_SOURCE = "Yahoo Finance";
+
+/**
+ * UTC ISO 시각을 KST(Asia/Seoul) "YYYY-MM-DD HH:mm"으로 바꾼다(journal.js kstDate와 같은 +9시간 방식, 분 단위).
+ * @param {string|null|undefined} iso UTC ISO 8601 시각(예: "2026-10-04T15:30:00+00:00")
+ * @returns {string|null} KST 시각 문자열. 읽을 수 없으면 null
+ */
+function kstMinute(iso) {
+  const t = Date.parse(iso ?? "");
+  if (!Number.isFinite(t)) return null;
+  return new Date(t + 9 * 3600_000).toISOString().slice(0, 16).replace("T", " ");
+}
+
+/**
+ * 브라우저 캐시에 둔 지표 응답을 그대로 써도 되는지 본다. fetched_at이 없거나 읽을 수 없거나
+ * FUNDAMENTALS_CACHE_HOURS보다 오래됐으면 false(다시 받는다).
+ * @param {object|undefined} d 캐시된 /api/stocks/fundamentals 응답
+ * @param {number} [now=Date.now()] 기준 시각(ms)
+ * @returns {boolean} 그대로 써도 되면 true
+ */
+function isFundamentalsFresh(d, now = Date.now()) {
+  const t = Date.parse(d?.fetched_at ?? "");
+  return Number.isFinite(t) && now - t < FUNDAMENTALS_CACHE_HOURS * 3600_000;
+}
+
+/**
+ * 지표 출처 줄 문구를 만든다. fetched_at이 있으면 KST 조회 시각과 "최대 N시간" 안내를, 없으면 "조회 시각 확인 불가"를 쓴다.
+ * @param {object} d /api/stocks/fundamentals 응답
+ * @returns {string} 출처 줄(텍스트, HTML 아님)
+ */
+function sourceLine(d) {
+  const src = `출처: ${d.source || FUNDAMENTALS_SOURCE}`;
+  const at = kstMinute(d.fetched_at);
+  if (!at) return `${src} · 조회 시각 확인 불가`;
+  return `${src} · 조회 ${at}(KST) · 최대 ${FUNDAMENTALS_CACHE_HOURS}시간 지난 값일 수 있음`;
+}
+
 function loadCompanyDashboard() {
   renderCompanyTabs();
   fetchAndRenderCompany(selectedCompanySymbol);
@@ -107,11 +147,23 @@ function currencyUnit(currency, scale = "") {
 }
 const UNKNOWN_CURRENCY = "통화 미확인";
 
+/**
+ * 종목 지표를 받아(또는 브라우저 캐시에서 꺼내) 그린다. 캐시된 응답의 fetched_at이
+ * FUNDAMENTALS_CACHE_HOURS보다 오래됐거나 없으면 버리고 다시 받는다(뷰를 다시 열거나 종목을 다시 고를 때).
+ * @param {string} symbol Yahoo 심볼
+ * @returns {Promise<void>}
+ */
 async function fetchAndRenderCompany(symbol) {
   const overviewEl = document.getElementById("co-overview");
   overviewEl.innerHTML = `<div class="text-xs" style="color:var(--text-mute);grid-column:1/-1;">불러오는 중…</div>`;
+  const sourceEl = document.getElementById("co-source");
+  if (sourceEl) sourceEl.textContent = "";  // 이전 종목의 출처 줄을 남기지 않는다
   try {
     let d = companyFundCache[symbol];
+    if (d && !isFundamentalsFresh(d)) {
+      delete companyFundCache[symbol];
+      d = undefined;
+    }
     if (!d) {
       d = await api(`/api/stocks/fundamentals?symbol=${encodeURIComponent(symbol)}`);
       companyFundCache[symbol] = d;
@@ -122,6 +174,11 @@ async function fetchAndRenderCompany(symbol) {
   }
 }
 
+/**
+ * 지표 응답을 개요·밸류에이션·수익성·분기 실적·재무상태 카드와 출처 줄에 그린다.
+ * @param {object} d /api/stocks/fundamentals 응답
+ * @returns {void}
+ */
 function renderCompanyData(d) {
   const pctColor = (d.chg ?? 0) >= 0 ? "var(--green)" : "var(--red)";
   const sign = (d.chg ?? 0) >= 0 ? "+" : "";
@@ -182,9 +239,11 @@ function renderCompanyData(d) {
 
   // 분기 실적
   const qs = d.quarters || [];
+  const qEnds = d.quarter_ends || [];  // 옛 형식 응답에는 없다 — 툴팁 없이 그린다
+  const qTitle = i => qEnds[i] ? ` title="분기 끝 ${escHtml(qEnds[i])}"` : "";
   document.getElementById("co-quarterly").innerHTML = qs.length ? `
     <table>
-      <thead><tr><th>구분</th>${qs.map(q=>`<th style="text-align:right;">${escHtml(q)}</th>`).join("")}</tr></thead>
+      <thead><tr><th>구분</th>${qs.map((q, i)=>`<th style="text-align:right;"${qTitle(i)}>${escHtml(q)}</th>`).join("")}</tr></thead>
       <tbody>
         <tr><td style="color:var(--text-dim);font-size:12px;">매출액 ${finHead}</td>${d.revenue.map(v=>`<td style="text-align:right;font-weight:600;">${nfmt(v)}</td>`).join("")}</tr>
         <tr><td style="color:var(--text-dim);font-size:12px;">영업이익 ${finHead}</td>${d.op.map(v=>`<td style="text-align:right;color:var(--green);font-weight:600;">${nfmt(v)}</td>`).join("")}</tr>
@@ -204,6 +263,9 @@ function renderCompanyData(d) {
         ${d.cash!=null ? `<tr><td style="color:var(--text-dim);font-size:12px;">현금및현금성자산</td><td style="text-align:right;">${fmt(d.cash)}</td><td style="text-align:right;">-</td></tr>` : ""}
       </tbody>
     </table>` : `<div class="text-xs" style="color:var(--text-mute);">Yahoo Finance가 이 종목의 재무상태표 상세를 제공하지 않습니다.</div>`;
+
+  const sourceEl = document.getElementById("co-source");
+  if (sourceEl) sourceEl.textContent = sourceLine(d);
 }
 
 function loadCompanyCompare() {
