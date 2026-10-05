@@ -12,14 +12,14 @@ import { evidenceModeAvailable, prefillEvidenceChat } from "/js/evidence.js";
 import { initJournal, openJournalForCompany } from "/js/journal.js";
 
 // ── 상수·문구(spec 3.2·결정 7-2) ──────────────────────────────────
-const MAX_ITEMS = 100;            // 서버 MAX_ITEMS(app/routes/watchlist.py)와 같은 값
+const DEFAULT_LIMIT = 100;        // 서버 응답에 limit이 없을 때만 쓰는 값(서버 MAX_ITEMS)
 const NOTE_MAX = 200;             // 서버 메모 상한과 같은 값
 const COUNT_CONCURRENCY = 4;      // (c) 개수 요청 동시 실행 상한
 const MSG = {
   loading: "관심종목을 불러오는 중…",
   empty: "관심종목이 없습니다. 종목을 검색해 ☆를 누르면 여기에 모입니다.",
   failed: "관심종목을 불러오지 못했습니다",
-  limit: `관심종목은 ${MAX_ITEMS}개까지 담을 수 있습니다`,
+  limit: n => `관심종목은 ${n}개까지 담을 수 있습니다`,
   addFail: "관심종목에 담지 못했습니다. 잠시 뒤 다시 시도해 주세요.",
   removeFail: "관심종목에서 지우지 못했습니다. 잠시 뒤 다시 시도해 주세요.",
   noteFail: "메모를 저장하지 못했습니다. 입력은 그대로 있습니다.",
@@ -33,24 +33,22 @@ const STAR_OFF = "☆ 관심종목";
 // ── 순수 함수 ─────────────────────────────────────────────────────
 
 /**
- * 비동기 작업을 동시에 limit개까지만 돌린다. 결과는 입력 순서다.
- * @template T, R
- * @param {T[]} items 입력 목록
+ * 동시 실행 상한을 나눠 쓰는 실행기를 만든다. 같은 실행기로 넣은 작업은 어느 호출에서 왔든 합쳐서 limit개까지만 돈다.
  * @param {number} limit 동시 실행 상한(1 이상)
- * @param {(item: T, index: number) => Promise<R>} fn 하나를 처리하는 함수
- * @returns {Promise<R[]>} 입력 순서의 결과
+ * @returns {<R>(fn: () => Promise<R>) => Promise<R>} 자리가 나면 fn을 돌리고 그 결과(또는 실패)를 돌려주는 함수
  */
-export async function mapLimit(items, limit, fn) {
-  const out = new Array(items.length);
-  let next = 0;
-  async function worker() {
-    while (next < items.length) {
-      const i = next++;
-      out[i] = await fn(items[i], i);
+export function createLimiter(limit) {
+  const max = Math.max(1, limit);
+  const waiting = [];
+  let running = 0;
+  const pump = () => {
+    while (running < max && waiting.length) {
+      const { fn, resolve, reject } = waiting.shift();
+      running++;
+      Promise.resolve().then(fn).then(resolve, reject).finally(() => { running--; pump(); });
     }
-  }
-  await Promise.all(Array.from({ length: Math.min(Math.max(1, limit), items.length) }, worker));
-  return out;
+  };
+  return fn => new Promise((resolve, reject) => { waiting.push({ fn, resolve, reject }); pump(); });
 }
 
 /**
@@ -120,11 +118,14 @@ async function call(path, { method = "GET", body } = {}) {
 }
 
 // ── 상태 ──────────────────────────────────────────────────────────
+const countSlot = createLimiter(COUNT_CONCURRENCY);  // 개수 요청은 fillCounts 호출이 겹쳐도 합쳐서 상한
 const wl = {
   state: "idle",        // idle | loading | list | error | unauthorized
   items: [], seq: 0,
+  limit: DEFAULT_LIMIT, // 서버가 알려 준 상한(목록 응답 limit)
   on: { evidence: false, journal: false },
   counts: new Map(),    // corp_code → {total, due} | null(실패). 없으면 조회 중
+  pending: new Set(),   // 개수를 묻는 중인 corp_code(이번 세대). 호출 사이 중복 요청을 막는다
   current: null,        // 지표 화면에서 고른 종목 {symbol, name, exchange?}
   busy: false,          // 별 버튼 요청 중
   editing: null,        // 메모 편집 중 {id, draft}
@@ -169,8 +170,8 @@ function render() {
   const count = $("wl-count");
   if (wl.state === "list") {
     status.textContent = wl.items.length ? "" : MSG.empty;
-    count.textContent = `${wl.items.length} / ${MAX_ITEMS}`;
-    list.replaceChildren(...wl.items.map(rowEl));
+    count.textContent = `${wl.items.length} / ${wl.limit}`;
+    renderRows(list);
   } else {
     status.textContent = wl.state === "loading" ? MSG.loading : wl.state === "error" ? MSG.failed : "";
     count.textContent = "";
@@ -206,6 +207,30 @@ function btn(cls, text) {
 }
 
 /**
+ * 줄들을 다시 그린다. 메모를 편집 중인 줄은 편집 칸 요소를 DOM에서 떼지 않고 나머지만 바꾼다
+ * (떼면 포커스·커서·한글 입력 조합이 끊긴다).
+ * @param {HTMLElement} list 목록 요소
+ * @returns {void}
+ */
+function renderRows(list) {
+  const id = wl.editing?.id;
+  const keep = id ? [...list.children].find(li => li.dataset.id === id && li.querySelector(".wl-note-form")) : null;
+  const at = keep ? wl.items.findIndex(i => i.id === id) : -1;
+  if (at < 0) {
+    list.replaceChildren(...wl.items.map(rowEl));
+    return;
+  }
+  const it = wl.items[at];
+  const form = keep.querySelector(".wl-note-form");
+  for (const c of [...keep.children]) if (c !== form) c.remove();
+  form.before(...rowParts(it));
+  keep.dataset.symbol = it.symbol;
+  for (const c of [...list.children]) if (c !== keep) c.remove();
+  keep.before(...wl.items.slice(0, at).map(rowEl));
+  keep.after(...wl.items.slice(at + 1).map(rowEl));
+}
+
+/**
  * 관심종목 한 줄: 이름 · 심볼 · 시장 · 메모와 연결 버튼, 메모 편집 칸.
  * @param {object} it 관심종목 항목
  * @returns {HTMLLIElement} 줄 요소
@@ -214,6 +239,27 @@ function rowEl(it) {
   const li = el("li", "wl-row");
   li.dataset.id = it.id;
   li.dataset.symbol = it.symbol;
+  li.append(...rowParts(it));
+  if (wl.editing?.id === it.id) {
+    const form = el("div", "wl-note-form");
+    const input = el("input", "wl-note-input input");
+    input.type = "text";
+    input.maxLength = NOTE_MAX;
+    input.setAttribute("aria-label", "메모");
+    input.value = wl.editing.draft;
+    input.addEventListener("input", () => { if (wl.editing) wl.editing.draft = input.value; });
+    form.append(input, btn("wl-note-save", "저장"), btn("wl-note-cancel", "취소"));
+    li.append(form);
+  }
+  return li;
+}
+
+/**
+ * 줄의 편집 칸 밖 부분: 이름·심볼·시장·메모 글자와 연결 버튼.
+ * @param {object} it 관심종목 항목
+ * @returns {HTMLElement[]} [본문, 버튼 묶음]
+ */
+function rowParts(it) {
   const main = el("div", "wl-main");
   main.append(el("span", "wl-name", it.name || it.symbol),
               el("span", "wl-meta", ["", it.symbol, it.market].filter(v => v !== null && v !== undefined).join(" · ")));
@@ -229,19 +275,7 @@ function rowEl(it) {
     if (kind === "journal") links.append(btn("wl-journal", journalLabel(wl.counts.get(it.corp_code))));
   }
   links.append(btn("wl-note-edit", "메모"), btn("wl-delete", "삭제"));
-  li.append(main, links);
-  if (wl.editing?.id === it.id) {
-    const form = el("div", "wl-note-form");
-    const input = el("input", "wl-note-input input");
-    input.type = "text";
-    input.maxLength = NOTE_MAX;
-    input.setAttribute("aria-label", "메모");
-    input.value = wl.editing.draft;
-    input.addEventListener("input", () => { if (wl.editing) wl.editing.draft = input.value; });
-    form.append(input, btn("wl-note-save", "저장"), btn("wl-note-cancel", "취소"));
-    li.append(form);
-  }
-  return li;
+  return [main, links];
 }
 
 /**
@@ -277,7 +311,9 @@ export async function loadWatchlistPanel() {
   if (status === 401) return setState("unauthorized");
   if (status !== 200 || !isListShape(data)) return setState("error");
   wl.items = data.items;
+  wl.limit = limitOf(data);
   wl.counts = new Map();
+  wl.pending = new Set();
   setState("list");
   const [evidence, journal] = await Promise.all([
     evidenceModeAvailable().catch(() => false),
@@ -291,58 +327,81 @@ export async function loadWatchlistPanel() {
 }
 
 /**
- * 조용히 목록만 다시 받는다(이미 있음 409 뒤). 실패하면 지금 목록을 그대로 둔다.
- * @returns {Promise<void>}
+ * 응답의 상한(limit). 없거나 이상하면 기본값.
+ * @param {any} data 목록 응답 또는 409 limit 응답
+ * @returns {number} 상한
  */
-async function reloadQuietly() {
-  const { status, data } = await call("/api/watchlist");
-  if (status === 401) return setState("unauthorized");
-  if (status === 200 && isListShape(data)) {
-    wl.items = data.items;
-    render();
-    await fillCounts(wl.seq);
-  }
+function limitOf(data) {
+  return Number.isInteger(data?.limit) && data.limit > 0 ? data.limit : wl.limit || DEFAULT_LIMIT;
 }
 
 /**
- * 아직 개수를 모르는 corp_code마다 기록 수(total)와 다시 볼 때 된 수(due=true의 total)를 묻는다.
- * 같은 corp_code는 한 번만, 동시 요청은 COUNT_CONCURRENCY개까지. 일지가 꺼져 있으면 묻지 않는다.
+ * 조용히 목록만 다시 받는다(이미 있음 409 뒤). 실패하면 지금 목록을 그대로 둔다.
+ * @returns {Promise<boolean>} 다시 받았으면 true(401이면 unauthorized로 바꾸고 false)
+ */
+async function reloadQuietly() {
+  const { status, data } = await call("/api/watchlist");
+  if (status === 401) {
+    setState("unauthorized");
+    return false;
+  }
+  if (status !== 200 || !isListShape(data)) return false;
+  wl.items = data.items;
+  wl.limit = limitOf(data);
+  render();
+  await fillCounts(wl.seq);
+  return true;
+}
+
+/**
+ * 아직 개수를 모르고 묻는 중도 아닌 corp_code마다 기록 수(total)와 다시 볼 때 된 수(due=true의 total)를 묻는다.
+ * 같은 corp_code는 호출이 겹쳐도 한 번만(wl.pending), 동시 요청은 모든 호출을 합쳐 COUNT_CONCURRENCY개까지.
+ * 일지가 꺼져 있으면 묻지 않는다. 하나라도 401이면 다른 경로처럼 로그인 안 됨으로 바꾼다.
  * @param {number} seq 패널 세대(그사이 다시 열었으면 버린다)
  * @returns {Promise<void>}
  */
 async function fillCounts(seq) {
   if (!wl.on.journal) return;
-  const codes = [...new Set(wl.items.map(i => i.corp_code).filter(Boolean))].filter(c => !wl.counts.has(c));
+  const pending = wl.pending;
+  const codes = [...new Set(wl.items.map(i => i.corp_code).filter(Boolean))]
+    .filter(c => !wl.counts.has(c) && !pending.has(c));
   if (!codes.length) return;
-  const tasks = codes.flatMap(c => [[c, false], [c, true]]);
-  const totals = await mapLimit(tasks, COUNT_CONCURRENCY, async ([code, due]) => {
+  codes.forEach(c => pending.add(c));
+  let unauthorized = false;
+  const ask = (code, due) => countSlot(async () => {
+    if (seq !== wl.seq || unauthorized) return null;  // 기다리는 사이 다시 열었거나 로그인이 풀렸다
     const q = new URLSearchParams({ corp_code: code });
     if (due) q.set("due", "true");
     q.set("limit", "1");
     const { status, data } = await call(`/api/journal?${q}`);
+    if (status === 401) unauthorized = true;
     return status === 200 && Number.isInteger(data?.total) ? data.total : null;
   });
+  const results = await Promise.all(codes.map(c => Promise.all([ask(c, false), ask(c, true)])));
+  codes.forEach(c => pending.delete(c));
   if (seq !== wl.seq) return;
+  if (unauthorized) return setState("unauthorized");
   codes.forEach((code, k) => {
-    const total = totals[2 * k], due = totals[2 * k + 1];
+    const [total, due] = results[k];
     wl.counts.set(code, total === null || due === null ? null : { total, due });
   });
-  render();
+  if (wl.state === "list") render();
 }
 
 // ── 동작 ──────────────────────────────────────────────────────────
 
 /**
- * 메모가 있으면 확인을 받는다(결정 7-3).
+ * 메모가 있거나 메모를 모르면(목록 재조회 실패로 item_id만 아는 줄) 확인을 받는다(결정 7-3).
  * @param {object} it 지울 항목
  * @returns {boolean} 지워도 되면 true
  */
 function confirmRemove(it) {
-  return !it.note || window.confirm(MSG.noteConfirm);
+  return (!it.note && !it.noteUnknown) || window.confirm(MSG.noteConfirm);
 }
 
 /**
- * 지금 고른 종목을 관심종목에 더한다. 409 duplicate는 조용히 ★로, 409 limit은 토스트.
+ * 지금 고른 종목을 관심종목에 더한다. 409 duplicate는 조용히 ★로(목록 재조회가 실패해도 item_id로), 409 limit은
+ * 서버가 알려 준 상한으로 토스트.
  * @returns {Promise<void>}
  */
 async function addCurrent() {
@@ -355,9 +414,17 @@ async function addCurrent() {
     render();
     await fillCounts(wl.seq);
   } else if (status === 409 && data?.code === "duplicate") {
-    await reloadQuietly();
+    const reloaded = await reloadQuietly();
+    if (!reloaded && wl.state === "list" && typeof data.item_id === "string" && !findItem(cur.symbol)) {
+      // 다시 받지 못해도 조용히 ★로(spec 3.2). 줄은 응답의 item_id로 만들고 메모는 모른다고 표시한다
+      wl.items = [...wl.items, { id: data.item_id, symbol: norm(cur.symbol), name: cur.name || cur.symbol,
+                                 corp_code: null, market: null, note: null, noteUnknown: true }];
+      render();
+    }
   } else if (status === 409 && data?.code === "limit") {
-    setToast(MSG.limit, "error");
+    wl.limit = limitOf(data);
+    setToast(MSG.limit(wl.limit), "error");
+    render();
   } else if (status === 401) {
     setState("unauthorized");
   } else {

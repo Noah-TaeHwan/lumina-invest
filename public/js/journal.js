@@ -177,6 +177,7 @@ async function call(path, { method = "GET", body } = {}) {
 const jr = {
   enabled: false, probe: null, evidence: null, wired: false,
   filters: { due: false, corp: "", decision: "" }, companies: new Map(),
+  provisional: null,  // 일지 목록이 아직 모르는 회사(관심종목에서 연 거르기) {code, name}. 거르는 동안만 상자에 보인다
   items: [], total: 0, listSeq: 0,
   detail: null, detailSeq: 0, pendingOpen: null,
 };
@@ -404,9 +405,17 @@ function rowHtml(it) {
   </button></li>`;
 }
 
+/**
+ * 회사 거르기 선택 상자를 그린다. 일지 목록에서 모은 회사에, 지금 거르는 임시 회사(목록이 모르는 회사)를 더한다.
+ * @returns {void}
+ */
 function renderCompanies() {
   const sel = $("jr-f-company");
-  const names = [...jr.companies.entries()].sort((a, b) => (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0));
+  const p = jr.provisional;
+  if (p && (jr.companies.has(p.code) || jr.filters.corp !== p.code)) jr.provisional = null;
+  const entries = [...jr.companies.entries()];
+  if (jr.provisional) entries.push([jr.provisional.code, jr.provisional.name]);
+  const names = entries.sort((a, b) => (a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0));
   sel.innerHTML = `<option value="">전체 회사</option>`
     + names.map(([code, name]) => `<option value="${escHtml(code)}">${escHtml(name)}</option>`).join("");
   sel.value = jr.filters.corp;
@@ -442,7 +451,7 @@ async function loadList({ append = false } = {}) {
   for (const it of data.items) {
     if (it.corp_code && !jr.companies.has(it.corp_code)) { jr.companies.set(it.corp_code, it.company); added = true; }
   }
-  if (added) renderCompanies();
+  if (added || jr.provisional) renderCompanies();
   $("jr-list").innerHTML = jr.items.map(rowHtml).join("");
   empty.textContent = jr.items.length ? "" : (filtered() ? MSG.emptyFiltered : MSG.empty);
   empty.classList.toggle("hidden", jr.items.length > 0);
@@ -736,7 +745,7 @@ function wire() {
   });
   $("jr-more").addEventListener("click", () => loadList({ append: true }));
   $("jr-f-due").addEventListener("change", e => { jr.filters.due = e.target.checked; loadList(); });
-  $("jr-f-company").addEventListener("change", e => { jr.filters.corp = e.target.value; loadList(); });
+  $("jr-f-company").addEventListener("change", e => { jr.filters.corp = e.target.value; renderCompanies(); loadList(); });
   document.querySelector(".jr-f-decision").addEventListener("click", e => {
     const b = e.target.closest("button[data-decision]");
     if (!b) return;
@@ -781,15 +790,17 @@ function openEntry(id) {
 /**
  * 관심종목 줄의 '판단 기록' 버튼에서(모듈 D 결정 7-2 (c)): 일지 탭을 이 회사로 걸러 연다.
  * 버튼 숫자(기록 수·다시 볼 때 된 수)와 목록이 어긋나지 않게 다른 거르기(다시 볼 때·최근 판단)는 푼다.
- * 거르기 선택 상자에 회사가 아직 없으면 넣는다. 기능 확인은 탭이 열릴 때(onJournalViewActivated) 한다.
+ * 거르기 선택 상자에 회사가 아직 없으면 임시로 넣는다: 일지 목록이 그 회사를 알게 되면 목록의 이름으로 바뀌고,
+ * 기록이 없는 회사는 거르기를 바꾸면 상자에서 빠진다(관심종목 이름은 영문일 수 있어 남기지 않는다).
+ * 기능 확인은 탭이 열릴 때(onJournalViewActivated) 한다.
  * @param {string} corpCode DART 고유번호
- * @param {string} company 선택 상자에 보일 회사 이름
+ * @param {string} company 목록이 아직 모를 때 선택 상자에 잠시 보일 회사 이름
  * @returns {void}
  */
 export function openJournalForCompany(corpCode, company) {
   if (!corpCode) return;
   jr.filters = { due: false, corp: corpCode, decision: "" };
-  if (!jr.companies.has(corpCode)) jr.companies.set(corpCode, company || corpCode);
+  jr.provisional = jr.companies.has(corpCode) ? null : { code: corpCode, name: company || corpCode };
   $("jr-f-due").checked = false;
   document.querySelectorAll(".jr-f-decision button").forEach(b =>
     b.setAttribute("aria-pressed", String(b.dataset.decision === "")));
