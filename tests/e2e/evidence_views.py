@@ -175,9 +175,17 @@ class _Quiet(SimpleHTTPRequestHandler):
         pass
 
 
+class _StaticServer(ThreadingHTTPServer):
+    # listen 대기열 기본값(5)은 브라우저가 /js 모듈을 한꺼번에 받을 때 넘칠 수 있다. 넘치면 macOS는 연결을 리셋하고
+    # (ERR_CONNECTION_RESET) 모듈 그래프 전체가 실패해 부트가 안 된다 — 로컬 macOS 20회 중 1회 wait_ready 10초 초과의
+    # 원인(PR #36 state.json 실측). 리눅스도 tcp_abort_on_overflow=1이면 같은 RST가 난다(대기열 1: 300회 중 6회 → 128: 0회)
+    request_queue_size = 128
+    daemon_threads = True  # ThreadingHTTPServer 기본값과 같지만 명시한다: 남은 요청 스레드가 종료를 막지 않게
+
+
 def _serve() -> tuple[ThreadingHTTPServer, str]:
     handler = functools.partial(_Quiet, directory=PUBLIC)
-    srv = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    srv = _StaticServer(("127.0.0.1", 0), handler)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     return srv, f"http://127.0.0.1:{srv.server_address[1]}"
 
