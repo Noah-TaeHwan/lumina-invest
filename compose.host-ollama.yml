@@ -1,0 +1,25 @@
+# compose.portfolio.yml 위에 겹쳐 쓰는 오버라이드: app이 컨테이너 ollama 대신 호스트의 Ollama를 쓴다.
+# macOS의 Docker 컨테이너는 GPU(Metal)를 쓰지 못해 컨테이너 Ollama가 CPU로만 돈다.
+# 사용법·실측 조건은 PORTFOLIO_LOCAL.md "6. 채팅이 느릴 때(macOS)" 참고.
+#
+#   docker compose --env-file .env.portfolio -f compose.portfolio.yml -f compose.host-ollama.yml \
+#     -p lumina-portfolio up -d --build app
+#
+# ollama 서비스 정의는 기본 구성 호환을 위해 그대로 둔다. app의 depends_on에서만 ollama를 뺐으므로
+# 위처럼 app을 지정해 올리면 컨테이너 ollama는 뜨지 않는다(!override는 최근 Compose v2의 병합 태그).
+
+services:
+  app:
+    environment:
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on: !override
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      neo4j:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
