@@ -124,6 +124,11 @@ def _note(v: Optional[str]) -> Optional[str]:
 
 
 def _invalid(errors: list[dict]) -> HTTPException:
+    """칸 이름과 사유만 담은 422.
+
+    @param errors `{"loc", "msg"}` 목록(입력값 없음)
+    @returns 던질 HTTPException
+    """
     return HTTPException(422, detail=errors)
 
 
@@ -195,11 +200,23 @@ def _item(i: WatchlistItem) -> dict:
 
 
 def _duplicate(item_id: uuid.UUID | None) -> JSONResponse:
+    """중복 409(결정 5-3). 화면은 이것을 '이미 있음'으로 받아 별만 채운다.
+
+    @param item_id 이미 있는 항목 id(경쟁으로 다시 못 찾으면 None)
+    @returns 409 응답 `{"detail", "code": "duplicate", "item_id"}`
+    """
     return JSONResponse(status_code=409, content={"detail": "이미 관심종목에 있습니다.", "code": "duplicate",
                                                   "item_id": str(item_id) if item_id else None})
 
 
 async def _existing_id(db: AsyncSession, uid: uuid.UUID, symbol: str) -> uuid.UUID | None:
+    """같은 사용자·심볼 항목의 id.
+
+    @param db DB 세션
+    @param uid 사용자 id
+    @param symbol 정규화한 심볼
+    @returns 있으면 id, 없으면 None
+    """
     return await db.scalar(select(WatchlistItem.id).where(WatchlistItem.user_id == uid,
                                                           WatchlistItem.symbol == symbol))
 
@@ -213,6 +230,11 @@ async def list_items(user=Depends(get_current_user_any), db: AsyncSession = Depe
 
     corp_code가 null인 국내(`NNNNNN.KS/KQ`) 행이 있고 문단 저장소가 연결돼 있으면 적재 회사 목록을 한 번 불러
     맞는 행을 채우고 저장한다(결정 4-3 나중에 채우기). 한 번 채운 값은 지우지 않는다.
+
+    @param user 현재 사용자
+    @param db DB 세션
+    @param companies 문단 저장소의 companies(근거 모드가 꺼져 연결이 없으면 None)
+    @returns `{"items": [항목...], "limit": 100}`
     """
     uid = uuid.UUID(user["id"])
     rows = (await db.execute(select(WatchlistItem).where(WatchlistItem.user_id == uid)
@@ -246,6 +268,12 @@ async def add_item(request: Request, user=Depends(get_current_user_any), db: Asy
 
     중복을 먼저 본다(100개인 사용자가 이미 있는 종목을 다시 눌러도 화면이 '이미 있음'으로 받게).
     국내 심볼이면 적재 회사 목록을 한 번 불러 corp_code를 정한다. 실패해도 null로 추가한다.
+
+    @param request 본문 `{"symbol", "name"?, "exchange"?, "note"?}`(그 밖의 칸은 무시)
+    @param user 현재 사용자
+    @param db DB 세션
+    @param companies 문단 저장소의 companies(없으면 None)
+    @returns 201과 항목, 409 duplicate·limit, 422(loc·msg만)
     """
     body: WatchlistCreate = await _parse(request, WatchlistCreate)  # type: ignore[assignment]
     uid = uuid.UUID(user["id"])
@@ -286,7 +314,14 @@ async def add_item(request: Request, user=Depends(get_current_user_any), db: Asy
 @router.patch("/{item_id}", summary="관심종목 메모 고치기")
 async def update_note(item_id: str, request: Request, user=Depends(get_current_user_any),
                       db: AsyncSession = Depends(get_pg_session)):
-    """메모만 고친다. 빈 문자열·null은 메모 지우기다."""
+    """메모만 고친다. 빈 문자열·null은 메모 지우기다.
+
+    @param item_id 항목 id(내 것이 아니면 404)
+    @param request 본문 `{"note"}`
+    @param user 현재 사용자
+    @param db DB 세션
+    @returns 200과 항목
+    """
     body: WatchlistNote = await _parse(request, WatchlistNote)  # type: ignore[assignment]
     item = await _owned_item(db, item_id, user)
     item.note = body.note
@@ -302,7 +337,13 @@ async def update_note(item_id: str, request: Request, user=Depends(get_current_u
 
 @router.delete("/{item_id}", status_code=204, summary="관심종목 삭제")
 async def delete_item(item_id: str, user=Depends(get_current_user_any), db: AsyncSession = Depends(get_pg_session)):
-    """내 항목 하나를 지운다. 204(본문 없음)."""
+    """내 항목 하나를 지운다.
+
+    @param item_id 항목 id(내 것이 아니면 404)
+    @param user 현재 사용자
+    @param db DB 세션
+    @returns 204(본문 없음)
+    """
     item = await _owned_item(db, item_id, user)
     await db.delete(item)
     await db.commit()
