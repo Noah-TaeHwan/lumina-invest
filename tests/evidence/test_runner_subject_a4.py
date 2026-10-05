@@ -169,3 +169,14 @@ def test_rejudge_into_a4_needs_call():
 def test_a2_and_a3_runs_unaffected_by_a4_fields():
     res = _run(A4Client(), TRUE, policy=rn.A3_SUBJECT)
     assert res.claims[0].status == "supported" and res.claims[0].subject_q is None and res.calls == 1
+
+
+def test_lex_high_followup_failure_ends_unjudged_without_asking_again():
+    """F9(spec 3.3-4): 상단 구간 후속이 실패하면 ❔(subject_unjudged)로 끝내고 주 판정·후속을 다시 하지 않는다."""
+    loose = replace(A4, theta_high=0.8)
+    claim = "커피 부문은 커피와 커피머신 등 상품을 판매하는 사업을 영위합니다."
+    client = A4Client(subj=lambda c, q: "fail")
+    res = _run(client, claim, policy=loose)
+    c = res.claims[0]
+    assert client.kinds() == ["subject"]
+    assert (c.status, c.reason, c.route) == ("no_evidence", sa.SUBJECT_UNJUDGED, "jev")

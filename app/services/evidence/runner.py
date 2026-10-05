@@ -287,8 +287,9 @@ class Runner:
                 if c.idx in pending:
                     best = pending[c.idx]
                     c.status, c.reason = "no_evidence", subject_a4.SUBJECT_UNJUDGED
-                    if await followup(c, [best]) and subject_a4.question_pass(
-                            c.subject_q.get(best), policy.subject_signal, policy.tau_d):
+                    if not await followup(c, [best]):
+                        return  # 후속 실패는 ❔(subject_unjudged)로 끝낸다(spec 3.3-4). 다시 묻지 않는다
+                    if subject_a4.question_pass(c.subject_q.get(best), policy.subject_signal, policy.tau_d):
                         c.status, c.route, c.source_idx, c.reason = "supported", "lex_high", best, None
                         return
                     c.status, c.reason = "unjudged", "deadline"
