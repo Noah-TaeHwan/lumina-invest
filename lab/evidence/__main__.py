@@ -2069,11 +2069,11 @@ def cmd_a4_measure(P: Paths, args) -> None:
     from lab.evidence import a4
 
     _require_draft(P, "a4-measure")
+    rows, n, failed = _a4_explore_rows(P)  # 데이터를 먼저 다 읽는다(빠진 것이 있으면 원장에 아무것도 남기지 않는다)
     design, rest = _a4_halves(P)
     if not any(r.get("event") == "a4-half-split" and r.get("study") == "a4" for r in read_jsonl(P.attempts)):
         log_attempt(P, "a4-half-split", seed=a4.HALF_SEED, design=design, check=rest,
                     design_companies=sum(map(len, design)), check_companies=sum(map(len, rest)))
-    rows, n, failed = _a4_explore_rows(P)
     sets = {k: a4.measure([r for r in rows if r["set"] == k]) for k in ("a2-tune", "a3-design", "a3-check")}
     allm = a4.measure(rows)
     confirm_n = round(len([r for r in rows if r["set"] != "a2-tune"]) * a4.RANDOM_N / 40)  # A-3 판정 대상 × 45/40

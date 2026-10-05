@@ -267,6 +267,12 @@ def test_explore_requires_concluded_a3(tmp_path):
     (A3.ev / "results/a3-check.json").unlink()
     with pytest.raises(SystemExit, match="a3-check.json"):
         cli.cmd_a4_measure(P, A)
+    assert not P.attempts.exists()  # 실패한 실측은 원장에 반분을 남기지 않는다
+    (A3.ev / "results/a3-check.json").write_text("{}")
+    (A3.priv / "corpCode.xml").unlink()
+    with pytest.raises(SystemExit, match="corpCode"):
+        cli.cmd_a4_measure(P, A)
+    assert not P.attempts.exists()
 
 
 # --- 확인 판정·동결·리포트 ------------------------------------------------------------------------------------
