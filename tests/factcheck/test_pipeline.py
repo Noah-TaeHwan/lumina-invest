@@ -1345,3 +1345,46 @@ def test_from_to_previous_quarter_pairing(text, contradicted):
     assert (r.status == "contradicted") is contradicted, (text, r.status, r.reason, r.xbrl)
     if contradicted:
         assert r.reason == "xbrl_mismatch"
+
+
+# ---- #69 검수: 'A에서 B로' 짝은 연결/별도 판단을 같게, B에 자기 기간이 붙으면 비교 기준 규칙을 쓰지 않는다 ----
+
+SS_Q1 = [_fact(SAMSUNG, OP, 6_685_000_000_000, "2025Q1", "2025-01-01", "2025-03-31", "20250515000001"),
+         _fact(SAMSUNG, OP, 1_000_000_000_000, "2025Q1", "2025-01-01", "2025-03-31", "20250515000001", fs="OFS")]
+
+
+def _from_check(text):
+    return _check(SAMSUNG, text, FakeStore(default=[Q2_PASSAGE]), FakeJev({"": ("support", 0)}), SS_FACTS + SS_Q1)
+
+
+def test_from_to_separate_mark_applies_to_both_amounts():
+    # A(1.0조)는 별도 Q1과 맞지만 B(4.7조)는 별도 Q2(1.19조)와 다르다 — 연결 Q2와 맞춰 ✅가 되면 안 된다
+    r = _from_check("2025년 2분기 별도 영업이익은 전 분기 1.0조원에서 4.7조원으로 늘었다.")
+    assert (r.status, r.reason) == ("contradicted", "xbrl_mismatch")
+    assert (r.xbrl["fs_div"], r.xbrl["period"]) == ("OFS", "2025Q2")
+
+
+@pytest.mark.parametrize("text", [
+    "2025년 2분기 연결 영업이익은 전 분기 6.7조원에서 4.7조원으로 줄었다.",
+    "2025년 2분기 영업이익은 전 분기 6.7조원에서 4.7조원으로 줄었다.",
+])
+def test_from_to_consolidated_pair_unchanged(text):
+    r = _from_check(text)
+    assert r.status != "contradicted" and r.xbrl["fs_div"] == "CFS", (r.status, r.reason)
+
+
+def test_from_to_unmarked_separate_pair_is_separate_only():
+    r = _from_check("2025년 2분기 영업이익은 전 분기 1.0조원에서 1.2조원으로 늘었다.")
+    assert (r.status, r.reason) == ("no_evidence", "separate_only")
+
+
+def test_from_to_unmarked_mixed_fs_pair_is_mismatch():
+    # A는 별도, B는 연결과만 맞는 짝: 한 재무제표로 둘 다 맞지 않으면 짝을 섞어 ✅로 만들지 않는다
+    r = _from_check("2025년 2분기 영업이익은 전 분기 1.0조원에서 4.7조원으로 늘었다.")
+    assert r.status == "contradicted"
+
+
+def test_from_to_own_period_on_b_disables_base_rule():
+    r = _from_check("2025년 2분기 연결 영업이익은 전 분기 6.7조원에서 2025년 1분기 4.7조원으로 집계됐다.")
+    assert r.status != "supported"
+    assert (r.status, r.xbrl["period"]) == ("contradicted", "2025Q1")  # main처럼 B를 2025년 1분기와 대조

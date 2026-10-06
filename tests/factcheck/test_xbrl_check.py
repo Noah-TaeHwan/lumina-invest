@@ -431,3 +431,61 @@ def test_base_period(claim, kind, want):
 def test_base_period_yoy_keeps_cumulative():
     got = xbrl_check._base_period(Period(2025, "quarter", 3, cumulative=True), "yoy")
     assert (got.label, got.cumulative) == ("2024Q3", True)
+
+
+# ---- 흔한 낱말 상장사명은 계정 앞말에서도 같은 규칙(법인 표시·선택 회사일 때만 회사 이름 앞말) ----
+
+DAESANG, TAEYANG = "00000401", "00000402"
+CW_IDX = CompanyIndex({SAMSUNG: ["삼성전자"], HYNIX: ["SK하이닉스"], DAESANG: ["대상"], TAEYANG: ["태양"]})
+
+
+@pytest.mark.parametrize("text, corp, n", [
+    ("2025년 2분기 태양 매출액은 3.2조원이다.", SAMSUNG, 0),           # 부문·지역 값: 대조하지 않는다
+    ("삼성전자의 2025년 2분기 대상 매출액은 30.2조원이다.", SAMSUNG, 0),
+    ("2025년 2분기 기업 고객 대상 매출액은 30.2조원이다.", SAMSUNG, 0),
+    ("2025년 2분기 국내 매출액은 30.2조원이다.", SAMSUNG, 0),           # 사전에 없는 낱말: 그대로
+    ("(주)대상의 2025년 2분기 매출액은 30.2조원이다.", SAMSUNG, 1),      # 법인 표시: 회사 이름 앞말
+    ("㈜대상의 매출액은 30.2조원이다.", SAMSUNG, 1),
+    ("주식회사 대상의 매출액은 30.2조원이다.", SAMSUNG, 1),
+    ("대상의 매출액은 30.2조원이다.", DAESANG, 1),                     # 선택 회사
+    ("2025년 2분기 대상 매출액은 30.2조원이다.", DAESANG, 1),
+])
+def test_common_word_name_as_account_modifier(text, corp, n):
+    assert len(xbrl_check.amount_claims(text, CW_IDX, corp)) == n, text
+
+
+@pytest.mark.parametrize("text", [
+    "2025년 2분기 태양 매출액은 3.2조원이다.",
+    "삼성전자의 2025년 2분기 대상 매출액은 30.2조원이다.",
+    "2025년 2분기 기업 고객 대상 매출액은 30.2조원이다.",
+])
+def test_common_word_modifier_not_contradicted(text):
+    rows = [_row("ifrs-full_Revenue", 74_566_317_000_000, period="2025Q2", start="2025-04-01", end="2025-06-30")]
+    r = xbrl_check.check(text, rows, corp_code=SAMSUNG, as_of=AS_OF, names=CW_IDX)
+    assert r.status != "mismatch", text
+
+
+def test_selected_common_word_company_still_compared():
+    rows = [dict(_row("ifrs-full_Revenue", 4_200_000_000_000, period="2025Q2", start="2025-04-01",
+                      end="2025-06-30"), corp_code=DAESANG)]
+    r = xbrl_check.check("대상의 2025년 2분기 매출액은 30.2조원이다.", rows, corp_code=DAESANG, as_of=AS_OF, names=CW_IDX)
+    assert r.status == "mismatch"
+
+
+def test_from_to_own_period_on_b_compares_b_only():
+    r = run(HY_HEAD + "전 분기 37.6조원에서 2026년 1분기 60.5조원으로 늘었다.", HY_ROWS, corp=HYNIX)
+    assert [it.period for it in r.items] == ["2026Q1"] and r.status == "mismatch"
+
+
+def test_from_to_mixed_fs_pair_items():
+    # A는 별도 Q1과만, B는 연결 Q2와만 맞음: 한 재무제표로 둘 다 맞지 않으니 A는 연결 불일치, B는 연결 일치로 남긴다
+    q1 = {"period": "2025Q1", "start": "2025-01-01", "end": "2025-03-31"}
+    q2 = {"period": "2025Q2", "start": "2025-04-01", "end": "2025-06-30"}
+    rows = [_row("dart_OperatingIncomeLoss", 6_685_000_000_000, **q1),
+            _row("dart_OperatingIncomeLoss", 1_000_000_000_000, fs="OFS", **q1),
+            _row("dart_OperatingIncomeLoss", 4_676_057_000_000, **q2),
+            _row("dart_OperatingIncomeLoss", 1_190_832_000_000, fs="OFS", **q2)]
+    r = run("2025년 2분기 영업이익은 전 분기 1.0조원에서 4.7조원으로 늘었다.", rows)
+    assert r.status == "mismatch"
+    assert [(it.status, it.fs_div, it.period) for it in r.items] == [("mismatch", "CFS", "2025Q1"),
+                                                                     ("match", "CFS", "2025Q2")]

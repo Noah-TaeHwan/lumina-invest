@@ -324,6 +324,14 @@ class CompanyIndex:
                 return hit
         return None
 
+    def resolve(self, surface: str, corp_code: str | None = None, marked: bool = False) -> tuple[str, str] | None:
+        """lookup + 흔한 낱말 이름 규칙(COMMON_WORD_COMPANY_NAMES): 그 이름은 법인 표시가 붙었거나(marked —
+        legal_marked로 구한다) 선택 회사(corp_code)일 때만 회사로 본다. 회사 이름을 찾는 곳은 모두 이것을 쓴다."""
+        hit = self.lookup(surface)
+        if hit is None or hit[0] == corp_code or normalize(hit[1]) not in self._common_word:
+            return hit
+        return hit if marked else None
+
     def mentions(self, text: str, corp_code: str | None = None) -> list[tuple[str, str, int, int]]:
         """문장 속 상장사 언급 (corp_code, 사전 이름, 시작, 끝). 연속 토큰 n개(≤3)까지 묶어 긴 이름부터 맞춘다.
         흔한 낱말과 같은 이름은 법인 표시가 붙었거나 선택 회사(corp_code)일 때만 남긴다."""
@@ -331,11 +339,10 @@ class CompanyIndex:
         out, i = [], 0
         while i < len(toks):
             for n in range(min(_NGRAM, len(toks) - i), 0, -1):
-                hit = self.lookup(" ".join(t for t, _, _ in toks[i:i + n]))
+                a, b = toks[i][1], toks[i + n - 1][2]
+                hit = self.resolve(" ".join(t for t, _, _ in toks[i:i + n]), corp_code, legal_marked(text, a, b))
                 if hit:
-                    a, b = toks[i][1], toks[i + n - 1][2]
-                    if hit[0] == corp_code or normalize(hit[1]) not in self._common_word or _legal_marked(text, a, b):
-                        out.append((hit[0], hit[1], a, b))
+                    out.append((hit[0], hit[1], a, b))
                     i += n
                     break
             else:
@@ -343,7 +350,7 @@ class CompanyIndex:
         return out
 
 
-def _legal_marked(text: str, a: int, b: int) -> bool:
+def legal_marked(text: str, a: int, b: int) -> bool:
     """text[a:b]의 이름에 법인 표시('(주)'·'㈜'·'주식회사')가 앞뒤나 안에 붙어 있나."""
     return bool(_MARK_BEFORE.search(text[:a]) or _MARK_AFTER.match(text, b) or _MARK_IN.search(text[a:b]))
 

@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Iterable, Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 
@@ -138,10 +138,12 @@ class XbrlResult:
         return None
 
 
-def _company_wide(text: str, pos: int, names: CompanyIndex | None) -> bool:
+def _company_wide(text: str, pos: int, names: CompanyIndex | None, corp_code: str | None = None) -> bool:
     """계정 앞말이 회사 전체 값을 가리키는가: 앞말 없음, 조사·쉼표로 끝난 앞말, 기간·허용 수식어, 상장사 이름('삼성전자의').
-    그 밖의 명사('HBM', 'DS부문', '메모리의')가 앞에 붙으면 제품·부문 값이다."""
-    words = text[:pos].split()
+    그 밖의 명사('HBM', 'DS부문', '메모리의')가 앞에 붙으면 제품·부문 값이다. 흔한 낱말과 같은 상장사명('고객 대상
+    매출', '태양 매출')은 법인 표시가 붙었거나 선택 회사일 때만 회사 이름 앞말이다(CompanyIndex.resolve)."""
+    head = text[:pos].rstrip()
+    words = head.split()
     if not words:
         return True
     prev = words[-1]
@@ -150,10 +152,13 @@ def _company_wide(text: str, pos: int, names: CompanyIndex | None) -> bool:
     stem = prev[:-1] if prev.endswith("의") and len(prev) > 1 else prev
     if stem in _QUALIFIERS or _PERIOD_TOKEN.search(stem):
         return True
-    return names is not None and names.lookup(stem) is not None
+    if names is None:
+        return False
+    a = len(head) - len(prev)
+    return names.resolve(stem, corp_code, scope.legal_marked(text, a, len(head))) is not None
 
 
-def amount_claims(text: str, names: CompanyIndex | None = None) -> list[AmountClaim]:
+def amount_claims(text: str, names: CompanyIndex | None = None, corp_code: str | None = None) -> list[AmountClaim]:
     """계정 언급마다 그 뒤(다음 계정 언급 전까지)의 금액(이익률이면 퍼센트)을 짝짓는다.
 
     - 금액 없이 이어진 계정 묶음('매출과 영업이익은 333.6조원, 43.6조원')은 묶음 계정 수와 금액 수가 같을 때만 순서대로
@@ -167,7 +172,7 @@ def amount_claims(text: str, names: CompanyIndex | None = None) -> list[AmountCl
     pending: list[re.Match] = []  # 금액 없이 앞에 늘어선 계정(같은 종류끼리만 묶는다)
     for i, m in enumerate(hits):
         kind = m.lastgroup
-        if kind != "margin" and not _company_wide(text, m.start(), names):
+        if kind != "margin" and not _company_wide(text, m.start(), names, corp_code):
             pending = []
             continue
         end = hits[i + 1].start() if i + 1 < len(hits) else len(text)
@@ -402,40 +407,79 @@ def _claim_period(claim: AmountClaim, mentions: list[scope.PeriodMention]) -> Pe
     return mentions[0].period if len(mentions) == 1 else None
 
 
+def _drop_base_with_own_period(claims: list[AmountClaim],
+                               mentions: Sequence[scope.PeriodMention]) -> list[AmountClaim]:
+    """'A에서 B로' 짝인데 A와 B 사이(B 바로 앞 포함)에 기간 표현이 따로 있으면 비교 기준 규칙을 쓰지 않는다:
+    A는 대조하지 않고 B는 지금처럼 금액 앞의 가장 가까운 기간으로."""
+    out: list[AmountClaim] = []
+    skip_next = False
+    for k, c in enumerate(claims):
+        if skip_next:
+            skip_next = False
+            continue
+        nxt = claims[k + 1] if k + 1 < len(claims) else None
+        if c.base_kind and nxt is not None and \
+                any(c.value_end <= m.start < nxt.value_start for m in mentions):
+            out.append(replace(nxt, base_at=None))
+            skip_next = True
+            continue
+        out.append(c)
+    return out
+
+
+def _evaluate_group(group: Sequence[tuple[AmountClaim, Period]], facts: Sequence[Mapping], corp_code: str,
+                    hint: str | None) -> list[XbrlItem | None]:
+    """주장들을 같은 재무제표로 대조한다. 표시가 있으면 그것. 없으면 연결로 모두 맞으면 연결, 아니면 별도로 모두 맞으면
+    별도(separate_only), 그 밖에는 주장마다 연결 일치 → 불일치 → 있는 값 순(짝을 연결·별도로 섞어 맞추지 않는다)."""
+    if hint:
+        return [_evaluate(c, facts, corp_code, p, hint) for c, p in group]
+    cfs = [_evaluate(c, facts, corp_code, p, "CFS") for c, p in group]
+    if all(g and g.status == "match" for g in cfs):
+        return cfs
+    ofs = [_evaluate(c, facts, corp_code, p, "OFS") for c, p in group]
+    if all(g and g.status == "match" for g in ofs):
+        for g in ofs:
+            g.note = _merge_note("separate_only", g.note)
+        return ofs
+    return [c_ if c_ and c_.status == "match" else
+            next((g for g in (c_, o_) if g and g.status == "mismatch"), None) or c_ or o_
+            for c_, o_ in zip(cfs, ofs, strict=True)]
+
+
 def check(text: str, facts: Sequence[Mapping], *, corp_code: str, as_of: Period,
           names: CompanyIndex | None = None, mentions: Sequence[scope.PeriodMention] | None = None) -> XbrlResult:
     """문장 속 계정 금액·영업이익률 주장을 XBRL 행과 대조한다. names는 '삼성전자의 매출'처럼 회사 이름이 앞말일 때 쓴다.
     mentions를 주면(앞 문장 기간 상속 등 scope가 정한 기간) 문장에서 다시 뽑지 않고 그것을 쓴다."""
-    claims = amount_claims(text, names)
+    claims = amount_claims(text, names, corp_code)
     if not claims:
         return XbrlResult("none", [])
     mentions = list(mentions) if mentions is not None else scope.extract_periods(text, as_of)
+    claims = _drop_base_with_own_period(claims, mentions)
     items: list[XbrlItem] = []
     prev_end = 0
-    for c in claims:
+    i = 0
+    while i < len(claims):
+        # 'A에서 B로' 짝(비교 기준 표현)은 같은 계정 언급에서 나왔으니 연결/별도 판단을 함께 한다
+        group = claims[i:i + 2] if claims[i].base_kind and i + 1 < len(claims) else claims[i:i + 1]
+        c = group[0]
         breaks = [b.end() for b in _CLAUSE_BREAK.finditer(text, prev_end, c.pos)]
         start = max([prev_end] + breaks)
-        hint = fs_div_hint(text[start:c.value_end])  # 이 계정 절에 적힌 표시만(다음 절로 번지지 않는다)
-        prev_end = c.value_end
-        period = _claim_period(c, mentions)
-        if period is None:
-            items.append(XbrlItem("unknown", c.account_id, DISPLAY[c.account_id], None, None, None, c.value_text,
-                                  note="no_period", unit="%" if c.account_id == "margin" else "원"))
-            continue
-        if hint:
-            got = _evaluate(c, facts, corp_code, period, hint)
-        else:
-            cfs = _evaluate(c, facts, corp_code, period, "CFS")
-            ofs = None if cfs and cfs.status == "match" else _evaluate(c, facts, corp_code, period, "OFS")
-            if ofs and ofs.status == "match":
-                ofs.note = _merge_note("separate_only", ofs.note)
-                got = ofs
-            else:
-                got = next((g for g in (cfs, ofs) if g and g.status == "mismatch"), None) or cfs or ofs
-        got = got or XbrlItem("unknown", c.account_id, DISPLAY[c.account_id], period.label, hint, None,
-                              c.value_text, note="no_fact", unit="%" if c.account_id == "margin" else "원")
-        got.claim_period = period
-        items.append(got)
+        hint = fs_div_hint(text[start:group[-1].value_end])  # 이 계정 절에 적힌 표시만(다음 절로 번지지 않는다)
+        prev_end = group[-1].value_end
+        periods = [_claim_period(g, mentions) for g in group]
+        known = [(g, p) for g, p in zip(group, periods, strict=True) if p is not None]
+        got = dict(zip([id(g) for g, _ in known], _evaluate_group(known, facts, corp_code, hint), strict=True))
+        for g, period in zip(group, periods, strict=True):
+            unit = "%" if g.account_id == "margin" else "원"
+            if period is None:
+                items.append(XbrlItem("unknown", g.account_id, DISPLAY[g.account_id], None, None, None, g.value_text,
+                                      note="no_period", unit=unit))
+                continue
+            it = got[id(g)] or XbrlItem("unknown", g.account_id, DISPLAY[g.account_id], period.label, hint, None,
+                                        g.value_text, note="no_fact", unit=unit)
+            it.claim_period = period
+            items.append(it)
+        i += len(group)
     st = [it.status for it in items]
     if "mismatch" in st:
         status = "mismatch"
