@@ -5,6 +5,9 @@
   (FACTCHECK_ALLOW_NO_DATA로만 허용). 시작 로그에 facts=·names=·passages=를 남긴다. 상대 경로는 저장소 루트 기준.
 - A4: API 키를 읽을 수 없으면 파이프라인을 켜지 않는다(503 no_api_key).
 - B4: 오래된 예약 복구가 실패하면 한도·익명 키를 공개하지 않는다(503 startup_failed). 복구 기준은 실행 마감 + 여유.
+- T4-B1: 준비가 안 됐으면 일정 간격으로 다시 확인해 회복하면 연다. health는 'Qdrant 연결 실패'와 '문단 0'을 구분한다.
+- T4-B2: 데모 두 회사 각각 XBRL 행·문단이 있어야 준비됨(없는 회사를 health에 표시).
+- T4-B4: 401/403이 이어져 판정 키가 막히면 no_api_key로 닫고, 재시작 전까지 다시 열지 않는다.
 lifespan 대신 prepare()/shutdown()을 직접 부른다(httpx ASGITransport는 lifespan을 돌리지 않는다). DB가 필요하다.
 """
 import asyncio
@@ -22,24 +25,38 @@ from app.services.factcheck import metering
 from app.services.factcheck import quota as fq
 from tests.factcheck.conftest import load_facts
 
-SAMSUNG = "00126380"
+SAMSUNG, HYNIX = "00126380", "00164779"
 ORIGIN = {"origin": "http://t"}
 
 
+def _corp_of(count_filter):
+    """qdrant Filter(must=[FieldCondition(key='corp_code', match=MatchValue(value=…))])에서 corp_code."""
+    for cond in getattr(count_filter, "must", None) or []:
+        if getattr(cond, "key", None) == "corp_code":
+            return cond.match.value
+    return None
+
+
 class Store:
-    """T1 FactcheckStore 모양의 가짜: exists·client.count·search·latest_period·aclose."""
+    """T1 FactcheckStore 모양의 가짜: exists·client.count(corp_code 필터)·search·latest_period·aclose.
+    by_corp: 회사별 문단 수. fail_exists: exists()가 앞의 n번 연결 오류를 낸다(일시 장애)."""
 
     collection = "factcheck_passages"
 
-    def __init__(self, passages=5, exists=True):
-        self.n, self._exists, self.closed = passages, exists, False
+    def __init__(self, passages=5, exists=True, by_corp=None, fail_exists=0):
+        self.by_corp = by_corp if by_corp is not None else {SAMSUNG: passages, HYNIX: passages}
+        self._exists, self.closed, self.fail_exists = exists, False, fail_exists
 
-        async def count(collection, exact=True):
-            return SimpleNamespace(count=self.n)
+        async def count(collection, exact=True, count_filter=None):
+            corp = _corp_of(count_filter)
+            return SimpleNamespace(count=self.by_corp.get(corp, 0) if corp else sum(self.by_corp.values()))
 
         self.client = SimpleNamespace(count=count)
 
     async def exists(self):
+        if self.fail_exists > 0:
+            self.fail_exists -= 1
+            raise ConnectionError("qdrant down")
         return self._exists
 
     async def search(self, corp_code, query, k=8, *, periods=None, report_types=None):
@@ -52,13 +69,17 @@ class Store:
         self.closed = True
 
 
-def data_dir(tmp_path, *, facts=3, names=1):
+NAMES = [{"corp_code": SAMSUNG, "corp_name": "삼성전자", "stock_code": "005930", "norm": "삼성전자"},
+         {"corp_code": HYNIX, "corp_name": "SK하이닉스", "stock_code": "000660", "norm": "SK하이닉스"}]
+
+
+def data_dir(tmp_path, *, facts=3, names=2, corps=("samsung", "skhynix")):
+    """회사마다 XBRL 행 facts개(T1 고정 자료)와 상장사명 names개."""
     d = tmp_path / "data"
-    d.mkdir()
-    (d / "xbrl_facts.json").write_text(json.dumps(load_facts()[:facts], ensure_ascii=False))
-    (d / "corp_names.json").write_text(json.dumps([{"corp_code": SAMSUNG, "corp_name": "삼성전자",
-                                                    "stock_code": "005930", "norm": "삼성전자"}][:names],
-                                                  ensure_ascii=False))
+    d.mkdir(parents=True)
+    rows = [r for c in corps for r in load_facts(c)[:facts]]
+    (d / "xbrl_facts.json").write_text(json.dumps(rows, ensure_ascii=False))
+    (d / "corp_names.json").write_text(json.dumps(NAMES[:names], ensure_ascii=False))
     return d
 
 
@@ -72,8 +93,8 @@ def boot(fc_pg, monkeypatch):
     def no_network(request):
         raise AssertionError("테스트에서 외부 JEV 호출이 나갔다")
 
-    monkeypatch.setattr(fm_main, "make_jev",
-                        lambda: metering.service_client(api_key="k", transport=httpx.MockTransport(no_network)))
+    monkeypatch.setattr(fm_main, "make_jev", lambda on_auth_block=None, on_auth_unblock=None: metering.service_client(
+        api_key="k", transport=httpx.MockTransport(no_network), on_auth_block=on_auth_block, on_auth_unblock=on_auth_unblock))
 
     def go(*, store=None, **kw):
         monkeypatch.setattr(fm_main, "make_store", lambda: store or Store())
@@ -99,10 +120,13 @@ def test_ready_with_data_key_and_recovery(boot, tmp_path, capsys):
     ready, health, post, pipeline = boot(data_dir=data_dir(tmp_path))
     assert ready.ready and ready.code is None
     assert health.status_code == 200 and health.json()["status"] == "ok"
-    assert health.json()["checks"]["data"] == {"facts": 3, "names": 1, "passages": 5}
+    data = health.json()["checks"]["data"]
+    assert (data["facts"], data["names"], data["passages"], data["qdrant"]) == (6, 2, 10, "ok")
+    assert data["by_corp"] == {SAMSUNG: {"facts": 3, "passages": 5}, HYNIX: {"facts": 3, "passages": 5}}
+    assert data["missing"] == []
     assert isinstance(pipeline.jev, metering.MeteredJev)  # 실제 조립: MeteredJev(ServiceJevClient)
     assert post.status_code == 202
-    assert "facts=3 names=1 passages=5" in capsys.readouterr().out
+    assert "facts=6 names=2 passages=10" in capsys.readouterr().out
 
 
 @pytest.mark.parametrize("case", ["missing_dir", "empty_facts", "no_passages", "no_collection"])
@@ -124,6 +148,7 @@ def test_allow_no_data_flag_is_the_only_way_to_run_without_data(boot, tmp_path):
     ready, health, post, pipeline = boot(data_dir=tmp_path / "missing", allow_no_data=True)
     assert ready.ready and health.status_code == 200 and post.status_code == 202
     assert pipeline.names.display(SAMSUNG) == "삼성전자"  # 사전이 없으면 데모 두 종목 이름으로
+    assert pipeline.names.display(HYNIX) == "SK하이닉스"
     assert health.json()["checks"]["allow_no_data"] is True
 
 
@@ -186,3 +211,150 @@ def test_real_make_jev_is_audited_service_client():
         assert metering._on_request in hooks["request"] and metering._on_response in hooks["response"]
     finally:
         asyncio.run(mj.inner.aclose())
+
+
+
+# ── T4-B2: 회사별 데이터 검사 ───────────────────────────────────────────────
+
+@pytest.mark.parametrize("case,missing", [
+    ("hynix_facts", [HYNIX]),  # SK하이닉스 XBRL 행이 없다
+    ("hynix_passages", [HYNIX]),  # SK하이닉스 문단이 없다
+    ("samsung_both", [SAMSUNG]),
+])
+def test_one_company_without_data_is_not_ready_and_named(boot, tmp_path, case, missing):
+    store, d = Store(), None
+    if case == "hynix_facts":
+        d = data_dir(tmp_path, corps=("samsung",))
+    elif case == "hynix_passages":
+        d, store = data_dir(tmp_path), Store(by_corp={SAMSUNG: 7, HYNIX: 0})
+    else:
+        d, store = data_dir(tmp_path, corps=("skhynix",)), Store(by_corp={SAMSUNG: 0, HYNIX: 4})
+    ready, health, post, _ = boot(data_dir=d, store=store)
+    assert not ready.ready and ready.code == "data_unavailable"
+    assert health.status_code == 503 and health.json()["checks"]["data"]["missing"] == missing
+    assert post.status_code == 503
+
+
+# ── T4-B1: 준비 안 됨 → 주기적으로 다시 확인 ───────────────────────────────
+
+def test_health_distinguishes_qdrant_down_from_empty_collection(boot, tmp_path):
+    _, down, _, _ = boot(data_dir=data_dir(tmp_path), store=Store(fail_exists=10 ** 6))
+    assert down.json()["checks"]["data"]["qdrant"] == "unreachable"
+    _, empty, _, _ = boot(data_dir=data_dir(tmp_path / "b"), store=Store(exists=False))
+    assert empty.json()["checks"]["data"]["qdrant"] == "no_collection"
+    _, zero, _, _ = boot(data_dir=data_dir(tmp_path / "c"), store=Store(passages=0))
+    assert zero.json()["checks"]["data"]["qdrant"] == "ok" and zero.json()["checks"]["data"]["passages"] == 0
+
+
+def test_not_ready_rechecks_and_opens_after_transient_failure(fc_pg, monkeypatch, tmp_path):
+    """시작 때 Qdrant가 잠깐 안 되면 503이지만, 다시 확인해 회복하면 연다(재시작 불필요)."""
+    monkeypatch.setattr(settings, "DATABASE_URL", fc_pg)
+    monkeypatch.setattr(settings, "RUN_MIGRATIONS_ON_STARTUP", False)
+    monkeypatch.setattr(fm_main, "load_api_key", lambda: "test-key")
+    monkeypatch.setattr(fm_main, "make_jev", lambda on_auth_block=None, on_auth_unblock=None: metering.service_client(
+        api_key="k", transport=httpx.MockTransport(lambda r: httpx.Response(500)), on_auth_block=on_auth_block, on_auth_unblock=on_auth_unblock))
+    store = Store(fail_exists=1)
+    monkeypatch.setattr(fm_main, "make_store", lambda: store)
+    d = data_dir(tmp_path)
+
+    async def run():
+        first = await fm_main.prepare(data_dir=d, recheck_s=0.05)
+        try:
+            transport = httpx.ASGITransport(app=fm_main.app)
+            async with httpx.AsyncClient(transport=transport, base_url="http://t", headers=ORIGIN) as c:
+                h1 = await c.get("/api/health")
+                for _ in range(100):
+                    h2 = await c.get("/api/health")
+                    if h2.status_code == 200:
+                        break
+                    await asyncio.sleep(0.05)
+                post = await c.post("/api/factcheck", json={"corp_code": SAMSUNG, "source": "my_draft",
+                                                            "text": "2025년 매출은 300조원이다."})
+            return first, h1, h2, post, factcheck._not_ready
+        finally:
+            await fm_main.shutdown()
+
+    first, h1, h2, post, not_ready = asyncio.run(run())
+    assert not first.ready and h1.status_code == 503 and h1.json()["checks"]["data"]["qdrant"] == "unreachable"
+    assert h2.status_code == 200 and not_ready is None and post.status_code == 202
+    assert fm_main._recheck_task is None  # 종료하면 재확인 작업도 멈춘다
+
+
+# ── T4-B4: 401이 이어지면 닫고, 시험 호출로 다시 연다 ─────────────────────
+
+def _auth_boot(monkeypatch, fc_pg, tmp_path, responses):
+    """판정 응답 순서(responses, 끝 값 반복)를 정한 MockTransport로 준비시킨다."""
+    seq = list(responses)
+
+    def handler(request):
+        status = seq.pop(0) if len(seq) > 1 else seq[0]
+        if status == 200:
+            return httpx.Response(200, json={"model": "jev-1.13.0", "usage": {"input_tokens": 321, "output_tokens": 1},
+                                             "answers": {"p1": {"type": "choice", "probabilities": {
+                                                 "supports": 0.1, "contradicts": 0.1, "says_nothing": 0.8}}}})
+        return httpx.Response(status)
+
+    monkeypatch.setattr(settings, "DATABASE_URL", fc_pg)
+    monkeypatch.setattr(settings, "RUN_MIGRATIONS_ON_STARTUP", False)
+    monkeypatch.setattr(fm_main, "load_api_key", lambda: "test-key")
+    monkeypatch.setattr(fm_main, "make_jev", lambda on_auth_block=None, on_auth_unblock=None: metering.service_client(
+        api_key="k", transport=httpx.MockTransport(handler), on_auth_block=on_auth_block,
+        on_auth_unblock=on_auth_unblock))
+    monkeypatch.setattr(fm_main, "make_store", lambda: Store())
+    return data_dir(tmp_path)
+
+
+async def _health(path="/api/health"):
+    transport = httpx.ASGITransport(app=fm_main.app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://t", headers=ORIGIN) as c:
+        return await c.get(path)
+
+
+def test_auth_block_closes_and_failed_probe_keeps_it_closed(fc_pg, monkeypatch, tmp_path):
+    d = _auth_boot(monkeypatch, fc_pg, tmp_path, [401])
+
+    async def run():
+        ready = await fm_main.prepare(data_dir=d, recheck_s=0.05, auth_probe_s=0.05)
+        try:
+            factcheck._pipeline.jev.blocked = True
+            fm_main._on_auth_block()  # 차단기가 열린 것과 같다
+            await asyncio.sleep(0.4)  # 시험 호출이 여러 번 돌아도 401이면 닫힌 채
+            health = await _health()
+            return ready, health, factcheck._quota
+        finally:
+            await fm_main.shutdown()
+
+    ready, health, quota = asyncio.run(run())
+    assert ready.ready
+    assert health.status_code == 503 and health.json()["code"] == "no_api_key"
+    assert health.json()["checks"]["api_key_rejected"] is True
+    assert quota is not None  # 한도·익명 키는 그대로(키만 막는다)
+
+
+def test_auth_probe_success_reopens_and_is_settled_in_quota(fc_pg, monkeypatch, tmp_path):
+    """차단 뒤 일정 간격으로 가벼운 시험 호출 1회(한도 예약·정산 안에서). 성공하면 다시 연다."""
+    d = _auth_boot(monkeypatch, fc_pg, tmp_path, [200])
+
+    async def run():
+        await fm_main.prepare(data_dir=d, recheck_s=0.05, auth_probe_s=0.05)
+        try:
+            factcheck._pipeline.jev.blocked = True
+            fm_main._on_auth_block()
+            closed = await _health()
+            for _ in range(100):
+                opened = await _health()
+                if opened.status_code == 200:
+                    break
+                await asyncio.sleep(0.05)
+            async with factcheck._quota._factory() as db:
+                from sqlalchemy import text as sql
+                rows = (await db.execute(sql("SELECT key, est, actual, settled_at IS NOT NULL FROM "
+                                             "factcheck_reservations WHERE count_run = false"))).all()
+            return closed, opened, [tuple(r) for r in rows], factcheck._not_ready
+        finally:
+            await fm_main.shutdown()
+
+    closed, opened, rows, not_ready = asyncio.run(run())
+    assert closed.status_code == 503 and opened.status_code == 200 and not_ready is None
+    assert opened.json()["checks"]["api_key_rejected"] is False
+    assert rows and rows[0][0] == "auth-probe" and rows[0][2] == 321 and rows[0][3] is True

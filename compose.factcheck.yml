@@ -1,0 +1,157 @@
+# 공시 팩트체커 배포(T4, 설계 docs/designs/2026-10-06-disclosure-factchecker.md D10·Outside Voice #6).
+# 단일 서버(GPU 없음) Docker Compose: Caddy(HTTPS) → app(app.factcheck_main) → PostgreSQL·Qdrant·Ollama(CPU, 임베딩만).
+#
+#   cp .env.factcheck.example .env.factcheck   # 실값을 채운다(.env.factcheck는 git이 무시한다)
+#   docker compose -f compose.factcheck.yml --env-file .env.factcheck up -d
+#
+# - 밖에 여는 포트는 Caddy 80/443뿐이다. PostgreSQL·Qdrant·Ollama·앱 포트는 열지 않는다.
+# - 앱은 uvicorn 워커 1개만 쓴다: 검수 job이 프로세스 메모리에 있어(jobs.py) 워커가 둘 이상이면 폴링이 다른 워커로 가
+#   404가 난다. 늘리려면 job 저장소를 공유 저장소로 옮겨야 한다.
+# - uvicorn의 프록시 헤더 처리는 끈다(--no-proxy-headers, uvicorn 기본은 켜짐·127.0.0.1만 신뢰): 접속 상대
+#   (request.client)가 Caddy로 남아야 앱의 신뢰 프록시 검사(TRUST_PROXY + FACTCHECK_TRUSTED_PROXIES = Caddy 고정 주소)가
+#   X-Forwarded-For를 한 번만 읽는다. Caddy 2.7+는 들어온 X-Forwarded-For를 믿지 않고 실제 접속 주소로 다시 쓴다.
+#   Caddy 주소(172.30.1.10)와 FACTCHECK_TRUSTED_PROXIES는 함께 바꾼다 — 한쪽만 바뀌면 모든 사용자가 한 익명 키로 묶인다.
+# - 판정 API 키는 파일(호스트 권한 0600)로 읽기 전용 마운트한다. 키 값은 환경변수·이미지·Git에 넣지 않는다.
+# - 데이터(xbrl_facts.json·corp_names.json)는 읽기 전용 마운트, 문단은 Qdrant 스냅샷으로 복원한다(docs/deploy/factcheck.md).
+# - 앱 healthcheck는 /api/health(준비 안 되면 503)다. Caddy는 앱 healthy를 기다리지 않는다 — 준비 안 됨일 때도 health
+#   페이지를 밖에서 볼 수 있어야 하고, 앱이 30초마다 다시 확인해 회복하면 스스로 연다.
+name: lumina-factcheck
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["uvicorn", "app.factcheck_main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1",
+              "--no-proxy-headers"]
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-factcheck}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.factcheck}@postgres:5432/${POSTGRES_DB:-factcheck}
+      QDRANT_URL: http://qdrant:6333
+      OLLAMA_BASE_URL: http://ollama:11434
+      EMBED_MODEL: ${OLLAMA_EMBED_MODEL:?Set OLLAMA_EMBED_MODEL (the embedding model tag used for loading) in .env.factcheck}
+      RUN_MIGRATIONS_ON_STARTUP: "true"
+      COOKIE_SECURE: "true"
+      TRUST_PROXY: "true"
+      FACTCHECK_TRUSTED_PROXIES: 172.30.1.10/32
+      FACTCHECK_ALLOWED_ORIGINS: https://${FACTCHECK_DOMAIN:?Set FACTCHECK_DOMAIN in .env.factcheck}
+      FACTCHECK_DATA_DIR: /data/factcheck
+      FACTCHECK_DAILY_ANON_RUNS: ${FACTCHECK_DAILY_ANON_RUNS:-3}
+      FACTCHECK_DAILY_KEY_TOKENS: ${FACTCHECK_DAILY_KEY_TOKENS:-2500000}
+      FACTCHECK_DAILY_GLOBAL_TOKENS: ${FACTCHECK_DAILY_GLOBAL_TOKENS:-10000000}  # 1천만 토큰/일(2026-10-06 노아 결정)
+      AWS_EC2_METADATA_DISABLED: "true"
+    volumes:
+      - ${TYPESAFE_KEY_FILE:?Set TYPESAFE_KEY_FILE to the host path of the TypeSafe JEV key file (mode 0600)}:/root/.config/typesafe/api_key:ro
+      - ${FACTCHECK_DATA_HOST_DIR:?Set FACTCHECK_DATA_HOST_DIR to the host folder with xbrl_facts.json and corp_names.json}:/data/factcheck:ro
+    networks:
+      - edge
+      - backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3).close()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-factcheck}
+      POSTGRES_USER: ${POSTGRES_USER:-factcheck}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.factcheck}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  qdrant:
+    image: qdrant/qdrant:v1.13.4  # 로컬 적재(compose.portfolio.yml)와 같은 버전 — 스냅샷 호환
+    restart: unless-stopped
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - backend
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          bash -ec 'exec 3<>/dev/tcp/127.0.0.1/6333;
+          printf "GET /healthz HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" >&3;
+          read -r status <&3;
+          [[ "$$status" == *" 200 "* ]]'
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  ollama:
+    # 이미지·모델 태그를 고정한다(적재 때와 같은 임베딩이어야 검색이 맞는다). 값은 로컬에서 확인해 .env.factcheck에 적는다
+    image: ollama/ollama:${OLLAMA_TAG:?Set OLLAMA_TAG (ollama/ollama image tag verified locally) in .env.factcheck}
+    restart: unless-stopped
+    environment:
+      OLLAMA_EMBED_MODEL: ${OLLAMA_EMBED_MODEL:?Set OLLAMA_EMBED_MODEL in .env.factcheck}
+    # CPU로 임베딩 모델만 쓴다. 시작할 때 받아 둔다(이미 있으면 바로 끝난다)
+    entrypoint: ["/bin/sh", "-c", "ollama serve & pid=$$!; sleep 5; ollama pull \"$${OLLAMA_EMBED_MODEL}\"; wait $$pid"]
+    volumes:
+      - ollama_models:/root/.ollama
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "ollama show \"$${OLLAMA_EMBED_MODEL}\" >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 600s
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      FACTCHECK_DOMAIN: ${FACTCHECK_DOMAIN:?Set FACTCHECK_DOMAIN in .env.factcheck}
+      ACME_EMAIL: ${ACME_EMAIL:?Set ACME_EMAIL in .env.factcheck}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/factcheck/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      edge:
+        ipv4_address: 172.30.1.10  # 앱이 이 주소만 신뢰 프록시로 본다(FACTCHECK_TRUSTED_PROXIES)
+    depends_on:
+      app:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:2019/config/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  edge:
+    # 서브넷이 서버의 다른 네트워크와 겹치면 subnet·ip_range·Caddy ipv4_address·FACTCHECK_TRUSTED_PROXIES를 함께 바꾼다
+    ipam:
+      config:
+        - subnet: 172.30.1.0/24
+          ip_range: 172.30.1.128/25  # 동적 할당은 .128~ — Caddy 고정 주소(.10)와 겹치지 않는다
+  backend: {}
+
+volumes:
+  postgres_data:
+  qdrant_data:
+  ollama_models:
+  caddy_data:
+  caddy_config:

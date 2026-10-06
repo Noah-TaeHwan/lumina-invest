@@ -1,0 +1,16 @@
+# 공시 팩트체커 HTTPS 앞단(compose.factcheck.yml). 도메인의 공개 DNS가 이 서버를 가리키고 80/443이 열려 있어야
+# 인증서가 자동 발급된다. 들어온 X-Forwarded-For는 믿지 않고(trusted_proxies 없음) 실제 접속 주소로 다시 써서 앱에 넘긴다.
+{
+	email {$ACME_EMAIL}
+}
+
+{$FACTCHECK_DOMAIN} {
+	encode gzip
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		-Server
+	}
+	reverse_proxy app:8000
+}

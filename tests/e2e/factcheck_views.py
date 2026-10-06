@@ -259,6 +259,11 @@ async def s_quota(browser, base, ck):
     await page.wait_for_function("document.getElementById('fc-error').innerText.startsWith('오늘 검수 한도')")
     ck.ok(await page.inner_text("#fc-error") == glob, "quota: 전체 한도 안내")
     ck.ok(await page.is_hidden("#fc-result"), "quota: 결과 영역은 열리지 않는다")
+    soon = "지금 다른 검수가 진행 중이라 잠시 자리가 없습니다. 잠시 뒤(1~3분) 다시 시도해 주세요."
+    fake.post = (429, {"detail": {"code": "cap_global_busy", "message": soon}})
+    await page.click("#fc-submit")
+    await page.wait_for_function("document.getElementById('fc-error').innerText.startsWith('지금 다른 검수가')")
+    ck.ok(await page.inner_text("#fc-error") == soon, "quota: 예약 경합은 '잠시 뒤' 안내(오늘 한도 소진과 구분)")
     busy = "지금 검수 요청이 많습니다. 잠시 뒤 다시 시도해 주세요."
     fake.post = (503, {"detail": {"code": "busy", "message": busy}})
     await page.click("#fc-submit")

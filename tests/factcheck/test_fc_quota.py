@@ -147,7 +147,7 @@ def test_key_token_cap_refuses_before_run_count(fc_pg):
         await engine.dispose()
         return ei.value
 
-    assert asyncio.run(go()).code == "cap_key_tokens"
+    assert asyncio.run(go()).code == "cap_key_busy"  # used 0: 진행 중 예약(6,000)이 풀리면 들어간다(T4-B3)
     rows = asyncio.run(_rows(fc_pg))
     assert rows["k1"][1:] == (1, 0, 6_000)
     assert rows["global"][1:] == (1, 0, 6_000)
@@ -163,7 +163,7 @@ def test_global_cap_refusal_rolls_back_key_reservation(fc_pg):
         await engine.dispose()
         return ei.value
 
-    assert asyncio.run(go()).code == "cap_global"
+    assert asyncio.run(go()).code == "cap_global_busy"  # used 0: 다른 검수 예약 때문(T4-B3)
     rows = asyncio.run(_rows(fc_pg))
     assert "k2" not in rows  # 키 행 생성·예약·회수가 모두 롤백됐다
     assert rows["global"][1:] == (1, 0, 8_000)
@@ -204,7 +204,7 @@ def test_concurrent_reservations_cannot_share_the_same_remainder(fc_pg):
         ok = [r for r in pair if isinstance(r, fq.Reservation)]
         refused = [r for r in pair if isinstance(r, fq.QuotaExceeded)]
         assert len(ok) == 1 and len(refused) == 1, pair
-        assert refused[0].code == "cap_global"
+        assert refused[0].code == "cap_global_busy"  # 같은 잔여량을 다른 예약이 먼저 잡았다(T4-B3)
 
 
 def test_concurrent_same_key_reservations_respect_run_count(fc_pg):
@@ -431,3 +431,74 @@ def test_settle_updates_key_then_global_separately(fc_pg):
     src = inspect.getsource(fq.FactcheckQuota._settle_in)
     assert "_SETTLE_KEY" in src and "_SETTLE_GLOBAL" in src
     assert src.index("_SETTLE_KEY") < src.index("_SETTLE_GLOBAL")
+
+
+# ── T4-B5: 오래된 예약 복구는 행마다 따로 ───────────────────────────────────
+
+def test_settle_stale_isolates_failing_row(fc_pg, caplog):
+    import logging
+
+    caplog.set_level(logging.ERROR)
+
+    async def go():
+        engine, factory = _factory(fc_pg)
+        q = _quota(factory)
+        bad = await q.reserve("bad", 1_000)
+        good = await q.reserve("good", 2_000)
+        async with engine.begin() as conn:
+            await conn.execute(text("UPDATE factcheck_reservations SET created_at = now() - interval '1 hour'"))
+            await conn.execute(text("DELETE FROM factcheck_quota WHERE key = 'bad'"))  # 이 행은 SettleMismatch
+        n = await q.settle_stale(older_than_s=60)
+        await engine.dispose()
+        return n, bad, good
+
+    n, bad, good = asyncio.run(go())
+    assert n == 1  # 한 행 실패가 나머지 복구를 막지 않는다
+    rows = asyncio.run(_q(fc_pg, "SELECT id, settled_at IS NOT NULL FROM factcheck_reservations"))
+    assert dict(rows) == {bad.id: False, good.id: True}
+    assert "factcheck_stale_settle_failed" in caplog.text and bad.id in caplog.text
+
+
+# ── T4-B3: 다른 검수의 예약 때문에 잠시 부족 vs 오늘 한도 소진 ──────────────
+
+def test_global_shortfall_from_others_reservations_is_busy_not_exhausted(fc_pg):
+    async def go():
+        engine, factory = _factory(fc_pg)
+        q = _quota(factory, global_tokens=10_000)
+        a = await q.reserve("a", 6_000)
+        with pytest.raises(fq.QuotaExceeded) as busy:
+            await q.reserve("b", 6_000)  # 6,000 예약이 풀리면 들어간다(used 0)
+        await q.settle(a, 6_000)  # 실제로 다 썼다
+        with pytest.raises(fq.QuotaExceeded) as gone:
+            await q.reserve("b", 6_000)  # 이제 오늘 남은 양이 모자란다
+        await engine.dispose()
+        return busy.value.code, gone.value.code
+
+    assert asyncio.run(go()) == ("cap_global_busy", "cap_global")
+
+
+def test_key_shortfall_from_own_running_reservation_is_busy(fc_pg):
+    async def go():
+        engine, factory = _factory(fc_pg)
+        q = _quota(factory, key_tokens=10_000)
+        await q.reserve("k1", 6_000)
+        with pytest.raises(fq.QuotaExceeded) as busy:
+            await q.reserve("k1", 6_000, count_run=False)
+        await engine.dispose()
+        return busy.value.code
+
+    assert asyncio.run(go()) == "cap_key_busy"
+
+
+def test_key_tokens_exhausted_after_settled_use_is_not_busy(fc_pg):
+    """오늘 실제로 쓴 양(used)만으로 키 상한을 넘으면 '잠시 뒤'가 아니라 소진(cap_key_tokens)이다(#64 검수 2)."""
+    async def go():
+        engine, factory = _factory(fc_pg)
+        q = _quota(factory, key_tokens=10_000)
+        await q.settle(await q.reserve("k1", 6_000), 6_000)
+        with pytest.raises(fq.QuotaExceeded) as ei:
+            await q.reserve("k1", 6_000)
+        await engine.dispose()
+        return ei.value.code
+
+    assert asyncio.run(go()) == "cap_key_tokens"
