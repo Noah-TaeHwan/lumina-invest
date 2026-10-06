@@ -86,7 +86,9 @@ def test_mismatch_reports_disclosed_value(facts):
     r = run("2026년 2분기 매출은 172조원이다.", facts)
     it = r.items[0]
     assert (it.account_nm, it.period, it.fs_div, it.amount) == ("매출액", "2026Q2", "CFS", 171499470000000)
-    assert r.primary() == {"account_nm": "매출액", "period": "2026Q2", "fs_div": "CFS", "amount": 171499470000000}
+    assert r.primary() == {"account_nm": "매출액", "period": "2026Q2", "fs_div": "CFS", "amount": 171499470000000,
+                           "unit": "원", "rcept_no": "20260814003699", "cumulative": False, "is_correction": False,
+                           "column": "thstrm_amount", "note": None}
 
 
 def test_multiple_amounts_and_partial(facts):
@@ -140,3 +142,82 @@ def test_dates_compact_format_accepted():
     row = _fact(171_499_470_000_000, "x", "20260814", report_type="half")
     row.update(period_start="20260401", period_end="20260630", amount="171499470000000")
     assert run("2026년 2분기 매출은 171.5조원이다.", [row]).status == "match"
+
+
+# ---- 리뷰 반영(A3·A5·B5·C2·Codex9) ----
+
+@pytest.mark.parametrize("text, status", [
+    ("2025년 매출은 300.9조원에서 333.6조원으로 늘었다.", "match"),   # 'X에서 Y로': 뒤 금액이 주장 기간 값
+    ("2025년 매출은 333.6조원에서 300조원으로 줄었다.", "mismatch"),
+    ("2025년과 2024년 매출은 각각 333.6조원, 300.9조원이다.", "match"),  # '각각': 기간 순서대로
+    ("2025년과 2024년 매출은 각각 333.6조원, 250조원이다.", "mismatch"),
+    ("2025년 3분기 매출은 86.1조원, 전년 동기 매출은 79.1조원이다.", "match"),  # 전년 동기 = 2024Q3
+    ("2025년 3분기 매출은 86.1조원, 전년 동기 매출은 70조원이다.", "mismatch"),
+    ("2025년 매출은 238조원으로 연결 대상 회사가 늘었다.", "match"),  # '연결'은 계정 절 밖(별도로만 일치)
+])
+def test_review_amount_structures(text, status, facts):
+    assert run(text, facts).status == status
+
+
+def test_fs_hint_is_per_clause(facts):
+    r = run("연결 자회사가 늘었지만 2025년 별도 매출은 238조원이다.", facts)
+    assert (r.status, r.items[0].fs_div, r.items[0].note) == ("match", "OFS", None)
+    r = run("2025년 연결 매출은 333.6조원, 별도 매출은 238조원이다.", facts)
+    assert [(i.status, i.fs_div, i.note) for i in r.items] == [("match", "CFS", None), ("match", "OFS", None)]
+
+
+def _row(account_id, amount, *, period="2025", start="2025-01-01", end="2025-12-31", rcept_no="r1",
+         rcept_dt="20260310", column="thstrm_amount", report_type="periodic", correction=False, fs="CFS"):
+    return {"corp_code": SAMSUNG, "period": period, "fs_div": fs, "account_id": account_id, "account_nm": "x",
+            "amount": amount, "rcept_no": rcept_no, "period_start": start, "period_end": end,
+            "value_kind": "duration", "cumulative": True, "currency": "KRW", "unit": "원", "rcept_dt": rcept_dt,
+            "is_correction": correction, "report_type": report_type, "column": column}
+
+
+NET, OWN = "ifrs-full_ProfitLoss", "ifrs-full_ProfitLossAttributableToOwnersOfParent"
+T = 10 ** 12
+
+
+@pytest.mark.parametrize("rows, text, status", [
+    ([_row(NET, 100 * T), _row(OWN, 98 * T)], "2025년 당기순이익은 98조원이다.", "match"),   # 지배주주 값
+    ([_row(NET, 100 * T), _row(OWN, 98 * T)], "2025년 당기순이익은 100조원이다.", "match"),
+    ([_row(NET, 100 * T), _row(OWN, 98 * T)], "2025년 당기순이익은 50조원이다.", "mismatch"),
+    ([_row(NET, 100 * T)], "2025년 당기순이익은 98조원이다.", "unknown"),   # 지배주주 값이 없어 판단 불가
+    ([_row(NET, 100 * T)], "2025년 당기순이익은 100조원이다.", "match"),
+    ([_row(NET, 100 * T), _row(OWN, 98 * T)], "2025년 지배기업 소유주지분 순이익은 100조원이다.", "mismatch"),
+    ([_row(NET, 100 * T), _row(OWN, 98 * T)], "2025년 지배주주 순이익은 98조원이다.", "match"),
+])
+def test_net_income_candidates(rows, text, status):
+    assert run(text, rows).status == status
+
+
+def test_restated_value_any_candidate_matches():
+    # 2024년 매출: 2024 사업보고서 원 보고값 300.0조, 2025 사업보고서 비교값(재작성) 300.9조
+    rows = [_row("ifrs-full_Revenue", 300_000 * 10 ** 9, period="2024", start="2024-01-01", end="2024-12-31",
+                 rcept_no="r2024", rcept_dt="20250310"),
+            _row("ifrs-full_Revenue", 300_900 * 10 ** 9, period="2024", start="2024-01-01", end="2024-12-31",
+                 rcept_no="r2025", rcept_dt="20260310", column="frmtrm_amount")]
+    for claim in ("300조원", "300.9조원"):
+        r = run(f"2024년 매출은 {claim}이다.", rows)
+        assert (r.status, r.items[0].note) == ("match", "restated"), claim
+    r = run("2024년 매출은 250조원이다.", rows)
+    assert r.status == "mismatch" and r.items[0].rcept_no == "r2024"  # 당기 칸(thstrm) 값이 대표
+
+
+def test_correction_flag_does_not_beat_later_receipt():
+    q2 = Period(2026, "quarter", 2)
+    a = _row("ifrs-full_Revenue", 1, period="2026Q2", start="2026-04-01", end="2026-06-30", rcept_no="a",
+             rcept_dt="20260730", report_type="preliminary", correction=True)
+    b = _row("ifrs-full_Revenue", 2, period="2026Q2", start="2026-04-01", end="2026-06-30", rcept_no="b",
+             rcept_dt="20260801", report_type="preliminary")
+    assert xbrl_check.select_fact([a, b], SAMSUNG, "ifrs-full_Revenue", q2, "CFS")["rcept_no"] == "b"
+
+
+def test_margin_sign_and_unit():
+    q2 = dict(period="2026Q2", start="2026-04-01", end="2026-06-30")
+    rows = [_row("dart_OperatingIncomeLoss", -20 * T, **q2), _row("ifrs-full_Revenue", 100 * T, **q2)]
+    assert run("2026년 2분기 영업이익률은 20%다.", rows).status == "mismatch"   # 실제는 -20%
+    assert run("2026년 2분기 영업이익률은 -20%다.", rows).status == "match"
+    assert run("2026년 2분기 영업이익률은 20% 적자다.", rows).status == "match"
+    r = run("2026년 2분기 영업이익률은 -20%다.", rows)
+    assert r.primary()["unit"] == "%" and r.primary()["amount"] == -20.0

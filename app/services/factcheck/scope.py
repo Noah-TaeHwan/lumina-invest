@@ -3,6 +3,8 @@
 - 기간 3종 중 **주장 기간**을 문장에서 뽑는다(연도·분기·반기·누적, '2Q25'·'26.2Q'·'1H26'·'FY25'·''25년' 변형).
   상대 표현('올해·작년·재작년·최근 분기·직전 분기')과 연도 없는 분기·반기는 검수 실행일이 아니라 **기준 시점 as_of**로
   해석한다. '전년 대비·전분기 대비' 같은 비교 기준은 주장 기간이 아니다. 해석 못 하면 기간 불명(빈 목록).
+- 기간 바로 뒤에 '대비·보다·에 비해'가 오면 비교 기준이라 뺀다('2024년 대비'). '전년 동기'는 문장 속 가장 가까운 절대
+  기간의 한 해 전(없으면 as_of 기준). 연도 없는 분기를 한 해 당겨 풀었으면 shifted로 표시한다(⚠️를 내지 않는 근거).
 - 검색 범위 = 주장 기간 끝 ~ 2년 뒤에 끝나는 보고서 기간(뒤 보고서의 비교값 포함, Codex #7). 기간 불명이면 전체(None).
 - 다른 회사: 주입한 상장사명 사전(corp_code → 이름들)과 토큰 단위로 **정확히** 맞춘다(끝 조사만 뗀다, 부분 일치 금지:
   'SK' ≠ 'SK하이닉스'). 주어 자리(첫 은·는·이·가 토큰까지)에 선택 회사가 없고 다른 상장사가 있으면 범위 밖.
@@ -17,6 +19,7 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from datetime import date
 
+from app.services.evidence.subject import _GENERIC as GENERIC_WORDS
 from app.services.evidence.subject import COMMON_WORD_NAMES, normalize
 
 HORIZON_YEARS = 2  # 주장 기간 뒤 몇 년 안의 보고서까지 검색하나(비교값)
@@ -82,12 +85,14 @@ class Period:
 
 @dataclass(frozen=True)
 class PeriodMention:
-    """문장 안 기간 표현 하나. start·end는 문장 안 글자 위치, relative는 as_of로 해석했는지."""
+    """문장 안 기간 표현 하나. start·end는 문장 안 글자 위치, relative는 as_of로 해석했는지,
+    shifted는 연도 없는 분기·반기가 as_of 뒤라 한 해 당겨 해석했는지(확신할 수 없는 해석)."""
 
     start: int
     end: int
     period: Period
     relative: bool = False
+    shifted: bool = False
 
 
 # ---- 기간 표현 ----
@@ -106,9 +111,13 @@ _YEAR_ABS = re.compile(
     rf"|(?<![\d,.])(?P<y4>{_Y4})(?:\s*(?:년도|년|회계연도|사업연도)|(?=\s*[1-4]Q|\s*[12]H))"
     rf"|{_APOS}(?P<y2>\d{{2}})\s*(?:년도|년)"
     rf"|(?<![\d,.'‘’])(?P<y2b>\d{{2}})년(?=\s*(?:[1-4]\s*분기|[1-4]Q|[상하]반기|[12]H|1\s*[~∼\-])))" + _SUB)
-_QYY = re.compile(rf"(?<![\w.])(?P<q>[1-4])Q(?:{_APOS}?(?P<yy>\d{{2}})|\s*(?P<yyyy>{_Y4}))(?![\d.])")
+_CUM = r"(?P<cum>\s*(?:누적|누계))?"
+_YQ = re.compile(rf"(?<![\w.])(?P<y>{_Y4})\s*(?P<k>[QH])(?P<n>[1-4])(?![\w])" + _CUM)  # 2026Q2·2026H1·2025 Q3
+_QYY = re.compile(rf"(?<![\w.])(?P<q>[1-4])Q(?:{_APOS}?(?P<yy>\d{{2}})|\s*(?P<yyyy>{_Y4}))(?![\d.])" + _CUM)
 _HYY = re.compile(rf"(?<![\w.])(?P<h>[12])H(?:{_APOS}?(?P<yy>\d{{2}})|\s*(?P<yyyy>{_Y4}))(?![\d.])")
-_YYDOT = re.compile(rf"(?<![\d.]){_APOS}?(?P<yy>{_Y4}|\d{{2}})\.\s*(?:(?P<q>[1-4])Q|(?P<h>[12])H)(?![A-Za-z])")
+_YYDOT = re.compile(rf"(?<![\d.]){_APOS}?(?P<yy>{_Y4}|\d{{2}})\.\s*(?:(?P<q>[1-4])Q|(?P<h>[12])H)(?![A-Za-z])" + _CUM)
+# 기간 바로 뒤 비교 표현: '2024년 대비', '작년 4분기 대비', '2024년보다' — 그 기간은 비교 기준이지 주장 기간이 아니다
+_COMPARE_AFTER = re.compile(r"\s*(?:대비|比|보다|에\s*비해|와\s*비교|과\s*비교)")
 _YEAR_REL = re.compile(r"(?P<rel>올해|금년|당해\s*연도|이번\s*해|재작년|지지난해|작년|지난해|전년도|전년)(?!\s*동기)" + _SUB)
 _SAME_Q_LAST_YEAR = re.compile(r"(?:전년|작년)\s*동기")
 _QUARTER_REL = re.compile(r"(?P<rel>이번\s*분기|최근\s*분기|당\s*분기|직전\s*분기|전\s*분기|지난\s*분기)")
@@ -146,27 +155,40 @@ def extract_periods(text: str, as_of: Period) -> list[PeriodMention]:
     def free(m: re.Match) -> bool:
         return not any(m.start() < e and s < m.end() for s, e in taken)
 
-    def add(m: re.Match, p: Period, relative: bool = False) -> None:
+    def add(m: re.Match, p: Period, relative: bool = False, shifted: bool = False) -> None:
         taken.append((m.start(), m.end()))
-        out.append(PeriodMention(m.start(), m.end(), p, relative))
+        if not _COMPARE_AFTER.match(text, m.end()):
+            out.append(PeriodMention(m.start(), m.end(), p, relative, shifted))
 
+    def quarter(year: int, q: int, cum) -> Period:
+        return Period(year, "quarter", q, cumulative=bool(cum) and q != 1)
+
+    for m in _YQ.finditer(text):
+        if free(m):
+            y, n = int(m["y"]), int(m["n"])
+            add(m, quarter(y, n, m["cum"]) if m["k"] == "Q" else Period(y, "half", n))
     for m in _QYY.finditer(text):
         if free(m):
-            add(m, Period(_yy(m["yy"] or m["yyyy"]), "quarter", int(m["q"])))
+            add(m, quarter(_yy(m["yy"] or m["yyyy"]), int(m["q"]), m["cum"]))
     for m in _HYY.finditer(text):
         if free(m):
             add(m, Period(_yy(m["yy"] or m["yyyy"]), "half", int(m["h"])))
     for m in _YYDOT.finditer(text):
         if free(m):
             y = _yy(m["yy"])
-            add(m, Period(y, "quarter", int(m["q"])) if m["q"] else Period(y, "half", int(m["h"])))
+            add(m, quarter(y, int(m["q"]), m["cum"]) if m["q"] else Period(y, "half", int(m["h"])))
     for m in _YEAR_ABS.finditer(text):
         if free(m):
             add(m, _with_sub(_yy(m["fy"] or m["y4"] or m["y2"] or m["y2b"]), m))
     last_q = Period.quarter_of(as_of.year, as_of.last_quarter)
+    absolute = list(out)
     for m in _SAME_Q_LAST_YEAR.finditer(text):
         if free(m):
-            add(m, Period(as_of.year - 1, "quarter", last_q.n), True)
+            if absolute:  # 문장 속 가장 가까운 절대 기간의 한 해 전 같은 기간
+                b = min(absolute, key=lambda x: abs(x.start - m.start())).period
+                add(m, Period(b.year - 1, b.kind, b.n, b.cumulative))
+            else:
+                add(m, Period(as_of.year - 1, "quarter", last_q.n), True)
     for m in _YEAR_REL.finditer(text):
         if free(m):
             add(m, _with_sub(as_of.year + _REL_YEAR_DELTA[re.sub(r"\s+", "", m["rel"])], m), True)
@@ -187,9 +209,10 @@ def extract_periods(text: str, as_of: Period) -> list[PeriodMention]:
             p = Period(year, "quarter", q, cumulative=bool(g["cum"]) and q != 1)
         else:
             p = Period(year, "half", 1 if g["hk"] == "상" or g["h"] == "1" else 2)
-        if not before and p.end > as_of.end:  # 연도 없는 분기가 기준 시점 뒤면 가장 최근의 그 분기(한 해 전)
+        shifted = not before and p.end > as_of.end
+        if shifted:  # 연도 없는 분기가 기준 시점 뒤면 가장 최근의 그 분기(한 해 전) — 확신할 수 없는 해석
             p = Period(p.year - 1, p.kind, p.n, p.cumulative)
-        add(m, p, relative=not before)
+        add(m, p, relative=not before, shifted=shifted)
     return sorted(out, key=lambda x: x.start)
 
 
@@ -227,12 +250,13 @@ _NGRAM = 3
 
 
 class CompanyIndex:
-    """상장사명 사전(corp_code → 이름들)을 비교용 표기로 색인한다. 일상어와 겹치는 이름('대상')·1자 이름은 뺀다."""
+    """상장사명 사전(corp_code → 이름들)을 비교용 표기로 색인한다. 일상어와 겹치는 이름('대상')·일반명사
+    (evidence.subject의 일반명사 목록, '콘텐츠')·1자 이름은 뺀다."""
 
     def __init__(self, names: Mapping[str, Iterable[str]]):
         self.names = {c: list(ns) for c, ns in names.items()}
         self._idx: dict[str, tuple[str, str]] = {}
-        common = {normalize(n) for n in COMMON_WORD_NAMES}
+        common = {normalize(n) for n in COMMON_WORD_NAMES} | {normalize(n) for n in GENERIC_WORDS}
         for corp, ns in self.names.items():
             for n in ns:
                 k = normalize(n)
@@ -303,7 +327,7 @@ _GROWTH = re.compile(r"YoY|QoQ|전년\s*동기\s*대비|전년\s*대비|전분�
                      r"|증가율|감소율|증감률|증감율|성장률|성장|증가|감소|늘|줄|급증|급감|상승|하락")
 MARKET = re.compile(r"목표\s*주가|목표가|주가|시가\s*총액|시총|PER(?![A-Za-z])|PBR(?![A-Za-z])|EV/EBITDA|투자\s*의견"
                     r"|컨센서스|밸류에이션|배당\s*수익률|매수\s*의견|매도\s*의견")
-FORECAST = re.compile(r"예상|전망|추정|예정|관측|것으로\s*보|할\s*것|될\s*것|넘을\s*것|기대")
+FORECAST = re.compile(r"예상|전망|추정|예정|관측|목표|것으로\s*보|할\s*것|될\s*것|넘을\s*것|기대")
 
 
 def derived_kind(text: str) -> str | None:
@@ -337,19 +361,28 @@ class Scope:
         return [m.period for m in self.mentions]
 
 
+def period_scope(text: str, as_of: Period) -> Scope:
+    """범위 밖 판별 없이 검색 범위만 붙인 Scope(force_check용). 증감률이면 잠정실적만 검색한다."""
+    mentions = extract_periods(text, as_of)
+    growth = derived_kind(text) == "growth" and bool(PRELIM_GROWTH_ACCOUNTS.search(text))
+    return Scope("checked", None, mentions, search_periods(m.period for m in mentions),
+                 ["preliminary"] if growth else None, derived_kind(text))
+
+
 def assess(text: str, corp_code: str, *, as_of: Period, names: Mapping[str, Iterable[str]] | CompanyIndex) -> Scope:
-    """검수 대상 문장(1단계 통과)을 범위 밖으로 돌릴지 정한다. 순서: 다른 회사 → 주가·추정 → 기준 시점 뒤 기간 →
-    기간 없는 전망 → 파생 지표. 통과하면 검색 기간·보고서 종류를 붙인다."""
+    """검수 대상 문장(1단계 통과)을 범위 밖으로 돌릴지 정한다. 순서: 다른 회사 → 주가 → 전망·추정·목표 표지 →
+    기준 시점 뒤 기간 → 파생 지표. 전망 표지는 기간과 상관없이 검수 안 함('3분기 영업이익은 10조원으로 예상된다').
+    통과하면 검색 기간·보고서 종류를 붙인다."""
     other = other_company(text, corp_code, names)
     if other:
         return Scope("other_company", f"other_company:{other}")
     if MARKET.search(text):
         return Scope("out_of_scope", "market")
+    if FORECAST.search(text):
+        return Scope("out_of_scope", "forecast")
     mentions = extract_periods(text, as_of)
     if any(m.period.end > as_of.end for m in mentions):
         return Scope("out_of_scope", "future_period", mentions)
-    if not mentions and FORECAST.search(text):
-        return Scope("out_of_scope", "forecast")
     sp = search_periods(m.period for m in mentions)
     kind = derived_kind(text)
     if kind == "growth":

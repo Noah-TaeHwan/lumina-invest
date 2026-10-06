@@ -20,7 +20,8 @@ NAMES = {SAMSUNG: ["삼성전자"], "00164779": ["SK하이닉스"], "00181712": 
 def passage(text, *, rcept_no="20260814003699", period="2026H1", report_type="half", section="II. 사업의 내용", idx=0):
     return {"passage_id": f"{SAMSUNG}-{rcept_no}-{section}-{idx}", "corp_code": SAMSUNG, "rcept_no": rcept_no,
             "report_type": report_type, "report_nm": "반기보고서 (2026.06)", "period": period,
-            "rcept_dt": rcept_no[:8], "section": section, "idx": idx, "text": text}
+            "rcept_dt": rcept_no[:8], "section": section, "idx": idx, "text": text, "superseded": False,
+            "is_correction": False}
 
 
 class FakeStore:
@@ -117,6 +118,10 @@ def collect(p: FactcheckPipeline, text: str, as_of="2026H1") -> list[SentenceRes
     return asyncio.run(go())
 
 
+def sub(x: dict, keys=("account_nm", "period", "fs_div", "amount")) -> dict:
+    return {k: x[k] for k in keys}
+
+
 def by_idx(results):
     return {r.idx: r for r in results}
 
@@ -130,14 +135,15 @@ def test_result_shape_matches_contract():
     (r,) = collect(p, "2026년 2분기 매출은 171.5조원으로 HBM 판매 호조 덕분이다.")
     assert set(vars(r)) == {"idx", "text", "category", "status", "evidence", "xbrl", "reason"}
     assert r.evidence == [{"rcept_no": "20260814003699", "report_nm": "반기보고서 (2026.06)", "period": "2026H1",
-                           "section": "II. 사업의 내용", "text": Q2_TEXT}]
+                           "section": "II. 사업의 내용", "text": Q2_TEXT, "superseded": False,
+                           "is_correction": False}]
 
 
 def test_supported_only_when_jev_supports_whole_sentence(facts):
     p = make(FakeStore(default=[Q2_PASSAGE]), FakeJev({"HBM": ("support", 0)}), facts)
     (r,) = collect(p, "2026년 2분기 매출은 171.5조원으로 HBM 판매 호조 덕분이다.")
     assert (r.category, r.status) == ("checked", "supported")
-    assert r.xbrl == {"account_nm": "매출액", "period": "2026Q2", "fs_div": "CFS", "amount": 171499470000000}
+    assert sub(r.xbrl) == {"account_nm": "매출액", "period": "2026Q2", "fs_div": "CFS", "amount": 171499470000000}
 
 
 def test_compound_sentence_partial_confirmation(facts):
@@ -161,7 +167,7 @@ def test_xbrl_mismatch_is_contradicted_without_jev(facts):
     p = make(store, jev, facts)
     (r,) = collect(p, "2026년 2분기 매출은 172조원으로 HBM 판매 호조 덕분이다.")
     assert (r.status, r.reason) == ("contradicted", "xbrl_mismatch")
-    assert r.xbrl == {"account_nm": "매출액", "period": "2026Q2", "fs_div": "CFS", "amount": 171499470000000}
+    assert sub(r.xbrl) == {"account_nm": "매출액", "period": "2026Q2", "fs_div": "CFS", "amount": 171499470000000}
     assert jev.calls == []
 
 
@@ -284,16 +290,67 @@ def test_sync_store_supported():
     assert r.status == "supported"
 
 
-def test_default_as_of_from_store_then_facts(facts):
-    # as_of 없음 → store.latest_period → 없으면 사실 행의 가장 최근 기간
+def test_default_as_of_from_store_then_today(facts, monkeypatch):
+    # as_of 없음 → store.latest_period → 없으면 오늘까지 끝난 분기. XBRL 행의 최신 기간으로 정하지 않는다(A1)
+    async def go(pp, text):
+        return [r async for r in pp.check(SAMSUNG, text)]
     p = make(FakeStore(default=[passage("x")], latest="2026H1"), FakeJev(), facts)
-    async def go(pp):
-        return [r async for r in pp.check(SAMSUNG, "작년 매출은 300조원이다.")]
-    (r,) = asyncio.run(go(p))
+    (r,) = asyncio.run(go(p, "작년 매출은 300조원이다."))
     assert (r.status, r.xbrl["period"]) == ("contradicted", "2025")
+    monkeypatch.setattr(pipeline, "_today", lambda: pipeline.date(2026, 10, 6))  # → 2026Q3
     p = make(FakeStore(default=[passage("x")]), FakeJev(), facts)
-    (r,) = asyncio.run(go(p))
-    assert (r.status, r.xbrl["period"]) == ("contradicted", "2025")
+    (r,) = asyncio.run(go(p, "3분기 매출은 86.1조원이다."))
+    assert r.xbrl is None  # 2026Q3(XBRL 없음). 행 최신 기간(2026Q2) 기준이면 2025Q3로 당겨 일치로 나왔다
+
+
+def test_shifted_bare_quarter_never_contradicted(facts):
+    # as_of 2026H1에서 '3분기'는 2025Q3로 당긴 해석 — 확신할 수 없으므로 ⚠️ 대신 최대 ❔(A1)
+    jev = FakeJev({"3분기": ("contradict", 0)})
+    (r,) = collect(make(FakeStore(default=[Q2_PASSAGE]), jev, facts), "3분기 매출은 90조원이다.")
+    assert (r.status, r.reason) == ("no_evidence", "period_ambiguous")
+    (r,) = collect(make(FakeStore(default=[Q2_PASSAGE]), FakeJev(), facts), "2025년 3분기 매출은 90조원이다.")
+    assert (r.status, r.reason) == ("contradicted", "xbrl_mismatch")
+
+
+def test_period_digits_removed_before_number_check():
+    # '2분기'의 2가 문단에 없어도 금액이 맞으면 ✅ 출처가 될 수 있다(B1)
+    p = make(FakeStore(default=[passage("매출액은 171.5조원이며 HBM 판매 호조가 실적을 이끌었다.")]),
+             FakeJev({"HBM": ("support", 0)}))
+    (r,) = collect(p, "2026년 2분기 매출은 171.5조원으로 HBM 판매 호조 덕분이다.")
+    assert r.status == "supported"
+
+
+def test_xbrl_result_keeps_selected_row_fields(facts):
+    p = make(FakeStore(default=[Q2_PASSAGE]), FakeJev({"HBM": ("support", 0)}), facts)
+    (r,) = collect(p, "2026년 2분기 매출은 171.5조원으로 HBM 판매 호조 덕분이다.")
+    assert sub(r.xbrl, ("unit", "rcept_no", "cumulative", "is_correction", "column")) == {
+        "unit": "원", "rcept_no": "20260814003699", "cumulative": False, "is_correction": False,
+        "column": "thstrm_amount"}
+
+
+class SlowStore(FakeStore):
+    """검색(임베딩 포함)이 느린 저장소. 동시에 도는 검색 수 최댓값을 잰다."""
+
+    def __init__(self, **kw):
+        super().__init__(**kw)
+        self.active = self.max_active = 0
+
+    async def search(self, corp_code, query, *, periods=None, report_types=None, k=8):
+        self.active += 1
+        self.max_active = max(self.max_active, self.active)
+        try:
+            await asyncio.sleep(0.02)
+            return self._hit(corp_code, query, periods, report_types, k)
+        finally:
+            self.active -= 1
+
+
+def test_search_runs_inside_per_request_limit():
+    store = SlowStore(default=[passage("HBM")])
+    text = "\n".join(f"2025년 {i}분기 HBM 판매." for i in range(1, 5)) + "\n" + "\n".join(
+        f"2024년 {i}분기 HBM 판매." for i in range(1, 5))
+    rs = collect(make(store, FakeJev(), per_request=2), text)
+    assert len(rs) == 8 and len(store.calls) == 8 and store.max_active <= 2
 
 
 def test_module_level_check_requires_configure():
@@ -338,3 +395,33 @@ def test_for_user_shares_global_concurrency():
     ra, rb = asyncio.run(go())
     assert len(ra) == len(rb) == 2 and jev.max_active == 1
     assert {c["user_id"] for c in jev.calls} == {"anon:a", "anon:b"}
+
+
+def test_force_check_judges_every_sentence_and_keeps_scope_flag():
+    # '직접 검수 요청'(T3): 1단계 분류·검수 안 함을 건너뛰고 모두 2단계로. 범위 밖 표시는 category·reason에 남긴다
+    store, jev = FakeStore(default=[Q2_PASSAGE]), FakeJev({"HBM": ("support", 0)})
+    text = "회사는 HBM 사업을 확대하고 있다.\nSK는 HBM 판매가 늘었다.\nHBM 시장은 더 커질 것으로 보인다."
+
+    async def go(force):
+        return [r async for r in make(store, jev).check(SAMSUNG, text, as_of="2026H1", force_check=force)]
+
+    off = by_idx(asyncio.run(go(False)))
+    assert [off[i].status for i in range(3)] == ["skipped"] * 3 and jev.calls == []
+    on = by_idx(asyncio.run(go(True)))
+    assert len(jev.calls) == 3 and len(store.calls) == 3
+    assert (on[0].category, on[0].status) == ("checked", "supported")
+    assert (on[1].category, on[1].status, on[1].reason) == ("other_company", "supported", "other_company:SK")
+    assert (on[2].category, on[2].status, on[2].reason) == ("out_of_scope", "supported", "forecast")
+
+
+def test_module_level_check_passes_force_check():
+    p = make(FakeStore(default=[Q2_PASSAGE]), FakeJev())
+    pipeline.configure(p)
+    try:
+        async def go():
+            return [r async for r in pipeline.check(SAMSUNG, "회사는 HBM 사업을 확대하고 있다.", as_of="2026H1",
+                                                    force_check=True)]
+        (r,) = asyncio.run(go())
+        assert r.status == "no_evidence"
+    finally:
+        pipeline.configure(None)

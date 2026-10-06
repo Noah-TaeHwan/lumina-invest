@@ -12,16 +12,16 @@ from pathlib import Path
 import pytest
 
 FIXTURES = Path(__file__).parent / "fixtures"
-_REPORT = {"11011": "annual", "11012": "half", "11014": "quarter"}
+_REPORT = {"11011": "periodic", "11012": "periodic", "11014": "periodic"}
 
 
 def _row(r: dict, fs_div: str, amount: str, period: str, start: str | None, end: str, kind: str, cum: bool,
-         report_type: str) -> dict:
+         report_type: str, column: str) -> dict:
     return {"corp_code": r["corp_code"], "period": period, "fs_div": fs_div, "account_id": r["account_id"],
             "account_nm": r["account_nm"], "amount": int(amount), "rcept_no": r["rcept_no"],
             "period_start": start, "period_end": end, "value_kind": kind, "cumulative": cum,
             "currency": r.get("currency", "KRW"), "unit": "원", "rcept_dt": r["rcept_no"][:8],
-            "is_correction": False, "report_type": report_type}
+            "is_correction": False, "report_type": report_type, "column": column}
 
 
 def convert(raw: dict, fs_div: str) -> list[dict]:
@@ -57,7 +57,7 @@ def convert(raw: dict, fs_div: str) -> list[dict]:
             if not amount or ident in seen:
                 continue
             seen.add(ident)
-            out.append(_row(r, fs_div, amount, label, start, end, kind, cum, rt))
+            out.append(_row(r, fs_div, amount, label, start, end, kind, cum, rt, key))
     return out
 
 

@@ -2,15 +2,20 @@
 
 - 입력 행은 T1 적재기의 데이터 계약(xbrl_facts.json) 그대로의 dict다: {corp_code, period, fs_div∈{CFS,OFS}, account_id,
   account_nm, amount(원), rcept_no, period_start, period_end, value_kind∈{instant,duration}, cumulative, currency, unit,
-  rcept_dt, is_correction}. 잠정·확정 구분은 선택 키 report_type('preliminary'면 잠정)으로 본다.
-- 계정 사전: 매출액·영업이익(손실)·당기순이익(손실)·자산총계·부채총계·자본총계. 매출원가·매출총이익·유형자산·자본금,
-  제품·부문 매출('HBM 매출', 'DS부문 매출')은 회사 전체 계정이 아니므로 대조하지 않는다(문단 판정으로 간다).
+  rcept_dt, is_correction, column, report_type}. report_type이 'preliminary'면 잠정, 그 밖은 확정(정기)으로 본다.
+- 계정 사전: 매출액·영업이익(손실)·당기순이익(손실)·자산총계·부채총계·자본총계. 순이익은 연결 당기순이익과 지배기업
+  소유주지분 순이익을 둘 다 후보로 보고, 하나라도 맞으면 일치, 둘 다 있는데 어느 것도 안 맞으면 불일치, 한쪽만 있고 안
+  맞으면 판단 불가(unknown)다. 매출원가·매출총이익·유형자산·자본금, 제품·부문 매출('HBM 매출')은 대조하지 않는다.
+- 금액과 기간 짝: 계정 뒤 첫 금액. 'X에서 Y로'면 뒤 금액(Y)이 주장 기간 값이고, '각각'이면 앞의 기간들과 순서대로 짝짓는다.
 - 기간은 scope.extract_periods로 푼 주장 기간(as_of 기준)을 시작·끝 날짜로 맞춘다: 'n분기'는 분기 단독, '상반기'·'누적'은
   1월 1일부터 누적, 재무상태표 계정은 기간 끝 시점 값. XBRL에 없는 기간(4분기 단독 등)은 unknown.
-- 연결/별도: 문장에 '연결'·'별도(개별)'이 있으면 그쪽만. 없으면 연결 우선, 연결이 어긋나고 별도가 맞으면 맞음 + 'separate_only'.
-- 같은 기간·계정 값이 여럿이면 확정(정기) > 잠정, 정정 > 원본, 늦은 접수일 순으로 하나를 고른다.
+- 연결/별도는 그 계정 절(앞 금액 또는 절 경계 뒤 ~ 이 금액)에 적힌 것만 본다(없으면 앞 절을 잇는다). 표시가 없으면 연결 우선, 연결이
+  어긋나고 별도가 맞으면 맞음 + 'separate_only'.
+- 같은 기간·계정 행이 여럿이면: 대체된 행(superseded) 제외, 확정이 있으면 확정만. 잠정은 순위 1위 하나만(정정·나중 공시가
+  앞선다). 확정 행들(원 보고값·뒤 보고서의 재작성 비교값)은 모두 후보로, 하나라도 맞으면 일치 + 'restated'(값이 서로
+  다를 때) 표시, 하나도 안 맞으면 대표 행(당기 칸 > 늦은 접수일 > 정정)으로 불일치를 보인다.
 - 금액 비교(단위 환산·반올림·버림 일치)는 evidence.numbers.number_check를 그대로 쓴다. 손실·적자 표현은 부호를 따로 본다.
-- 영업이익률은 같은 기간·같은 연결/별도의 영업이익 ÷ 매출액으로 계산해 같은 규칙으로 비교한다.
+- 영업이익률은 같은 기간·같은 연결/별도의 영업이익 ÷ 매출액(부호 포함)으로 계산해 같은 규칙으로 비교한다.
 """
 from __future__ import annotations
 
@@ -24,33 +29,42 @@ from app.services.evidence.numbers import number_check
 from app.services.factcheck import scope
 from app.services.factcheck.scope import CompanyIndex, Period
 
-REVENUE, OPERATING, NET, ASSETS, LIABILITIES, EQUITY = (
-    "ifrs-full_Revenue", "dart_OperatingIncomeLoss", "ifrs-full_ProfitLoss", "ifrs-full_Assets",
-    "ifrs-full_Liabilities", "ifrs-full_Equity")
+REVENUE, OPERATING, NET, OWNERS, ASSETS, LIABILITIES, EQUITY = (
+    "ifrs-full_Revenue", "dart_OperatingIncomeLoss", "ifrs-full_ProfitLoss",
+    "ifrs-full_ProfitLossAttributableToOwnersOfParent", "ifrs-full_Assets", "ifrs-full_Liabilities", "ifrs-full_Equity")
 INSTANT_ACCOUNTS = frozenset({ASSETS, LIABILITIES, EQUITY})
-DISPLAY = {REVENUE: "매출액", OPERATING: "영업이익", NET: "당기순이익", ASSETS: "자산총계", LIABILITIES: "부채총계",
-           EQUITY: "자본총계"}
+DISPLAY = {REVENUE: "매출액", OPERATING: "영업이익", NET: "당기순이익", OWNERS: "지배기업 소유주지분 순이익",
+           ASSETS: "자산총계", LIABILITIES: "부채총계", EQUITY: "자본총계", "margin": "영업이익률"}
+# 주장 계정 → 대조 후보 계정. '순이익'은 연결 당기순이익과 지배주주 순이익 둘 다
+CANDIDATES = {NET: (NET, OWNERS), OWNERS: (OWNERS,)}
 
 _B = r"(?<![가-힣A-Za-z])"  # 토큰 첫머리('DS부문매출'·'유형자산'은 계정이 아니다)
 _ACCOUNT = re.compile(
     rf"(?P<rev>{_B}(?:매출액|영업수익|매출(?!\s*(?:원가|총이익|총손실|채권|채무|비중|처|구성|이익))))"
     rf"|(?P<op>{_B}영업\s*(?:이익|손실)(?!\s*률))"
+    rf"|(?P<own>{_B}지배(?:기업)?\s*(?:소유주\s*)?(?:지분\s*|주주\s*)?(?:당기)?\s*순(?:이익|손실)(?!\s*률))"
     rf"|(?P<net>{_B}(?:당기|반기|분기)?\s*순(?:이익|손실)(?!\s*률))"
     rf"|(?P<ast>{_B}(?:자산\s*총계|총\s*자산|자산(?!\s*(?:가치|운용|매각|재평가|유동화|건전성|총계))))"
     rf"|(?P<lia>{_B}(?:부채\s*총계|총\s*부채|부채(?!\s*(?:비율|총계))))"
     rf"|(?P<eq>{_B}(?:자본\s*총계|총\s*자본|자본(?!\s*(?:금|잉여금|변동|조정|적정|비율|총계|시장|지출))))"
     rf"|(?P<margin>{_B}영업\s*이익률)")
-_GROUP_ACCOUNT = {"rev": REVENUE, "op": OPERATING, "net": NET, "ast": ASSETS, "lia": LIABILITIES, "eq": EQUITY}
+_GROUP_ACCOUNT = {"rev": REVENUE, "op": OPERATING, "own": OWNERS, "net": NET, "ast": ASSETS, "lia": LIABILITIES,
+                  "eq": EQUITY, "margin": "margin"}
 _MONEY = re.compile(r"-?\d[\d,]*(?:\.\d+)?(?:\s*(?:조|십억|억|천만|백만|만|천)(?:\s*\d[\d,]*(?:\.\d+)?)?)+\s*원?"
                     r"|-?\d[\d,]*(?:\.\d+)?\s*원")
-_PERCENT = re.compile(r"\d[\d,]*(?:\.\d+)?\s*%(?!p)")
+_PERCENT = re.compile(r"[-−]?\d[\d,]*(?:\.\d+)?\s*%(?!p)")
+# 절 경계(연결/별도 표시가 미치는 범위를 끊는다): 쉼표·세미콜론·연결 어미
+_CLAUSE_BREAK = re.compile(r"[,;]|지만|는데|으며|이며|며\s|고\s")
+_FROM = re.compile(r"\s*에서")  # 'X에서 Y로'의 '에서'
+_EACH = re.compile(r"각각")
 # 계정 바로 앞 토큰으로 허용하는 수식어(회사 전체 값). 그 밖의 명사가 앞에 붙으면 제품·부문 값으로 보고 대조하지 않는다
 _QUALIFIERS = frozenset({"연결", "별도", "개별", "총", "전체", "전사", "회사", "당사", "동사", "연간", "분기", "반기",
-                         "누적", "누계", "합산", "말", "기준", "기말", "당기", "확정", "잠정", "실제", "실적", "합계"})
+                         "누적", "누계", "합산", "말", "기준", "기말", "당기", "확정", "잠정", "실제", "실적", "합계",
+                         "동기", "전년", "전기", "작년", "올해", "금년", "지난해", "재작년"})
 _PERIOD_TOKEN = re.compile(r"\d|년|분기|반기|월|FY")
 # 앞말이 이 끝으로 끝나면 계정을 꾸미는 말이 아니다(조사·연결 어미·쉼표). '이'·'가'는 명사 끝('디스플레이')과 겹쳐 뺀다
 _NOT_MODIFIER_END = ("은", "는", "을", "를", "도", "에", "와", "과", "로", "고", "며", ",")
-_LOSS = re.compile(r"손실|적자")
+_LOSS = re.compile(r"손실|적자|마이너스")
 
 
 @dataclass
@@ -62,6 +76,9 @@ class AmountClaim:
     value_text: str
     pos: int
     negative: bool
+    value_start: int = 0  # 문장 안 금액 위치(연결/별도 절 계산용)
+    value_end: int = 0
+    period_idx: int | None = None  # '각각' 짝: 계정 앞 기간 표현의 순번
 
 
 @dataclass
@@ -76,7 +93,11 @@ class XbrlItem:
     amount: int | float | None
     claimed: str
     rcept_no: str | None = None
-    note: str | None = None  # separate_only(표시 없음 + 별도로만 일치) / no_period / no_fact
+    note: str | None = None  # separate_only / restated / no_period / no_fact / candidate_missing (여럿이면 쉼표)
+    unit: str = "원"  # 영업이익률이면 '%'
+    cumulative: bool | None = None
+    is_correction: bool | None = None
+    column: str | None = None
 
 
 @dataclass
@@ -93,7 +114,9 @@ class XbrlResult:
             for it in self.items:
                 if it.status == want:
                     return {"account_nm": it.account_nm, "period": it.period, "fs_div": it.fs_div,
-                            "amount": it.amount}
+                            "amount": it.amount, "unit": it.unit, "rcept_no": it.rcept_no,
+                            "cumulative": it.cumulative, "is_correction": it.is_correction, "column": it.column,
+                            "note": it.note}
         return None
 
 
@@ -113,26 +136,35 @@ def _company_wide(text: str, pos: int, names: CompanyIndex | None) -> bool:
 
 
 def amount_claims(text: str, names: CompanyIndex | None = None) -> list[AmountClaim]:
-    """계정 언급마다 그 뒤(다음 계정 언급 전까지)의 첫 금액(이익률이면 퍼센트)을 짝짓는다."""
-    hits = [m for m in _ACCOUNT.finditer(text)]
+    """계정 언급마다 그 뒤(다음 계정 언급 전까지)의 금액(이익률이면 퍼센트)을 짝짓는다.
+    'X에서 Y로'면 Y, '각각 A, B'면 금액마다 하나씩(period_idx = 계정 앞 기간 표현 순번), 그 밖은 첫 금액."""
+    hits = list(_ACCOUNT.finditer(text))
     out = []
     for i, m in enumerate(hits):
-        end = hits[i + 1].start() if i + 1 < len(hits) else len(text)
-        seg = text[m.end():end]
         kind = m.lastgroup
         if kind != "margin" and not _company_wide(text, m.start(), names):
             continue
-        v = (_PERCENT if kind == "margin" else _MONEY).search(seg)
-        if not v:
+        end = hits[i + 1].start() if i + 1 < len(hits) else len(text)
+        values = list((_PERCENT if kind == "margin" else _MONEY).finditer(text, m.end(), end))
+        if not values:
             continue
-        negative = bool(_LOSS.search(m.group(0))) or v.group(0).startswith("-") or bool(_LOSS.search(seg[:v.start()]))
-        out.append(AmountClaim("margin" if kind == "margin" else _GROUP_ACCOUNT[kind], m.group(0),
-                               v.group(0).lstrip("-"), m.start(), negative))
+        acc = _GROUP_ACCOUNT[kind]
+        if len(values) >= 2 and _EACH.search(text, m.end(), values[0].start()):
+            picked = [(v, j) for j, v in enumerate(values)]
+        elif len(values) >= 2 and _FROM.match(text, values[0].end()):
+            picked = [(values[1], None)]
+        else:
+            picked = [(values[0], None)]
+        for v, j in picked:
+            raw = v.group(0)
+            negative = bool(_LOSS.search(m.group(0))) or raw[0] in "-−" or \
+                bool(_LOSS.search(text, v.end(), min(end, v.end() + 6))) or bool(_LOSS.search(text, m.end(), v.start()))
+            out.append(AmountClaim(acc, m.group(0), raw.lstrip("-−"), m.start(), negative, v.start(), v.end(), j))
     return out
 
 
 def fs_div_hint(text: str) -> str | None:
-    """문장에 적힌 연결/별도. 둘 다 있거나 없으면 None."""
+    """글에 적힌 연결/별도. 둘 다 있거나 없으면 None. check는 문장 전체가 아니라 계정 절마다 이 함수를 쓴다."""
     cfs, ofs = "연결" in text, bool(re.search(r"별도|개별", text))
     return "CFS" if cfs and not ofs else "OFS" if ofs and not cfs else None
 
@@ -156,17 +188,32 @@ def _period_matches(row: Mapping, period: Period, instant: bool) -> bool:
     return row.get("period") == period.label and bool(row.get("cumulative")) == period.cumulative
 
 
+def _thstrm(row: Mapping) -> bool:
+    return str(row.get("column") or "thstrm").startswith("thstrm")
+
+
 def _rank(row: Mapping) -> tuple:
-    return (row.get("report_type") != "preliminary", bool(row.get("is_correction")), str(row.get("rcept_dt") or ""),
-            str(row.get("rcept_no") or ""))
+    """대표 행 순위: 확정 > 잠정, 당기 칸(thstrm) > 비교 칸, 늦은 접수일, (같은 날이면) 정정."""
+    return (row.get("report_type") != "preliminary", _thstrm(row), str(row.get("rcept_dt") or ""),
+            bool(row.get("is_correction")), str(row.get("rcept_no") or ""))
+
+
+def candidate_rows(facts: Iterable[Mapping], corp_code: str, account_id: str, period: Period,
+                   fs_div: str) -> list[dict]:
+    """대조 후보 행(대표 행이 앞). 대체된 행 제외, 확정이 있으면 확정 전부(재작성 비교값 포함), 없으면 잠정 1위 하나."""
+    instant = account_id in INSTANT_ACCOUNTS
+    rows = [dict(r) for r in facts if r.get("corp_code") == corp_code and r.get("account_id") == account_id
+            and r.get("fs_div") == fs_div and _period_matches(r, period, instant)]
+    live = [r for r in rows if not r.get("superseded")] or rows
+    final = [r for r in live if r.get("report_type") != "preliminary"]
+    ranked = sorted(final or live, key=_rank, reverse=True)
+    return ranked if final else ranked[:1]
 
 
 def select_fact(facts: Iterable[Mapping], corp_code: str, account_id: str, period: Period, fs_div: str) -> dict | None:
-    """같은 회사·계정·기간·연결/별도 행 중 하나: 확정 > 잠정, 정정 > 원본, 늦은 접수일."""
-    instant = account_id in INSTANT_ACCOUNTS
-    rows = [r for r in facts if r.get("corp_code") == corp_code and r.get("account_id") == account_id
-            and r.get("fs_div") == fs_div and _period_matches(r, period, instant)]
-    return dict(max(rows, key=_rank)) if rows else None
+    """같은 회사·계정·기간·연결/별도의 대표 행 하나(candidate_rows의 첫 행)."""
+    rows = candidate_rows(facts, corp_code, account_id, period, fs_div)
+    return rows[0] if rows else None
 
 
 def _same_amount(claim: AmountClaim, amount: int) -> bool:
@@ -175,38 +222,68 @@ def _same_amount(claim: AmountClaim, amount: int) -> bool:
     return number_check(claim.value_text, str(abs(amount)))
 
 
-def _margin(facts: Sequence[Mapping], corp_code: str, period: Period, fs_div: str) -> tuple[Decimal, dict] | None:
+def _item(status: str, claim: AmountClaim, account_id: str, row: Mapping, period: Period, fs_div: str,
+          amount, unit: str = "원", note: str | None = None) -> XbrlItem:
+    nm = DISPLAY[account_id] if account_id in (OWNERS, "margin") else row.get("account_nm") or DISPLAY[account_id]
+    return XbrlItem(status, account_id, nm, row.get("period") or period.label, fs_div, amount, claim.value_text,
+                    row.get("rcept_no"), note, unit, row.get("cumulative"), row.get("is_correction"), row.get("column"))
+
+
+def _compare_account(claim: AmountClaim, facts: Sequence[Mapping], corp_code: str, account_id: str, period: Period,
+                     fs_div: str) -> XbrlItem | None:
+    """한 계정·한 연결/별도 기준 비교. 행이 없으면 None. 후보 중 하나라도 맞으면 match."""
+    rows = candidate_rows(facts, corp_code, account_id, period, fs_div)
+    if not rows:
+        return None
+    note = "restated" if len({int(r["amount"]) for r in rows}) > 1 else None
+    for r in rows:
+        if _same_amount(claim, int(r["amount"])):
+            return _item("match", claim, account_id, r, period, fs_div, int(r["amount"]), note=note)
+    return _item("mismatch", claim, account_id, rows[0], period, fs_div, int(rows[0]["amount"]), note=note)
+
+
+def _compare_margin(claim: AmountClaim, facts: Sequence[Mapping], corp_code: str, period: Period,
+                    fs_div: str) -> XbrlItem | None:
     op = select_fact(facts, corp_code, OPERATING, period, fs_div)
     rev = select_fact(facts, corp_code, REVENUE, period, fs_div)
     if not op or not rev or not int(rev["amount"]):
         return None
-    return Decimal(int(op["amount"])) * 100 / Decimal(int(rev["amount"])), op
+    value = Decimal(int(op["amount"])) * 100 / Decimal(int(rev["amount"]))
+    ok = claim.negative == (value < 0) and number_check(claim.value_text, f"{abs(value):.6f}%")
+    return _item("match" if ok else "mismatch", claim, "margin", op, period, fs_div, float(round(value, 2)), "%")
 
 
-def _compare(claim: AmountClaim, facts: Sequence[Mapping], corp_code: str, period: Period,
-             fs_div: str) -> tuple[bool, XbrlItem] | None:
-    """한 연결/별도 기준으로 비교. 행이 없으면 None."""
+def _evaluate(claim: AmountClaim, facts: Sequence[Mapping], corp_code: str, period: Period,
+              fs_div: str) -> XbrlItem | None:
+    """한 연결/별도 기준 결과. 순이익은 후보 계정 중 하나라도 맞으면 match, 후보가 다 있고 다 어긋나면 mismatch,
+    후보가 모자라 판단할 수 없으면 unknown(candidate_missing). 행이 하나도 없으면 None."""
     if claim.account_id == "margin":
-        got = _margin(facts, corp_code, period, fs_div)
-        if got is None:
-            return None
-        value, row = got
-        ok = number_check(claim.value_text, f"{value:.6f}%")
-        return ok, XbrlItem("match" if ok else "mismatch", "margin", "영업이익률", row.get("period") or period.label,
-                            fs_div, float(round(value, 2)), claim.value_text, row.get("rcept_no"))
-    row = select_fact(facts, corp_code, claim.account_id, period, fs_div)
-    if row is None:
+        return _compare_margin(claim, facts, corp_code, period, fs_div)
+    accounts = CANDIDATES.get(claim.account_id, (claim.account_id,))
+    got = [_compare_account(claim, facts, corp_code, a, period, fs_div) for a in accounts]
+    present = [g for g in got if g is not None]
+    if not present:
         return None
-    amount = int(row["amount"])
-    ok = _same_amount(claim, amount)
-    return ok, XbrlItem("match" if ok else "mismatch", claim.account_id,
-                        row.get("account_nm") or DISPLAY[claim.account_id], row.get("period") or period.label,
-                        fs_div, amount, claim.value_text, row.get("rcept_no"))
+    hit = next((g for g in present if g.status == "match"), None)
+    if hit:
+        return hit
+    if len(present) == len(accounts):
+        return present[0]
+    miss = present[0]
+    return XbrlItem("unknown", claim.account_id, DISPLAY[claim.account_id], miss.period, fs_div, None,
+                    claim.value_text, note="candidate_missing")
+
+
+def _merge_note(*notes: str | None) -> str | None:
+    return ",".join(n for n in notes if n) or None
 
 
 def _claim_period(claim: AmountClaim, mentions: list[scope.PeriodMention]) -> Period | None:
-    """주장 앞의 가장 가까운 기간 표현. 앞에 없고 문장에 기간이 하나뿐이면 그것."""
+    """'각각'이면 계정 앞 기간 표현의 같은 순번. 그 밖은 주장 앞의 가장 가까운 기간 표현, 앞에 없고 문장에 기간이
+    하나뿐이면 그것."""
     before = [m for m in mentions if m.start < claim.pos]
+    if claim.period_idx is not None:
+        return before[claim.period_idx].period if claim.period_idx < len(before) else None
     if before:
         return before[-1].period
     return mentions[0].period if len(mentions) == 1 else None
@@ -219,26 +296,30 @@ def check(text: str, facts: Sequence[Mapping], *, corp_code: str, as_of: Period,
     if not claims:
         return XbrlResult("none", [])
     mentions = scope.extract_periods(text, as_of)
-    hint = fs_div_hint(text)
     items: list[XbrlItem] = []
+    prev_end, hint = 0, None
     for c in claims:
-        nm = "영업이익률" if c.account_id == "margin" else DISPLAY[c.account_id]
+        breaks = [b.end() for b in _CLAUSE_BREAK.finditer(text, prev_end, c.pos)]
+        start = max([prev_end] + breaks)
+        hint = fs_div_hint(text[start:c.value_end]) or hint  # 이 계정 절의 표시, 없으면 앞 절을 잇는다
+        prev_end = c.value_end
         period = _claim_period(c, mentions)
         if period is None:
-            items.append(XbrlItem("unknown", c.account_id, nm, None, None, None, c.value_text, note="no_period"))
+            items.append(XbrlItem("unknown", c.account_id, DISPLAY[c.account_id], None, None, None, c.value_text,
+                                  note="no_period", unit="%" if c.account_id == "margin" else "원"))
             continue
         if hint:
-            got = _compare(c, facts, corp_code, period, hint)
+            got = _evaluate(c, facts, corp_code, period, hint)
         else:
-            cfs = _compare(c, facts, corp_code, period, "CFS")
-            ofs = None if cfs and cfs[0] else _compare(c, facts, corp_code, period, "OFS")
-            if ofs and ofs[0]:
-                ofs[1].note = "separate_only"
+            cfs = _evaluate(c, facts, corp_code, period, "CFS")
+            ofs = None if cfs and cfs.status == "match" else _evaluate(c, facts, corp_code, period, "OFS")
+            if ofs and ofs.status == "match":
+                ofs.note = _merge_note("separate_only", ofs.note)
                 got = ofs
             else:
-                got = cfs or ofs
-        items.append(got[1] if got else XbrlItem("unknown", c.account_id, nm, period.label, hint, None,
-                                                 c.value_text, note="no_fact"))
+                got = next((g for g in (cfs, ofs) if g and g.status == "mismatch"), None) or cfs or ofs
+        items.append(got or XbrlItem("unknown", c.account_id, DISPLAY[c.account_id], period.label, hint, None,
+                                     c.value_text, note="no_fact", unit="%" if c.account_id == "margin" else "원"))
     st = [it.status for it in items]
     if "mismatch" in st:
         status = "mismatch"

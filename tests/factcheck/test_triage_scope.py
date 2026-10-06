@@ -129,6 +129,42 @@ def test_comparison_base_is_not_claim_period(text, expected):
     assert labels(text) == expected
 
 
+# ---- 리뷰 반영: 비교 기준·전년 동기·축약 누적·YYYYQn 표기·연도 당김 표시 ----
+
+@pytest.mark.parametrize("text, expected", [
+    ("2025년 매출은 2024년 대비 10.9% 늘었다.", ["2025"]),       # 절대 기간 + 대비는 비교 기준
+    ("매출은 작년 4분기 대비 늘었다.", []),
+    ("2025년 매출이 2024년보다 늘었다.", ["2025"]),
+    ("2025년 3분기 매출은 2024년 3분기에 비해 늘었다.", ["2025Q3"]),
+    ("2025년 3분기 매출은 86.1조원, 전년 동기는 79.1조원이다.", ["2025Q3", "2024Q3"]),  # 문장 속 절대 기간 기준
+    ("전년 동기 매출은 74.6조원이다.", ["2025Q2"]),                # 절대 기간이 없으면 as_of 기준
+    ("2026Q2 매출은 171.5조원이다.", ["2026Q2"]),
+    ("2026H1 매출은 305.4조원이다.", ["2026H1"]),
+    ("2025 Q3 매출은 86.1조원이다.", ["2025Q3"]),
+])
+def test_review_periods(text, expected):
+    assert labels(text) == expected
+
+
+@pytest.mark.parametrize("text", ["3Q25 누적 매출은 239.8조원이다.", "'25.3Q 누적 매출은 239.8조원이다.",
+                                  "2025Q3 누적 매출은 239.8조원이다.", "25.3Q 누계 매출"])
+def test_abbreviated_cumulative(text):
+    (m,) = scope.extract_periods(text, AS_OF)
+    assert m.period.label == "2025Q3" and m.period.cumulative
+
+
+def test_shifted_bare_quarter_marked():
+    assert scope.extract_periods("3분기 매출", AS_OF)[0].shifted is True   # 2026Q3 → 2025Q3로 당김
+    assert scope.extract_periods("2분기 매출", AS_OF)[0].shifted is False
+    assert scope.extract_periods("2025년 3분기 매출", AS_OF)[0].shifted is False
+
+
+def test_generic_word_company_names_excluded():
+    idx = scope.CompanyIndex({"00000002": ["콘텐츠"], SAMSUNG: ["삼성전자"]})
+    assert scope.company_mentions("콘텐츠 매출이 늘었다.", idx) == []
+    assert scope.company_mentions("삼성전자 매출이 늘었다.", idx) == [(SAMSUNG, "삼성전자")]
+
+
 def test_relative_marked():
     ms = scope.extract_periods("작년 매출은 333.6조원이다.", AS_OF)
     assert ms[0].relative is True
@@ -197,11 +233,16 @@ def test_derived_kind(text, kind):
     ("HBM 매출 비중은 40%다.", "derived", "derived:other", None),
     ("2분기 영업이익률은 52.2%다.", "checked", "derived:margin", None),
     ("SK는 2분기 매출 79.3조원을 기록했다.", "other_company", "other_company:SK", None),
-    ("2027년 매출은 400조원으로 예상된다.", "out_of_scope", "future_period", None),
-    ("올해 매출은 350조원을 넘을 것이다.", "out_of_scope", "future_period", None),  # 2026 연간은 as_of(2026H1) 뒤
+    ("2027년 매출은 400조원이다.", "out_of_scope", "future_period", None),
+    ("올해 매출은 350조원이다.", "out_of_scope", "future_period", None),  # 2026 연간은 as_of(2026H1) 뒤
+    # 전망 표지는 기간 검사보다 먼저 본다(검수 안 함)
+    ("2027년 매출은 400조원으로 예상된다.", "out_of_scope", "forecast", None),
+    ("올해 매출은 350조원을 넘을 것이다.", "out_of_scope", "forecast", None),
+    ("3분기 영업이익은 10조원으로 예상된다.", "out_of_scope", "forecast", None),
+    ("2분기 영업이익 목표는 10조원이다.", "out_of_scope", "forecast", None),
     ("목표주가 12만원을 제시한다.", "out_of_scope", "market", None),
     ("매출은 350조원으로 예상된다.", "out_of_scope", "forecast", None),
-    ("2025년 매출은 333조원으로 추정된다.", "checked", None, None),   # 지난 기간이면 검수(재현율 우선)
+    ("2025년 매출은 333조원으로 추정된다.", "out_of_scope", "forecast", None),
 ])
 def test_assess(text, category, reason, report_types):
     s = scope.assess(text, SAMSUNG, as_of=AS_OF, names=NAMES)
