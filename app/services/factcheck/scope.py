@@ -338,6 +338,14 @@ def company_mentions(text: str, names: Mapping[str, Iterable[str]] | CompanyInde
     return [(c, n) for c, n, _, _ in _as_index(names).mentions(text)]
 
 
+def company_names_in(text: str, names: Mapping[str, Iterable[str]] | CompanyIndex) -> dict[str, str]:
+    """문장 속 상장사 언급 corp_code → 사전 이름(나온 순서, 회사마다 첫 이름). 주어 없는 문장의 회사 상속에 쓴다."""
+    out: dict[str, str] = {}
+    for c, n in company_mentions(text, names):
+        out.setdefault(c, n)
+    return out
+
+
 def _subject_end(text: str) -> int:
     """주어 자리 끝 위치: 첫 은·는·이·가로 끝나는 토큰의 끝. 없으면 문장 끝."""
     for m in _TOKEN.finditer(text):

@@ -73,6 +73,23 @@ def _ambiguous(sc: scope.Scope) -> bool:
     return sc.ambiguous_period or any(m.shifted for m in sc.mentions)
 
 
+def _inherited_subject(named: Sequence[dict[str, str]], i: int, corp_code: str) -> str | None:
+    """주어 없는 문장의 회사 상속. 문장 i에 회사 이름이 하나도 없으면(지시어 '같은 회사·동사·당사'도 이름이 아니다)
+    가장 가까운 '회사 이름 있는' 앞 문장을 본다: 선택 회사만이면 None(지금처럼 판정), 다른 회사만이면
+    'other_company_inherited:<회사명>', 선택 회사와 다른 회사가 함께면 'subject_ambiguous'. 앞에 없으면 None."""
+    if named[i]:
+        return None
+    for j in range(i - 1, -1, -1):
+        cs = named[j]
+        if not cs:
+            continue
+        others = [n for c, n in cs.items() if c != corp_code]
+        if not others:
+            return None
+        return "subject_ambiguous" if corp_code in cs else f"other_company_inherited:{others[0]}"
+    return None
+
+
 def _inherited_period(sentence: str, own: Sequence[Sequence[scope.PeriodMention]], i: int,
                       blocked: Sequence[bool] = ()) -> Period | None:
     """앞 문장 기간 상속: 문장 i에 해석된 기간이 없고 상대 기간 표현('같은 분기' 등)만 있으면, 앞쪽 문장 중 기간이
@@ -456,18 +473,26 @@ class FactcheckPipeline:
                                           user_id=self.user_id)
         todo: list[tuple[int, str, str, str | None, scope.Scope, xbrl_check.XbrlResult, str]] = []
         own = [scope.extract_periods(s, as_of_p) for s in sentences]
-        # 기간을 물려줄 수 없는 문장: 다른 회사가 주어(그 회사의 기간), force_check면 범위 밖 문장도
-        blocked = [scope.other_company(s, corp_code, self.names) is not None or
+        named = [scope.company_names_in(s, self.names) for s in sentences]
+        subjects = [_inherited_subject(named, i, corp_code) for i in range(len(sentences))]
+        # 기간을 물려줄 수 없는 문장: 다른 회사가 주어(그 회사의 기간), 회사를 이어받아 건너뛴 문장, force_check면
+        # 범위 밖 문장도
+        blocked = [scope.other_company(s, corp_code, self.names) is not None or subjects[i] is not None or
                    (force_check and scope.assess(s, corp_code, as_of=as_of_p, names=self.names).category != "checked")
-                   for s in sentences]
+                   for i, s in enumerate(sentences)]
         for i, (s, t) in enumerate(zip(sentences, tri, strict=True)):
             if not t.check:
                 yield SentenceResult(i, s, t.category, "skipped", [], None, t.reason)
+                continue
+            if subjects[i] and not force_check:  # 앞 문장이 다른 회사(또는 두 회사) 얘기: 검색·JEV 없이 건너뜀
+                yield SentenceResult(i, s, "other_company", "skipped", [], None, subjects[i])
                 continue
             inherited = _inherited_period(s, own, i, blocked)
             inh = f"period_inherited:{inherited.label}" if inherited else None
             sc = scope.assess(s, corp_code, as_of=as_of_p, names=self.names, inherited=inherited)
             category, note = "checked", inh
+            if subjects[i]:  # force_check: 판정은 하되 다른 회사 문장처럼(선택 회사 XBRL로 대조하지 않는다)
+                category, note = "other_company", _join(subjects[i], inh)
             if sc.category != "checked":
                 if not force_check:
                     yield SentenceResult(i, s, sc.category, "skipped", [], None, _join(sc.reason, inh))

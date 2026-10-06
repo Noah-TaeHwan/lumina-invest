@@ -206,11 +206,12 @@ def test_deadline_leaves_rest_busy():
 
 def test_skipped_sentences_do_not_call_store_or_jev():
     store, jev = FakeStore(default=[Q2_PASSAGE]), FakeJev()
-    rs = collect(make(store, jev), "HBM 시장은 더 커질 것으로 보인다.\nSK는 2분기 매출 79.3조원을 기록했다.\n"
-                                   "목표주가 12만원을 제시한다.\nHBM 매출 비중은 40%다.")
+    # 'SK는…' 문장은 맨 뒤(그 뒤의 이름 없는 문장은 회사 상속으로 건너뛰므로 사유별 건너뛰기를 보려면 마지막에)
+    rs = collect(make(store, jev), "HBM 시장은 더 커질 것으로 보인다.\n"
+                                   "목표주가 12만원을 제시한다.\nHBM 매출 비중은 40%다.\nSK는 2분기 매출 79.3조원을 기록했다.")
     got = [(r.category, r.status, r.reason) for r in sorted(rs, key=lambda r: r.idx)]
-    assert got == [("opinion", "skipped", "opinion"), ("other_company", "skipped", "other_company:SK"),
-                   ("out_of_scope", "skipped", "market"), ("derived", "skipped", "derived:other")]
+    assert got == [("opinion", "skipped", "opinion"), ("out_of_scope", "skipped", "market"),
+                   ("derived", "skipped", "derived:other"), ("other_company", "skipped", "other_company:SK")]
     assert store.calls == [] and jev.calls == []
 
 
@@ -997,6 +998,11 @@ def test_no_inherit_from_other_company_sentence():
     rs = _run_text("SK하이닉스의 2025년 2분기 연결 매출은 22.2조원이다. 같은 분기 연결 영업이익은 4.68조원이다.",
                    FakeStore(default=NOISE), FakeJev(), SS_FACTS)
     assert rs[0].category == "other_company"
+    # 회사 상속이 먼저 걸린다(이름 없는 문장 → 앞 문장이 다른 회사): 기간 상속도 하지 않고 건너뜀
+    assert (rs[1].status, rs[1].reason) == ("skipped", "other_company_inherited:SK하이닉스")
+    # 이름이 있는 문장이면 기간만 막힌다(❔)
+    rs = _run_text("SK하이닉스의 2025년 2분기 연결 매출은 22.2조원이다. 삼성전자의 같은 분기 연결 영업이익은 4.68조원이다.",
+                   FakeStore(default=NOISE), FakeJev(), SS_FACTS)
     assert (rs[1].status, rs[1].reason) == ("no_evidence", "period_ambiguous")
 
 
@@ -1009,3 +1015,78 @@ def test_account_name_with_period_word_not_exact():
     rows = [_fact(SAMSUNG, net, 34_451_351_000_000, "2025", "2025-01-01", "2025-12-31", "r1", nm="당기순이익",
                   reprt_code="11011")]
     _not_exact("삼성전자의 2025년 연결 반기순이익은 34.5조원이다.", rows)
+
+
+# ---- 주어 없는 문장의 회사 상속: 가장 가까운 '회사 이름 있는' 앞 문장의 회사를 잇는다 ----
+
+SK_S = "SK하이닉스의 2025년 2분기 연결 영업이익은 9.2조원이다."
+PLAIN = "2025년 2분기 연결 영업이익은 4.7조원이다."
+
+
+def _calls_for(store, jev, text):
+    return [c for c in store.calls if c["query"] == text], [c for c in jev.calls if c["claim"] == text]
+
+
+def test_unnamed_sentence_after_other_company_is_skipped():
+    store, jev = FakeStore(default=NOISE), FakeJev()
+    rs = _run_text(f"{SK_S} {PLAIN}", store, jev, SS_FACTS)
+    assert (rs[0].status, rs[0].category) == ("skipped", "other_company")
+    assert (rs[1].status, rs[1].category, rs[1].reason) == ("skipped", "other_company",
+                                                             "other_company_inherited:SK하이닉스")
+    assert store.calls == [] and jev.calls == []
+
+
+def test_unnamed_sentence_after_selected_company_is_judged():
+    rs = _run_text(f"삼성전자의 2025년 2분기 연결 매출은 74.6조원이다. {PLAIN}", FakeStore(default=NOISE), FakeJev(),
+                   SS_FACTS)
+    assert (rs[1].status, rs[1].reason) == ("supported", "xbrl_exact")
+
+
+def test_named_sentence_does_not_inherit():
+    rs = _run_text(f"{SK_S} 삼성전자의 {PLAIN}", FakeStore(default=NOISE), FakeJev(), SS_FACTS)
+    assert (rs[1].status, rs[1].reason) == ("supported", "xbrl_exact")
+
+
+def test_two_companies_before_unnamed_is_subject_ambiguous():
+    store, jev = FakeStore(default=NOISE), FakeJev()
+    rs = _run_text("삼성전자와 SK하이닉스는 2025년 2분기에 흑자였다. 영업이익은 4.7조원이다.", store, jev, SS_FACTS)
+    assert (rs[1].status, rs[1].category, rs[1].reason) == ("skipped", "other_company", "subject_ambiguous")
+    assert _calls_for(store, jev, "영업이익은 4.7조원이다.") == ([], [])
+
+
+def test_nearest_named_sentence_is_used_across_unnamed_ones():
+    store, jev = FakeStore(default=NOISE), FakeJev()
+    rs = _run_text(f"{SK_S} 2025년 2분기 연결 매출은 22.2조원이다. {PLAIN}", store, jev, SS_FACTS)
+    for i in (1, 2):
+        assert (rs[i].status, rs[i].reason) == ("skipped", "other_company_inherited:SK하이닉스"), i
+    assert store.calls == [] and jev.calls == []
+
+
+def test_first_unnamed_sentence_is_selected_company():
+    rs = _run_text(f"{PLAIN} {SK_S}", FakeStore(default=NOISE), FakeJev(), SS_FACTS)
+    assert (rs[0].status, rs[0].reason) == ("supported", "xbrl_exact")
+
+
+@pytest.mark.parametrize("pronoun", ["같은 회사의 ", "동사의 ", "이 회사의 ", "당사의 "])
+def test_pronoun_subject_inherits_like_unnamed(pronoun):
+    rs = _run_text(f"{SK_S} {pronoun}{PLAIN}", FakeStore(default=NOISE), FakeJev(), SS_FACTS)
+    assert (rs[1].status, rs[1].reason) == ("skipped", "other_company_inherited:SK하이닉스")
+
+
+def test_subject_inherited_sentence_does_not_pass_period():
+    # 회사를 이어받아 건너뛴 문장은 기간도 물려주지 않는다(그 회사의 기간)
+    rs = _run_text(f"{SK_S} 2025년 2분기 연결 매출은 22.2조원이다. 삼성전자의 같은 분기 연결 영업이익은 4.7조원이다.",
+                   FakeStore(default=NOISE), FakeJev(), SS_FACTS)
+    assert (rs[2].status, rs[2].reason) == ("no_evidence", "period_ambiguous")
+
+
+def test_force_check_judges_subject_inherited_sentence_without_selected_xbrl():
+    jev = FakeJev()
+    p = FactcheckPipeline(store=FakeStore(default=NOISE), jev=jev, facts=SS_FACTS, names=NAMES, user_id="anon:test")
+
+    async def go():
+        return [r async for r in p.check(SAMSUNG, f"{SK_S} {PLAIN}", as_of="2026H1", force_check=True)]
+    rs = by_idx(asyncio.run(go()))
+    assert rs[1].category == "other_company" and rs[1].xbrl is None
+    assert "other_company_inherited:SK하이닉스" in rs[1].reason and "xbrl_exact" not in rs[1].reason
+    assert any(c["claim"] == PLAIN for c in jev.calls)

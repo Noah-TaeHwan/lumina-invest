@@ -42,6 +42,8 @@ const REASONS = {
   future_period: '아직 공시되지 않은 기간',
   not_claim: '사실 주장이 아님',
   other_company: '다른 회사가 주어',
+  other_company_inherited: '앞 문장이 다른 회사 얘기라 이 문장은 검수하지 않음',
+  subject_ambiguous: '앞 문장에 두 회사가 함께 나와 어느 회사 얘기인지 알 수 없음',
   derived: '파생 지표',
   rule: '규칙으로 검수 대상',
   jev: '판정 모델 분류',
