@@ -280,16 +280,25 @@ _TOKEN = re.compile(r"[^\s,·/()\[\]\"“”‘’'「」]+")
 _EDGE = re.compile(r"[.!?。:;…]+$")
 _SUBJECT_END = ("은", "는", "이", "가")
 _NGRAM = 3
+# 흔한 낱말과 같은 상장사명. 법인 표시('(주)'·'㈜'·'주식회사')가 붙거나 선택 회사일 때만 회사로 본다. 근거: 리드 채점 세트
+# v2·#66/#67 교차 검수에서 '나노 공정', '도움이 되면서', '레이 트레이싱'이 다른 회사 주어로 잡혀 문장을 건너뛰었다. 뒤쪽은
+# evidence.subject의 일상어 상장사명(전에는 색인에서 아예 뺐다 — 이제 같은 규칙으로 법인 표시·선택 회사면 회사로 본다)
+COMMON_WORD_COMPANY_NAMES = tuple(dict.fromkeys(
+    ("도움", "나노", "레이", "대상", "동방", "노을", "레몬", "라임", "기린", "리드") + tuple(COMMON_WORD_NAMES)))
+_MARK_BEFORE = re.compile(r"(?:㈜|\(\s*주\s*\)|주식회사)\s*$")
+_MARK_AFTER = re.compile(r"\s*(?:㈜|\(\s*주\s*\))")
+_MARK_IN = re.compile(r"㈜|\(\s*주\s*\)|주식회사")
 
 
 class CompanyIndex:
-    """상장사명 사전(corp_code → 이름들)을 비교용 표기로 색인한다. 일상어와 겹치는 이름('대상')·일반명사
-    (evidence.subject의 일반명사 목록, '콘텐츠')·1자 이름은 뺀다."""
+    """상장사명 사전(corp_code → 이름들)을 비교용 표기로 색인한다. 일반명사(evidence.subject의 일반명사 목록,
+    '콘텐츠')·1자 이름은 뺀다. 흔한 낱말과 같은 이름(COMMON_WORD_COMPANY_NAMES)은 색인하되 mentions에서 거른다."""
 
     def __init__(self, names: Mapping[str, Iterable[str]]):
         self.names = {c: list(ns) for c, ns in names.items()}
         self._idx: dict[str, tuple[str, str]] = {}
-        common = {normalize(n) for n in COMMON_WORD_NAMES} | {normalize(n) for n in GENERIC_WORDS}
+        common = {normalize(n) for n in GENERIC_WORDS}
+        self._common_word = {normalize(n) for n in COMMON_WORD_COMPANY_NAMES}
         for corp, ns in self.names.items():
             for n in ns:
                 k = normalize(n)
@@ -315,15 +324,18 @@ class CompanyIndex:
                 return hit
         return None
 
-    def mentions(self, text: str) -> list[tuple[str, str, int, int]]:
-        """문장 속 상장사 언급 (corp_code, 사전 이름, 시작, 끝). 연속 토큰 n개(≤3)까지 묶어 긴 이름부터 맞춘다."""
+    def mentions(self, text: str, corp_code: str | None = None) -> list[tuple[str, str, int, int]]:
+        """문장 속 상장사 언급 (corp_code, 사전 이름, 시작, 끝). 연속 토큰 n개(≤3)까지 묶어 긴 이름부터 맞춘다.
+        흔한 낱말과 같은 이름은 법인 표시가 붙었거나 선택 회사(corp_code)일 때만 남긴다."""
         toks = [(m.group(0), m.start(), m.end()) for m in _TOKEN.finditer(text)]
         out, i = [], 0
         while i < len(toks):
             for n in range(min(_NGRAM, len(toks) - i), 0, -1):
                 hit = self.lookup(" ".join(t for t, _, _ in toks[i:i + n]))
                 if hit:
-                    out.append((hit[0], hit[1], toks[i][1], toks[i + n - 1][2]))
+                    a, b = toks[i][1], toks[i + n - 1][2]
+                    if hit[0] == corp_code or normalize(hit[1]) not in self._common_word or _legal_marked(text, a, b):
+                        out.append((hit[0], hit[1], a, b))
                     i += n
                     break
             else:
@@ -331,29 +343,51 @@ class CompanyIndex:
         return out
 
 
+def _legal_marked(text: str, a: int, b: int) -> bool:
+    """text[a:b]의 이름에 법인 표시('(주)'·'㈜'·'주식회사')가 앞뒤나 안에 붙어 있나."""
+    return bool(_MARK_BEFORE.search(text[:a]) or _MARK_AFTER.match(text, b) or _MARK_IN.search(text[a:b]))
+
+
 def _as_index(names: Mapping[str, Iterable[str]] | CompanyIndex) -> CompanyIndex:
     return names if isinstance(names, CompanyIndex) else CompanyIndex(names)
 
 
-def company_mentions(text: str, names: Mapping[str, Iterable[str]] | CompanyIndex) -> list[tuple[str, str]]:
-    """문장 속 상장사 언급 (corp_code, 사전 이름) 목록(나온 순서)."""
-    return [(c, n) for c, n, _, _ in _as_index(names).mentions(text)]
+def company_mentions(text: str, names: Mapping[str, Iterable[str]] | CompanyIndex,
+                     corp_code: str | None = None) -> list[tuple[str, str]]:
+    """문장 속 상장사 언급 (corp_code, 사전 이름) 목록(나온 순서). corp_code는 선택 회사(흔한 낱말 이름 규칙)."""
+    return [(c, n) for c, n, _, _ in _as_index(names).mentions(text, corp_code)]
 
 
-def company_names_in(text: str, names: Mapping[str, Iterable[str]] | CompanyIndex) -> dict[str, str]:
-    """문장 속 상장사 언급 corp_code → 사전 이름(나온 순서, 회사마다 첫 이름). 주어 없는 문장의 회사 상속에 쓴다."""
+def company_names_in(text: str, names: Mapping[str, Iterable[str]] | CompanyIndex,
+                     corp_code: str | None = None) -> dict[str, str]:
+    """문장 속 상장사 언급 corp_code → 사전 이름(나온 순서, 회사마다 첫 이름)."""
     out: dict[str, str] = {}
-    for c, n in company_mentions(text, names):
+    for c, n in company_mentions(text, names, corp_code):
         out.setdefault(c, n)
     return out
 
 
-def subject_company_names(text: str, names: Mapping[str, Iterable[str]] | CompanyIndex) -> dict[str, str]:
-    """주어 자리(첫 은·는·이·가 토큰까지 — other_company와 같은 규칙)에 나온 상장사 corp_code → 사전 이름."""
+def subject_company_names(text: str, names: Mapping[str, Iterable[str]] | CompanyIndex,
+                          corp_code: str | None = None) -> dict[str, str]:
+    """주어 자리(첫 은·는·이·가 토큰까지 — other_company와 같은 규칙)에 나온 상장사 corp_code → 사전 이름.
+    주어 없는 문장의 회사 상속에 쓴다."""
     end = _subject_end(text)
     out: dict[str, str] = {}
-    for c, n, s, _ in _as_index(names).mentions(text):
+    for c, n, s, _ in _as_index(names).mentions(text, corp_code):
         if s < end:
+            out.setdefault(c, n)
+    return out
+
+
+def topic_company_names(text: str, names: Mapping[str, Iterable[str]] | CompanyIndex,
+                        corp_code: str | None = None) -> dict[str, str]:
+    """주어 자리에서 회사 이름이 은·는·이·가와 바로 붙은 상장사('SK하이닉스는'). 숫자 없는 문장도 회사 문맥 기준이 되는
+    경우다. 나열·수식('LG 등', '기아 등')·'의'로 붙은 이름은 아니다."""
+    end = _subject_end(text)
+    out: dict[str, str] = {}
+    for c, n, s, e in _as_index(names).mentions(text, corp_code):
+        seg = _EDGE.sub("", text[s:e])
+        if s < end and seg.endswith(_SUBJECT_END) and normalize(seg[:-1]) == normalize(n):
             out.setdefault(c, n)
     return out
 
@@ -369,7 +403,7 @@ def _subject_end(text: str) -> int:
 def other_company(text: str, corp_code: str, names: Mapping[str, Iterable[str]] | CompanyIndex) -> str | None:
     """주어 자리에 선택 회사가 없고 다른 상장사가 있으면 그 이름. 선택 회사가 함께 있으면 None(검수, 재현율 우선)."""
     end = _subject_end(text)
-    found = [(c, n) for c, n, s, _ in _as_index(names).mentions(text) if s < end]
+    found = [(c, n) for c, n, s, _ in _as_index(names).mentions(text, corp_code) if s < end]
     if any(c == corp_code for c, _ in found):
         return None
     return next((n for c, n in found if c != corp_code), None)

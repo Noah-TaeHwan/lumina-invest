@@ -61,7 +61,7 @@ def rule_triage(text: str, *, corp_code: str, names: Mapping[str, Iterable[str]]
         return Triage(False, "opinion", "not_claim:lead")
     if _DIGIT.search(text):
         return Triage(True, "checked", "rule:number")
-    if scope.company_mentions(text, names):
+    if scope.company_mentions(text, names, corp_code):
         return Triage(True, "checked", "rule:company")
     if scope.extract_periods(text, as_of):
         return Triage(True, "checked", "rule:period")

@@ -493,3 +493,60 @@ def test_no_period_sentence_searches_recent_reports():
     assert p.period_assumed and sorted(p.search_periods) == sorted(scope.recent_periods(AS_OF))
     s = scope.assess("2025년 매출은 333.6조원이다.", SAMSUNG, as_of=AS_OF, names=NAMES)   # 기간 있는 문장은 그대로
     assert not s.period_assumed and s.search_periods == scope.search_periods([Period(2025, "year")])
+
+
+# ---- 흔한 낱말과 같은 상장사명: 법인 표시가 붙거나 선택 회사일 때만 회사로 본다 ----
+
+NANO = "00994994"
+CW_NAMES = {**NAMES, NANO: ["나노"], "00450728": ["도움"], "00120021": ["LG"]}
+
+
+def test_common_word_company_names_constant():
+    assert {"도움", "나노", "레이", "대상", "동방", "노을", "레몬", "라임", "기린", "리드"} <= set(scope.COMMON_WORD_COMPANY_NAMES)
+
+
+@pytest.mark.parametrize("text, corp, want", [
+    ("나노 공정 비중이 20%다.", SAMSUNG, {}),
+    ("가격 상승도 도움이 되면서 삼성전자의 영업이익은 4.7조원이었다.", SAMSUNG, {}),  # 주어 자리는 '도움이'까지
+    ("(주)나노의 영업이익은 9.2조원이다.", SAMSUNG, {NANO: "나노"}),
+    ("㈜나노의 영업이익은 9.2조원이다.", SAMSUNG, {NANO: "나노"}),
+    ("주식회사 나노의 영업이익은 9.2조원이다.", SAMSUNG, {NANO: "나노"}),
+    ("나노(주)의 영업이익은 9.2조원이다.", SAMSUNG, {NANO: "나노"}),
+    ("나노의 영업이익은 9.2조원이다.", NANO, {NANO: "나노"}),          # 선택 회사
+    ("LG의 영업이익은 9.2조원이다.", SAMSUNG, {"00120021": "LG"}),      # 목록 밖 이름은 그대로
+])
+def test_common_word_names_same_rule_in_three_helpers(text, corp, want):
+    assert scope.subject_company_names(text, CW_NAMES, corp) == want
+    cn = scope.company_names_in(text, CW_NAMES, corp)
+    assert all(cn.get(c) == n for c, n in want.items())
+    if NANO not in want:
+        assert NANO not in cn and "00450728" not in cn
+    other = next((n for c, n in want.items() if c != corp), None)
+    assert scope.other_company(text, corp, CW_NAMES) == other
+
+
+def test_common_word_name_not_in_company_names_in():
+    assert scope.company_names_in("가격 상승도 도움이 되면서 삼성전자의 영업이익은 4.7조원이었다.", CW_NAMES, SAMSUNG) == \
+        {SAMSUNG: "삼성전자"}
+    assert scope.company_names_in("2분기 영업이익은 4.7조원이며 나노 공정이 적용됐다.", CW_NAMES, SAMSUNG) == {}
+    assert scope.company_names_in("2분기 영업이익은 4.7조원이며 나노 공정이 적용됐다.", CW_NAMES, NANO) == {NANO: "나노"}
+
+
+@pytest.mark.parametrize("text, want", [
+    ("SK하이닉스는 견조한 실적을 냈다.", {HYNIX: "SK하이닉스"}),
+    ("SK하이닉스가 신제품을 냈다.", {HYNIX: "SK하이닉스"}),
+    ("애플과 LG 등 주요 고객사 수요가 견조했다.", {}),
+    ("모바일 부문은 기아 등 자동차 고객 확대로 성장했다.", {}),
+    ("도움이 컸다.", {}),
+    ("SK하이닉스의 실적이 좋았다.", {}),     # '의'로 붙은 이름은 숫자 없으면 기준이 아니다
+])
+def test_topic_company_names(text, want):
+    assert scope.topic_company_names(text, {**CW_NAMES, "00106641": ["기아"]}, SAMSUNG) == want
+
+
+def test_rule_triage_common_word_name_only_for_selected_or_marked():
+    def reason(text, corp):
+        return triage.rule_triage(text, corp_code=corp, names=CW_NAMES, as_of=AS_OF).reason
+    assert reason("나노는 공정을 확대했다.", NANO) == "rule:company"        # 선택 회사
+    assert reason("(주)나노는 공정을 확대했다.", SAMSUNG) == "rule:company"  # 법인 표시
+    assert reason("나노 공정을 확대했다.", SAMSUNG) != "rule:company"
