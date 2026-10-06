@@ -7,8 +7,8 @@
   DB·로그에는 어느 것도 쓰지 않는다.
 - 상한: job 개수(max_jobs, 만료 전 끝난 job 포함), 동시 실행(max_running), 보관 글자 수 추정(max_chars). 넘으면 StoreBusy.
   자리는 예약(await) 전에 동기로 잡고(admit), 실패하면 돌려준다(release) — 경쟁 요청이 상한을 넘지 못한다.
-- 만료: 조회는 즉시 막고, 백그라운드 sweeper가 주기적으로 지우며 그 job의 작업을 취소하고 끝날 때까지 기다린다
-  (원문이 담긴 작업 프레임이 15분을 넘겨 남지 않는다).
+- 만료: 조회 시점에 15분이 지났으면 그 자리에서 지우고 작업을 취소한다(B8). 백그라운드 sweeper도 주기적으로 지우며
+  작업을 취소하고 끝날 때까지 기다린다(원문이 담긴 작업 프레임이 15분을 넘겨 남지 않는다).
 - 정산 작업(track)도 여기서 들고 있다가 종료 때 기다린다(DB를 닫기 전에 정산이 끝나야 한다).
 # ponytail: 단일 인스턴스 메모리 저장, 다중 인스턴스면 Redis로
 """
@@ -17,18 +17,23 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import hmac
+import json
+import logging
 import secrets
 import time
 from dataclasses import dataclass, field
 from typing import Awaitable, Callable
 
 TTL_S = 15 * 60
+JOB_DEADLINE_S = 180.0  # 파이프라인 실행 하나의 상한(문장별 혼잡 ⊘ 처리는 파이프라인 몫, D9)
 STATUSES = ("supported", "contradicted", "no_evidence", "unjudged", "skipped")
 MAX_JOBS = 300
 MAX_RUNNING = 8
 MAX_CHARS = 3_000_000  # 보관 글자 수 추정 합(입력 + 문장당 근거 문단 여유), 대략 수십 MB 이하
 EVIDENCE_CHARS_PER_SENTENCE = 2_000
 SWEEP_S = 30.0
+
+log = logging.getLogger("app.factcheck.jobs")
 
 
 def owner_hash(cookie: str) -> str:
@@ -127,12 +132,39 @@ class JobStore:
         self._jobs[job.id] = job
         return job
 
+    def _expired(self, job: Job) -> bool:
+        return job.created < self._now() - self.ttl_s
+
+    def _evict(self, job: Job) -> None:
+        """만료 job을 지금 지우고 작업을 취소한다(취소가 끝나기를 종료 때 기다리도록 붙잡아 둔다)."""
+        if self._jobs.get(job.id) is job:
+            del self._jobs[job.id]
+        tasks = list(job.tasks)
+        for t in tasks:
+            t.cancel()
+        if tasks:
+            self.track(asyncio.gather(*tasks, return_exceptions=True))
+
     def get(self, job_id: str, owner: str) -> Job | None:
-        """job_id와 소유자 해시가 둘 다 맞고 만료 전일 때만 돌려준다."""
+        """job_id와 소유자 해시가 둘 다 맞고 만료 전일 때만 돌려준다. 만료됐으면 그 자리에서 지운다."""
         job = self._jobs.get(job_id)
-        if job is None or job.created < self._now() - self.ttl_s or not hmac.compare_digest(job.owner, owner):
+        if job is None:
+            return None
+        if self._expired(job):
+            self._evict(job)
+            return None
+        if not hmac.compare_digest(job.owner, owner):
             return None
         return job
+
+    def alive(self, job: Job) -> bool:
+        """그 job이 아직 저장소에 있고 만료 전인가(예약을 기다린 뒤 다시 확인할 때 쓴다)."""
+        if self._jobs.get(job.id) is not job:
+            return False
+        if self._expired(job):
+            self._evict(job)
+            return False
+        return True
 
     def expires_in(self, job: Job) -> int:
         """만료까지 남은 초."""
@@ -174,8 +206,8 @@ class JobStore:
                         await also()
                 except asyncio.CancelledError:
                     raise
-                except Exception:  # noqa: BLE001 — 한 번 실패해도 다음 주기에 다시 한다
-                    pass
+                except Exception as exc:  # noqa: BLE001 — 한 번 실패해도 다음 주기에 다시 한다
+                    log.error(json.dumps({"event": "factcheck_sweep_failed", "error": type(exc).__name__}))
         if self._sweeper is None or self._sweeper.done():
             self._sweeper = asyncio.ensure_future(loop())
 
@@ -189,9 +221,14 @@ class JobStore:
     async def drain(self) -> None:
         """실행 중 작업과 정산 작업이 모두 끝날 때까지 기다린다(테스트·종료용)."""
         while True:
-            tasks = [t for job in self._jobs.values() for t in job.tasks] + list(self._settling)
+            for f in [f for f in self._settling if f.done()]:
+                self._settling.discard(f)  # 제거 콜백이 아직 안 돌았어도 끝난 항목은 뺀다(B1: 무한 반복 방지)
+            tasks = [t for job in self._jobs.values() for t in job.tasks if not t.done()] + list(self._settling)
             if not tasks:
-                return
+                await asyncio.sleep(0)  # 남은 완료 콜백(작업 → 정산 생성)이 돌 기회를 준 뒤 한 번 더 본다
+                if not any(not t.done() for job in self._jobs.values() for t in job.tasks) and not self._settling:
+                    return
+                continue
             await asyncio.gather(*tasks, return_exceptions=True)
 
     async def close(self) -> None:
