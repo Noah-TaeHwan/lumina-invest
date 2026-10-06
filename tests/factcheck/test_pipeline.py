@@ -1090,3 +1090,48 @@ def test_force_check_judges_subject_inherited_sentence_without_selected_xbrl():
     assert rs[1].category == "other_company" and rs[1].xbrl is None
     assert "other_company_inherited:SK하이닉스" in rs[1].reason and "xbrl_exact" not in rs[1].reason
     assert any(c["claim"] == PLAIN for c in jev.calls)
+
+
+# ---- #66 검수: 상속 기준 앞 문장은 '주어 자리에 회사 이름 + 숫자 있음'일 때만 ----
+
+COMMON_NAMES = {**NAMES, "00450728": ["도움"], "00994994": ["나노"], "00120021": ["LG"], "00000301": ["레이"],
+                "00000302": ["대덕"], "00106641": ["기아"]}
+SS_REV = "삼성전자의 2026년 2분기 연결 매출액은 171.5조원이다."
+PLAIN_Q2 = "2026년 2분기 연결 영업이익은 89.5조원이다."
+
+
+def _run_names(text, names, facts):
+    p = FactcheckPipeline(store=FakeStore(default=NOISE), jev=FakeJev(), facts=facts, names=names, user_id="anon:test")
+
+    async def go():
+        return [r async for r in p.check(SAMSUNG, text, as_of="2026H1")]
+    return by_idx(asyncio.run(go()))
+
+
+@pytest.mark.parametrize("middle", [
+    "환율 상승도 이익에 도움이 됐다.",
+    "나노 공정 비중이 늘었다.",
+    "애플과 LG 등 주요 고객사 수요가 견조했다.",
+    "레이 트레이싱 수요가 늘었다.",
+    "대덕 연구단지 투자도 이어졌다.",
+    "모바일 부문은 기아 등 자동차 고객 확대로 성장했다.",
+    "모바일 부문은 기아 등 자동차 고객 확대로 20% 성장했다.",   # 숫자는 있지만 이름이 주어 자리 밖
+])
+def test_common_word_names_do_not_change_subject(middle, facts):
+    from conftest import prelim_rows
+    rs = _run_names(f"{SS_REV} {middle} {PLAIN_Q2}", COMMON_NAMES, facts + prelim_rows())
+    assert "inherited" not in (rs[2].reason or "") and rs[2].reason != "subject_ambiguous", middle
+    assert (rs[2].status, rs[2].reason) == ("supported", "xbrl_exact"), middle
+
+
+def test_other_company_without_number_does_not_change_subject(facts):
+    # 한계(고정): 숫자 없는 다른 회사 문장은 회사 문맥을 바꾸지 않는다 → 다음 이름 없는 숫자 문장은 선택 회사로 판정
+    from conftest import prelim_rows
+    rs = _run_names(f"SK하이닉스는 견조한 실적을 냈다. {PLAIN_Q2}", COMMON_NAMES, facts + prelim_rows())
+    assert "inherited" not in (rs[1].reason or "")
+    assert (rs[1].status, rs[1].reason) == ("supported", "xbrl_exact")
+
+
+def test_other_company_number_sentence_still_inherits_past_plain_middle():
+    rs = _run_names(f"{SK_S} 환율 상승도 이익에 도움이 됐다. {PLAIN}", COMMON_NAMES, SS_FACTS)
+    assert (rs[2].status, rs[2].reason) == ("skipped", "other_company_inherited:SK하이닉스")
