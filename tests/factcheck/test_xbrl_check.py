@@ -359,3 +359,75 @@ def test_approximate_amount_units(text, status):
 def test_approximate_amount_relative_cap(text, amount, status):
     assert xbrl_check.APPROX_REL_TOL == Decimal("0.10")
     assert run(text, [_row("dart_OperatingIncomeLoss", amount, **SS_Q2)]).status == status
+
+
+# ---- 'A에서 B로' + 비교 기준 기간('전 분기·전년 동기·전년·직전 분기·전기'): A=비교 기준 기간, B=주장 기간 ----
+
+def _hy(amount, period, start, end):
+    return dict(_row("dart_OperatingIncomeLoss", amount, period=period, start=start, end=end), corp_code=HYNIX)
+
+
+HY_ROWS = [_hy(37_610_000_000_000, "2026Q1", "2026-01-01", "2026-03-31"),
+           _hy(60_540_000_000_000, "2026Q2", "2026-04-01", "2026-06-30"),
+           _hy(9_210_000_000_000, "2025Q2", "2025-04-01", "2025-06-30")]
+HY_HEAD = "SK하이닉스의 2026년 2분기 연결 영업이익은 "
+
+
+@pytest.mark.parametrize("tail, status, periods", [
+    ("전 분기 37.6조원에서 60.5조원으로 늘었다.", "match", ["2026Q1", "2026Q2"]),
+    ("직전 분기 37.6조원에서 60.5조원으로 늘었다.", "match", ["2026Q1", "2026Q2"]),
+    ("전기 37.6조원에서 60.5조원으로 늘었다.", "match", ["2026Q1", "2026Q2"]),
+    ("전년 동기 9.2조원에서 60.5조원으로 늘었다.", "match", ["2025Q2", "2026Q2"]),
+    ("전 분기 32.1조원에서 60.5조원으로 늘었다.", "mismatch", ["2026Q1", "2026Q2"]),   # 앞 금액만 틀림
+    ("전 분기 37.6조원에서 70.5조원으로 늘었다.", "mismatch", ["2026Q1", "2026Q2"]),   # 뒤 금액만 틀림
+    ("전년 동기 7.1조원에서 60.5조원으로 늘었다.", "mismatch", ["2025Q2", "2026Q2"]),
+    ("전년 동기 9.2조원에서 70.5조원으로 늘었다.", "mismatch", ["2025Q2", "2026Q2"]),
+    ("37.6조원에서 60.5조원으로 늘었다.", "match", ["2026Q2"]),                        # 비교 기준 표현 없음: 그대로 B만
+])
+def test_from_to_with_comparison_base(tail, status, periods):
+    r = run(HY_HEAD + tail, HY_ROWS, corp=HYNIX)
+    assert r.status == status, tail
+    assert [it.period for it in r.items] == periods, tail
+
+
+def test_from_to_comparison_base_uses_claim_period_not_as_of():
+    # '전년'은 기준 시점이 아니라 주장 기간(2025년)의 전년(2024년)
+    rows = [_row("dart_OperatingIncomeLoss", 43_600_000_000_000), _row("dart_OperatingIncomeLoss", 32_700_000_000_000,
+                                                                       period="2024", start="2024-01-01",
+                                                                       end="2024-12-31")]
+    assert run("2025년 영업이익은 전년 32.7조원에서 43.6조원으로 늘었다.", rows).status == "match"
+    r = run("2025년 영업이익은 전년 30.1조원에서 43.6조원으로 늘었다.", rows)
+    assert r.status == "mismatch" and [it.period for it in r.items] == ["2024", "2025"]
+
+
+@pytest.mark.parametrize("tail", [
+    "전년 37.6조원에서 60.5조원으로 늘었다.",        # 분기 주장의 '전년': 전년 동기인지 전년 연간인지 불확실
+    "전 분기 37.6조원에서 2026년 2분기 60.5조원으로 늘었다.",
+])
+def test_from_to_uncertain_base_is_not_mismatch(tail):
+    r = run(HY_HEAD + tail, HY_ROWS, corp=HYNIX)
+    assert r.status != "mismatch", tail
+
+
+@pytest.mark.parametrize("claim, kind, want", [
+    (Period(2026, "quarter", 1), "prev_q", "2025Q4"),
+    (Period(2026, "quarter", 2), "prev", "2026Q1"),
+    (Period(2026, "half", 1), "prev", "2025H2"),
+    (Period(2026, "half", 2), "prev", "2026H1"),
+    (Period(2025, "year"), "prev", "2024"),
+    (Period(2025, "year"), "prev_y", "2024"),
+    (Period(2026, "quarter", 2), "yoy", "2025Q2"),
+    (Period(2026, "half", 1), "yoy", "2025H1"),
+    (Period(2026, "quarter", 2), "prev_y", None),  # 분기 주장의 '전년': 불확실
+    (Period(2026, "half", 1), "prev_q", None),
+    (Period(2025, "year"), "prev_q", None),
+    (Period(2025, "quarter", 3, cumulative=True), "prev_q", None),  # 누적의 앞 분기: 불확실
+])
+def test_base_period(claim, kind, want):
+    got = xbrl_check._base_period(claim, kind)
+    assert (got.label if got else None) == want
+
+
+def test_base_period_yoy_keeps_cumulative():
+    got = xbrl_check._base_period(Period(2025, "quarter", 3, cumulative=True), "yoy")
+    assert (got.label, got.cumulative) == ("2024Q3", True)

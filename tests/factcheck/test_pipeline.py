@@ -1327,3 +1327,21 @@ def scope_search_periods_2024():
     from app.services.factcheck import scope as sc
     from app.services.factcheck.scope import Period as P
     return sc.search_periods([P(2024, "year")])
+
+
+# ---- 'A에서 B로' + '전 분기': A=비교 기준 기간, B=주장 기간(오경보 ⚠️ 없음) ----
+
+HY_FROM = [_fact(HYNIX, OP, 37_610_000_000_000, "2026Q1", "2026-01-01", "2026-03-31", "r26q1"),
+           _fact(HYNIX, OP, 60_540_000_000_000, "2026Q2", "2026-04-01", "2026-06-30", "r26q2")]
+
+
+@pytest.mark.parametrize("text, contradicted", [
+    ("SK하이닉스의 2026년 2분기 연결 영업이익은 전 분기 37.6조원에서 60.5조원으로 늘었다.", False),
+    ("SK하이닉스의 2026년 2분기 연결 영업이익은 전 분기 32.1조원에서 60.5조원으로 늘었다.", True),
+    ("SK하이닉스의 2026년 2분기 연결 영업이익은 전 분기 37.6조원에서 70.5조원으로 늘었다.", True),
+])
+def test_from_to_previous_quarter_pairing(text, contradicted):
+    r = _check(HYNIX, text, FakeStore(default=NOISE), FakeJev(), HY_FROM)
+    assert (r.status == "contradicted") is contradicted, (text, r.status, r.reason, r.xbrl)
+    if contradicted:
+        assert r.reason == "xbrl_mismatch"

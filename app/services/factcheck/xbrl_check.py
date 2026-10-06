@@ -64,6 +64,9 @@ _APPROX_BEFORE = re.compile(r"(?<![가-힣])(?:약|대략)\s*$")
 _APPROX_AFTER = re.compile(r"\s*(?:가량|여(?![가-힣])|정도|안팎|수준)")
 APPROX_REL_TOL = Decimal("0.10")  # 근사 표시 금액은 실제값 대비 이 비율 안이어야 같다고 본다
 _FROM = re.compile(r"\s*에서")  # 'X에서 Y로'의 '에서'
+# 'A에서 B로'의 A 바로 앞 비교 기준 표현 → 주장 기간(B)에서 비교 기준 기간(A)을 얻는 방법
+_BASE = re.compile(r"(?<![가-힣])(?:(?P<yoy>(?:전년|작년|지난해)\s*동기)|(?P<prev_q>(?:직전|지난|이전|전)\s*분기)"
+                   r"|(?P<prev_y>전년도|전년|작년|지난해)|(?P<prev>전기))\s*$")
 _EACH = re.compile(r"각각")
 # 계정 바로 앞 토큰으로 허용하는 수식어(회사 전체 값). 그 밖의 명사가 앞에 붙으면 제품·부문 값으로 보고 대조하지 않는다
 _QUALIFIERS = frozenset({"연결", "별도", "개별", "총", "전체", "전사", "회사", "당사", "동사", "연간", "분기", "반기",
@@ -87,6 +90,8 @@ class AmountClaim:
     value_start: int = 0  # 문장 안 금액 위치(연결/별도 절 계산용)
     value_end: int = 0
     period_idx: int | None = None  # '각각' 짝: 계정 앞 기간 표현의 순번
+    base_at: int | None = None  # 'A에서 B로' + 비교 기준 표현: 그 표현의 위치(주장 기간은 이 앞의 기간 표현)
+    base_kind: str | None = None  # A 쪽이면 비교 기준 종류(yoy / prev_q / prev_y / prev), B 쪽이면 None
     approx: bool = False  # 근사 표시어가 붙은 금액('약 90조원', '40조원 가량')
 
 
@@ -154,7 +159,8 @@ def amount_claims(text: str, names: CompanyIndex | None = None) -> list[AmountCl
     - 금액 없이 이어진 계정 묶음('매출과 영업이익은 333.6조원, 43.6조원')은 묶음 계정 수와 금액 수가 같을 때만 순서대로
       짝짓고, 다르면 짝을 모르므로 대조하지 않는다.
     - 계정 하나에 '각각 A, B'면 금액마다 하나씩(period_idx = 계정 앞 기간 표현 순번).
-    - 'X에서 Y로'면 Y. 그 밖은 첫 금액.
+    - 'X에서 Y로'면 Y. X 바로 앞에 비교 기준 표현('전 분기·전년 동기·전년·직전 분기·전기')이 있으면 X(비교 기준
+      기간)와 Y(주장 기간) 둘 다. 그 밖은 첫 금액.
     """
     hits = list(_ACCOUNT.finditer(text))
     out: list[AmountClaim] = []
@@ -178,21 +184,25 @@ def amount_claims(text: str, names: CompanyIndex | None = None) -> list[AmountCl
         if len(group) > 1:
             if len(values) != len(group):
                 continue  # 계정과 금액 수가 다르면 짝을 모른다
-            picked = [(g, v, None) for g, v in zip(group, values, strict=True)]
+            picked = [(g, v, None, None, None) for g, v in zip(group, values, strict=True)]
         elif len(values) >= 2 and _EACH.search(text, m.end(), values[0].start()):
-            picked = [(m, v, j) for j, v in enumerate(values)]
+            picked = [(m, v, j, None, None) for j, v in enumerate(values)]
         elif len(values) >= 2 and _FROM.match(text, values[0].end()):
-            picked = [(m, values[1], None)]
+            base = _BASE.search(text, m.end(), values[0].start())
+            if base:  # A=비교 기준 기간, B=주장 기간
+                picked = [(m, values[0], None, base.start(), base.lastgroup), (m, values[1], None, base.start(), None)]
+            else:
+                picked = [(m, values[1], None, None, None)]
         else:
-            picked = [(m, values[0], None)]
-        for g, v, j in picked:
+            picked = [(m, values[0], None, None, None)]
+        for g, v, j, base_at, base_kind in picked:
             raw = v.group(0)
             negative = bool(_LOSS.search(g.group(0))) or raw[0] in _NEG or \
                 bool(_LOSS.search(text, v.end(), min(end, v.end() + 6))) or bool(_LOSS.search(text, m.end(), v.start()))
             approx = bool(_APPROX_BEFORE.search(text, max(0, v.start() - 6), v.start())) or \
                 bool(_APPROX_AFTER.match(text, v.end()))
             out.append(AmountClaim(_GROUP_ACCOUNT[g.lastgroup], g.group(0), raw.lstrip(_NEG), g.start(), negative,
-                                   v.start(), v.end(), j, approx))
+                                   v.start(), v.end(), j, approx=approx, base_at=base_at, base_kind=base_kind))
     return out
 
 
@@ -356,9 +366,33 @@ def _merge_note(*notes: str | None) -> str | None:
     return ",".join(n for n in notes if n) or None
 
 
+def _base_period(p: Period, kind: str) -> Period | None:
+    """주장 기간 p의 비교 기준 기간. 확실하지 않으면 None(대조하지 않는다 — 조기 ⚠️ 없음).
+    yoy(전년 동기): 한 해 전 같은 기간. prev_q(전 분기·직전 분기): 분기 단독의 앞 분기. prev_y(전년·작년): 연간의 앞 해
+    (분기·반기 주장의 '전년'은 전년 동기인지 전년 연간인지 모른다). prev(전기): 같은 단위의 앞 기간."""
+    if kind == "yoy":
+        return Period(p.year - 1, p.kind, p.n, p.cumulative)
+    if p.cumulative:
+        return None
+    if kind == "prev_q" or (kind == "prev" and p.kind == "quarter"):
+        return Period.quarter_of(p.year, p.n - 1) if p.kind == "quarter" else None
+    if kind == "prev" and p.kind == "half":
+        return Period(p.year, "half", 1) if p.n == 2 else Period(p.year - 1, "half", 2)
+    if kind in ("prev_y", "prev") and p.kind == "year":
+        return Period(p.year - 1, "year")
+    return None
+
+
 def _claim_period(claim: AmountClaim, mentions: list[scope.PeriodMention]) -> Period | None:
-    """'각각'이면 계정 앞 기간 표현의 같은 순번. 그 밖은 금액 앞의 가장 가까운 기간 표현('매출은 2025년 333.6조원'도
-    2025), 앞에 없고 문장에 기간이 하나뿐이면 그것."""
+    """'각각'이면 계정 앞 기간 표현의 같은 순번. 'A에서 B로' + 비교 기준 표현이면 그 표현 앞의 가장 가까운 기간이 주장
+    기간(B), A는 그 비교 기준 기간(기준 시점으로 푼 '전 분기'가 아니라 주장 기간에서 구한다). 그 밖은 금액 앞의 가장
+    가까운 기간 표현('매출은 2025년 333.6조원'도 2025), 앞에 없고 문장에 기간이 하나뿐이면 그것."""
+    if claim.base_at is not None:
+        before = [m for m in mentions if m.start < claim.base_at]
+        if not before:
+            return None
+        p = before[-1].period
+        return _base_period(p, claim.base_kind) if claim.base_kind else p
     if claim.period_idx is not None:
         listed = [m for m in mentions if m.start < claim.pos]
         return listed[claim.period_idx].period if claim.period_idx < len(listed) else None
