@@ -223,7 +223,9 @@ def test_search_scope_from_claim_period_and_growth():
     assert growth["report_types"] == ["preliminary"] and "2026Q2" in growth["periods"] and growth["k"] == 8
     last_year = c["작년 HBM 판매가 늘었다."]
     assert "2025" in last_year["periods"] and "2024" not in last_year["periods"] and last_year["report_types"] is None
-    assert c["삼성전자 HBM 판매가 늘었다."]["periods"] is None  # 기간 불명 → 전체
+    # 기간 불명 → 기준 시점 끝에서 12개월 안에 끝나는 보고서만(2026H1 기준)
+    assert sorted(c["삼성전자 HBM 판매가 늘었다."]["periods"]) == sorted(
+        ["2025Q3", "2025Q4", "2025", "2026Q1", "2026Q2", "2026H1"])
 
 
 def test_no_passages_is_no_evidence_without_jev():
@@ -412,8 +414,10 @@ def test_force_check_judges_every_sentence_and_keeps_scope_flag():
     on = by_idx(asyncio.run(go(True)))
     assert len(jev.calls) == 3 and len(store.calls) == 3
     assert (on[0].category, on[0].status) == ("checked", "supported")
-    assert (on[1].category, on[1].status, on[1].reason) == ("other_company", "supported", "other_company:SK")
-    assert (on[2].category, on[2].status, on[2].reason) == ("out_of_scope", "supported", "forecast")
+    assert (on[1].category, on[1].status, on[1].reason) == ("other_company", "supported",
+                                                              "period_assumed:recent,other_company:SK")
+    assert (on[2].category, on[2].status, on[2].reason) == ("out_of_scope", "supported",
+                                                              "period_assumed:recent,forecast")
 
 
 def test_module_level_check_passes_force_check():
@@ -1189,3 +1193,53 @@ def test_list_lead_not_sent_to_jev_triage(monkeypatch):
 def test_list_lead_with_number_not_skipped():
     (r,) = collect(make(FakeStore(default=NOISE), FakeJev()), "2분기 실적을 요약하면 아래와 같다.")
     assert r.status != "skipped"
+
+
+# ---- 기간 없는 문장의 근거 시점(최근 1년 보고서) ----
+
+class PeriodStore(FakeStore):
+    """periods 필터를 실제로 적용하는 가짜 저장소."""
+
+    def __init__(self, rows):
+        super().__init__(default=rows)
+
+    async def search(self, corp_code, query, *, periods=None, report_types=None, k=8):
+        self._hit(corp_code, query, periods, report_types, k)
+        return [p for p in self.default if periods is None or p["period"] in periods][:k]
+
+
+DRAM = "삼성전자는 D램 시장 점유율 1위를 지켰다."
+OLD = passage("D램 시장 점유율 1위를 유지하고 있다.", rcept_no="20250311000001", period="2024", report_type="annual")
+NEW = passage("D램 시장 점유율 1위를 유지하고 있다.", rcept_no="20260814003699", period="2026H1")
+
+
+def test_no_period_sentence_not_supported_by_old_report_only():
+    store, jev = PeriodStore([OLD]), FakeJev({"D램": ("support", 0)})
+    (r,) = collect(make(store, jev), DRAM)
+    assert sorted(store.calls[0]["periods"]) == sorted(["2025Q3", "2025Q4", "2025", "2026Q1", "2026Q2", "2026H1"])
+    assert r.status == "no_evidence" and jev.calls == []
+
+
+def test_no_period_sentence_supported_by_recent_report_marks_reason():
+    store, jev = PeriodStore([OLD, NEW]), TextJev("D램")
+    (r,) = collect(make(store, jev), DRAM)
+    assert (r.status, r.reason) == ("supported", "period_assumed:recent")
+    assert r.evidence[0]["rcept_no"] == "20260814003699"
+
+
+def test_no_period_contradiction_marks_reason():
+    store = PeriodStore([NEW])
+    (r,) = collect(make(store, FakeJev({"D램": ("contradict", 0)})), DRAM)
+    assert (r.status, r.reason) == ("contradicted", "period_assumed:recent")
+
+
+def test_period_sentence_search_unchanged():
+    store = PeriodStore([OLD, NEW])
+    collect(make(store, FakeJev()), "2024년 D램 시장 점유율 1위를 지켰다.")
+    assert store.calls[0]["periods"] == scope_search_periods_2024()
+
+
+def scope_search_periods_2024():
+    from app.services.factcheck import scope as sc
+    from app.services.factcheck.scope import Period as P
+    return sc.search_periods([P(2024, "year")])

@@ -5,6 +5,7 @@
   해석한다. '전년 대비·전분기 대비' 같은 비교 기준은 주장 기간이 아니다. 해석 못 하면 기간 불명(빈 목록).
 - 기간 바로 뒤에 '대비·보다·에 비해'가 오면 비교 기준이라 뺀다('2024년 대비'). '전년 동기'는 문장 속 가장 가까운 절대
   기간의 한 해 전(없으면 as_of 기준). 연도 없는 분기를 한 해 당겨 풀었으면 shifted로 표시한다(⚠️를 내지 않는 근거).
+- 해석된 기간이 없는 문장은 기준 시점 끝에서 RECENT_MONTHS(12)개월 안에 끝나는 보고서만 검색한다(period_assumed).
 - 검색 범위 = 주장 기간 끝 ~ 2년 뒤에 끝나는 보고서 기간(뒤 보고서의 비교값 포함, Codex #7). 기간 불명이면 전체(None).
 - 다른 회사: 주입한 상장사명 사전(corp_code → 이름들)과 토큰 단위로 **정확히** 맞춘다(끝 조사만 뗀다, 부분 일치 금지:
   'SK' ≠ 'SK하이닉스'). 주어 자리(첫 은·는·이·가 토큰까지)에 선택 회사가 없고 다른 상장사가 있으면 범위 밖.
@@ -30,6 +31,7 @@ def normalize(name: str) -> str:
     return corp_names.normalize(_subject_normalize(name))
 
 HORIZON_YEARS = 2  # 주장 기간 뒤 몇 년 안의 보고서까지 검색하나(비교값)
+RECENT_MONTHS = 12  # 기간 없는 문장의 검색 범위: 기준 시점 끝에서 이 개월 안에 끝나는 보고서 기간(설계 D3)
 PRELIM_GROWTH_ACCOUNTS = re.compile(r"매출|영업\s*이익(?!\s*률)")  # 잠정실적 공시에 증감율이 있는 계정
 
 
@@ -411,6 +413,7 @@ class Scope:
     derived: str | None = None
     period_spans: list[tuple[int, int]] = field(default_factory=list)  # 숫자 확인 전에 지울 기간 표현 구간(비교 기준 포함)
     ambiguous_period: bool = False  # 명시 기간 없이 '같은 분기' 같은 상대 기간만 있다(판정 최대 ❔)
+    period_assumed: bool = False  # 해석된 기간이 없어 최근 보고서(recent_periods)로 검색 범위를 정했다
 
     @property
     def periods(self) -> list[Period]:
@@ -466,13 +469,37 @@ def _scan_with(text: str, as_of: Period, inherited: Period | None) -> tuple[list
     return got, sorted(spans + [(m.start, m.end) for m in got])
 
 
+def recent_periods(as_of: Period, months: int = RECENT_MONTHS) -> list[str]:
+    """기간 없는 문장의 검색 기간: as_of 끝에서 months개월 안(이전 끝은 제외)에 끝나는 보고서 기간 표기.
+    예: as_of 2026Q2·2026H1 → 2025Q3·2025Q4·2025·2026Q1·2026Q2·2026H1."""
+    hi = as_of.end
+    y, m = hi.year, hi.month - months
+    while m <= 0:
+        y, m = y - 1, m + 12
+    lo = date(y, m, calendar.monthrange(y, m)[1])
+    hit: dict[str, date] = {}
+    for year in range(lo.year, hi.year + 1):
+        for c in _all_labels(year):
+            if lo < c.end <= hi:
+                hit[c.label] = c.end
+    return sorted(hit, key=lambda k: (hit[k], k))
+
+
+def _periods_or_recent(mentions: Sequence[PeriodMention], as_of: Period) -> tuple[list[str] | None, bool]:
+    """(검색 기간, 최근 보고서로 가정했는가). 해석된 기간이 있으면 search_periods 그대로."""
+    if mentions:
+        return search_periods(m.period for m in mentions), False
+    return recent_periods(as_of), True
+
+
 def period_scope(text: str, as_of: Period, *, inherited: Period | None = None) -> Scope:
     """범위 밖 판별 없이 검색 범위만 붙인 Scope(force_check용). 증감률이면 잠정실적만 검색한다.
     inherited는 앞 문장에서 이어받은 기간(상대 기간 표현만 있는 문장에만 쓴다)."""
     mentions, spans = _scan_with(text, as_of, inherited)
     growth = derived_kind(text) == "growth" and bool(PRELIM_GROWTH_ACCOUNTS.search(text))
-    return Scope("checked", None, mentions, search_periods(m.period for m in mentions),
-                 ["preliminary"] if growth else None, derived_kind(text), spans, relative_only(text, mentions))
+    sp, assumed = _periods_or_recent(mentions, as_of)
+    return Scope("checked", None, mentions, sp, ["preliminary"] if growth else None, derived_kind(text), spans,
+                 relative_only(text, mentions), assumed)
 
 
 def assess(text: str, corp_code: str, *, as_of: Period, names: Mapping[str, Iterable[str]] | CompanyIndex,
@@ -492,15 +519,15 @@ def assess(text: str, corp_code: str, *, as_of: Period, names: Mapping[str, Iter
     amb = relative_only(text, mentions)
     if any(m.period.end > as_of.end for m in mentions):
         return Scope("out_of_scope", "future_period", mentions, period_spans=spans, ambiguous_period=amb)
-    sp = search_periods(m.period for m in mentions)
+    sp, assumed = _periods_or_recent(mentions, as_of)
     kind = derived_kind(text)
     if kind == "growth":
         if PRELIM_GROWTH_ACCOUNTS.search(text):
-            return Scope("checked", "derived:growth", mentions, sp, ["preliminary"], kind, spans, amb)
+            return Scope("checked", "derived:growth", mentions, sp, ["preliminary"], kind, spans, amb, assumed)
         return Scope("derived", "derived:growth_unsupported", mentions, derived=kind, period_spans=spans,
                      ambiguous_period=amb)
     if kind == "margin":
-        return Scope("checked", "derived:margin", mentions, sp, None, kind, spans, amb)
+        return Scope("checked", "derived:margin", mentions, sp, None, kind, spans, amb, assumed)
     if kind == "other":
         return Scope("derived", "derived:other", mentions, derived=kind, period_spans=spans, ambiguous_period=amb)
-    return Scope("checked", None, mentions, sp, period_spans=spans, ambiguous_period=amb)
+    return Scope("checked", None, mentions, sp, period_spans=spans, ambiguous_period=amb, period_assumed=assumed)
