@@ -408,3 +408,178 @@ Stop: CONVERGENCE
 
 > 단위 환산·반올림은 numbers.py로 정했으나, 파생 지표 처리는 '❔ 또는 범위 밖으로 표시'로 둘 중 하나를 고르지 않았고 감지 방법도 없다.
 <!-- gstack:office-hours:concerns:end -->
+
+---
+
+# Engineering Review (gstack plan-eng-review, 2026-10-06)
+
+검토 대상: 이 문서(APPROVED + 2026-10-06 추가 결정). 검토·결정: AI 리드(Claude Code). 노아 지시("이런거를 나한테 묻지 말고, 너가 하나씩 직접 리드해")에 따라 각 결정은 질문 대신 **AI 리드 자동 결정**으로 정하고 근거를 남겼다. 노아는 아래 어느 결정이든 뒤집을 수 있다.
+
+## Step 0: Scope Challenge
+
+- **이미 있는 것(재사용):** 문장 분리 `evidence/claims.claim_spans`·`is_not_claim`, 숫자 대조 `evidence/numbers.py`(단위 환산·반올림·표 단위), 판정 `evidence/judge.py`(문단 8개 묶음 JEV 1회, `supported/contradicted/no_evidence/unjudged`), JEV 클라이언트 `app/lib/jev.py`(키 파일·토큰 상한), 문단 분해 `evidence/passages.py`, DART 클라이언트 `evidence/dart.py`(`list.json`·`document.xml`·`corpCode.xml`), Qdrant 저장소 `evidence/store.py`, 일일 한도 설정 `EVIDENCE_DAILY_*`, 폴링형 실행 화면 패턴(`/api/evidence/runs/{id}`).
+- **없는 것(새로):** 다문서·전체 절 수집과 기간 메타데이터, XBRL 재무 수치(OpenDART `fnlttSinglAcntAll`, 저장소 미사용), 1단계 검수 대상 분류, 범위 밖 판별(다른 회사·기간·파생 지표), 익명 한도, 팩트체커 화면, 배포 프로필.
+- **핵심 구조 결정(D1, AI 리드 자동 결정):** 새 코드는 `app/services/factcheck/`에 두고 **`app/services/evidence/*.py`는 고치지 않는다.** 그 폴더는 A-2~A-4 사전등록의 `code_sha256` 대상이라 고치면 동결 대조가 깨진다(재현은 동결 커밋에서 가능하지만 불필요한 소음). 재사용은 import로만 한다. 새 Qdrant 컬렉션 `factcheck_passages`를 써서 근거 모드의 `evidence_passages`와 섞지 않는다.
+- **화면 결정(D2):** 원본 `app.html`(메뉴 50여 개)을 고치지 않고 **새 독립 페이지 `public/factcheck.html` + `public/js/factcheck.js`**를 만든다. 배포 프로필에서 루트(`/`)가 이 페이지를 연다. 원본 메뉴 '숨김' 작업이 통째로 사라진다(가장 작은 변경).
+- **복잡도:** 새 파일 약 12~16개(서비스 6, 라우트 1, 마이그레이션 1, 페이지 2, compose·문서 2, 테스트 4~5), 새 서비스 성격 구성요소 4개(수집기·분류기·XBRL 대조기·파이프라인). 8파일·2서비스 기준을 넘지만, 기능 목록은 이미 설계에서 승인됐고 더 작은 배치는 없다(각 구성요소가 하나의 책임). → **scope accepted as-is**, 배치는 위 D1·D2로 오히려 원본 수정이 줄었다.
+
+## 1. Architecture
+
+```
+[factcheck.html] --POST /api/factcheck {corp_code, text, source}--> [routes/factcheck.py]
+     ^                                                                  | 한도 확인(익명: IP 해시, 로그인: 사용자)
+     |  GET /api/factcheck/{job_id} (폴링, 문장별 결과 누적)               v
+     +-------------------------------------------------------- [job store: 메모리, TTL 15분, 원문 미저장 영속]
+                                                                        |
+                       factcheck/pipeline.check(corp_code, text) -------+
+                         |
+   0 문장 분리 ── evidence.claims.claim_spans
+   1 분류 ─────── factcheck/triage: 규칙(숫자·회사명·기간 → 검수) → 나머지 JEV 묶음 분류 1회
+                  factcheck/scope:  다른 회사(상장사 사전) / 기간 해석 / 파생 지표 → 범위 밖
+   2 대조 ─────── 기간 → 후보 문서(payload 필터 period·report_type) → Qdrant 검색 8개
+                  ├─ 재무 계정 주장: factcheck/xbrl 코드 대조(연결/별도·기간·계정) ── 일치/불일치/모름
+                  └─ evidence.numbers 숫자 확인 → evidence.judge JEV 판정
+   3 표시 ─────── 배지·근거 문단·보고서명·기간·XBRL 값(코드), LLM 없음
+```
+
+- **D3 기간 매칭:** 문장에서 연도·분기·반기를 뽑고(정규식), 상대 표현('작년·올해·전년 대비·최근 분기')은 **검수 실행일 기준이 아니라 사용자가 고른 '기준 시점'(기본: 적재된 가장 최근 보고서 기간)**으로 해석한다. 해석 못 하면 '기간 불명'으로 최근 정기보고서·잠정실적 전체를 검색 범위로 둔다. (R2-3 해결 방향)
+- **D4 XBRL 대조 우선:** 매출액·영업이익·당기순이익·자산·부채·자본 등 계정 사전에 걸리는 숫자 주장은 XBRL 값과 코드로 먼저 대조한다. 불일치면 ⚠️(근거: XBRL 계정·기간·연결/별도), 일치면 ✅ 근거로 쓴다. 연결/별도가 문장에 없으면 연결 우선, 별도로 일치하면 그 사실을 표시한다. 계정 사전 밖이면 기존 문단 판정으로 간다.
+- **D5 파생 지표:** 증감률·이익률·YoY·비중(%) 문장은 **XBRL 두 값으로 계산 가능한 것(증감률·영업이익률)만 코드로 계산해 대조**하고, 그 밖은 '범위 밖(파생 지표)' 회색. 배지를 하나로 정함(R2-2).
+- **D6 다른 회사:** OpenDART 고유번호 목록(`fetch_corp_codes`, 상장사)에서 회사명 사전을 만들고, 문장 주어 자리(문장 앞부분)에 선택 회사가 아닌 상장사명이 오면 '범위 밖(다른 회사)'. 자회사명은 사업보고서 '계열회사 현황' 절에서 뽑아 같은 회사로 본다. (R2-4)
+- **D7 상태 저장:** 익명 결과는 **프로세스 메모리 job store(TTL 15분)**에만 두고 DB·로그에 원문을 남기지 않는다. `# ponytail: 단일 인스턴스 메모리 저장, 다중 인스턴스면 Redis로`. 로그인 사용자의 결과 저장·공유는 2주차(R2-13: 1주차 로그인 용도 = 한도 확대만).
+- **D8 한도(R2-11·12·16):** 익명 키 = `sha256(IP + 일별 솔트)`(원 IP 미저장, 하루 지나 솔트 교체로 연결 불가), 하루 3회, 1회 판정 대상 30문장(초과 입력은 입력 단계에서 거부·안내, 2,000자). 로그인 사용자 = 기존 `EVIDENCE_DAILY_USER_*`. 서버 전체 = 기존 `EVIDENCE_DAILY_GLOBAL_TOKENS` 변수 재사용, **공개용 값은 노아가 공개 전에 정한다**. 카운터는 PostgreSQL 표 `factcheck_quota(key, day, count)`(마이그레이션 1개, Redis 불필요).
+- **D9 동시성(R2-17):** 요청당 JEV 동시 4, 서버 전체 동시 8(asyncio 세마포어). 넘으면 대기, 30초 넘으면 남은 문장 ⊘(판정 불가: 혼잡). 점진 표시는 기존 폴링 패턴(1초 간격).
+- **D10 배포 데이터(R2-18):** 서버에 필요한 데이터 = Qdrant `factcheck_passages` 스냅샷(문단 + payload: corp_code·rcept_no·report_type·report_nm·period·rcept_dt·section·idx·text) + `xbrl_facts.json`(계정 값) + 상장사명 사전 JSON. PostgreSQL은 빈 DB에 마이그레이션만(근거 모드 표 불필요). 갱신 = 정기보고서·잠정실적 공시 때 로컬 수집 → 스냅샷·JSON 재업로드(R2-10: 분기 1회가 맞다 — 이제 분기보고서·잠정실적을 적재하므로).
+- **D11 배포 프로필:** `APP_PROFILE=factcheck`이면 `main.py`가 허용 라우터만 등록(auth·factcheck·health·정적 파일). 원본 라우터는 등록 안 함(R1-14 유지). 2주차 공유 라우트(R2-14)는 그때 허용 목록에 추가: 공유 생성·철회(로그인), 토큰 조회(익명).
+- **D12 표시 문구(R2-1):** 랜딩·결과 상단에 "검색 범위: 삼성전자·SK하이닉스 최근 3년 정기보고서·잠정실적·주요사항보고서·XBRL 재무 수치"와 알려진 약점(주어 바꿔치기)을 상시 표시. ❔ 문구 = "검색 범위 안에서 못 찾음".
+- **D13 '남의 글'(R2-15):** 출처가 '남의 글'이면 2주차 공유 링크를 막는다(본인 글만 공유). 1주차에는 공유가 없어 영향 없음.
+- **실패 모드(새 경로마다):** JEV 시간 초과 → 해당 문장 ⊘(보임), Qdrant 다운 → 전체 실패 메시지(보임), XBRL 데이터 누락 연도 → 문단 판정으로 대체(보임: 근거 종류 표시), 1단계 JEV 실패 → **전 문장 검수로 대체**(놓침 방지, 비용↑ 기록), 한도 소진 → 안내(보임). 조용한 실패 없음 → critical gap 0.
+
+## 2. Code Quality
+
+- 재사용 우선: 위 Scope Challenge 목록. `evidence/` 함수는 import만, 복사 금지.
+- 새 공통 코드 추출 없음(두 곳 이상에서 같은 동작을 쓰는 실제 호출부가 아직 없다 — 근거 모드와 팩트체커의 판정 루프는 입력·저장이 달라 합치지 않는다).
+- 오류 처리 누락 위험: 기간 정규식의 한국어 변형(‘’25년’, ‘2Q25’, ‘상반기’), 회사명 부분 일치(‘SK’가 ‘SK하이닉스’에 걸림) → 테스트 표로 고정.
+
+## 3. Tests (요약, 상세는 Test Plan 산출물)
+
+```
+CODE PATHS                                         USER FLOWS
+[+] factcheck/triage                               [+] 익명 첫 검수
+  ├─ 규칙 검수(숫자/회사명/기간)      [GAP] 단위       ├─ [GAP][→E2E] 붙여넣기→결과(문장별 점진)
+  ├─ JEV 묶음 분류 + 임계값          [GAP] 단위(가짜) ├─ [GAP][→E2E] 30문장 초과 거부 안내
+  └─ JEV 실패 → 전부 검수            [GAP] 단위       ├─ [GAP][→E2E] 한도 소진 안내
+[+] factcheck/scope                                 └─ [GAP][→E2E] 건너뛴 문장 펼치기·검수 요청
+  ├─ 기간(절대/상대/불명)            [GAP] 표 단위   [+] 오류 화면
+  ├─ 다른 회사/자회사                [GAP] 표 단위     ├─ [GAP][→E2E] JEV 혼잡 ⊘
+  └─ 파생 지표 계산/범위 밖          [GAP] 표 단위     └─ [GAP][→E2E] 서버 오류
+[+] factcheck/xbrl 대조(연결/별도·기간·계정) [GAP] 단위(고정 JSON)
+[+] factcheck/collect(다문서·기간 메타·XBRL)  [GAP] 단위(고정 응답)
+[+] routes/factcheck(한도·job·허용 목록)      [GAP] API(DB 테스트)
+[+] 리포트 변조 도그푸드                       [→EVAL] 사전등록·확인 세트 1회
+COVERAGE: 기존 0 / 새 경로 17 — 전부 새 코드라 테스트 먼저(RED→GREEN)
+```
+- **회귀(IRON RULE):** 근거 모드·일지·관심종목은 건드리지 않으므로 기존 스위트(현재 1003 passed)와 e2e 5종이 그대로 통과해야 한다. 프로필 기본값(`APP_PROFILE` 없음)에서 라우터 등록이 지금과 같다는 테스트 1개를 둔다(원본 기능 회귀 방지).
+
+## 4. Performance
+
+- 요청당 JEV 호출: 1단계 묶음 1회 + 검수 문장 수(≤30). 문단 검색은 문장당 Qdrant 1회(필터 포함), 임베딩은 CPU `nomic-embed-text` 문장당 1회 — 30문장 × 수십 ms 수준으로 추정(미측정, 1주차에 실측).
+- XBRL·회사명 사전은 시작 시 메모리 적재(두 종목 수천 행, MB 미만 추정).
+- Qdrant 필터에 `period`·`report_type` 페이로드 색인 추가(검색 범위 축소).
+
+## NOT in scope
+- 판단 일지 연결(외부 재사용 신호 뒤), A-5 비교 실험(2주 뒤), 수정 제안 LLM, 종목 확대(두 종목 뒤), 결제, 다중 인스턴스.
+
+## Review Concerns 처리(R2-1~19)
+| ID | 결정 |
+|---|---|
+| R2-1 | D12 |
+| R2-2 | D5 |
+| R2-3 | D3 + 성공 기준에 범위 밖 회색 비율 기록 추가 |
+| R2-4 | D6(구현 위치 `factcheck/scope.py`, JEV 호출 전 필터) |
+| R2-5 | 도그푸드 지표: 탐지 = ⚠️·❔만 인정, 회색(범위 밖)·⊘는 별도 칸으로 보고, 기간·주어 변조는 범위 밖 판별 결과와 엔진 결과를 나눠 보고(사전등록 항목) |
+| R2-6 | 우선순위: 배포·안전장치 > 수집·파이프라인 > 도그푸드 조정 세트 > 확인 세트 판정 > 공유 링크. 확인 세트 판정이 밀리면 2주 밖 |
+| R2-7 | 공개 시 "정답 라벨은 AI 두 모델(Opus·Codex)이 만들고 불일치만 재검토, 사람 검수 없음" 고지 |
+| R2-8 | 유형별 최소 20문장, 모자라면 유형 합쳐 보고, 모두 95% 신뢰구간 함께(사전등록) |
+| R2-9 | 측정 이벤트: 실행 시각·출처 선택·판정 개수·로그인 사용자 ID 또는 익명 키 해시(원문 없음) 기록. 모집 발행자 5명은 로그인으로 쓰게 함 |
+| R2-10 | D10 |
+| R2-11 | D8(공개 값은 노아가 공개 전 결정) |
+| R2-12 | D8 |
+| R2-13 | D7 |
+| R2-14 | D11 |
+| R2-15 | D13 |
+| R2-16 | D8 |
+| R2-17 | D9 |
+| R2-18 | D10 |
+| R2-19 | 무신사 '상장 직후'는 근거 없음 → "시드·데모 범위에 없음"으로만 쓴다(데모 범위가 두 종목이 됐으므로 해당 없음) |
+
+## Worktree parallelization (1주차 클라우드 세션)
+
+| Step | Modules | Depends on |
+|---|---|---|
+| A 수집(다문서·전체 절·기간 메타·XBRL·회사명 사전) | factcheck/collect, factcheck/xbrl(로더) | — |
+| B 파이프라인(분류·범위·XBRL 대조·판정 연결) | factcheck/triage, scope, xbrl(대조), pipeline | A의 데이터 계약(아래)만 |
+| C API·화면·프로필·한도 | routes/factcheck, public/factcheck.*, main.py, 마이그레이션 | B의 함수 계약만 |
+| D 배포(compose.factcheck.yml, HTTPS, 문서) | 배포 파일 | C |
+| E 도그푸드(리포트 수집·라벨·변조·사전등록) | lab/factcheck | A·B |
+
+- **데이터 계약(A↔B):** Qdrant payload `{passage_id, corp_code, rcept_no, report_type∈{annual,half,quarter,preliminary,major}, report_nm, period:"YYYY"|"YYYYQn"|"YYYYH1", rcept_dt:"YYYYMMDD", section, idx, text}`, `xbrl_facts.json` 행 `{corp_code, period, fs_div∈{CFS,OFS}, account_id, account_nm, amount(원), rcept_no}`.
+- **함수 계약(B↔C):** `async def check(corp_code: str, text: str, *, as_of: str|None) -> AsyncIterator[SentenceResult]`, `SentenceResult{idx, text, category∈{checked,opinion,out_of_scope,other_company,derived}, status∈{supported,contradicted,no_evidence,unjudged,skipped}, evidence:[{rcept_no, report_nm, period, section, text}], xbrl:{account_nm, period, fs_div, amount}|None, reason}`.
+- **실행 순서:** A·B·C 동시 발주(계약 고정) → A 머지 후 로컬에서 실제 수집 실행 → B·C 머지 → D → E는 A·B 머지 뒤.
+
+## Implementation Tasks
+- [ ] **T1 (P1, human ~3d / CC ~4h)** — factcheck/collect — 두 종목 3년 다문서·전체 절 수집, 기간 메타, XBRL `fnlttSinglAcntAll`, 상장사명·자회사 사전. Verify: 고정 응답 단위 테스트 + 로컬 실행 후 문서 수·문단 수·XBRL 행 수 보고
+- [ ] **T2 (P1, human ~3d / CC ~4h)** — factcheck/triage·scope·xbrl·pipeline — 1단계 분류(규칙→JEV 묶음, 실패 시 전부 검수), 기간·다른 회사·파생 지표, XBRL 대조, 기존 판정 연결. Verify: 표 단위 테스트(기간 변형·회사명 부분 일치·연결/별도) RED→GREEN
+- [ ] **T3 (P1, human ~2d / CC ~3h)** — routes/factcheck + factcheck.html/js + APP_PROFILE + factcheck_quota 마이그레이션. Verify: DB 테스트(한도·초과 거부·익명 원문 미저장), e2e(첫 검수·점진 표시·한도·건너뛴 문장), 프로필 기본값 회귀 1개
+- [ ] **T4 (P1, human ~1d / CC ~2h)** — 배포 compose·HTTPS·데이터 업로드 절차 문서. Verify: 로컬에서 프로필로 기동 + 첫 검수. **AWS 실제 생성은 노아 확인 후**
+- [ ] **T5 (P2, human ~4d / CC ~6h)** — 리포트 변조 도그푸드(로컬 전용 원문, 라벨 두 벌, 변조 5유형, 사전등록, 조정 세트). Verify: 사전등록 커밋 + 조정 세트 결과
+
+## Outside Voice (Codex, 2026-10-06) — 반영 결정
+
+Codex(다른 계열) 독립 검토: P1 7건·P2 4건, 권고 "2주 MVP를 두 종목의 명시적 기간·핵심 재무계정 검수로 축소하고 데이터 계약부터 검증하라". AI 리드가 코드로 확인한 항목: `passages.py:160` 문단 ID에 접수번호 없음, `store.py:118` 새 적재에 없는 회사 문단 전체 삭제, `main.py:16` 원본 라우터·Redis·Neo4j 무조건 import, 로그인 세션 Redis 의존(`lib/session.py`), 제품 JEV 경로는 비동기 `ServiceJevClient`·`Quota`(사전 조회·사후 가산, 예약 없음, `lib/jev_service.py:54`).
+
+| # | 지적 | AI 리드 결정 |
+|---|---|---|
+| 1 | XBRL 계약이 분기 단독/누적·잔액/손익·단위·정정을 구분 못 함 | 계약에 `period_start, period_end, value_kind∈{instant,duration}, cumulative, currency, unit, rcept_dt, is_correction` 추가. OpenDART 응답의 당기·누적 금액 칸을 둘 다 적재. 증감률은 같은 종류·같은 길이 기간끼리만 계산 |
+| 2 | 숫자 하나 일치를 문장 전체 ✅로 승격 | 문장 ✅는 **문장 전체가 판정에서 지지**될 때만. XBRL 불일치 → ⚠️(문장 안 사실 하나라도 틀리면 틀림). XBRL 일치 + 나머지 판정 미지지 → ❔ + "숫자는 XBRL과 일치, 나머지는 공시에서 못 찾음" 부분 확인 문구 |
+| 3 | 기존 저장소 재사용 시 다문서 덮어쓰기·삭제 | `factcheck/store.py`를 새로 둔다: 문단 ID = `{corp}-{rcept_no}-{section}-{idx}`, 문서 단위 적재·삭제, payload 색인(period·report_type). 근거 모드 저장소는 그대로 |
+| 4 | 동기 `jev.py`·`judge_claim`을 async에서 직접 호출하면 막힘 | 제품 경로 `ServiceJevClient`(비동기)를 쓰는 어댑터를 T2 첫 작업으로. `judge.build_state`·`sys_decision`(순수 함수)만 재사용 |
+| 5 | 한도가 공개 비용 상한을 보장 못 함 | 팩트체커 전용 **원자적 예약**: PG에서 `UPDATE ... SET reserved = reserved + :est WHERE used + reserved + :est <= :cap RETURNING`(전체·익명 키 각각), 호출 후 실제 토큰으로 정산, 예약 실패 시 호출 안 함. 분류 실패 후 전량 검수도 같은 예약을 거친다 |
+| 6 | Redis 제거와 인증·lifespan 충돌 | **별도 진입점 `app/factcheck_main.py`**(필요한 모듈만 import, 자체 lifespan: PG·Qdrant만). **1주차 공개는 익명만(로그인 없음)** → Redis·Neo4j 불필요. 로그인·결과 저장·공유는 2주차 결정 |
+| 7 | 보고서 기간 ≠ 문단 속 숫자 기간, 정정·잠정 우선순위 | 세 기간을 나눔: 주장 기간 / 문서 보고 대상 기간 / 공시 시점. 검색 범위 = 주장 기간 이후 2년 안의 보고서(비교값 포함). 같은 기간 값은 정정 > 원본, 확정(정기) > 잠정 우선, 화면에 어느 값인지 표시 |
+| 8 | 수집기는 확장이 아니라 실자료 검증이 먼저 | **T0 로컬 스파이크(AI 리드, 오늘):** 실제 문서 유형별(사업·반기·분기·잠정실적) 원문 구조와 XBRL 응답을 받아 파서·계약을 확인한 뒤 A·B·C 계약을 고정 |
+| 9 | 익명 폴링 접근 권한 | job_id = 추측 불가 토큰(256비트) + 익명 쿠키 결속, 둘 다 맞아야 조회 |
+| 10 | AI 두 모델 일치 ≠ 원자료 일치 | 도그푸드 확인 세트에서 숫자·기간·주체 핵심 항목 표본을 **사람이 원자료로 확인**(노아 과제, 표본 크기는 사전등록에서). 못 하면 공개 시 "사람 검수 없음" 유지 |
+| 11 | 2주 범위가 과함, JEV 1단계 분류 효과부터 입증 | **범위 축소(채택).** 1주차 = 두 종목의 정기보고서(사업·반기·분기) 전체 절 + 잠정실적 + XBRL 핵심 계정, 명시적 기간·핵심 재무계정 검수와 근거 표시. 주요사항보고서·자회사 추출·파생 지표(증감률·영업이익률 외)는 2주 밖. **1단계 JEV 분류(노아 제안)는 버리지 않고 도그푸드에서 '규칙만' 대비 재현율·비용을 재서, 이길 때 제품에 켠다**(그 전까지 제품은 규칙 분류 + 건너뛴 문장 수동 검수 버튼) |
+
+### 수정된 1주차 작업(위 Implementation Tasks를 대체)
+- [ ] **T0 (P1, AI 리드 로컬, CC ~1h)** — 실자료 스파이크: 삼성전자 문서 유형별 원문·XBRL 응답 구조 확인 → 데이터 계약 고정
+- [ ] **T1 (P1)** — factcheck/collect + factcheck/store(문서 단위 ID·적재·삭제·payload 색인) + XBRL 확장 계약 + 상장사명 사전
+- [ ] **T2 (P1)** — ServiceJevClient 어댑터 → 규칙 분류·기간 3종 해석·다른 회사·XBRL 대조(부분 확인 포함)·판정 연결
+- [ ] **T3 (P1)** — `factcheck_main.py` 별도 진입점 + 익명 API(토큰·쿠키 결속) + 원자적 예약 한도 + `factcheck.html/js`
+- [ ] **T4 (P1)** — 배포 compose(app·PG·Qdrant·CPU Ollama)·HTTPS·데이터 업로드 문서. AWS 생성은 노아 확인 후
+- [ ] **T5 (P2)** — 도그푸드: 리포트 수집(로컬 전용)·라벨 두 벌·변조 5유형·**JEV 1단계 분류 vs 규칙 비교**·사전등록·조정 세트
+
+## Completion summary
+- Step 0: Scope Challenge — scope accepted as-is(구조는 D1·D2로 축소), Outside Voice 뒤 **scope reduced per recommendation**(Codex #11 채택)
+- Architecture: 13 decisions(D1~D13), Code Quality: 2 issues, Test: diagram produced, 17 gaps(전부 새 코드), Performance: 1 issue(필터 색인)
+- Failure modes: critical gap 0(조용한 실패 없음 — ⊘·안내·대체 경로)
+- Outside voice: Codex completed, 11 findings 전부 반영
+- Parallelization: T0 → (T1 ∥ T2 ∥ T3, 계약 고정) → T4 → T5
+- Unresolved decisions: 0(전부 AI 리드 자동 결정, 노아 위임) — 단, 공개용 서버 전체 JEV 상한 값과 AWS 생성·비용은 노아 확인 대기(결정 아닌 승인 사항)
+
+## GSTACK REVIEW REPORT
+
+| Review | Trigger | Why | Runs | Status | Findings |
+|--------|---------|-----|------|--------|----------|
+| CEO Review | `/plan-ceo-review` | Scope & strategy | 0 | — | — |
+| Outside Review | Codex (`codex exec`, plan-review) | Independent 2nd opinion | 1 | completed | 11 findings(P1 7·P2 4), 전부 반영 |
+| Eng Review | `/plan-eng-review` | Architecture & tests (required) | 1 | issues_open | 20 issues(설계 결정·테스트 공백으로 매핑), 0 critical gaps |
+| Design Review | `/plan-design-review` | UI/UX gaps | 0 | — | — |
+| DX Review | `/plan-devex-review` | Developer experience gaps | 0 | — | — |
+
+- **OUTSIDE COVERAGE:** Codex, plan-review, completed, 11 findings.
+- **CROSS-MODEL:** Claude 검토와 Codex가 같은 방향(다문서 저장소·기간 처리·한도). Codex만 지적: XBRL 계약 부족, 복합 문장 승격, 별도 진입점 필요, 범위 축소. 모두 반영.
+- **VERDICT:** Eng Review는 issues_open(발견을 작업으로 매핑한 상태, 차단 이슈 없음) — T0 스파이크 후 구현 시작 가능.
+
+NO UNRESOLVED DECISIONS
