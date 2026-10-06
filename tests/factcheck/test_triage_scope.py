@@ -607,3 +607,18 @@ def test_header_and_intro_not_sent_to_jev_triage():
 ])
 def test_header_needs_period_or_company_and_short_line(text):
     assert not scope.is_header(text, AS_OF, HDR_NAMES, SAMSUNG), text
+
+
+# ---- 영문 회사명 별칭(scope.ENGLISH_ALIASES): 색인만, 표시는 한글 이름 ----
+
+def test_english_aliases_constant_and_display():
+    assert set(scope.ENGLISH_ALIASES) == {SAMSUNG, HYNIX}
+    idx = scope.CompanyIndex({SAMSUNG: ["삼성전자"], HYNIX: ["SK하이닉스"], SK: ["SK"]})  # 실제 사전처럼 한글 이름만
+    assert idx.display(HYNIX) == "SK하이닉스" and idx.display(SAMSUNG) == "삼성전자"
+    assert scope.company_mentions("SK hynix와 Samsung Electronics", idx) == [(HYNIX, "SK하이닉스"), (SAMSUNG, "삼성전자")]
+    assert scope.company_mentions("SK의 실적", idx) == [(SK, "SK")]
+
+
+def test_english_alias_only_for_listed_corp():
+    idx = scope.CompanyIndex({SK: ["SK"]})  # 사전에 SK하이닉스가 없으면 별칭도 없다(데모 범위 밖 사전)
+    assert scope.company_mentions("SK hynix의 실적", idx) == [(SK, "SK")]

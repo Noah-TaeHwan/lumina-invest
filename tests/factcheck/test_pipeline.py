@@ -1421,3 +1421,38 @@ def test_header_keeps_company_context_for_body(title, other):
     # 지금 동작 고정: 다른 회사 이름 + 기간 숫자가 있는 제목 줄은 회사 문맥 기준 문장이다
     rs = _run_names(f"{title}\n2025년 2분기 연결 영업이익은 4.7조원이다.", HDR_NAMES, SS_FACTS)
     assert (rs[1].status, rs[1].reason) == ("skipped", f"other_company_inherited:{other}")
+
+
+# ---- 영문 회사명 별칭: 'SK hynix'가 지주사 'SK'로 잡히지 않게(긴 이름 먼저) ----
+
+HY_Q2_25 = [_fact(HYNIX, OP, 9_213_000_000_000, "2025Q2", "2025-04-01", "2025-06-30", "20250814000001"),
+            _fact(HYNIX, REV, 22_232_000_000_000, "2025Q2", "2025-04-01", "2025-06-30", "20250814000001",
+                  nm="매출액")]
+
+
+@pytest.mark.parametrize("name", ["SK Hynix", "SK hynix", "SK HYNIX", "Hynix"])
+def test_english_alias_selected_company_checked(name):
+    r = _check(HYNIX, f"{name}의 2025년 2분기 연결 영업이익은 9.2조원이다.", FakeStore(default=NOISE), FakeJev(),
+               HY_Q2_25)
+    assert r.category == "checked" and r.status != "skipped", (name, r.reason)
+    assert r.xbrl is not None and r.xbrl["amount"] == 9_213_000_000_000
+    assert (r.status, r.reason) == ("supported", "xbrl_exact"), name
+
+
+def test_english_alias_other_company_named_in_korean():
+    rs = _run_text("SK Hynix의 2025년 2분기 영업이익은 9.2조원이다. 2025년 2분기 연결 영업이익은 4.7조원이다.",
+                   FakeStore(default=NOISE), FakeJev(), SS_FACTS)
+    assert (rs[0].status, rs[0].reason) == ("skipped", "other_company:SK하이닉스")
+    assert (rs[1].status, rs[1].reason) == ("skipped", "other_company_inherited:SK하이닉스")
+
+
+@pytest.mark.parametrize("name", ["Samsung Electronics", "Samsung Elec.", "SAMSUNG ELECTRONICS"])
+def test_english_alias_samsung(name):
+    r = _check(SAMSUNG, f"{name}의 2025년 2분기 연결 영업이익은 4.7조원이다.", FakeStore(default=NOISE), FakeJev(),
+               SS_FACTS)
+    assert (r.status, r.reason) == ("supported", "xbrl_exact"), name
+
+
+def test_holding_sk_still_sk():
+    rs = _run_text("SK의 2025년 2분기 영업이익은 9.2조원이다.", FakeStore(default=NOISE), FakeJev(), SS_FACTS)
+    assert (rs[0].status, rs[0].reason) == ("skipped", "other_company:SK")

@@ -285,6 +285,13 @@ _NGRAM = 3
 # evidence.subject의 일상어 상장사명(전에는 색인에서 아예 뺐다 — 이제 같은 규칙으로 법인 표시·선택 회사면 회사로 본다)
 COMMON_WORD_COMPANY_NAMES = tuple(dict.fromkeys(
     ("도움", "나노", "레이", "대상", "동방", "노을", "레몬", "라임", "기린", "리드") + tuple(COMMON_WORD_NAMES)))
+# 데모 범위 두 회사의 영문 이름 별칭(대소문자 무시, 법인 접미 'Co., Ltd.'는 normalize가 뗀다). 근거: 리드 공개 전 점검에서
+# 'SK hynix'가 두 토큰 중 'SK'(지주사)로 잡혀 선택 회사 문장을 건너뛰었다. 상장사명 사전(corp_names)은 한글 이름뿐이라
+# 색인에만 더하고, 맞으면 한글 사전 이름(화면·사유 표시)을 돌려준다. 긴 이름이 먼저 맞는다(mentions의 n-gram 순서)
+ENGLISH_ALIASES = {
+    "00126380": ("Samsung Electronics", "Samsung Elec."),  # 삼성전자
+    "00164779": ("SK hynix", "Hynix"),  # SK하이닉스
+}
 _MARK_BEFORE = re.compile(r"(?:㈜|\(\s*주\s*\)|주식회사)\s*$")
 _MARK_AFTER = re.compile(r"\s*(?:㈜|\(\s*주\s*\))")
 _MARK_IN = re.compile(r"㈜|\(\s*주\s*\)|주식회사")
@@ -304,6 +311,11 @@ class CompanyIndex:
                 k = normalize(n)
                 if len(k) >= 2 and k not in common:
                     self._idx.setdefault(k, (corp, n))
+        for corp, aliases in ENGLISH_ALIASES.items():
+            if self.names.get(corp):
+                for a in aliases:  # 끝 마침표가 있는 꼴('Samsung Elec.의')과 없는 꼴 둘 다
+                    for k in {normalize(a), normalize(_EDGE.sub("", a))}:
+                        self._idx.setdefault(k, (corp, self.display(corp)))
 
     @classmethod
     def from_entries(cls, entries: Iterable[Mapping]) -> "CompanyIndex":

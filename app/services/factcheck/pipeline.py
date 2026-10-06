@@ -207,10 +207,11 @@ def amount_only(sentence: str, sc: scope.Scope, xr: xbrl_check.XbrlResult, names
         if c != corp_code:
             continue
         seg = sentence[a:b]
-        k = seg.find(name)
-        if k < 0:
+        surface = next((n for n in (name, *scope.ENGLISH_ALIASES.get(c, ())) if seg.lower().find(n.lower()) >= 0), None)
+        if surface is None:
             return False  # 이름 자리를 정확히 모르면(표기 차이) 보수적으로 JEV 경로
-        blank(a + k, a + k + len(name))
+        k = seg.lower().find(surface.lower())
+        blank(a + k, a + k + len(surface))
     for m in sc.mentions:
         blank(m.start, m.end)
     for a, b in xr.spans:
