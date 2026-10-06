@@ -631,3 +631,28 @@ def test_english_alias_only_for_listed_corp():
 ])
 def test_opm_derived_kind(text, kind):
     assert scope.derived_kind(text) == kind
+
+
+# ---- 제목 줄의 종목코드 '(373220)'·영문 표지(Review·Preview·Comment·Update) ----
+
+@pytest.mark.parametrize("text", [
+    "LG Energy Solution(373220) 2Q26 Review: 북미 수요가 바닥을 지났다",
+    "LG에너지솔루션(373220) 2026년 2분기 프리뷰: 북미 수요가 바닥을 지났다.",
+    "삼성전자 (005930) 2Q26 preview — 메모리가 회복했다",
+    "SK하이닉스 2Q26 COMMENT: HBM 수요가 견조했다.",
+    "현대차 4Q25 Update",
+])
+def test_header_with_stock_code_and_english_marker(text):
+    assert _rule(text) == (False, "opinion", "not_claim:header"), text
+
+
+@pytest.mark.parametrize("text", [
+    "LG Energy Solution 2Q26 Review: 영업이익 1.2조원",             # 금액 숫자 있음
+    "LG에너지솔루션(373220) 2026년 2분기 리뷰: 영업이익 1.2조원",
+    "삼성전자 2Q26 Review (1,234억원)",                             # 괄호 안이지만 종목코드(6자리)가 아니다
+    "삼성전자(1,234) 2Q26 Review: 메모리가 회복했다",                # 6자리 종목코드가 아닌 괄호 숫자
+    "삼성전자(12345678) 2Q26 Review: 메모리가 회복했다",
+    "삼성전자 2Q26 Reviewer 메모",                                  # 표지 낱말이 아니다
+])
+def test_header_stock_code_rule_keeps_amounts(text):
+    assert _rule(text)[2] != "not_claim:header", text

@@ -485,23 +485,25 @@ def is_list_lead(text: str) -> bool:
 
 # 제목: 앞부분이 '(회사명) (기간) (리뷰·점검·…)'이고 ':'·'：'·'—'·'–'로 나뉜 문장, 또는 끝 문장부호·서술어미 없는 짧은 제목 줄
 _HEADER_SPLIT = re.compile(r"\s*[:：—–]\s*")
-_HEADER_KIND = re.compile(r"(?:리뷰|점검|분석|프리뷰|코멘트|요약|정리)$")
+_HEADER_KIND = re.compile(r"(?:리뷰|점검|분석|프리뷰|코멘트|요약|정리|(?<![A-Za-z])(?i:review|preview|comment|update))$")
+_STOCK_CODE = re.compile(r"\(\s*\d{6}\s*\)")  # 괄호 안 6자리 종목코드('(373220)'): 금액 숫자가 아니다
 _HEADER_MAX = 40  # 짧은 제목 줄의 최대 글자 수
 # 글 소개: '다음은·아래는 … (메모·초안·정리·답변·요약)(이다·입니다)'
 _INTRO = re.compile(r"^\s*(?:다음은|아래는)\s.*(?:메모|초안|정리|답변|요약)(?:이다|입니다|다)\s*[.!]?\s*$")
 
 
 def _has_amount_digit(text: str, as_of: Period) -> bool:
-    """기간 표현('2026년 2분기')의 숫자를 빼고도 숫자가 남는가(금액·비율 숫자)."""
+    """기간 표현('2026년 2분기')·괄호 안 종목코드('(373220)')의 숫자를 빼고도 숫자가 남는가(금액·비율 숫자)."""
     chars = list(text)
-    for a, b in period_spans(text, as_of):
+    for a, b in period_spans(text, as_of) + [m.span() for m in _STOCK_CODE.finditer(text)]:
         chars[a:b] = " " * (b - a)
     return bool(re.search(r"\d", "".join(chars)))
 
 
 def is_header(text: str, as_of: Period, names: Mapping[str, Iterable[str]] | CompanyIndex,
               corp_code: str | None = None) -> bool:
-    """리포트 제목 줄인가(금액 숫자 없음). ① 앞부분이 기간·회사명을 담고 '리뷰·점검·분석·프리뷰·코멘트·요약·정리'로
+    """리포트 제목 줄인가(금액 숫자 없음). ① 앞부분이 기간·회사명을 담고 '리뷰·점검·분석·프리뷰·코멘트·요약·정리'
+    (영문 Review·Preview·Comment·Update, 대소문자 무시)로
     끝나며 ':'·'：'·'—'·'–'로 나뉜 문장, ② 같은 꼴로 끝나는 짧은 줄(끝 문장부호·서술어미 없음)."""
     if _has_amount_digit(text, as_of):
         return False
