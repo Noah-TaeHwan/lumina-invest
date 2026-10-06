@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import secrets
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -39,7 +40,7 @@ def estimate(n_calls: int) -> int:
 class QuotaSettings(BaseSettings):
     """팩트체커 한도 설정(환경변수). 앱 공용 Settings(app/config.py)를 고치지 않으려고 따로 둔다."""
 
-    model_config = SettingsConfigDict(env_file=None, extra="ignore")
+    model_config = SettingsConfigDict(env_file=os.getenv("ENV_FILE", ".env.dev"), extra="ignore")  # app/config.py와 같은 파일
 
     FACTCHECK_DAILY_ANON_RUNS: int = 3
     # 익명 키 하루 토큰: 3회 × 30문장 × 호출당 p95
