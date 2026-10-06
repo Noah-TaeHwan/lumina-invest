@@ -53,12 +53,14 @@ class Triage:
 
 def rule_triage(text: str, *, corp_code: str, names: Mapping[str, Iterable[str]] | CompanyIndex,
                 as_of: Period) -> Triage:
-    """규칙 분류. 순서: 비주장 규칙(목록 머리말 포함) → 숫자 → 회사명 → 기간 → (검수 안 함) 주가 → 의견·전망 → 사실 표지 없음."""
+    """규칙 분류. 순서: 비주장 규칙(목록 머리말·글 소개·제목 포함) → 숫자 → 회사명 → 기간 → (검수 안 함) 주가 → 의견·전망 → 사실 표지 없음."""
     r = not_claim_reason(text)
     if r:
         return Triage(False, "opinion", f"not_claim:{r.split(':')[0]}")
-    if scope.is_list_lead(text):  # 목록 머리말: JEV 분류 전에 뺀다(기존 사유 코드 재사용)
+    if scope.is_list_lead(text) or scope.is_intro(text, as_of):  # 목록 머리말·글 소개: JEV 분류 전에 뺀다
         return Triage(False, "opinion", "not_claim:lead")
+    if scope.is_header(text, as_of, names, corp_code):  # 리포트 제목 줄(금액 숫자 없음)
+        return Triage(False, "opinion", "not_claim:header")
     if _DIGIT.search(text):
         return Triage(True, "checked", "rule:number")
     if scope.company_mentions(text, names, corp_code):

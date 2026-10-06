@@ -550,3 +550,60 @@ def test_rule_triage_common_word_name_only_for_selected_or_marked():
     assert reason("나노는 공정을 확대했다.", NANO) == "rule:company"        # 선택 회사
     assert reason("(주)나노는 공정을 확대했다.", SAMSUNG) == "rule:company"  # 법인 표시
     assert reason("나노 공정을 확대했다.", SAMSUNG) != "rule:company"
+
+
+# ---- 제목·글 소개 문장: 금액 숫자(기간 표현의 숫자는 빼고 센다)가 없으면 규칙 단계에서 건너뛴다 ----
+
+HDR_NAMES = {**NAMES, "01515323": ["LG에너지솔루션"], "00164742": ["현대차"]}
+
+
+def _rule(text):
+    t = triage.rule_triage(text, corp_code=SAMSUNG, names=HDR_NAMES, as_of=AS_OF)
+    return t.check, t.category, t.reason
+
+
+@pytest.mark.parametrize("text, reason", [
+    ("LG에너지솔루션 2026년 3분기 프리뷰: 북미 수요가 바닥을 지났다.", "not_claim:header"),
+    ("현대차 2025년 연간 실적 점검 — 환율이 이익을 지켰다", "not_claim:header"),
+    ("삼성전자 2025년 2분기 실적 리뷰：메모리가 회복했다.", "not_claim:header"),
+    ("2025년 4분기 실적 코멘트 – 수요 둔화", "not_claim:header"),
+    ("삼성전자 2026년 2분기 실적 분석", "not_claim:header"),          # 끝 문장부호·서술어미 없는 짧은 제목 줄
+    ("현대차 실적 리뷰: 환율이 이익을 지켰다.", "not_claim:header"),      # 앞부분에 회사명만(기간 없음)
+    ("다음은 2분기 실적에 대해 내가 정리한 메모다.", "not_claim:lead"),
+    ("아래는 고객 질문에 대한 답변 초안입니다.", "not_claim:lead"),
+    ("다음은 2025년 실적 요약입니다.", "not_claim:lead"),
+])
+def test_header_and_intro_skipped_in_rule_stage(text, reason):
+    assert _rule(text) == (False, "opinion", reason), text
+
+
+@pytest.mark.parametrize("text", [
+    "2026년 3분기 영업이익은 1.2조원이다.",
+    "LG에너지솔루션 2026년 3분기 영업이익: 1.2조원",     # 금액 숫자 있음
+    "실적 점검 결과 영업이익은 1.2조원으로 늘었다.",
+    "삼성전자 2026년 2분기 실적 리뷰: 영업이익 1.2조원",   # 금액 숫자 있음
+    "삼성전자 2분기 영업이익 1.2조원",                    # 짧지만 금액 숫자 있음
+    "다음은 2분기 영업이익 1.2조원에 대한 메모다.",
+    "2025년 2분기 HBM 판매가 늘었다.",                   # 서술어미로 끝나는 문장
+])
+def test_claims_with_amount_or_predicate_not_header(text):
+    assert _rule(text)[2] not in ("not_claim:header", "not_claim:lead"), text
+
+
+def test_header_and_intro_not_sent_to_jev_triage():
+    client = FakeTriageJev()
+    sents = ["LG에너지솔루션 2026년 3분기 프리뷰: 북미 수요가 바닥을 지났다.", "다음은 2분기 실적에 대해 내가 정리한 메모다.",
+             "아래는 고객 질문에 대한 답변 초안입니다.", "회사는 HBM 사업을 확대하고 있다."]
+    got = asyncio.run(triage.triage_all(sents, corp_code=SAMSUNG, company="삼성전자", names=HDR_NAMES, as_of=AS_OF,
+                                        client=client, enabled=True))
+    (state, questions), = client.calls
+    assert len(questions) == 1 and all(s not in state for s in sents[:3])
+    assert [g.reason for g in got[:3]] == ["not_claim:header", "not_claim:lead", "not_claim:lead"]
+
+
+@pytest.mark.parametrize("text", [
+    "실적 리뷰: 메모리가 회복했다.",                       # 앞부분에 기간·회사명이 없다
+    "삼성전자 2026년 2분기 메모리 반도체와 파운드리 사업부의 실적과 업황 전망에 대한 종합 분석",  # 나뉘지 않은 긴 줄
+])
+def test_header_needs_period_or_company_and_short_line(text):
+    assert not scope.is_header(text, AS_OF, HDR_NAMES, SAMSUNG), text
