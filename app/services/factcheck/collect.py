@@ -160,7 +160,8 @@ def collect(client: httpx.Client, key: str, corps, bgn: str, end: str, out_dir: 
     for d in manifest:
         if d["rcept_no"] in reports:
             facts += prelim_facts(d["corp_code"], d["rcept_no"], reports[d["rcept_no"]], rcept_dt=d["rcept_dt"],
-                                  is_correction=d["is_correction"], superseded=d["superseded"])
+                                  is_correction=d["is_correction"], superseded=d["superseded"],
+                                  fs_div=d.get("fs_div"))
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "documents.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=1))
     save_facts(out_dir / "xbrl_facts.json", facts)

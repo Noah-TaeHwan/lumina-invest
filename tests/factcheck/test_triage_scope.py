@@ -352,3 +352,33 @@ def test_not_claim_never_sent_to_jev():
     got = asyncio.run(triage.triage_all(["왜 이렇게 됐을까?"], corp_code=SAMSUNG, company="삼성전자", names=NAMES,
                                         as_of=AS_OF, client=client, enabled=True))
     assert client.calls == [] and got[0].reason == "not_claim:question"
+
+
+# ---- PR #56 후속(2·3·4번) ----
+
+def test_invalid_half_does_not_crash():
+    assert labels("2026H3 매출은 10조원이다.") == []
+    with pytest.raises(ValueError):
+        Period(2026, "half", 3)
+    with pytest.raises(ValueError):
+        Period(2026, "quarter", 5)
+    s = scope.assess("2026H3 매출은 10조원이다.", SAMSUNG, as_of=AS_OF, names=NAMES)
+    assert s.category == "checked"
+
+
+@pytest.mark.parametrize("text, expected", [
+    ("2026Q2의 매출은 171.5조원이다.", ["2026Q2"]),
+    ("2026H1의 매출은 305.4조원이다.", ["2026H1"]),
+    ("2Q의 매출은 171.5조원이다.", ["2026Q2"]),
+    ("2Q25의 영업이익은 4.7조원이다.", ["2025Q2"]),
+])
+def test_period_followed_by_particle(text, expected):
+    assert labels(text) == expected
+
+
+def test_period_spans_include_comparison_bases():
+    text = "2025년 매출은 2024년 대비 10.9% 늘었다."
+    s = scope.assess(text, SAMSUNG, as_of=AS_OF, names=NAMES)
+    assert [m.period.label for m in s.mentions] == ["2025"]   # 주장 기간
+    spans = [text[a:b] for a, b in s.period_spans]             # 숫자 제거용 구간(비교 기준 포함)
+    assert "2025년" in spans and "2024년" in spans

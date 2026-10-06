@@ -58,11 +58,11 @@ def _join(*reasons: str | None) -> str | None:
     return ",".join(r for r in reasons if r) or None
 
 
-def _without_periods(sentence: str, mentions: Sequence[scope.PeriodMention]) -> str:
-    """기간 표현 구간을 공백으로 지운 문장(숫자 확인용)."""
+def _without_periods(sentence: str, spans: Sequence[tuple[int, int]]) -> str:
+    """기간 표현 구간(주장 기간과 비교 기준 '2024년 대비' 모두)을 공백으로 지운 문장(숫자 확인용)."""
     chars = list(sentence)
-    for m in mentions:
-        chars[m.start:m.end] = " " * (m.end - m.start)
+    for a, b in spans:
+        chars[a:b] = " " * (b - a)
     return "".join(chars)
 
 
@@ -191,9 +191,8 @@ class FactcheckPipeline:
         ambiguous = any(m.shifted for m in sc.mentions)
 
         def done(status: str, evidence: list, reason: str | None) -> SentenceResult:
-            # 기간을 당겨 해석한 문장: ⚠️를 내지 않고, XBRL이 어긋났으면 판정이 지지해도 ✅로 올리지 않는다
-            if ambiguous and (status in ("contradicted", "supported") and xr.status == "mismatch"
-                              or status == "contradicted"):
+            # 기간을 당겨 해석한 문장: 기간 해석을 확신할 수 없으므로 ⚠️·✅ 모두 내지 않는다(최대 ❔)
+            if ambiguous and status in ("contradicted", "supported"):
                 status, evidence, reason = "no_evidence", [], "period_ambiguous"
             return SentenceResult(idx, sentence, category, status, evidence, xbrl, _join(reason, note))
 
@@ -207,7 +206,7 @@ class FactcheckPipeline:
                                              log_ctx={"stage": "judge", "claim_idx": idx})
         if out.judgement is None:
             return done("unjudged", [], out.error_code)
-        claim = _without_periods(sentence, sc.mentions)
+        claim = _without_periods(sentence, sc.period_spans)
         valid = [number_check(claim, t) for t in texts]
         status, src, _ = judge.sys_decision(out.judgement, valid, self.tau_s, self.tau_c)
         if status == "no_evidence":
@@ -240,7 +239,10 @@ class FactcheckPipeline:
                     continue
                 category, note = sc.category, sc.reason
                 sc = scope.period_scope(s, as_of_p)
-            xr = xbrl_check.check(s, self.facts, corp_code=corp_code, as_of=as_of_p, names=self.names)
+            if category == "other_company":  # 다른 회사 수치를 선택 회사 XBRL로 대조하지 않는다(force_check)
+                xr = xbrl_check.XbrlResult("none", [])
+            else:
+                xr = xbrl_check.check(s, self.facts, corp_code=corp_code, as_of=as_of_p, names=self.names)
             if xr.status == "mismatch" and not any(m.shifted for m in sc.mentions):
                 yield SentenceResult(i, s, category, "contradicted", [], xr.primary(), _join("xbrl_mismatch", note))
                 continue

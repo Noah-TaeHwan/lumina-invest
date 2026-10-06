@@ -5,6 +5,7 @@
 II·III절 발췌. OpenDART는 httpx.MockTransport 가짜로 대신한다(외부 호출 없음).
 """
 import io
+import re
 import json
 import zipfile
 from decimal import Decimal
@@ -457,7 +458,8 @@ def test_collect_drops_xbrl_rows_filed_after_end(tmp_path):
                         {"CFS": late, "OFS": {"status": "013", "message": "없음"}})
     summary = collect.collect(client, "KEY", [SAMSUNG], "20231006", "20261006", tmp_path)
     assert json.loads((tmp_path / "xbrl_facts.json").read_text()) == []
-    assert summary["xbrl_rows"] == 0 and summary["xbrl_after_end"] == 18
+    # 18행 + 자본변동표의 지배기업 소유주지분 순이익(당기·전년 동기 누적) 2행
+    assert summary["xbrl_rows"] == 0 and summary["xbrl_after_end"] == 20
 
 
 def test_collect_main_fails_when_correction_prelim_unparsed(tmp_path, monkeypatch, capsys):
@@ -478,3 +480,99 @@ def test_by_corp_code():
                                              "stock_code": "005935", "norm": "삼성전자(우)"}]
     assert corp_names.by_corp_code(entries) == {"00126380": ["삼성전자", "삼성전자(우)"],
                                                 "00164779": ["SK하이닉스"], "00181712": ["SK"]}
+
+
+# ── PR #55 마지막 코멘트 반영(후속): 제목 없는 잠정실적의 연결·별도 기준 ──
+
+def _strip_xforms_title(html: str) -> str:
+    return re.sub(r'<div class="xforms_title">.*?</div>', "", html, count=1, flags=re.S)
+
+
+def test_prelim_without_xforms_title_uses_html_title_for_fs_div():
+    html = _strip_xforms_title(_fix("prelim_samsung_2026Q2_correction.xml"))
+    assert 'class="xforms_title"' not in html.split("</head>", 1)[1]
+    rep = parse.parse_prelim(html)
+    assert {r["fs_div"] for r in parse.prelim_facts(SAMSUNG, PRELIM_RCEPT, rep)} == {"CFS"}
+
+
+def test_prelim_without_any_title_defaults_to_consolidated_or_manifest():
+    html = re.sub(r"<title>.*?</title>", "", _strip_xforms_title(_fix("prelim_samsung_2026Q2_correction.xml")),
+                  flags=re.S)
+    rep = parse.parse_prelim(html)
+    assert {r["fs_div"] for r in parse.prelim_facts(SAMSUNG, PRELIM_RCEPT, rep)} == {"CFS"}  # 기본 연결
+    assert {r["fs_div"] for r in parse.prelim_facts(SAMSUNG, PRELIM_RCEPT, rep, fs_div="OFS")} == {"OFS"}  # manifest
+
+
+def test_prelim_separate_title_still_ofs():
+    html = re.sub(r"연결재무제표\s*기준\s*", "", _fix("prelim_samsung_2026Q2_correction.xml"))
+    rep = parse.parse_prelim(html)
+    assert {r["fs_div"] for r in parse.prelim_facts(SAMSUNG, PRELIM_RCEPT, rep)} == {"OFS"}
+
+
+# ── 잠정실적 구양식(2025년 10월 이전): 기간은 본표 머리 아래 줄, 단위·부호·전환 여부가 공시마다 다르다 ──
+
+def _old(name: str) -> parse.PrelimReport:
+    return parse.parse_prelim(parse.decode((FIX / name).read_bytes()))
+
+
+def _fig(rep, account, basis="당해실적"):
+    (f,) = [f for f in rep.figures if f.account == account and f.basis == basis]
+    return f
+
+
+def test_old_form_eokwon_periods_unit_values():
+    rep = _old("prelim_samsung_2025Q2_eokwon.xml")
+    assert (rep.period, rep.period_start, rep.period_end, rep.unit) == ("2025Q2", "2025-04-01", "2025-06-30", "억원")
+    assert rep.periods["전기실적"] == ("2025-01-01", "2025-03-31")
+    assert rep.periods["전년동기실적"] == ("2024-04-01", "2024-06-30")
+    assert rep.periods["당기누계실적"] == ("2025-01-01", "2025-06-30")
+    assert rep.periods["전년동기누적실적"] == ("2024-01-01", "2024-06-30")
+    rev = _fig(rep, "매출액")
+    assert (rev.current, rev.prior_q, rev.qoq_pct, rev.prior_y, rev.yoy_pct) == (
+        Decimal("745663"), Decimal("791405"), Decimal("-5.78"), Decimal("740683"), Decimal("0.67"))
+    assert _fig(rep, "매출액", "누계실적").current == Decimal("1537068")
+    assert not rep.is_correction
+    rows = {(r["account_id"], r["cumulative"]): r for r in parse.prelim_facts(SAMSUNG, "20250731000001", rep)}
+    q2 = rows[("ifrs-full_Revenue", False)]
+    assert (q2["amount"], q2["period"], q2["rounding_unit"], q2["fs_div"]) == (74_566_300_000_000, "2025Q2", 10**8, "CFS")
+    assert rows[("ifrs-full_Revenue", True)]["amount"] == 153_706_800_000_000
+    assert rows[("ifrs-full_ProfitLossAttributableToOwnersOfParent", False)]["amount"] == 4_934_000_000_000
+    text = " ".join(p.text for p in parse.prelim_passages(SAMSUNG, "20250731000001", rep))
+    assert "745,663억원" in text and "-5.78%" in text and "1,537,068억원" in text
+
+
+def test_old_form_correction_header_and_correction_table():
+    rep = _old("prelim_samsung_2023Q3_correction_oldheader.xml")
+    assert (rep.period, rep.unit, rep.is_correction, rep.original_date) == ("2023Q3", "조원", True, "20231011")
+    assert _fig(rep, "매출액").current == Decimal("67.40")     # 정정 후 본표 값
+    assert _fig(rep, "영업이익", "누계실적").current == Decimal("3.74")
+    got = {(c.group, c.item, c.basis): (c.before, c.after) for c in rep.corrections}
+    assert got[("당기실적", "매출액", "당해실적")] == (Decimal("67.00"), Decimal("67.40"))
+    assert got[("당기실적", "영업이익", "누계실적")] == (Decimal("3.71"), Decimal("3.74"))
+    assert got[("전년동기대비증감율(%)", "영업이익", "당해실적")] == (Decimal("-77.88"), Decimal("-77.57"))
+    assert len(rep.corrections) == 10
+    corr = [p.text for p in parse.prelim_passages(SAMSUNG, "20231031000001", rep) if p.section == parse.CORR]
+    assert any("정정 전 67.00조원 → 정정 후 67.40조원" in t for t in corr)
+
+
+def test_old_form_mwon_negative_turnaround_and_signed_rates():
+    rep = _old("prelim_skhynix_2023Q3_mwon_loss.xml")
+    assert (rep.period, rep.period_start, rep.unit) == ("2023Q3", "2023-07-01", "백만원")
+    assert rep.periods["전년동기실적"] == ("2022-07-01", "2022-09-30")
+    op = _fig(rep, "영업이익")
+    assert (op.current, op.prior_q, op.qoq_pct, op.prior_y) == (
+        Decimal("-1791961"), Decimal("-2882084"), Decimal("37.8"), Decimal("1660523"))
+    assert (op.yoy_pct, op.yoy_turn) == (None, "적자전환")
+    assert _fig(rep, "매출액").qoq_pct == Decimal("24.1")
+    rows = {(r["account_id"], r["cumulative"]): r for r in parse.prelim_facts(HYNIX, "20231026000001", rep)}
+    assert rows[("dart_OperatingIncomeLoss", False)]["amount"] == -1_791_961_000_000
+    assert rows[("dart_OperatingIncomeLoss", True)]["amount"] == -8_076_347_000_000
+    assert rows[("dart_OperatingIncomeLoss", False)]["rounding_unit"] == 10**6
+    text = " ".join(p.text for p in parse.prelim_passages(HYNIX, "20231026000001", rep))
+    assert "-1,791,961백만원" in text and "전년동기대비 적자전환" in text and "37.8%" in text
+
+
+def test_new_form_still_parses_unchanged():
+    rep = _old("prelim_samsung_2026Q2_correction.xml")
+    assert (rep.period, rep.unit) == ("2026Q2", "조원")
+    assert _fig(rep, "매출액").current == Decimal("171.50")

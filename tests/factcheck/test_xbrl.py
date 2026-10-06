@@ -92,8 +92,9 @@ def test_contract_fields_and_defaults():
 def test_only_fixed_accounts_no_sce_or_cf_and_no_duplicates():
     rows = _rows("xbrl_samsung_2026_11012_CFS.json")
     assert {r["account_id"] for r in rows} <= set(xbrl.ACCOUNTS)
-    assert {r["sj_div"] for r in rows} <= {"IS", "CIS", "BS"}
-    # 자본변동표(SCE) 구성요소 값이 섞이지 않는다
+    # SCE는 지배기업 소유주지분 순이익 합계 구성요소만(PR #56 후속 5번), 나머지 구성요소 값은 섞이지 않는다
+    assert {r["sj_div"] for r in rows if r["account_id"] != xbrl.OWNERS} <= {"IS", "CIS", "BS"}
+    assert {r["sj_div"] for r in rows if r["account_id"] == xbrl.OWNERS} == {"SCE"}
     assert 897_514_000_000 not in {r["amount"] for r in rows}
     keys = [(r["account_id"], r["period"], r["cumulative"], r["value_kind"], r["column"]) for r in rows]
     assert len(keys) == len(set(keys))
@@ -167,3 +168,22 @@ def test_duplicate_account_column_in_one_response_raises():
     import pytest
     with pytest.raises(ValueError, match="ifrs-full_Revenue"):
         xbrl.facts_from_response(resp, fs_div="CFS")
+
+
+# ── PR #56 후속 5번: 지배기업 소유주지분 순이익은 IS에 없으면 자본변동표(SCE) 합계 행에서 ──
+
+def test_owners_net_income_from_sce_total_row():
+    own = "ifrs-full_ProfitLossAttributableToOwnersOfParent"
+    rows = _rows("xbrl_samsung_2025_11011_CFS.json")
+    assert _one(rows, own, "2025")["amount"] == 44_260_956_000_000
+    assert _one(rows, own, "2024")["amount"] == 33_621_363_000_000
+    assert _one(rows, own, "2023")["sj_div"] == "SCE"
+    half = _rows("xbrl_samsung_2026_11012_CFS.json")
+    h1 = _one(half, own, "2026H1", cumulative=True)   # 자본변동표 값은 연초부터 누적
+    assert (h1["amount"], h1["period_start"], h1["column"]) == (118_370_658_000_000, "2026-01-01", "thstrm_add")
+    assert _one(half, own, "2025H1", cumulative=True)["amount"] == 12_962_441_000_000
+    assert not [r for r in half if r["account_id"] == own and not r["cumulative"]]  # 분기 단독 값은 없다
+    hynix = _rows("xbrl_skhynix_2026_11012_CFS.json")
+    assert _one(hynix, own, "2026H1", cumulative=True)["amount"] == 134_150_412_000_000
+    q3 = _rows("xbrl_samsung_2025_11014_CFS.json")
+    assert _one(q3, own, "2025Q3", cumulative=True)["amount"] == 24_968_902_000_000
