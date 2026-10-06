@@ -403,3 +403,31 @@ def test_limits_from_env_defaults_fit_one_max_run(monkeypatch):
     assert lim.global_tokens <= 3_000_000  # 근거 모드 전체 기본값을 넘지 않는다
     monkeypatch.setenv("FACTCHECK_DAILY_GLOBAL_TOKENS", "123456")
     assert fq.limits_from_env().global_tokens == 123_456
+
+
+def test_concurrent_reserve_and_settle_do_not_deadlock(fc_pg):
+    """예약(키 → 전체)과 정산이 같은 순서로 행을 잠근다(C1). 여러 연결에서 예약·정산을 섞어 돌려도 교착 없이 끝난다."""
+    async def go():
+        engines = [_factory(fc_pg) for _ in range(4)]
+        qs = [_quota(f, key_tokens=10 ** 9, global_tokens=10 ** 12, runs=10 ** 6) for _, f in engines]
+
+        async def cycle(q, key):
+            for _ in range(15):
+                await q.settle(await q.reserve(key, 100), 50)
+
+        await asyncio.wait_for(asyncio.gather(*(cycle(q, f"k{i % 2}") for i, q in enumerate(qs))), 60)
+        for e, _ in engines:
+            await e.dispose()
+
+    asyncio.run(go())
+    rows = asyncio.run(_rows(fc_pg))
+    assert rows["global"][1:] == (60, 3_000, 0)
+
+
+def test_settle_updates_key_then_global_separately(fc_pg):
+    """정산 SQL이 키 행과 전체 행을 따로(키 먼저) 바꾼다 — 한 문장 IN (k, g)는 잠금 순서가 정해지지 않는다(C1)."""
+    import inspect
+
+    src = inspect.getsource(fq.FactcheckQuota._settle_in)
+    assert "_SETTLE_KEY" in src and "_SETTLE_GLOBAL" in src
+    assert src.index("_SETTLE_KEY") < src.index("_SETTLE_GLOBAL")

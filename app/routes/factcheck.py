@@ -39,7 +39,7 @@ from app.config import settings
 from app.services.evidence.claims import claim_spans
 from app.services.factcheck import metering
 from app.services.factcheck import settings as fc_settings
-from app.services.factcheck.jobs import Job, JobStore, StoreBusy, owner_hash, size_estimate
+from app.services.factcheck.jobs import JOB_DEADLINE_S, Job, JobStore, StoreBusy, owner_hash, size_estimate
 from app.services.factcheck.quota import MAX_SENTENCES, AnonKeyer, FactcheckQuota, QuotaExceeded, Reservation
 
 log = logging.getLogger("app.factcheck.api")
@@ -59,12 +59,11 @@ SOURCES = {"my_draft": "내 초안", "ai_answer": "AI 답변", "others": "남의
 MAX_CHARS = 2000
 MAX_BODY_BYTES = 16 * 1024
 POLL_MS = 1000
-JOB_DEADLINE_S = 180.0  # 파이프라인 전체 상한(문장별 혼잡 ⊘ 처리는 파이프라인 몫, D9)
 COOKIE = "fc_anon"
 COOKIE_MAX_AGE_S = 86400
 _COOKIE_RE = re.compile(r"^[A-Za-z0-9_-]{43}$")
 EVIDENCE_FIELDS = ("rcept_no", "report_nm", "period", "section", "text")
-XBRL_FIELDS = ("account_nm", "period", "fs_div", "amount")
+XBRL_FIELDS = ("account_nm", "period", "fs_div", "amount", "unit", "note")  # unit: 원 / %(영업이익률), note: restated 등
 CAP_MESSAGES = {
     "cap_runs": "익명 검수는 하루 3회까지입니다. 오늘 3회를 모두 썼습니다. 내일(한국 시간 자정 이후) 다시 써 주세요.",
     "cap_key_tokens": "오늘 이 연결에서 쓸 수 있는 검수량을 모두 썼습니다. 내일(한국 시간 자정 이후) 다시 써 주세요.",
@@ -73,6 +72,12 @@ CAP_MESSAGES = {
 BUSY = {"code": "busy", "message": "지금 검수 요청이 많습니다. 잠시 뒤 다시 시도해 주세요."}
 NOT_FOUND = {"code": "not_found", "message": "검수 결과를 찾을 수 없습니다. 15분이 지나 만료됐거나 다른 브라우저에서 시작한 검수입니다."}
 UNAVAILABLE = {"code": "quota_unavailable", "message": "검수 한도를 확인할 수 없어 지금은 검수를 받지 않습니다."}
+NOT_READY = {  # 진입점 준비 상태(factcheck_main.prepare)가 검수를 막는 이유
+    "data_unavailable": "공시 데이터가 준비되지 않아 지금은 검수를 받지 않습니다.",
+    "no_api_key": "판정 API 키가 설정되지 않아 지금은 검수를 받지 않습니다.",
+    "startup_failed": "서버 준비 중 오류가 있어 지금은 검수를 받지 않습니다.",
+}
+_SENTENCE_END = re.compile(r"(?<=[.!?？！。])\s+|\n+")
 
 router = APIRouter(prefix="/api/factcheck", tags=["factcheck"])
 
@@ -83,12 +88,15 @@ _quota: FactcheckQuota | None = None
 _pipeline: Any = None
 _jobs = JobStore()
 _keyer: AnonKeyer | None = None
+_not_ready: str | None = None
 
 
-def configure(*, quota: FactcheckQuota | None, pipeline: Any = None, keyer: AnonKeyer | None = None) -> None:
-    """진입점 lifespan이 PostgreSQL 연결 뒤 한도·익명 키·파이프라인(MeteredJev를 넣은 T2 FactcheckPipeline)을 넣는다."""
-    global _quota, _pipeline, _keyer
-    _quota, _pipeline, _keyer = quota, pipeline, keyer
+def configure(*, quota: FactcheckQuota | None, pipeline: Any = None, keyer: AnonKeyer | None = None,
+              not_ready: str | None = None) -> None:
+    """진입점이 준비 단계 뒤 한도·익명 키·파이프라인(MeteredJev를 넣은 T2 FactcheckPipeline)과 준비 안 된 이유
+    (NOT_READY 키: data_unavailable / no_api_key / startup_failed)를 넣는다."""
+    global _quota, _pipeline, _keyer, _not_ready
+    _quota, _pipeline, _keyer, _not_ready = quota, pipeline, keyer, not_ready
 
 
 def get_quota() -> FactcheckQuota:
@@ -119,7 +127,9 @@ def require_metered(pipeline: Any) -> Any:
 
 
 def get_pipeline() -> Any:
-    """진입점이 넣은 T2 파이프라인(요청마다 for_user 사본을 쓴다). 없으면 503."""
+    """진입점이 넣은 T2 파이프라인(요청마다 for_user 사본을 쓴다). 준비가 안 됐거나 없으면 503."""
+    if _not_ready is not None:
+        raise HTTPException(503, {"code": _not_ready, "message": NOT_READY.get(_not_ready, NOT_READY["startup_failed"])})
     if _pipeline is None:
         raise HTTPException(503, {"code": "pipeline_unavailable", "message": "검수 엔진이 아직 준비되지 않았습니다."})
     return require_metered(_pipeline)
@@ -153,13 +163,35 @@ def client_ip(request: Request) -> str:
     return hops[0] if hops else peer
 
 
+def key_source(ip: str) -> str:
+    """익명 키를 만들 주소: IPv6는 /64 접두(한 가입자가 보통 /64를 받는다), IPv4에 대응한 IPv6는 그 IPv4."""
+    try:
+        addr = ipaddress.ip_address(ip)
+    except ValueError:
+        return ip
+    if isinstance(addr, ipaddress.IPv6Address):
+        if addr.ipv4_mapped is not None:
+            return str(addr.ipv4_mapped)
+        return str(ipaddress.ip_network(f"{addr}/64", strict=False))
+    return str(addr)
+
+
+def count_sentences(text: str) -> int:
+    """입력 제한용 문장 수: 문장부호(. ! ? 와 전각) 뒤 공백·줄바꿈으로 나눈 비지 않은 조각 수. claim_spans와 달리 짧은 문장
+    ('네.')도 센다. 소수점(3.5조)은 뒤에 공백이 없어 경계가 아니다."""
+    return sum(1 for piece in _SENTENCE_END.split(text) if piece.strip())
+
+
 def check_same_origin(request: Request) -> None:
-    """교차 출처 POST를 막는다: Origin(있으면)과 Content-Type(application/json)."""
+    """교차 출처 POST를 막는다: Origin(있으면)과 Content-Type(application/json). Origin은 FACTCHECK_ALLOWED_ORIGINS(배포에서
+    필수)와 정확히 같거나, 목록이 비어 있으면 요청의 스킴·Host와 같아야 한다(스킴까지 비교 — http/https 섞임 차단)."""
     origin = request.headers.get("origin")
     if origin is not None:
         allowed = [o.strip().rstrip("/") for o in FC.FACTCHECK_ALLOWED_ORIGINS.split(",") if o.strip()]
+        parts = urlsplit(origin)
         ok = origin.rstrip("/") in allowed if allowed else (
-            urlsplit(origin).netloc != "" and urlsplit(origin).netloc == request.headers.get("host", ""))
+            parts.netloc != "" and parts.netloc == request.headers.get("host", "")
+            and parts.scheme == request.url.scheme)
         if not ok:
             raise HTTPException(403, {"code": "bad_origin", "message": "다른 사이트에서 보낸 요청은 받지 않습니다."})
     ctype = request.headers.get("content-type", "").split(";")[0].strip().lower()
@@ -242,8 +274,10 @@ def ensure_settled(jobs: JobStore, quota: FactcheckQuota, res: Reservation, ledg
 
 
 async def _run(job: Job, pipeline: Any, jobs: JobStore, quota: FactcheckQuota, res: Reservation,
-               ledger: metering.Ledger, text: str, recheck_idx: int | None = None) -> None:
-    """파이프라인을 돌려 결과를 job에 쌓고, 어떻게 끝나든 원장 값으로 정산한다. 원문·예외 메시지는 로그에 남기지 않는다."""
+               ledger: metering.Ledger, text: str, recheck_idx: int | None = None,
+               prev: tuple[str, dict | None] | None = None) -> None:
+    """파이프라인을 돌려 결과를 job에 쌓고, 어떻게 끝나든 원장 값으로 정산한다. 원문·예외 메시지는 로그에 남기지 않는다.
+    수동 검수(recheck_idx)는 그 문장만 바꾸고, job 상태는 수동 검수 전 상태로 돌린다(실패한 job의 오류를 덮지 않는다)."""
     token = metering.bind(ledger)
     final: tuple[str, dict | None] = ("failed", {"code": "cancelled", "message": "서버가 검수를 멈췄습니다. 다시 시도해 주세요."})
     try:
@@ -265,6 +299,8 @@ async def _run(job: Job, pipeline: Any, jobs: JobStore, quota: FactcheckQuota, r
         log.warning(json.dumps({"event": "factcheck_failed", "error": type(exc).__name__}))
     finally:
         metering.unbind(token)
+        if prev is not None:  # 수동 검수: 성공이면 이전 상태 그대로, 실패면 이전 오류가 있으면 그것을 남긴다
+            final = prev if final[0] == "done" else ("failed", prev[1] or final[1])
         try:
             await asyncio.shield(ensure_settled(jobs, quota, res, ledger))  # 다시 취소돼도 정산은 끝까지 간다
         finally:
@@ -272,10 +308,10 @@ async def _run(job: Job, pipeline: Any, jobs: JobStore, quota: FactcheckQuota, r
 
 
 def _launch(job: Job, pipeline: Any, jobs: JobStore, quota: FactcheckQuota, res: Reservation, text: str,
-            recheck_idx: int | None = None) -> None:
+            recheck_idx: int | None = None, prev: tuple[str, dict | None] | None = None) -> None:
     """원장을 만들고 작업을 띄운다. 작업이 첫 단계 전에 취소돼도(코루틴의 finally가 안 돈다) 완료 콜백이 정산한다."""
     ledger = metering.Ledger(res.est)
-    task = jobs.spawn(job, _run(job, pipeline, jobs, quota, res, ledger, text, recheck_idx))
+    task = jobs.spawn(job, _run(job, pipeline, jobs, quota, res, ledger, text, recheck_idx, prev))
 
     def done(t: asyncio.Task) -> None:
         if t.cancelled() and job.status == "running":
@@ -297,7 +333,7 @@ async def _reserve(quota: FactcheckQuota, key: str, est: int, *, count_run: bool
 
 async def _anon_key(keyer: AnonKeyer, request: Request) -> str:
     try:
-        return await keyer.key(client_ip(request))
+        return await keyer.key(key_source(client_ip(request)))
     except Exception as exc:  # noqa: BLE001
         log.error(json.dumps({"event": "factcheck_salt_failed", "error": type(exc).__name__}))
         raise HTTPException(503, UNAVAILABLE)
@@ -326,9 +362,9 @@ async def start(request: Request, response: Response, pipeline: Any = Depends(ge
     if not isinstance(body, dict):
         raise _bad("bad_json", "요청 형식이 올바르지 않습니다.")
     corp_code, source, text = body.get("corp_code"), body.get("source"), body.get("text")
-    if corp_code not in {c["corp_code"] for c in COMPANIES}:
+    if not isinstance(corp_code, str) or corp_code not in {c["corp_code"] for c in COMPANIES}:
         raise _bad("bad_company", "데모 범위(삼성전자·SK하이닉스)의 회사만 고를 수 있습니다.")
-    if source not in SOURCES:
+    if not isinstance(source, str) or source not in SOURCES:
         raise _bad("bad_source", "출처를 골라 주세요(내 초안·AI 답변·남의 글).")
     text = text.strip() if isinstance(text, str) else ""
     if not text:
@@ -336,10 +372,11 @@ async def start(request: Request, response: Response, pipeline: Any = Depends(ge
     if len(text) > MAX_CHARS:
         raise _bad("too_long", f"익명 검수는 한 번에 {MAX_CHARS:,}자까지입니다. 지금 {len(text):,}자입니다. 나눠서 붙여 넣어 주세요.",
                    limit=MAX_CHARS, length=len(text))
-    n = len(claim_spans(text))
-    if n > MAX_SENTENCES:
-        raise _bad("too_many_sentences", f"익명 검수는 한 번에 문장 {MAX_SENTENCES}개까지입니다. 지금 {n}개입니다. "
-                   "나눠서 붙여 넣어 주세요.", limit=MAX_SENTENCES, sentences=n)
+    n = len(claim_spans(text))  # 파이프라인이 도는 문장 수(예약·진행 표시)
+    counted = max(n, count_sentences(text))  # 입력 제한은 짧은 문장도 센다
+    if counted > MAX_SENTENCES:
+        raise _bad("too_many_sentences", f"익명 검수는 한 번에 문장 {MAX_SENTENCES}개까지입니다. 지금 {counted}개입니다. "
+                   "나눠서 붙여 넣어 주세요.", limit=MAX_SENTENCES, sentences=counted)
 
     size = size_estimate(len(text), n)
     try:
@@ -399,11 +436,14 @@ async def recheck(job_id: str, idx: int, request: Request, pipeline: Any = Depen
     try:
         key = await _anon_key(keyer, request)
         res = await _reserve(quota, key, metering.reservation_for(1, triage=False), count_run=False)
+        if not jobs.alive(job):  # 예약을 기다리는 동안 만료·삭제됐다: 유료 작업을 띄우지 않고 바로 0으로 정산(B2)
+            await _settle(quota, res, 0)
+            raise HTTPException(404, NOT_FOUND)
     except BaseException:
         job.rechecked.discard(idx)
         job.status, job.error = prev
         raise
     finally:
         jobs.release_running()
-    _launch(job, pipeline.for_user(key), jobs, quota, res, current["text"], recheck_idx=idx)
+    _launch(job, pipeline.for_user(key), jobs, quota, res, current["text"], recheck_idx=idx, prev=prev)
     return {"job_id": job.id, "idx": idx, "status": job.status, "poll_interval_ms": POLL_MS}

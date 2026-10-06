@@ -49,12 +49,15 @@ SENTS = ["삼성전자의 2026년 상반기 매출은 153조원이다.", "2025�
          "앞으로도 좋을까?", "2025년 연구개발비는 35조원이다."]
 R0 = res(0, SENTS[0], "supported", xbrl={"account_nm": "매출액", "period": "2026H1", "fs_div": "CFS",
                                           "amount": 153000000000000})
-R1 = res(1, SENTS[1], "contradicted", reason="숫자는 XBRL과 다름",
+R1 = res(1, SENTS[1], "contradicted", reason="xbrl_mismatch",
          evidence=[{**EVID, "text": XSS, "report_nm": "사업보고서 (2025.12)", "period": "2025"}],
          xbrl={"account_nm": "영업이익", "period": "2025", "fs_div": "CFS", "amount": 43601100000000})
-R2 = res(2, SENTS[2], "no_evidence")
-R3 = res(3, SENTS[3], "skipped", category="opinion", reason="의견·전망 문장")
-R4 = res(4, SENTS[4], "supported")
+R2 = res(2, SENTS[2], "no_evidence", reason="xbrl_partial,restated",  # 영업이익률(%)·재작성 비교값
+         xbrl={"account_nm": "영업이익률", "period": "2025", "fs_div": "CFS", "amount": 11.61, "unit": "%",
+               "note": "restated"})
+R3 = res(3, SENTS[3], "skipped", category="opinion", reason="not_claim:question")
+# 화면이 모르는 코드는 원문 그대로(객체 상속 속성 이름도 표에 걸리지 않는다, #61 검수 5)
+R4 = res(4, SENTS[4], "supported", reason="zz_new_code,__proto__,constructor,constructor:x,toString")
 ALL = [R0, R1, R2, R3, R4]
 
 
@@ -202,7 +205,20 @@ async def s_first(browser, base, ck):
     ck.ok(XSS in body, "first: 근거 문단의 태그는 글자로 보인다")
     ck.ok(await page.evaluate("window.__fcx === undefined && !document.querySelector('#fc-list img')"),
           "first: 태그가 실행되지 않는다(textContent)")
-    ck.ok("숫자는 XBRL과 다름" in body, "first: 이유 표시")
+    ck.ok("XBRL 재무 수치와 다름" in body and "xbrl_mismatch" not in body, f"first: 사유 코드는 한국어로 {body!r}")
+    second = page.locator("#fc-list > li").nth(1)  # ❔ 영업이익률
+    await second.locator("summary").click()
+    body2 = await second.inner_text()
+    ck.ok("숫자는 XBRL과 일치, 나머지는 공시에서 못 찾음 · 재작성된 비교값과 일치" in body2,
+          f"first: 여러 사유 코드(xbrl_partial,restated) {body2!r}")
+    ck.ok("영업이익률 · 기간 2025 · 연결 · 11.61%" in body2 and "11.61원" not in body2, f"first: 단위 % {body2!r}")
+    ck.ok("비고: 재작성된 비교값과 일치" in body2, f"first: XBRL 비고 {body2!r}")
+    last = page.locator("#fc-list > li").last
+    await last.locator("summary").click()
+    last_text = await last.inner_text()
+    ck.ok("zz_new_code · __proto__ · constructor · constructor:x · toString" in last_text
+          and "[object" not in last_text and "function" not in last_text,
+          f"first: 모르는 사유 코드(상속 속성 이름 포함)는 원문 그대로 {last_text!r}")
     ck.ok(not await page.is_disabled("#fc-submit"), "first: 끝나면 다시 보낼 수 있다")
     clean(ck, page, "first")
     await ctx.close()
@@ -267,7 +283,8 @@ async def s_skipped(browser, base, ck):
     ck.ok(SENTS[3] not in await page.inner_text("#fc-list"), "skipped: 확인 목록에 섞이지 않는다")
     await page.click("#fc-skipped-title")
     item = await page.inner_text("#fc-skipped-list")
-    ck.ok(SENTS[3] in item and "이유: 의견·전망 — 의견·전망 문장" in item, f"skipped: 문장과 이유 {item!r}")
+    ck.ok(SENTS[3] in item and "이유: 의견·전망 — 사실 주장이 아님 — 질문 문장" in item and "not_claim" not in item,
+          f"skipped: 문장과 이유(사유 코드는 한국어로) {item!r}")
     await page.click("#fc-skipped-list .fc-recheck")
     await page.wait_for_function("document.getElementById('fc-summary').innerText.endsWith('건너뜀 0')")
     ck.ok([p for m, p, _ in fake.calls if m == "POST" and "recheck" in p] == [f"/api/factcheck/{JOB}/recheck/3"],
