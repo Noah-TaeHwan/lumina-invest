@@ -365,8 +365,15 @@ async function recheck(state, idx, btn) {
 async function loadCompanies() {
   try {
     const res = await fetch('/api/factcheck/companies', { credentials: 'same-origin' });
-    if (!res.ok) return;
+    if (!res.ok) {
+      document.body.dataset.fcCompanies = 'failed';
+      return;
+    }
     const data = await res.json();
+    // 하루 횟수는 서버 한도 값으로만 쓴다(못 받으면 숫자 없는 기본 문장 유지 — 틀린 숫자보다 낫다)
+    if (Number.isInteger(data.anon_runs) && data.anon_runs > 0) {
+      $('fc-runs').textContent = `로그인 없이 하루 ${data.anon_runs}회까지 쓸 수 있습니다.`;
+    }
     if (Array.isArray(data.companies) && data.companies.length) {
       const sel = $('fc-company');
       const keep = sel.value;
@@ -381,7 +388,10 @@ async function loadCompanies() {
     if (Array.isArray(data.weaknesses) && data.weaknesses.length) {
       $('fc-weak').replaceChildren(...data.weaknesses.map((w) => el('li', w)));
     }
-  } catch (_) { /* 기본 문구 유지 */ }
+    document.body.dataset.fcCompanies = 'ok';
+  } catch (_) {
+    document.body.dataset.fcCompanies = 'failed'; /* 기본 문구 유지 */
+  }
 }
 
 /** 화면 시작. */

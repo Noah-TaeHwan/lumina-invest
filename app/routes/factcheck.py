@@ -64,8 +64,8 @@ COOKIE_MAX_AGE_S = 86400
 _COOKIE_RE = re.compile(r"^[A-Za-z0-9_-]{43}$")
 EVIDENCE_FIELDS = ("rcept_no", "report_nm", "period", "section", "text")
 XBRL_FIELDS = ("account_nm", "period", "fs_div", "amount", "unit", "note")  # unit: 원 / %(영업이익률), note: restated 등
-CAP_MESSAGES = {
-    "cap_runs": "익명 검수는 하루 3회까지입니다. 오늘 3회를 모두 썼습니다. 내일(한국 시간 자정 이후) 다시 써 주세요.",
+CAP_RUNS_MESSAGE = "익명 검수는 하루 {n}회까지입니다. 오늘 {n}회를 모두 썼습니다. 내일(한국 시간 자정 이후) 다시 써 주세요."
+CAP_MESSAGES = {  # cap_runs는 실제 한도 값으로 만든다(_cap_message)
     "cap_key_tokens": "오늘 이 연결에서 쓸 수 있는 검수량을 모두 썼습니다. 내일(한국 시간 자정 이후) 다시 써 주세요.",
     "cap_global": "오늘 검수 한도에 도달했습니다. 내일(한국 시간 자정 이후) 다시 써 주세요.",
     # 오늘 한도가 남았는데 진행 중인 다른 검수의 예약 때문에 잠시 모자라다(예약이 풀리면 된다)
@@ -334,12 +334,28 @@ def _launch(job: Job, pipeline: Any, jobs: JobStore, quota: FactcheckQuota, res:
     task.add_done_callback(done)
 
 
+def _cap_message(quota: FactcheckQuota, code: str) -> str:
+    """한도 초과 안내. cap_runs의 횟수는 이 한도 객체의 값(설정 FACTCHECK_DAILY_ANON_RUNS)을 쓴다."""
+    if code == "cap_runs":
+        return CAP_RUNS_MESSAGE.format(n=quota.limits.runs)
+    return CAP_MESSAGES[code]
+
+
+def anon_runs() -> int | None:
+    """익명 하루 실행 횟수. 연결된 한도 객체가 있으면 그 값, 아직 없으면 설정 값. 못 읽으면 None
+    (회사 목록 응답은 그대로 주고, 화면은 숫자 없는 문장을 둔다)."""
+    try:
+        return _quota.limits.runs if _quota is not None else fc_settings.load().FACTCHECK_DAILY_ANON_RUNS
+    except Exception:  # noqa: BLE001 — 안내 숫자 때문에 회사 목록이 실패하면 안 된다
+        return None
+
+
 async def _reserve(quota: FactcheckQuota, key: str, est: int, *, count_run: bool) -> Reservation:
     try:
         return await quota.reserve(key, est, count_run=count_run)
     except QuotaExceeded as exc:
         headers = {"Retry-After": str(BUSY_RETRY_AFTER_S)} if exc.code.endswith("_busy") else None
-        raise HTTPException(429, {"code": exc.code, "message": CAP_MESSAGES[exc.code]}, headers=headers)
+        raise HTTPException(429, {"code": exc.code, "message": _cap_message(quota, exc.code)}, headers=headers)
     except Exception as exc:  # noqa: BLE001 — 한도를 셀 수 없으면 부르지 않는다
         log.error(json.dumps({"event": "factcheck_quota_failed", "error": type(exc).__name__}))
         raise HTTPException(503, UNAVAILABLE)
@@ -357,9 +373,9 @@ async def _anon_key(keyer: AnonKeyer, request: Request) -> str:
 
 @router.get("/companies")
 async def companies():
-    """데모 범위 회사 두 개와 상시 표시 문구."""
+    """데모 범위 회사 두 개와 상시 표시 문구. anon_runs는 화면의 '하루 N회' 안내에 쓴다."""
     return {"companies": COMPANIES, "scope": SCOPE, "weaknesses": WEAKNESSES, "max_chars": MAX_CHARS,
-            "max_sentences": MAX_SENTENCES, "sources": SOURCES}
+            "max_sentences": MAX_SENTENCES, "sources": SOURCES, "anon_runs": anon_runs()}
 
 
 @router.post("", status_code=202, dependencies=[Depends(check_same_origin)])
