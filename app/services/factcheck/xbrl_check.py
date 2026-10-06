@@ -59,6 +59,9 @@ _PERCENT = re.compile(r"[-−△]?\d[\d,]*(?:\.\d+)?\s*%(?!p)")
 # 절 경계(연결/별도 표시가 미치는 범위를 끊는다): 쉼표·세미콜론·연결 어미
 _CLAUSE_BREAK = re.compile(r"[,;]|지만|는데|으며|이며|며\s|고\s")
 _JOIN = re.compile(r"\s*(?:과|와|및|,|·|그리고)?\s*")  # 계정 묶음의 이음말('매출과 영업이익', '매출, 영업이익')
+# 근사 표시어: 금액 앞 '약·대략', 금액 뒤 '가량·여·정도·안팎·수준'
+_APPROX_BEFORE = re.compile(r"(?<![가-힣])(?:약|대략)\s*$")
+_APPROX_AFTER = re.compile(r"\s*(?:가량|여(?![가-힣])|정도|안팎|수준)")
 _FROM = re.compile(r"\s*에서")  # 'X에서 Y로'의 '에서'
 _EACH = re.compile(r"각각")
 # 계정 바로 앞 토큰으로 허용하는 수식어(회사 전체 값). 그 밖의 명사가 앞에 붙으면 제품·부문 값으로 보고 대조하지 않는다
@@ -83,6 +86,7 @@ class AmountClaim:
     value_start: int = 0  # 문장 안 금액 위치(연결/별도 절 계산용)
     value_end: int = 0
     period_idx: int | None = None  # '각각' 짝: 계정 앞 기간 표현의 순번
+    approx: bool = False  # 근사 표시어가 붙은 금액('약 90조원', '40조원 가량')
 
 
 @dataclass
@@ -184,8 +188,10 @@ def amount_claims(text: str, names: CompanyIndex | None = None) -> list[AmountCl
             raw = v.group(0)
             negative = bool(_LOSS.search(g.group(0))) or raw[0] in _NEG or \
                 bool(_LOSS.search(text, v.end(), min(end, v.end() + 6))) or bool(_LOSS.search(text, m.end(), v.start()))
+            approx = bool(_APPROX_BEFORE.search(text, max(0, v.start() - 6), v.start())) or \
+                bool(_APPROX_AFTER.match(text, v.end()))
             out.append(AmountClaim(_GROUP_ACCOUNT[g.lastgroup], g.group(0), raw.lstrip(_NEG), g.start(), negative,
-                                   v.start(), v.end(), j))
+                                   v.start(), v.end(), j, approx))
     return out
 
 
@@ -242,12 +248,29 @@ def select_fact(facts: Iterable[Mapping], corp_code: str, account_id: str, perio
     return rows[0] if rows else None
 
 
+def _approx_same(value_text: str, amount: int) -> bool:
+    """근사 표시어가 붙은 금액의 정밀도를 마지막 0이 아닌 자리로 본다: 정수부가 0으로 끝나고 소수가 없으면
+    '90조' → 10조 단위, '1,200억' → 100억 단위, '1조 2,000억' → 1,000억 단위로 반올림해 맞춘다."""
+    nums = parse(value_text)
+    if len(nums) != 1 or nums[0].kind != "abs" or "." in value_text:
+        return False
+    w = nums[0]
+    n = int((abs(w.value) / w.step).to_integral_value())
+    zeros = len(str(n)) - len(str(n).rstrip("0")) if n else 0
+    if zeros == 0:
+        return False
+    unit = w.step * (10 ** zeros)
+    return (Decimal(amount) / unit).to_integral_value(ROUND_HALF_UP) == abs(w.value) / unit
+
+
 def _same_amount(claim: AmountClaim, amount: int, rounding_unit: int = 1) -> bool:
     """부호가 같고 number_check로 같은 값. 공시 값이 rounding_unit(잠정실적 10^10원 등)으로 반올림돼 있으면, 그보다
     자세한 주장은 그 단위로 반올림해 맞춘다('171.499조' ↔ 171.50조)."""
     if amount and claim.negative != (amount < 0):
         return False
     if number_check(claim.value_text, str(abs(amount))):
+        return True
+    if claim.approx and _approx_same(claim.value_text, abs(amount)):
         return True
     if rounding_unit > 1:
         nums = parse(claim.value_text)

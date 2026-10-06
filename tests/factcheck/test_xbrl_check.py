@@ -303,3 +303,39 @@ def test_unicode_minus_is_negative_claim(text, facts):
 def test_items_record_claim_period(facts):
     r = run("2025년 1분기 및 2분기 매출은 333.6조원이다.", facts)
     assert all(it.claim_period is not None for it in r.items)
+
+
+# ---- 근사 표시어('약·대략·가량·여·정도·안팎·수준')가 붙은 반올림 숫자 ----
+
+HY_Q1 = dict(period="2026Q1", start="2026-01-01", end="2026-03-31")
+HY_OP = [dict(_row("dart_OperatingIncomeLoss", 37_610_000_000_000, **HY_Q1), corp_code=HYNIX)]
+SS_Q2 = dict(period="2026Q2", start="2026-04-01", end="2026-06-30")
+SS_OP = [_row("dart_OperatingIncomeLoss", 89_490_000_000_000, **SS_Q2),
+         _row("ifrs-full_Revenue", 1_234_000_000_000, **SS_Q2)]
+
+
+@pytest.mark.parametrize("text, status", [
+    ("SK하이닉스의 2026년 1분기 연결 영업이익은 약 40조원이다.", "match"),     # 37.61조 → 10조 단위로 40
+    ("SK하이닉스의 2026년 1분기 연결 영업이익은 40조원 가량이다.", "match"),
+    ("SK하이닉스의 2026년 1분기 연결 영업이익은 40조원 정도다.", "match"),
+    ("SK하이닉스의 2026년 1분기 연결 영업이익은 40조원 안팎이다.", "match"),
+    ("SK하이닉스의 2026년 1분기 연결 영업이익은 40조원 수준이다.", "match"),
+    ("SK하이닉스의 2026년 1분기 연결 영업이익은 대략 40조원이다.", "match"),
+    ("SK하이닉스의 2026년 1분기 연결 영업이익은 약 50조원이다.", "mismatch"),   # 실제로 틀린 값
+    ("SK하이닉스의 2026년 1분기 연결 영업이익은 40조원이다.", "mismatch"),      # 표시어 없음: 지금 그대로(1조 단위)
+    ("SK하이닉스의 2026년 1분기 연결 영업이익은 약 37.6조원이다.", "match"),    # 소수 있음: 지금 규칙
+    ("SK하이닉스의 2026년 1분기 연결 영업이익은 약 40.0조원이다.", "mismatch"),  # 소수까지 적었으면 그 정밀도
+])
+def test_approximate_amount_precision(text, status):
+    assert xbrl_check.check(text, HY_OP, corp_code=HYNIX, as_of=AS_OF, names=NAMES).status == status
+
+
+@pytest.mark.parametrize("text, status", [
+    ("2026년 2분기 영업이익은 약 90조원이다.", "match"),       # 89.49조
+    ("2026년 2분기 영업이익은 90조원이다.", "mismatch"),
+    ("2026년 2분기 매출은 약 1,200억원이다.", "mismatch"),     # 1조 2,340억 ≠ 1,200억(100억 단위)
+    ("2026년 2분기 매출은 약 1조 2,300억원이다.", "match"),     # 100억 단위
+    ("2026년 2분기 매출은 약 1조 2,000억원이다.", "match"),     # 1,000억 단위
+])
+def test_approximate_amount_units(text, status):
+    assert run(text, SS_OP).status == status

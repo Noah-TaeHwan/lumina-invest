@@ -417,6 +417,16 @@ class Scope:
         return [m.period for m in self.mentions]
 
 
+# 목록 머리말: '정리하면·요약하면·살펴보면 + 다음과/아래와(아래 표와) 같다·같습니다·같음·같이 …'. 숫자가 있으면 아니다
+_LIST_LEAD = re.compile(r"(?:정리|요약|살펴보)\S*면\s+(?:다음|아래)(?:\s*표)?\s*(?:와|과)\s*같(?:다|습니다|음|이)")
+
+
+def is_list_lead(text: str) -> bool:
+    """목록·표를 여는 머리말 문장인가(숫자 없음). evidence.claims의 머리말 규칙이 놓치는 꼬리 변형('아래 표와 같다',
+    '다음과 같음', '…같다(단위: 조원)', '다음과 같이 정리된다', '…같다:')을 덧붙여 잡는다."""
+    return not re.search(r"\d", text) and bool(_LIST_LEAD.search(text))
+
+
 def relative_units(text: str) -> set[str]:
     """문장 속 상대 기간 표현의 단위: quarter('같은 분기·당분기·동 분기·해당 분기·이번 분기') / half('반기') /
     year('해·연도·회계연도') / any('같은 기간·동 기간·해당 기간'). 앞 문장 기간을 이어받을 때 단위를 맞추는 데 쓴다."""
