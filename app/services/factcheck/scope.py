@@ -405,18 +405,32 @@ def relative_only(text: str, mentions: Sequence[PeriodMention]) -> bool:
     return not mentions and bool(SAME_PERIOD.search(text))
 
 
-def period_scope(text: str, as_of: Period) -> Scope:
-    """범위 밖 판별 없이 검색 범위만 붙인 Scope(force_check용). 증감률이면 잠정실적만 검색한다."""
+def _scan_with(text: str, as_of: Period, inherited: Period | None) -> tuple[list[PeriodMention],
+                                                                            list[tuple[int, int]]]:
+    """_scan에 앞 문장 기간 상속을 더한다: 해석된 기간이 없고 상대 기간 표현만 있으면, 그 표현 자리마다 inherited
+    기간을 둔다(relative=True). 그 밖에는 _scan 그대로."""
     mentions, spans = _scan(text, as_of)
+    if inherited is None or not relative_only(text, mentions):
+        return mentions, spans
+    got = [PeriodMention(m.start(), m.end(), inherited, relative=True) for m in SAME_PERIOD.finditer(text)]
+    return got, sorted(spans + [(m.start, m.end) for m in got])
+
+
+def period_scope(text: str, as_of: Period, *, inherited: Period | None = None) -> Scope:
+    """범위 밖 판별 없이 검색 범위만 붙인 Scope(force_check용). 증감률이면 잠정실적만 검색한다.
+    inherited는 앞 문장에서 이어받은 기간(상대 기간 표현만 있는 문장에만 쓴다)."""
+    mentions, spans = _scan_with(text, as_of, inherited)
     growth = derived_kind(text) == "growth" and bool(PRELIM_GROWTH_ACCOUNTS.search(text))
     return Scope("checked", None, mentions, search_periods(m.period for m in mentions),
                  ["preliminary"] if growth else None, derived_kind(text), spans, relative_only(text, mentions))
 
 
-def assess(text: str, corp_code: str, *, as_of: Period, names: Mapping[str, Iterable[str]] | CompanyIndex) -> Scope:
+def assess(text: str, corp_code: str, *, as_of: Period, names: Mapping[str, Iterable[str]] | CompanyIndex,
+           inherited: Period | None = None) -> Scope:
     """검수 대상 문장(1단계 통과)을 범위 밖으로 돌릴지 정한다. 순서: 다른 회사 → 주가 → 전망·추정·목표 표지 →
     기준 시점 뒤 기간 → 파생 지표. 전망 표지는 기간과 상관없이 검수 안 함('3분기 영업이익은 10조원으로 예상된다').
-    통과하면 검색 기간·보고서 종류를 붙인다."""
+    통과하면 검색 기간·보고서 종류를 붙인다. inherited는 앞 문장에서 이어받은 기간(해석된 기간 없이 상대 기간
+    표현만 있는 문장에만 쓴다 — 그 표현 자리에 그 기간을 둔다)."""
     other = other_company(text, corp_code, names)
     if other:
         return Scope("other_company", f"other_company:{other}")
@@ -424,7 +438,7 @@ def assess(text: str, corp_code: str, *, as_of: Period, names: Mapping[str, Iter
         return Scope("out_of_scope", "market")
     if FORECAST.search(text):
         return Scope("out_of_scope", "forecast")
-    mentions, spans = _scan(text, as_of)
+    mentions, spans = _scan_with(text, as_of, inherited)
     amb = relative_only(text, mentions)
     if any(m.period.end > as_of.end for m in mentions):
         return Scope("out_of_scope", "future_period", mentions, period_spans=spans, ambiguous_period=amb)

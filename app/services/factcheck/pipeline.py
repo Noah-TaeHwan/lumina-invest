@@ -16,7 +16,9 @@ evidence.numbers.number_check).
   있는 문장은 ⚠️·✅를 내지 않고 최대 ❔('period_ambiguous')다.
 - 문장의 금액이 XBRL과 모두 맞으면(separate_only 제외) 고른 XBRL 행 값으로 만든 근거 한 줄을 판정 문단 맨 앞에 둔다
   (원문 문단 대신 — 원문은 열·연결/별도를 코드로 가를 수 없다). 저장소 추가 호출 없음. ✅는 여전히 JEV 지지일 때만.
-- 해석된 기간 없이 상대 기간만 있는 문장, 별도로만 맞은 문장(separate_only)은 검색·JEV 없이 ❔.
+- 해석된 기간 없이 상대 기간만 있는 문장은 앞쪽 문장 중 기간이 해석된 가장 가까운 문장의 기간이 정확히 하나면 그것을
+  이어받아 판정하고 reason에 'period_inherited:YYYYQn'을 남긴다. 이어받을 수 없거나 연도를 당겨 푼 분기 문장,
+  별도로만 맞은 문장(separate_only)은 검색·JEV 없이 ❔.
 - 숫자 확인(number_check)은 문장에서 기간 표현을 지운 뒤 한다('2분기'의 2가 문단 숫자로 요구되지 않게).
 - force_check(사용자의 '직접 검수 요청'): 1단계 분류와 '검수 안 함'을 건너뛰고 모든 문장을 대조한다. 범위 밖 판별 결과는
   category·reason에 그대로 남긴다.
@@ -69,6 +71,21 @@ def _ambiguous(sc: scope.Scope) -> bool:
     return sc.ambiguous_period or any(m.shifted for m in sc.mentions)
 
 
+def _inherited_period(sentence: str, own: Sequence[Sequence[scope.PeriodMention]], i: int) -> Period | None:
+    """앞 문장 기간 상속: 문장 i에 해석된 기간이 없고 상대 기간 표현('같은 분기' 등)만 있으면, 앞쪽 문장 중 기간이
+    해석된 가장 가까운 문장을 본다. 그 문장의 기간이 정확히 하나(당긴 해석 아님)면 그 기간, 아니면 None(❔ 그대로)."""
+    if not scope.relative_only(sentence, own[i]):
+        return None
+    for prev in reversed(own[:i]):
+        if not prev:
+            continue
+        periods = {m.period for m in prev}
+        if len(periods) == 1 and not any(m.shifted for m in prev):
+            return next(iter(periods))
+        return None
+    return None
+
+
 def _period_text(label: str | None, cumulative: bool | None, instant: bool) -> str:
     """XBRL 근거 줄의 기간 표기: '2025년 2분기(3개월)'·'2025년 1~3분기(누적)'·'2025년 상반기(누적)'·'2025년 연간'·
     재무상태표면 '2025년 말'·'2026년 6월 말'·'2025년 3분기 말'."""
@@ -110,7 +127,8 @@ XBRL_SECTION = "XBRL"
 
 
 def xbrl_passages(xr: xbrl_check.XbrlResult, company: str) -> list[dict]:
-    """XBRL과 모두 맞은 문장(xr.status == 'match')의 항목마다 근거 한 줄 문단. separate_only가 섞이면 없다.
+    """XBRL과 모두 맞은 문장(xr.status == 'match')의 근거 문단(항목마다 한 줄, 여럿이면 ' / '로 이어 한 문단).
+    separate_only가 섞이면 없다.
     머리말은 행의 보고서 종류를 따른다(정기 '[재무제표(XBRL) 값]', 잠정 '[잠정실적 (정정) 공시 값]').
 
     원문 문단은 열(당기·전기·누계)과 기준(연결·별도)을 코드로 가를 수 없어 숫자만 맞는 엉뚱한 문단을 고를 수 있다.
@@ -128,6 +146,11 @@ def xbrl_passages(xr: xbrl_check.XbrlResult, company: str) -> list[dict]:
                     "rcept_no": it.rcept_no, "report_nm": it.report_nm, "period": it.period,
                     "section": XBRL_SECTION, "text": text, "superseded": False,
                     "is_correction": bool(it.is_correction)})
+    if len(out) > 1:  # 항목이 여럿이면 한 근거로 합친다(문장 숫자 전부가 한 문단에서 확인되게)
+        first = out[0]
+        out = [{**first, "passage_id": "+".join(p["passage_id"] for p in out),
+                "text": " / ".join(p["text"] for p in out),
+                "is_correction": any(p["is_correction"] for p in out)}]
     return out
 
 
@@ -260,20 +283,16 @@ class FactcheckPipeline:
                          xr: xbrl_check.XbrlResult, corp_code: str, req: asyncio.Semaphore) -> SentenceResult:
         """문장 하나: 문단 검색 → JEV 판정 → SYS 규칙. note는 force_check 때의 범위 밖 표시.
 
-        해석된 기간 없이 상대 기간만 있는 문장(period_ambiguous)과 연결/별도 표시 없이 별도로만 맞은 문장
-        (separate_only)은 검색·JEV 없이 바로 ❔다(결과가 ❔로 정해져 있으니 익명 한도를 쓰지 않는다)."""
+        기간을 확신할 수 없는 문장(상대 기간만 있거나 연도를 당겨 푼 분기, period_ambiguous)과 연결/별도 표시 없이
+        별도로만 맞은 문장(separate_only)은 검색·JEV 없이 바로 ❔다(결과가 ❔로 정해져 있으니 익명 한도를 쓰지 않는다)."""
         xbrl = xr.primary()
-        if sc.ambiguous_period:
+        if _ambiguous(sc):  # 상대 기간만 있거나 연도를 당겨 푼 분기: 결과가 ❔로 정해져 있다
             return SentenceResult(idx, sentence, category, "no_evidence", [], xbrl, _join("period_ambiguous", note))
         if any("separate_only" in (it.note or "") for it in xr.items):
             return SentenceResult(idx, sentence, category, "no_evidence", [], xbrl, _join("separate_only", note))
         partial = xr.status in ("match", "partial")
-        ambiguous = _ambiguous(sc)
 
         def done(status: str, evidence: list, reason: str | None) -> SentenceResult:
-            # 기간 해석을 확신할 수 없는 문장(당긴 분기·상대 기간만): ⚠️·✅ 모두 내지 않고 ❔ period_ambiguous
-            if ambiguous and status in ("contradicted", "supported", "no_evidence"):
-                status, evidence, reason = "no_evidence", [], "period_ambiguous"
             return SentenceResult(idx, sentence, category, status, evidence, xbrl, _join(reason, note))
 
         async with req:
@@ -310,22 +329,26 @@ class FactcheckPipeline:
                                           as_of=as_of_p, client=self.jev, enabled=self.jev_triage,
                                           user_id=self.user_id)
         todo: list[tuple[int, str, str, str | None, scope.Scope, xbrl_check.XbrlResult]] = []
+        own = [scope.extract_periods(s, as_of_p) for s in sentences]
         for i, (s, t) in enumerate(zip(sentences, tri, strict=True)):
             if not t.check:
                 yield SentenceResult(i, s, t.category, "skipped", [], None, t.reason)
                 continue
-            sc = scope.assess(s, corp_code, as_of=as_of_p, names=self.names)
-            category, note = "checked", None
+            inherited = _inherited_period(s, own, i)
+            inh = f"period_inherited:{inherited.label}" if inherited else None
+            sc = scope.assess(s, corp_code, as_of=as_of_p, names=self.names, inherited=inherited)
+            category, note = "checked", inh
             if sc.category != "checked":
                 if not force_check:
-                    yield SentenceResult(i, s, sc.category, "skipped", [], None, sc.reason)
+                    yield SentenceResult(i, s, sc.category, "skipped", [], None, _join(sc.reason, inh))
                     continue
-                category, note = sc.category, sc.reason
-                sc = scope.period_scope(s, as_of_p)
+                category, note = sc.category, _join(sc.reason, inh)
+                sc = scope.period_scope(s, as_of_p, inherited=inherited)
             if category == "other_company":  # 다른 회사 수치를 선택 회사 XBRL로 대조하지 않는다(force_check)
                 xr = xbrl_check.XbrlResult("none", [])
             else:
-                xr = xbrl_check.check(s, self.facts, corp_code=corp_code, as_of=as_of_p, names=self.names)
+                xr = xbrl_check.check(s, self.facts, corp_code=corp_code, as_of=as_of_p, names=self.names,
+                                      mentions=sc.mentions)
             if xr.status == "mismatch" and not _ambiguous(sc):
                 yield SentenceResult(i, s, category, "contradicted", [], xr.primary(), _join("xbrl_mismatch", note))
                 continue

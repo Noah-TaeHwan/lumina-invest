@@ -270,7 +270,8 @@ def test_every_sentence_exactly_once_and_text_preserved():
 
 def test_per_request_concurrency_cap():
     jev = FakeJev({"HBM": ("sleep", 0.05)})
-    text = "\n".join(f"{i}분기 HBM 판매 {i}." for i in range(1, 5)) + "\n" + "\n".join(
+    # 연도 있는 분기만(연도 없는 '3분기'는 as_of 뒤라 당겨 풀려 검색·JEV 없이 ❔가 된다)
+    text = "\n".join(f"2024년 {i}분기 HBM 판매 {i}." for i in range(1, 5)) + "\n" + "\n".join(
         f"2025년 {i}분기 HBM 판매." for i in range(1, 5))
     rs = collect(make(FakeStore(default=[passage("HBM")]), jev, per_request=4), text)
     assert len(rs) == 8 and jev.max_active <= 4 and len(jev.calls) == 8
@@ -722,3 +723,78 @@ def test_separate_only_with_other_account_mismatch_is_contradicted():
     r = _check(SAMSUNG, "삼성전자의 2025년 2분기 영업이익은 1.2조원, 매출은 100조원이다.", store, jev, rows)
     assert (r.status, r.reason) == ("contradicted", "xbrl_mismatch")
     assert r.xbrl["account_nm"] == "매출액" and store.calls == [] and jev.calls == []
+
+
+# ---- 개선 1: 두 계정 모두 XBRL 일치 → 근거 줄을 한 문단으로 합친다 ----
+
+def test_all_items_matched_lines_joined_into_one_passage():
+    store, jev = FakeStore(default=NOISE), TextJev(XBRL_HEAD)
+    r = _check(SAMSUNG, "삼성전자의 2025년 2분기 연결 매출은 74.6조원, 영업이익은 4.7조원이다.", store, jev, SS_FACTS)
+    first = _texts(jev)[0]
+    assert "74,566,317백만원" in first and "4,676,057백만원" in first
+    assert first.count(XBRL_HEAD) == 2 and len(_texts(jev)) == 8
+    assert r.status == "supported" and r.evidence[0]["section"] == "XBRL"
+
+
+def test_one_of_two_items_mismatch_still_contradicted():
+    store, jev = FakeStore(default=NOISE), TextJev(XBRL_HEAD)
+    r = _check(SAMSUNG, "삼성전자의 2025년 2분기 연결 매출은 74.6조원, 영업이익은 8.4조원이다.", store, jev, SS_FACTS)
+    assert (r.status, r.reason) == ("contradicted", "xbrl_mismatch") and jev.calls == []
+
+
+# ---- 개선 2: 연도를 당겨 푼 분기 문장은 검색·JEV 없이 바로 ❔ ----
+
+def test_shifted_sentence_skips_search_and_jev(facts):
+    for text in ("3분기 매출은 86.1조원이다.", "3분기 매출은 90조원이다."):
+        store, jev = FakeStore(default=[Q2_PASSAGE]), FakeJev({"3분기": ("support", 0)})
+        (r,) = collect(make(store, jev, facts), text)
+        assert (r.status, r.reason) == ("no_evidence", "period_ambiguous"), text
+        assert store.calls == [] and jev.calls == [], text
+
+
+# ---- 개선 3: 앞 문장 기간 상속 ----
+
+def _run_text(text, store, jev, facts):
+    p = FactcheckPipeline(store=store, jev=jev, facts=facts, names=NAMES, user_id="anon:test")
+
+    async def go():
+        return [r async for r in p.check(SAMSUNG, text, as_of="2026H1")]
+    return by_idx(asyncio.run(go()))
+
+
+def test_inherit_previous_sentence_period_mismatch():
+    rs = _run_text("삼성전자의 2025년 2분기 연결 매출은 74.6조원이다. 같은 분기 연결 영업이익은 89.5조원이다.",
+                   FakeStore(default=NOISE), TextJev(XBRL_HEAD), SS_FACTS)
+    r = rs[1]
+    assert (r.status, r.reason) == ("contradicted", "xbrl_mismatch,period_inherited:2025Q2")
+    assert (r.xbrl["period"], r.xbrl["amount"]) == ("2025Q2", 4_676_057_000_000)
+
+
+def test_inherit_previous_sentence_period_supported():
+    rs = _run_text("삼성전자의 2025년 2분기 연결 매출은 74.6조원이다. 같은 분기 연결 영업이익은 4.7조원이다.",
+                   FakeStore(default=NOISE), TextJev(XBRL_HEAD), SS_FACTS)
+    assert (rs[1].status, rs[1].reason) == ("supported", "period_inherited:2025Q2")
+
+
+def test_inherit_skips_sentences_without_period():
+    rs = _run_text("삼성전자의 2025년 2분기 연결 매출은 74.6조원이다.\nHBM 판매가 늘었다.\n"
+                   "같은 분기 연결 영업이익은 89.5조원이다.", FakeStore(default=NOISE), FakeJev(), SS_FACTS)
+    assert (rs[2].status, rs[2].reason) == ("contradicted", "xbrl_mismatch,period_inherited:2025Q2")
+
+
+@pytest.mark.parametrize("text", [
+    "같은 분기 연결 영업이익은 4.7조원이다.",                                   # 앞 문장 없음
+    "2025년 2분기 매출은 74.6조원, 2024년 2분기 매출은 74.1조원이다. 같은 분기 영업이익은 4.7조원이다.",  # 기간 둘
+    "3분기 매출은 86.1조원이다. 같은 분기 영업이익은 12.2조원이다.",              # 앞 문장 기간이 당긴 해석
+])
+def test_inherit_not_possible_stays_ambiguous(text, facts):
+    store, jev = FakeStore(default=NOISE), FakeJev()
+    rs = _run_text(text, store, jev, facts + SS_FACTS)
+    last = rs[max(rs)]
+    assert (last.status, last.reason) == ("no_evidence", "period_ambiguous")
+
+
+def test_inherit_uses_nearest_previous_period():
+    rs = _run_text("2024년 2분기 매출은 74.1조원이다. 삼성전자의 2025년 2분기 연결 매출은 74.6조원이다. "
+                   "같은 분기 연결 영업이익은 89.5조원이다.", FakeStore(default=NOISE), FakeJev(), SS_FACTS)
+    assert rs[2].reason == "xbrl_mismatch,period_inherited:2025Q2"
