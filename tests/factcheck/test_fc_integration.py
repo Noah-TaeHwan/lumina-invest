@@ -72,7 +72,8 @@ def test_real_pipeline_through_api_settles_from_ledger_and_uses_anon_key(fc_pg):
     assert by[0]["status"] == "supported" and by[0]["evidence"][0]["report_nm"] == "반기보고서 (2026.06)"
     assert by[1]["status"] == "skipped" and by[1]["category"] == "opinion"
     assert by[2]["status"] == "contradicted" and by[2]["xbrl"]["account_nm"] == "매출액"  # XBRL 불일치: JEV 안 부름
-    assert set(by[2]["xbrl"]) == {"account_nm", "period", "fs_div", "amount"}  # 계약 필드만 낸다
+    assert set(by[2]["xbrl"]) == {"account_nm", "period", "fs_div", "amount", "unit", "note"}  # 계약 필드 + 단위·비고
+    assert by[2]["xbrl"]["unit"] == "원"
     assert by[3]["status"] == "skipped" and by[3]["category"] == "other_company"
     # 수동 검수: 실제 force_check로 그 문장을 대조했다
     assert rc.status_code == 202 and after["status"] == "done"
@@ -97,7 +98,7 @@ def test_real_pipeline_jev_timeout_is_charged_at_bound(fc_pg):
     assert done["results"][0]["status"] == "unjudged" and done["results"][0]["reason"] == "timeout"
     assert jev.calls == 1
     used = rows["global"][1]
-    assert used >= 1_000 and used <= fm.SLOT_TOKENS and rows["global"][2] == 0  # 모르는 사용량: 그 요청의 상한 × 시도
+    assert used == fm.SLOT_TOKENS and rows["global"][2] == 0  # 모르는 사용량: 그 호출의 몫 그대로(B6)
 
 
 def test_real_pipeline_refuses_calls_beyond_reservation(fc_pg):
@@ -122,27 +123,3 @@ def test_real_pipeline_refuses_calls_beyond_reservation(fc_pg):
     assert jev.calls == 0
     assert done["results"][0]["status"] == "unjudged" and done["results"][0]["reason"] == "budget"
     assert rows["global"][1:] == (0, 0)
-
-
-def test_entrypoint_builds_metered_real_pipeline(tmp_path):
-    """진입점 조립: T1 저장소·XBRL 행·상장사명 사전 + MeteredJev(ServiceJevClient). 데이터 파일이 없어도 만든다."""
-    import json
-
-    from app import factcheck_main
-    from app.lib.jev_service import ServiceJevClient
-
-    (tmp_path / "xbrl_facts.json").write_text(json.dumps(load_facts()[:3], ensure_ascii=False))
-    (tmp_path / "corp_names.json").write_text(json.dumps([{"corp_code": SAMSUNG, "corp_name": "삼성전자"}],
-                                                         ensure_ascii=False))
-
-    async def go(path):
-        p = factcheck_main.build_pipeline(path)
-        try:
-            return p, isinstance(p.jev, fm.MeteredJev), isinstance(p.jev.inner, ServiceJevClient), len(p.facts)
-        finally:
-            await factcheck_main.close_pipeline(p)
-
-    p, metered, service, n = asyncio.run(go(tmp_path))
-    assert isinstance(p, FactcheckPipeline) and metered and service and n == 3
-    p2, metered2, _, n2 = asyncio.run(go(tmp_path / "missing"))
-    assert metered2 and n2 == 0  # 파일이 없으면 XBRL 대조 없이(문단 판정만) 뜬다

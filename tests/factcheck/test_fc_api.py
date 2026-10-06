@@ -18,7 +18,6 @@ from fastapi import FastAPI
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from app.services.evidence.claims import claim_spans
 from app.services.factcheck import jobs as fj
 from app.services.factcheck import metering as fm
 from app.services.factcheck import quota as fq
@@ -96,11 +95,6 @@ def run(url, coro_fn, **kw):
         finally:
             await env.close()
     return asyncio.run(go())
-
-
-def slot(sentence):
-    """가짜 파이프라인이 그 문장으로 보내는 요청의 원장 한 몫(상한 × 최대 시도)."""
-    return fm.request_bound(f"회사: {SAMSUNG}\n주장: {sentence}", {"p1": {"type": "choice"}}) * fm.MAX_ATTEMPTS
 
 
 # ── 회사 목록 ────────────────────────────────────────────────────────────────
@@ -189,9 +183,8 @@ def test_unknown_usage_is_charged_at_slot_not_zero(fc_pg):
         return done, await quota_rows(env)
 
     done, rows = run(fc_pg, go, jev=FakeServiceJev(exc=RuntimeError("network")))
-    checked = [s.text for s in claim_spans(DRAFT)][:1]  # 첫 검수 문장에서 예외 → 실행 실패
-    assert done["status"] == "failed"
-    assert rows["global"][1:] == (slot(checked[0]), 0)  # 모르는 사용량은 그 호출의 상한 그대로
+    assert done["status"] == "failed"  # 첫 검수 문장에서 예외 → 실행 실패
+    assert rows["global"][1:] == (fm.SLOT_TOKENS, 0)  # 모르는 사용량은 그 호출의 몫(상한 × 최대 시도) 그대로
 
 
 def test_pipeline_error_marks_job_failed_and_settles(fc_pg):

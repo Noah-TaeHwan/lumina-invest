@@ -479,7 +479,7 @@ CODE PATHS                                         USER FLOWS
 [+] 리포트 변조 도그푸드                       [→EVAL] 사전등록·확인 세트 1회
 COVERAGE: 기존 0 / 새 경로 17 — 전부 새 코드라 테스트 먼저(RED→GREEN)
 ```
-- **회귀(IRON RULE):** 근거 모드·일지·관심종목은 건드리지 않으므로 기존 스위트(현재 1003 passed)와 e2e 5종이 그대로 통과해야 한다. 프로필 기본값(`APP_PROFILE` 없음)에서 라우터 등록이 지금과 같다는 테스트 1개를 둔다(원본 기능 회귀 방지).
+- **회귀(IRON RULE):** 근거 모드·일지·관심종목은 건드리지 않으므로 기존 스위트(현재 1003 passed)와 e2e 5종이 그대로 통과해야 한다. 기본 앱(`app/main.py`)의 라우터 등록이 지금과 같다는 테스트 1개를 둔다(원본 기능 회귀 방지). `APP_PROFILE`은 별도 진입점 `app/factcheck_main.py`로 대체됐다(Outside Voice #6).
 
 ## 4. Performance
 
@@ -530,7 +530,7 @@ COVERAGE: 기존 0 / 새 경로 17 — 전부 새 코드라 테스트 먼저(RED
 ## Implementation Tasks
 - [ ] **T1 (P1, human ~3d / CC ~4h)** — factcheck/collect — 두 종목 3년 다문서·전체 절 수집, 기간 메타, XBRL `fnlttSinglAcntAll`, 상장사명·자회사 사전. Verify: 고정 응답 단위 테스트 + 로컬 실행 후 문서 수·문단 수·XBRL 행 수 보고
 - [ ] **T2 (P1, human ~3d / CC ~4h)** — factcheck/triage·scope·xbrl·pipeline — 1단계 분류(규칙→JEV 묶음, 실패 시 전부 검수), 기간·다른 회사·파생 지표, XBRL 대조, 기존 판정 연결. Verify: 표 단위 테스트(기간 변형·회사명 부분 일치·연결/별도) RED→GREEN
-- [ ] **T3 (P1, human ~2d / CC ~3h)** — routes/factcheck + factcheck.html/js + APP_PROFILE + factcheck_quota 마이그레이션. Verify: DB 테스트(한도·초과 거부·익명 원문 미저장), e2e(첫 검수·점진 표시·한도·건너뛴 문장), 프로필 기본값 회귀 1개
+- [ ] **T3 (P1, human ~2d / CC ~3h)** — routes/factcheck + factcheck.html/js + ~~APP_PROFILE~~ **별도 진입점 `app/factcheck_main.py`로 대체**(Outside Voice #6) + factcheck_quota 마이그레이션. Verify: DB 테스트(한도·초과 거부·익명 원문 미저장), e2e(첫 검수·점진 표시·한도·건너뛴 문장), 기본 앱(`app/main.py`) 라우터 등록 불변 회귀 1개
 - [ ] **T4 (P1, human ~1d / CC ~2h)** — 배포 compose·HTTPS·데이터 업로드 절차 문서. Verify: 로컬에서 프로필로 기동 + 첫 검수. **AWS 실제 생성은 노아 확인 후**
 - [ ] **T5 (P2, human ~4d / CC ~6h)** — 리포트 변조 도그푸드(로컬 전용 원문, 라벨 두 벌, 변조 5유형, 사전등록, 조정 세트). Verify: 사전등록 커밋 + 조정 세트 결과
 

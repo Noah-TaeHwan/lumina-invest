@@ -21,6 +21,90 @@ const CATEGORY = {
   derived: '파생 지표(범위 밖)',
 };
 const FS_DIV = { CFS: '연결', OFS: '별도' };
+// 서버 사유 코드 → 한국어(쉼표로 이어진 여러 코드, ':' 뒤 세부값). 모르는 코드는 원문 그대로 보인다
+const REASONS = {
+  xbrl_partial: '숫자는 XBRL과 일치, 나머지는 공시에서 못 찾음',
+  xbrl_mismatch: 'XBRL 재무 수치와 다름',
+  period_ambiguous: '기간이 분명하지 않아 판정하지 않음',
+  no_passages: '검색 범위에서 관련 공시 문단을 찾지 못함',
+  busy: '요청이 몰려 판정하지 못함(잠시 뒤 다시)',
+  timeout: '판정이 시간 안에 끝나지 않음',
+  request_too_large: '문장·문단이 너무 길어 판정하지 않음',
+  budget: '검수 한도 안에서 판정하지 못함',
+  unmetered: '판정 설정 오류',
+  no_api_key: '판정 API 설정 오류',
+  no_fact_marker: '숫자·회사명·기간이 없어 검수 대상 아님',
+  opinion: '의견·전망',
+  market: '주가·시장 전망(공시 범위 밖)',
+  forecast: '추정·목표치(공시 범위 밖)',
+  future_period: '아직 공시되지 않은 기간',
+  not_claim: '사실 주장이 아님',
+  other_company: '다른 회사가 주어',
+  derived: '파생 지표',
+  rule: '규칙으로 검수 대상',
+  jev: '판정 모델 분류',
+  jev_failed: '분류 실패로 검수',
+  triage_error: '분류 실패로 검수',
+  forced: '직접 검수 요청',
+  restated: '재작성된 비교값과 일치',
+  separate_only: '연결과 다르고 별도 재무제표 값과 일치',
+  no_period: 'XBRL에 그 기간 값 없음',
+  no_fact: 'XBRL에 그 계정 값 없음',
+  candidate_missing: 'XBRL 후보 값 일부 없음',
+  http_5xx: '판정 서버 오류',
+  http_429: '판정 서버 요청 한도',
+  http_4xx: '판정 요청 오류',
+  invalid_response: '판정 응답 오류',
+  error: '판정 중 오류',
+};
+const REASON_DETAIL = {
+  'not_claim:question': '질문 문장',
+  'not_claim:phrase': '자료 언급·답변 불가 표현',
+  'not_claim:lead': '목록 머리말',
+  'not_claim:short': '짧은 문장',
+  'derived:growth': '증감률(잠정실적으로 대조)',
+  'derived:growth_unsupported': '증감률(대조할 수 없는 형태)',
+  'derived:margin': '영업이익률(XBRL로 계산해 대조)',
+  'derived:other': '그 밖의 파생 지표(범위 밖)',
+  'rule:number': '숫자', 'rule:company': '회사명', 'rule:period': '기간',
+  'jev:fact': '사실', 'jev:uncertain': '애매해서 검수',
+};
+
+/** 표에 그 키가 직접 있을 때만 값(객체가 물려받은 __proto__·constructor·toString 같은 이름에 걸리지 않게). */
+function own(table, key) {
+  return Object.prototype.hasOwnProperty.call(table, key) ? table[key] : undefined;
+}
+
+/** 사유 코드 하나를 한국어로: 정확히 맞는 표 → 'X:세부' → 앞부분 표 + (세부) → 원문. */
+function reasonLabel(code) {
+  const c = String(code).trim();
+  if (!c) return '';
+  if (own(REASONS, c)) return own(REASONS, c);
+  const i = c.indexOf(':');
+  if (i > 0) {
+    const head = c.slice(0, i);
+    const tail = c.slice(i + 1);
+    if (own(REASON_DETAIL, c)) return `${own(REASONS, head) || head} — ${own(REASON_DETAIL, c)}`;
+    if (head === 'other_company') return `다른 회사(${tail})가 주어`;
+    if (own(REASONS, head)) return `${own(REASONS, head)}(${tail})`;
+  }
+  return c;
+}
+
+/** 쉼표로 이어진 사유 코드를 한국어로 이어 붙인다. 없으면 빈 문자열. */
+function reasonText(reason) {
+  if (reason === null || reason === undefined || reason === '') return '';
+  return String(reason).split(',').map(reasonLabel).filter(Boolean).join(' · ');
+}
+
+/** XBRL 값: 단위가 %면 퍼센트(영업이익률), 아니면 원. */
+function xbrlAmount(x) {
+  if (x.unit === '%') {
+    const n = Number(x.amount);
+    return Number.isFinite(n) ? `${n.toLocaleString('ko-KR', { maximumFractionDigits: 2 })}%` : `${x.amount}%`;
+  }
+  return won(x.amount);
+}
 
 const $ = (id) => document.getElementById(id);
 
@@ -83,7 +167,7 @@ function evidenceNode(ev) {
 
 /** 확인한 문장 하나(펼치면 근거). */
 function resultNode(r) {
-  const b = BADGE[r.status] || BADGE.unjudged;
+  const b = own(BADGE, r.status) || BADGE.unjudged;
   const li = el('li', null, r.status);
   li.dataset.idx = r.idx;
   li.dataset.status = r.status;
@@ -96,15 +180,18 @@ function resultNode(r) {
   sum.appendChild(sent);
   det.appendChild(sum);
   const body = el('div', null, 'body');
-  if (r.reason) body.appendChild(el('p', r.reason, 'muted'));
+  const why = reasonText(r.reason);
+  if (why) body.appendChild(el('p', why, 'muted reason'));
   if (r.xbrl) {
     const x = r.xbrl;
-    const parts = [x.account_nm, x.period && `기간 ${x.period}`, FS_DIV[x.fs_div] || x.fs_div, won(x.amount)].filter(Boolean);
+    const parts = [x.account_nm, x.period && `기간 ${x.period}`, own(FS_DIV, x.fs_div) || x.fs_div, xbrlAmount(x)].filter(Boolean);
     body.appendChild(el('div', `XBRL 재무 수치: ${parts.join(' · ')}`, 'xbrl'));
+    const note = reasonText(x.note);
+    if (note) body.appendChild(el('div', `비고: ${note}`, 'xbrl muted xbrl-note'));
   }
   const evs = Array.isArray(r.evidence) ? r.evidence : [];
   evs.forEach((ev) => body.appendChild(evidenceNode(ev || {})));
-  if (!r.reason && !r.xbrl && !evs.length) body.appendChild(el('p', '표시할 근거 문단이 없습니다.', 'muted'));
+  if (!why && !r.xbrl && !evs.length) body.appendChild(el('p', '표시할 근거 문단이 없습니다.', 'muted'));
   det.appendChild(body);
   li.appendChild(det);
   return li;
@@ -117,7 +204,7 @@ function skippedNode(r, state) {
   const wrap = el('div', null, 'body');
   wrap.style.paddingTop = '10px';
   wrap.appendChild(el('div', r.text, 'sent'));
-  const why = [CATEGORY[r.category], r.reason].filter(Boolean).join(' — ') || '검수 대상이 아니라고 분류됨';
+  const why = [own(CATEGORY, r.category), reasonText(r.reason)].filter(Boolean).join(' — ') || '검수 대상이 아니라고 분류됨';
   wrap.appendChild(el('span', `이유: ${why}`, 'label'));
   const btn = el('button', '이 문장 검수 요청', 'secondary fc-recheck');
   btn.type = 'button';
@@ -144,7 +231,7 @@ function render(state, job) {
   showJobError(job.error && job.error.message);
 
   const checked = results.filter((r) => r.status !== 'skipped')
-    .sort((a, b) => ((ORDER[a.status] ?? 9) - (ORDER[b.status] ?? 9)) || (a.idx - b.idx));
+    .sort((a, b) => ((own(ORDER, a.status) ?? 9) - (own(ORDER, b.status) ?? 9)) || (a.idx - b.idx));
   const list = $('fc-list');
   // 폴링으로 다시 그려도 사용자가 펼친 문장은 펼친 채로 둔다
   const open = new Set([...list.querySelectorAll('li')].filter((li) => li.querySelector('details')?.open)

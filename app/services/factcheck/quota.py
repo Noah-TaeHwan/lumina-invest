@@ -9,9 +9,11 @@
   성공하면 같은 트랜잭션에서 예약 행(factcheck_reservations, ID)을 남긴다. 예약량은 상한 기준이다(metering.reservation_for).
 - 예약에 실패하면 호출하지 않는다(호출부 책임: 예약이 성공해야 파이프라인을 시작한다).
 - 정산(멱등): `UPDATE factcheck_reservations SET settled_at ... WHERE id = :id AND settled_at IS NULL RETURNING`이 행을
-  돌려줄 때만 한도 행에서 예약분을 빼고 실제를 더한다. 한도 행이 두 개(키·전체) 다 바뀌지 않으면 되돌린다(SettleMismatch).
+  돌려줄 때만 한도 행에서 예약분을 빼고 실제를 더한다(키 행 → 전체 행 순서, 예약과 같은 잠금 순서). 두 행이 각각
+  하나씩 바뀌지 않으면 되돌린다(SettleMismatch).
   실제가 음수·정수 아님이면 예약량 그대로 차감한다(0 정산 금지).
 - 오래된 미정산 예약(서버가 죽었거나 정산 중 DB 오류)은 settle_stale이 예약량으로 정산한다(서버 시작 때·주기적으로).
+  기준 STALE_S = 실행 마감 + 여유(크래시 직후 예약이 오래 묶이지 않게).
 - 익명 하루 실행 3회(count). 건너뛴 문장 수동 검수는 count_run=False로 토큰만 예약한다.
 - 날짜는 KST. 지난 날의 익명 행은 예약할 때 지우되, 진행 중 예약이 있는 행(reserved > 0)은 남긴다(자정 넘김). 전체 행은 남긴다.
 - 상한 값은 금액이 아니라 입력 토큰 수다. 공개 배포의 전체 상한 FACTCHECK_DAILY_GLOBAL_TOKENS는 노아가 공개 전에 정한다.
@@ -28,11 +30,13 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.services.factcheck import settings as fc_settings
+from app.services.factcheck.jobs import JOB_DEADLINE_S
 
 KST = timezone(timedelta(hours=9))
 GLOBAL_KEY = "global"
 MAX_SENTENCES = 30  # 익명 1회 입력 전체 문장 상한(라우트의 422 기준과 같다)
-STALE_S = 30 * 60
+# 미정산 예약을 '오래됐다'고 보는 기준: 실행 마감(180초) + 정산 재시도 여유. 살아 있는 검수는 이보다 오래되지 않는다
+STALE_S = JOB_DEADLINE_S + 120
 
 
 @dataclass(frozen=True)
@@ -40,7 +44,7 @@ class QuotaLimits:
     """하루 상한: 익명 키 실행 횟수·익명 키 토큰·서버 전체 토큰(기본값은 settings와 같다)."""
 
     runs: int = 3
-    key_tokens: int = 2_000_000
+    key_tokens: int = 2_500_000
     global_tokens: int = 3_000_000
 
 
@@ -95,9 +99,12 @@ _COUNT = text("SELECT count FROM factcheck_quota WHERE key = :k AND day = :d")
 _RECORD = text("INSERT INTO factcheck_reservations (id, key, day, est, count_run) VALUES (:id, :k, :d, :est, :cr)")
 _CLOSE = text("UPDATE factcheck_reservations SET settled_at = now(), actual = :actual "
               "WHERE id = :id AND settled_at IS NULL RETURNING key, day, est")
-_SETTLE = text(
-    "UPDATE factcheck_quota SET reserved = GREATEST(reserved - :est, 0), used = used + :actual, updated_at = now() "
-    "WHERE key IN (:k, :g) AND day = :d")
+# 정산도 예약과 같은 순서(키 행 → 전체 행)로 한 행씩 잠근다. `WHERE key IN (k, g)` 한 문장은 잠금 순서가 정해지지 않아
+# 예약(키 → 전체)과 교착할 수 있다(실측: 동시 예약·정산에서 DeadlockDetected)
+_SETTLE_ROW = ("UPDATE factcheck_quota SET reserved = GREATEST(reserved - :est, 0), used = used + :actual, "
+               "updated_at = now() WHERE key = :k AND day = :d")
+_SETTLE_KEY = text(_SETTLE_ROW)
+_SETTLE_GLOBAL = text(_SETTLE_ROW)
 _STALE = text("SELECT id, key, day, est FROM factcheck_reservations "
               "WHERE settled_at IS NULL AND created_at < now() - make_interval(secs => :s) ORDER BY created_at")
 
@@ -147,10 +154,11 @@ class FactcheckQuota:
         row = (await db.execute(_CLOSE, {"id": rid, "actual": actual})).first()
         if row is None:
             return False
-        n = (await db.execute(_SETTLE, {"k": row.key, "g": GLOBAL_KEY, "d": row.day, "est": row.est,
-                                        "actual": actual})).rowcount
-        if n != 2:
-            raise SettleMismatch(f"quota rows updated={n}")  # begin()이 되돌린다
+        p = {"d": row.day, "est": row.est, "actual": actual}
+        nk = (await db.execute(_SETTLE_KEY, {**p, "k": row.key})).rowcount
+        ng = (await db.execute(_SETTLE_GLOBAL, {**p, "k": GLOBAL_KEY})).rowcount
+        if (nk, ng) != (1, 1):
+            raise SettleMismatch(f"quota rows updated key={nk} global={ng}")  # begin()이 되돌린다
         return True
 
     async def settle_stale(self, older_than_s: float = STALE_S) -> int:
