@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Iterable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 
@@ -111,6 +111,7 @@ class XbrlResult:
 
     status: str
     items: list[XbrlItem]
+    spans: list[tuple[int, int]] = field(default_factory=list)  # 문장 안 계정 언급·금액 표현 자리(금액 주장만 판별용)
 
     def primary(self) -> dict | None:
         """SentenceResult.xbrl에 넣을 값: 불일치가 있으면 그 공시 값, 아니면 첫 일치 값."""
@@ -375,4 +376,5 @@ def check(text: str, facts: Sequence[Mapping], *, corp_code: str, as_of: Period,
         status = "partial"
     else:
         status = "unknown"
-    return XbrlResult(status, items)
+    spans = sorted({(c.pos, c.pos + len(c.term)) for c in claims} | {(c.value_start, c.value_end) for c in claims})
+    return XbrlResult(status, items, spans)

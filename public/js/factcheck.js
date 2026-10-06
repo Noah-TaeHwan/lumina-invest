@@ -23,6 +23,7 @@ const CATEGORY = {
 const FS_DIV = { CFS: '연결', OFS: '별도' };
 // 서버 사유 코드 → 한국어(쉼표로 이어진 여러 코드, ':' 뒤 세부값). 모르는 코드는 원문 그대로 보인다
 const REASONS = {
+  xbrl_exact: '공시 재무제표(또는 잠정실적) 값과 숫자·기간·계정이 일치',
   xbrl_partial: '숫자는 XBRL과 일치, 나머지는 공시에서 못 찾음',
   xbrl_mismatch: 'XBRL 재무 수치와 다름',
   period_ambiguous: '기간이 분명하지 않아 판정하지 않음',

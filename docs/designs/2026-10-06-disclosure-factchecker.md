@@ -549,7 +549,7 @@ Codex(다른 계열) 독립 검토: P1 7건·P2 4건, 권고 "2주 MVP를 두 �
 | # | 지적 | AI 리드 결정 |
 |---|---|---|
 | 1 | XBRL 계약이 분기 단독/누적·잔액/손익·단위·정정을 구분 못 함 | 계약에 `period_start, period_end, value_kind∈{instant,duration}, cumulative, currency, unit, rcept_dt, is_correction` 추가. OpenDART 응답의 당기·누적 금액 칸을 둘 다 적재. 증감률은 같은 종류·같은 길이 기간끼리만 계산 |
-| 2 | 숫자 하나 일치를 문장 전체 ✅로 승격 | 문장 ✅는 **문장 전체가 판정에서 지지**될 때만. XBRL 불일치 → ⚠️(문장 안 사실 하나라도 틀리면 틀림). XBRL 일치 + 나머지 판정 미지지 → ❔ + "숫자는 XBRL과 일치, 나머지는 공시에서 못 찾음" 부분 확인 문구 |
+| 2 | 숫자 하나 일치를 문장 전체 ✅로 승격 | 문장 ✅는 **문장 전체가 판정에서 지지**될 때만. XBRL 불일치 → ⚠️(문장 안 사실 하나라도 틀리면 틀림). XBRL 일치 + 나머지 판정 미지지 → ❔ + "숫자는 XBRL과 일치, 나머지는 공시에서 못 찾음" 부분 확인 문구. **예외(2026-10-06 개정, AI 리드):** 문장이 회사·기간·계정·금액만으로 이루어지고 XBRL과 모두 일치하면 결정적 대조로 ✅(`xbrl_exact`, JEV 호출 없음). 근거: 2026-10-06 실측에서 반올림한 맞는 숫자의 JEV 점수가 기준 경계 0.84~0.85에서 흔들렸다 |
 | 3 | 기존 저장소 재사용 시 다문서 덮어쓰기·삭제 | `factcheck/store.py`를 새로 둔다: 문단 ID = `{corp}-{rcept_no}-{section}-{idx}`, 문서 단위 적재·삭제, payload 색인(period·report_type). 근거 모드 저장소는 그대로 |
 | 4 | 동기 `jev.py`·`judge_claim`을 async에서 직접 호출하면 막힘 | 제품 경로 `ServiceJevClient`(비동기)를 쓰는 어댑터를 T2 첫 작업으로. `judge.build_state`·`sys_decision`(순수 함수)만 재사용 |
 | 5 | 한도가 공개 비용 상한을 보장 못 함 | 팩트체커 전용 **원자적 예약**: PG에서 `UPDATE ... SET reserved = reserved + :est WHERE used + reserved + :est <= :cap RETURNING`(전체·익명 키 각각), 호출 후 실제 토큰으로 정산, 예약 실패 시 호출 안 함. 분류 실패 후 전량 검수도 같은 예약을 거친다 |

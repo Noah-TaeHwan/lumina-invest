@@ -31,6 +31,7 @@ import asyncio
 import copy
 import inspect
 import json
+import re
 import logging
 from collections.abc import AsyncIterator, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
@@ -73,17 +74,73 @@ def _ambiguous(sc: scope.Scope) -> bool:
 
 def _inherited_period(sentence: str, own: Sequence[Sequence[scope.PeriodMention]], i: int) -> Period | None:
     """앞 문장 기간 상속: 문장 i에 해석된 기간이 없고 상대 기간 표현('같은 분기' 등)만 있으면, 앞쪽 문장 중 기간이
-    해석된 가장 가까운 문장을 본다. 그 문장의 기간이 정확히 하나(당긴 해석 아님)면 그 기간, 아니면 None(❔ 그대로)."""
+    해석된 가장 가까운 문장을 본다. 그 문장의 기간이 정확히 하나(당긴 해석 아님)이고 상대 표현의 단위와 맞으면
+    ('같은 분기' ← 분기 단독, '같은 반기' ← 반기, '같은 해' ← 연간, '같은 기간' ← 무엇이든) 그 기간, 아니면 None."""
     if not scope.relative_only(sentence, own[i]):
         return None
     for prev in reversed(own[:i]):
         if not prev:
             continue
         periods = {m.period for m in prev}
-        if len(periods) == 1 and not any(m.shifted for m in prev):
-            return next(iter(periods))
-        return None
+        if len(periods) != 1 or any(m.shifted for m in prev):
+            return None
+        p = next(iter(periods))
+        return p if all(scope.unit_accepts(u, p) for u in scope.relative_units(sentence)) else None
     return None
+
+
+def _period_plain(p: Period) -> str:
+    """'2025년 2분기'·'2025년 상반기'·'2025년' — JEV에 넘기는 문장의 상속 기간 괄호 표기."""
+    if p.kind == "quarter":
+        return f"{p.year}년 {'1~' if p.cumulative else ''}{p.n}분기"
+    if p.kind == "half":
+        return f"{p.year}년 {'상' if p.n == 1 else '하'}반기"
+    return f"{p.year}년"
+
+
+def _annotate_inherited(sentence: str, mentions: Sequence[scope.PeriodMention], p: Period) -> str:
+    """상속한 상대 기간 표현 뒤에 해석한 기간을 괄호로 붙인다('같은 분기(2025년 2분기)'). JEV 입력용(화면 원문은 그대로)."""
+    out, last = [], 0
+    for m in sorted(mentions, key=lambda m: m.start):
+        out += [sentence[last:m.end], f"({_period_plain(p)})"]
+        last = m.end
+    return "".join(out) + sentence[last:]
+
+
+# 금액 주장만인지 볼 때 지워도 되는 낱말(조사·서술어·이음말·근사어 '약'). 그 밖의 낱말이 남으면 JEV 경로다
+EXACT_ALLOWED = frozenset({
+    "은", "는", "이", "가", "의", "을", "를", "도", "로", "으로", "에서",
+    "이다", "였다", "이었다", "입니다", "였습니다", "이었습니다", "기록했다", "기록하였다", "기록했습니다", "집계됐다",
+    "그리고", "및", "약",
+})
+_FS_WORD = re.compile(r"연결|별도|개별")
+_WORD = re.compile(r"[가-힣A-Za-z0-9]+")
+
+
+def amount_only(sentence: str, sc: scope.Scope, xr: xbrl_check.XbrlResult, names: CompanyIndex,
+                corp_code: str) -> bool:
+    """문장이 회사·기간·계정·금액(과 연결/별도 표시)만으로 이루어졌는가. 선택 회사 이름, 기간 표현(상속한 상대 기간
+    포함, 비교 기준 '전년 대비'는 지우지 않는다), 계정 언급·금액 자리, 연결/별도 표시어를 지운 뒤 남은 낱말이 모두
+    EXACT_ALLOWED이면 True. '집계됐다'는 바로 앞이 '로'·'으로'일 때만."""
+    chars = list(sentence)
+
+    def blank(a: int, b: int) -> None:
+        chars[a:b] = " " * (b - a)
+
+    for c, _n, a, b in names.mentions(sentence):
+        if c == corp_code:
+            blank(a, b)
+    for m in sc.mentions:
+        blank(m.start, m.end)
+    for a, b in xr.spans:
+        blank(a, b)
+    for m in _FS_WORD.finditer(sentence):
+        blank(m.start(), m.end())
+    words = _WORD.findall("".join(chars))
+    for j, w in enumerate(words):
+        if w not in EXACT_ALLOWED or (w == "집계됐다" and (j == 0 or words[j - 1] not in ("로", "으로"))):
+            return False
+    return True
 
 
 def _period_text(label: str | None, cumulative: bool | None, instant: bool) -> str:
@@ -280,8 +337,10 @@ class FactcheckPipeline:
         return [p for p in rows if not p.get("superseded") and p.get("section") not in HISTORY_SECTIONS]
 
     async def _judge_one(self, idx: int, sentence: str, category: str, note: str | None, sc: scope.Scope,
-                         xr: xbrl_check.XbrlResult, corp_code: str, req: asyncio.Semaphore) -> SentenceResult:
-        """문장 하나: 문단 검색 → JEV 판정 → SYS 규칙. note는 force_check 때의 범위 밖 표시.
+                         xr: xbrl_check.XbrlResult, corp_code: str, req: asyncio.Semaphore,
+                         jev_sentence: str | None = None) -> SentenceResult:
+        """문장 하나: 문단 검색 → JEV 판정 → SYS 규칙. note는 force_check 때의 범위 밖 표시. jev_sentence는 JEV에
+        넘길 문장(앞 문장 기간 상속이면 상대 기간 뒤에 괄호로 해석한 기간을 붙인 것, 없으면 원문).
 
         기간을 확신할 수 없는 문장(상대 기간만 있거나 연도를 당겨 푼 분기, period_ambiguous)과 연결/별도 표시 없이
         별도로만 맞은 문장(separate_only)은 검색·JEV 없이 바로 ❔다(결과가 ❔로 정해져 있으니 익명 한도를 쓰지 않는다)."""
@@ -304,7 +363,8 @@ class FactcheckPipeline:
                 return done("no_evidence", [], "xbrl_partial" if partial else "no_passages")
             texts = [p.get("text") or "" for p in passages]
             async with self._global:
-                out = await self.judge.judge(self.names.display(corp_code), sentence, texts, user_id=self.user_id,
+                out = await self.judge.judge(self.names.display(corp_code), jev_sentence or sentence, texts,
+                                             user_id=self.user_id,
                                              log_ctx={"stage": "judge", "claim_idx": idx})
         if out.judgement is None:
             return done("unjudged", [], out.error_code)
@@ -328,7 +388,7 @@ class FactcheckPipeline:
             tri = await triage.triage_all(sentences, corp_code=corp_code, company=company, names=self.names,
                                           as_of=as_of_p, client=self.jev, enabled=self.jev_triage,
                                           user_id=self.user_id)
-        todo: list[tuple[int, str, str, str | None, scope.Scope, xbrl_check.XbrlResult]] = []
+        todo: list[tuple[int, str, str, str | None, scope.Scope, xbrl_check.XbrlResult, str]] = []
         own = [scope.extract_periods(s, as_of_p) for s in sentences]
         for i, (s, t) in enumerate(zip(sentences, tri, strict=True)):
             if not t.check:
@@ -352,15 +412,24 @@ class FactcheckPipeline:
             if xr.status == "mismatch" and not _ambiguous(sc):
                 yield SentenceResult(i, s, category, "contradicted", [], xr.primary(), _join("xbrl_mismatch", note))
                 continue
-            todo.append((i, s, category, note, sc, xr))
+            lines = xbrl_passages(xr, company)
+            if category == "checked" and lines and not _ambiguous(sc) and \
+                    amount_only(s, sc, xr, self.names, corp_code):
+                # 금액 주장만 + XBRL 모두 일치: 결정적 대조로 ✅(JEV 없음). 반올림 숫자의 JEV 점수가 기준 경계에서
+                # 흔들리는 문제(2026-10-06 실측) — number_check의 반올림 규칙이 이 판단에 더 정확하다
+                yield SentenceResult(i, s, category, "supported", [_evidence(lines[0])], xr.primary(),
+                                     _join("xbrl_exact", note))
+                continue
+            jev_sentence = _annotate_inherited(s, sc.mentions, inherited) if inherited else s
+            todo.append((i, s, category, note, sc, xr, jev_sentence))
         if not todo:
             return
 
         req = asyncio.Semaphore(self.per_request)
         loop = asyncio.get_running_loop()
         deadline = loop.time() + self.deadline_s
-        tasks = {asyncio.create_task(self._judge_one(i, s, cat, note, sc, xr, corp_code, req)): (i, s, cat, note, xr)
-                 for i, s, cat, note, sc, xr in todo}
+        tasks = {asyncio.create_task(self._judge_one(i, s, cat, note, sc, xr, corp_code, req, js)):
+                 (i, s, cat, note, xr) for i, s, cat, note, sc, xr, js in todo}
         try:
             while tasks:
                 remaining = deadline - loop.time()
