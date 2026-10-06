@@ -528,7 +528,7 @@ def test_comparison_period_digits_removed_before_number_check():
     assert r.status == "supported"
 
 
-# ---- 실데이터 스모크 결함 1: XBRL 일치 계정 문장의 근거 문단을 메타로 찾아 앞에 둔다 ----
+# ---- 실데이터 스모크 결함 1(교차 검수 반영): XBRL 일치 행으로 만든 근거 한 줄을 판정 문단 맨 앞에 ----
 
 HYNIX = "00164779"
 NOISE = [passage(t, rcept_no="20250314000001", period="2025", report_type="annual", idx=i) for i, t in enumerate(
@@ -536,44 +536,30 @@ NOISE = [passage(t, rcept_no="20250314000001", period="2025", report_type="annua
      "2024년 12월 31일 기준 임원 현황", "2023년 3월 정기주주총회", "2025년 3월 배당 기준일",
      "2024년 6월 사채 발행", "2023년 11월 자기주식 취득"])]
 SS_RCEPT, HY_RCEPT = "20250814003156", "20231114002574"
-SS_IS = dict(passage("[2-2. 연결 손익계산서 표, 연결 손익계산서, 단위 백만원] 영업이익 (주27) | 제 57 기 반기 3개월"
-                     "(2025.04.01~2025.06.30): 4,676,057 | 제 57 기 반기 누적(2025.01.01~2025.06.30): 11,361,329",
-                     rcept_no=SS_RCEPT, period="2025H1", section="III", idx=40))
-SS_OFS = dict(passage("[4-2. 손익계산서 표, 손익계산서, 단위 백만원] 영업이익 | 제 57 기 반기 3개월: 1,190,832",
-                      rcept_no=SS_RCEPT, period="2025H1", section="III", idx=90))
-SS_SEG = dict(passage("[부문별 영업이익 표, 단위 십억원] DS 부문 영업이익 14,557", rcept_no=SS_RCEPT, period="2025H1",
-                      section="II", idx=12))
-SS_PRE = dict(passage("[연결재무제표 기준 영업(잠정)실적(공정공시) 2025Q2(2025-04-01~2025-06-30)] 영업이익(당해실적): "
-                      "당기실적 4.68조원 | 전기실적 6.69조원", rcept_no="20250731800001", period="2025Q2",
-                      report_type="preliminary", section="PRELIM", idx=1))
-SS_PRE_OLD = dict(passage("[영업(잠정)실적 2025Q2] 영업이익(당해실적): 당기실적 46,761억원", rcept_no="20250708800001",
-                          period="2025Q2", report_type="preliminary", section="PRELIM", idx=1), superseded=True)
-SS_PRE_OLD2 = dict(passage("[영업(잠정)실적 2025Q2] 영업이익(당해실적): 당기실적 4.60조원", rcept_no="20250708800001",
-                           period="2025Q2", report_type="preliminary", section="PRELIM", idx=2), superseded=True)
-SS_CORR = dict(passage("정정 전 영업이익 4.60조원 → 정정 후 4.68조원", rcept_no="20250731800001", period="2025Q2",
-                       report_type="preliminary", section="CORR", idx=0))
-HY_IS = dict(passage("[2-2. 연결 포괄손익계산서 표, 연결 포괄손익계산서, 단위 백만원] 영업이익(손실) | 제 76 기 3분기 "
-                     "3개월(2023.07.01~2023.09.30): (1,791,961)", rcept_no=HY_RCEPT, period="2023Q3", section="III",
-                     idx=30), corp_code=HYNIX)
-HY_PRE = dict(passage("[연결재무제표 기준 영업(잠정)실적(공정공시) 2023Q3(2023-07-01~2023-09-30)] 영업이익(당해실적): "
-                      "당기실적 -1,791,961백만원 | 전기실적 -2,882,084백만원", rcept_no="20231026800001",
-                      period="2023Q3", report_type="preliminary", section="PRELIM", idx=1), corp_code=HYNIX)
+OP, REV = "dart_OperatingIncomeLoss", "ifrs-full_Revenue"
+XBRL_HEAD = "[재무제표(XBRL) 값]"
 
 
-class MetaStore(FakeStore):
-    """dense 검색은 날짜 많은 잡음 문단만 돌려주고, passages(메타 필터)는 걸러지지 않은 원본을 돌려주는 가짜.
-    (파이프라인이 superseded·CORR·숫자 불일치를 스스로 거르는지 본다.)"""
+def _fact(corp, account, amount, period, start, end, rcept_no, *, fs="CFS", cumulative=False, nm="영업이익",
+          reprt_code="11012", bsns_year="2025", report_type="periodic"):
+    return {"corp_code": corp, "period": period, "fs_div": fs, "account_id": account, "account_nm": nm,
+            "amount": amount, "rcept_no": rcept_no, "period_start": start, "period_end": end,
+            "value_kind": "duration", "cumulative": cumulative, "currency": "KRW", "unit": "원",
+            "rcept_dt": rcept_no[:8], "is_correction": False, "report_type": report_type, "superseded": False,
+            "rounding_unit": 1, "column": "thstrm_add" if cumulative else "thstrm", "reprt_code": reprt_code,
+            "bsns_year": bsns_year}
 
-    def __init__(self, rows, **kw):
-        super().__init__(default=NOISE, **kw)
-        self.rows, self.meta_calls = rows, []
 
-    async def passages(self, corp_code, *, rcept_nos=None, periods=None, report_types=None, include_history=False):
-        self.meta_calls.append({"rcept_nos": rcept_nos, "periods": periods, "report_types": report_types})
-        return [r for r in self.rows if r["corp_code"] == corp_code
-                and (rcept_nos is None or r["rcept_no"] in rcept_nos)
-                and (periods is None or r["period"] in periods)
-                and (report_types is None or r["report_type"] in report_types)]
+SS_FACTS = [
+    _fact(SAMSUNG, OP, 4_676_057_000_000, "2025Q2", "2025-04-01", "2025-06-30", SS_RCEPT),
+    _fact(SAMSUNG, OP, 11_361_329_000_000, "2025H1", "2025-01-01", "2025-06-30", SS_RCEPT, cumulative=True),
+    _fact(SAMSUNG, OP, 1_190_832_000_000, "2025Q2", "2025-04-01", "2025-06-30", SS_RCEPT, fs="OFS"),
+    _fact(SAMSUNG, REV, 74_566_317_000_000, "2025Q2", "2025-04-01", "2025-06-30", SS_RCEPT, nm="매출액"),
+    _fact(SAMSUNG, OP, 23_527_391_000_000, "2025Q3", "2025-01-01", "2025-09-30", "20251114002447", cumulative=True,
+          reprt_code="11014"),
+]
+HY_FACTS = [_fact(HYNIX, OP, -1_791_961_000_000, "2023Q3", "2023-07-01", "2023-09-30", HY_RCEPT,
+                  reprt_code="11014", bsns_year="2023")]
 
 
 class TextJev(FakeJev):
@@ -590,87 +576,116 @@ class TextJev(FakeJev):
         return await super().ask(state, questions, user_id=user_id, log_ctx=log_ctx, usage=usage)
 
 
-def _fact(corp, account, amount, period, start, end, rcept_no, report_type="periodic"):
-    return {"corp_code": corp, "period": period, "fs_div": "CFS", "account_id": account, "account_nm": "영업이익",
-            "amount": amount, "rcept_no": rcept_no, "period_start": start, "period_end": end,
-            "value_kind": "duration", "cumulative": False, "currency": "KRW", "unit": "원",
-            "rcept_dt": rcept_no[:8], "is_correction": False, "report_type": report_type, "superseded": False,
-            "rounding_unit": 1, "column": "thstrm"}
-
-
-OP = "dart_OperatingIncomeLoss"
-SS_FACTS = [_fact(SAMSUNG, OP, 4_676_057_000_000, "2025Q2", "2025-04-01", "2025-06-30", SS_RCEPT)]
-HY_FACTS = [_fact(HYNIX, OP, -1_791_961_000_000, "2023Q3", "2023-07-01", "2023-09-30", HY_RCEPT)]
-SS_ROWS = [SS_OFS, SS_SEG, SS_IS, SS_PRE_OLD, SS_PRE_OLD2, SS_CORR, SS_PRE]
-
-
-def _passages_in_state(jev):
+def _texts(jev):
     (call,) = jev.calls
     return [l.split("] ", 1)[1] for l in call["state"].splitlines() if l.startswith("[Passage ")]
 
 
-def test_xbrl_match_puts_matching_document_passages_first(facts):
-    store, jev = MetaStore(SS_ROWS), TextJev("4,676,057")
-    p = make(store, jev, SS_FACTS)
-    (r,) = collect(p, "삼성전자의 2025년 2분기 연결 영업이익은 4.7조원이다.")
-    texts = _passages_in_state(jev)
-    assert texts[:2] == [SS_IS["text"], SS_PRE["text"]]       # (a) 같은 접수번호 문서, (b) 같은 기간 잠정실적
-    assert len(texts) == 8                                    # 전체 k 유지
-    assert (r.status, r.evidence[0]["rcept_no"]) == ("supported", SS_RCEPT)
-    assert {"rcept_nos": [SS_RCEPT], "periods": None, "report_types": None} in store.meta_calls
-    assert {"rcept_nos": None, "periods": ["2025Q2"], "report_types": ["preliminary"]} in store.meta_calls
-
-
-def test_anchor_filters_superseded_history_and_number_mismatch():
-    jev = TextJev("4,676,057")
-    collect(make(MetaStore(SS_ROWS), jev, SS_FACTS), "삼성전자의 2025년 2분기 연결 영업이익은 4.7조원이다.")
-    joined = "\n".join(_passages_in_state(jev))
-    for bad in ("46,761억원", "4.60조원", "정정 전", "1,190,832", "14,557"):
-        assert bad not in joined, bad
-
-
-def test_hynix_operating_loss_anchor():
-    store, jev = MetaStore([HY_IS, HY_PRE]), TextJev("1,791,961")
-    p = FactcheckPipeline(store=store, jev=jev, facts=HY_FACTS, names=NAMES, user_id="anon:test")
+def _check(corp, text, store, jev, facts):
+    p = FactcheckPipeline(store=store, jev=jev, facts=facts, names=NAMES, user_id="anon:test")
 
     async def go():
-        return [r async for r in p.check(HYNIX, "SK하이닉스의 2023년 3분기 연결 영업손실은 1.79조원이었다.",
-                                         as_of="2026H1")]
+        return [r async for r in p.check(corp, text, as_of="2026H1")]
     (r,) = asyncio.run(go())
-    assert _passages_in_state(jev)[:2] == [HY_IS["text"], HY_PRE["text"]]
+    return r
+
+
+@pytest.mark.parametrize("corp, text, line", [
+    (SAMSUNG, "삼성전자의 2025년 2분기 연결 영업이익은 4.68조원이다.",
+     "삼성전자 연결 영업이익 2025년 2분기(3개월): 4,676,057백만원 — 접수번호 20250814003156"),
+    (SAMSUNG, "삼성전자의 2025년 2분기 연결 영업이익은 4.7조원이다.",
+     "삼성전자 연결 영업이익 2025년 2분기(3개월): 4,676,057백만원 — 접수번호 20250814003156"),
+    (SAMSUNG, "삼성전자의 2025년 상반기 연결 영업이익은 11.4조원이다.",     # 누적 행
+     "삼성전자 연결 영업이익 2025년 상반기(누적): 11,361,329백만원 — 접수번호 20250814003156"),
+    (SAMSUNG, "삼성전자의 2025년 2분기 별도 영업이익은 1.19조원이다.",     # OFS 힌트
+     "삼성전자 별도 영업이익 2025년 2분기(3개월): 1,190,832백만원 — 접수번호 20250814003156"),
+    (SAMSUNG, "삼성전자의 2025년 1~3분기 연결 영업이익은 23.5조원이다.",    # 3분기 누적 행
+     "삼성전자 연결 영업이익 2025년 1~3분기(누적): 23,527,391백만원 — 접수번호 20251114002447"),
+    (HYNIX, "SK하이닉스의 2023년 3분기 연결 영업손실은 1.79조원이었다.",   # 음수 행
+     "SK하이닉스 연결 영업이익 2023년 3분기(3개월): -1,791,961백만원 — 접수번호 20231114002574"),
+    (SAMSUNG, "삼성전자의 2025년 2분기 연결 영업이익률은 6.3%다.",
+     "삼성전자 연결 영업이익률 2025년 2분기(3개월): 6.27% — 접수번호 20250814003156"),
+])
+def test_xbrl_line_is_first_passage(corp, text, line):
+    store, jev = FakeStore(default=NOISE), TextJev(XBRL_HEAD)
+    r = _check(corp, text, store, jev, SS_FACTS + HY_FACTS)
+    texts = _texts(jev)
+    assert texts[0] == f"{XBRL_HEAD} {line}"
+    assert len(texts) == 8 and texts[1:] == [p["text"] for p in NOISE[:7]]   # 전체 k 유지, 중복 없음
+    assert len(store.calls) == 1                                             # Qdrant 추가 호출 없음(검색 1회)
     assert r.status == "supported"
+    ev = r.evidence[0]
+    assert (ev["section"], ev["text"]) == ("XBRL", texts[0])
+    assert ev["rcept_no"] in line
 
 
-def test_no_xbrl_match_uses_dense_only():
-    store, jev = MetaStore(SS_ROWS), FakeJev()
-    collect(make(store, jev, SS_FACTS), "2025년 2분기 HBM 판매가 늘었다.")
-    assert store.meta_calls == [] and _passages_in_state(jev) == [p["text"] for p in NOISE]
+def test_xbrl_evidence_names_original_report():
+    jev = TextJev(XBRL_HEAD)
+    r = _check(SAMSUNG, "삼성전자의 2025년 2분기 연결 영업이익은 4.68조원이다.", FakeStore(default=NOISE), jev, SS_FACTS)
+    assert {k: r.evidence[0][k] for k in ("report_nm", "period")} == {"report_nm": "반기보고서 (2025.06)",
+                                                                     "period": "2025Q2"}
 
 
-def test_wrong_number_still_contradicted_by_xbrl():
-    store, jev = MetaStore(SS_ROWS), FakeJev()
-    (r,) = collect(make(store, jev, SS_FACTS), "삼성전자의 2025년 2분기 연결 영업이익은 8.4조원이다.")
-    assert (r.status, r.reason) == ("contradicted", "xbrl_mismatch") and jev.calls == []
-
-
-def test_store_without_passages_method_still_works():
-    jev = TextJev("4,676,057")
-    (r,) = collect(make(FakeStore(default=NOISE), jev, SS_FACTS), "삼성전자의 2025년 2분기 연결 영업이익은 4.7조원이다.")
+def test_partial_match_gets_no_xbrl_line():
+    # 영업이익은 맞고 순이익은 XBRL 행이 없다(partial) → 앵커 없음, dense만 → ✅ 아님
+    store, jev = FakeStore(default=NOISE), TextJev(XBRL_HEAD)
+    r = _check(SAMSUNG, "삼성전자의 2025년 2분기 연결 영업이익은 4.7조원, 순이익은 6.7조원이다.", store, jev, SS_FACTS)
+    assert _texts(jev) == [p["text"] for p in NOISE]
     assert (r.status, r.reason) == ("no_evidence", "xbrl_partial")
 
 
-# ---- 실데이터 스모크 결함 2: 상대 기간 표현만 있으면 최대 ❔ ----
+def test_separate_only_is_capped_without_search_or_jev():
+    # 연결/별도 표시 없음 + 연결 불일치·별도 일치 → ❔ separate_only, 검색·JEV 호출 없음
+    store, jev = FakeStore(default=NOISE), TextJev(XBRL_HEAD)
+    r = _check(SAMSUNG, "삼성전자의 2025년 2분기 영업이익은 1.2조원이다.", store, jev, SS_FACTS)
+    assert (r.status, r.reason) == ("no_evidence", "separate_only")
+    assert r.xbrl["fs_div"] == "OFS"
+    assert store.calls == [] and jev.calls == []
 
-def test_relative_only_period_never_supported_or_contradicted(facts):
+
+def test_no_xbrl_match_uses_dense_only():
+    store, jev = FakeStore(default=NOISE), FakeJev()
+    collect(make(store, jev, SS_FACTS), "2025년 2분기 HBM 판매가 늘었다.")
+    assert _texts(jev) == [p["text"] for p in NOISE]
+
+
+def test_wrong_number_still_contradicted_by_xbrl():
+    store, jev = FakeStore(default=NOISE), FakeJev()
+    (r,) = collect(make(store, jev, SS_FACTS), "삼성전자의 2025년 2분기 연결 영업이익은 8.4조원이다.")
+    assert (r.status, r.reason) == ("contradicted", "xbrl_mismatch") and jev.calls == [] and store.calls == []
+
+
+# ---- 실데이터 스모크 결함 2(교차 검수 반영): 상대 기간 표현만 있으면 바로 ❔, 검색·JEV 0회 ----
+
+def test_relative_only_period_skips_search_and_jev(facts):
     from conftest import prelim_rows
     rows = facts + prelim_rows()   # 2026Q2 잠정 영업이익 89.49조
-    for claim, act in (("89.5조원", ("support", 0)), ("84.6조원", ("contradict", 0))):
-        p = make(FakeStore(default=[Q2_PASSAGE]), FakeJev({"같은 분기": act}), rows)
-        (r,) = collect(p, f"같은 분기 연결 영업이익은 {claim}이다.")
+    for claim in ("89.5조원", "84.6조원"):
+        store, jev = FakeStore(default=[Q2_PASSAGE]), FakeJev({"같은 분기": ("support", 0)})
+        (r,) = collect(make(store, jev, rows), f"같은 분기 연결 영업이익은 {claim}이다.")
         assert (r.status, r.reason) == ("no_evidence", "period_ambiguous"), claim
+        assert store.calls == [] and jev.calls == [], claim
+
+
+def test_current_quarter_word_resolves_and_xbrl_mismatch_is_contradicted(facts):
+    # '당분기'는 as_of(2026H1)로 2026Q2가 된다 → ambiguous 아님, XBRL(89.49조)과 불일치 → ⚠️(조기 반환)
+    store, jev = FakeStore(default=[Q2_PASSAGE]), FakeJev()
+    (r,) = collect(make(store, jev, facts), "당분기 영업이익은 8.4조원이다.")
+    assert (r.status, r.reason) == ("contradicted", "xbrl_mismatch")
+    assert r.xbrl["period"] == "2026Q2" and store.calls == [] and jev.calls == []
 
 
 def test_explicit_period_with_same_quarter_phrase_unchanged(facts):
-    p = make(FakeStore(default=[Q2_PASSAGE]), FakeJev(), facts)
-    (r,) = collect(p, "2026년 2분기 매출은 172조원이다.")
-    assert r.status == "contradicted"
+    # 명시 기간이 있으면 '같은 분기'가 함께 있어도 ambiguous가 아니다 → XBRL 불일치 ⚠️ 그대로
+    store, jev = FakeStore(default=[Q2_PASSAGE]), FakeJev()
+    (r,) = collect(make(store, jev, facts), "2026년 2분기 영업이익은 89.5조원이고 같은 분기 매출은 172조원이다.")
+    assert (r.status, r.reason) == ("contradicted", "xbrl_mismatch")
+
+
+@pytest.mark.parametrize("label, cumulative, instant, want", [
+    ("2025Q2", False, False, "2025년 2분기(3개월)"), ("2025Q3", True, False, "2025년 1~3분기(누적)"),
+    ("2025H1", True, False, "2025년 상반기(누적)"), ("2025", False, False, "2025년 연간"),
+    ("2025", False, True, "2025년 말"), ("2026H1", False, True, "2026년 6월 말"), ("2025Q3", False, True, "2025년 3분기 말"),
+])
+def test_xbrl_line_period_text(label, cumulative, instant, want):
+    assert pipeline._period_text(label, cumulative, instant) == want

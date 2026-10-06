@@ -384,20 +384,37 @@ def test_period_spans_include_comparison_bases():
     assert "2025년" in spans and "2024년" in spans
 
 
-# ---- 실데이터 스모크 결함 2: 상대 기간 표현만 있는 문장 ----
+# ---- 실데이터 스모크 결함 2: 상대 기간 표현만 있는 문장(교차 검수 반영) ----
+# ambiguous ⇔ 해석된 기간이 하나도 없고 상대 기간 표현('같은 분기' 등)이 있다
 
 @pytest.mark.parametrize("text, ambiguous", [
     ("같은 분기 연결 영업이익은 89.5조원이다.", True),
     ("같은 기간 매출은 74.6조원이다.", True),
-    ("동기 영업이익은 4.7조원이다.", True),
-    ("당분기 영업이익은 89.5조원이다.", True),
-    ("이번 분기 매출은 171.5조원이다.", True),
+    ("해당 분기 매출은 74.6조원이다.", True),
+    ("동분기 영업이익은 4.7조원이다.", True),
+    ("동 기간 영업이익은 4.7조원이다.", True),
     ("같은 해 매출은 333.6조원이다.", True),
-    ("2025년 2분기 영업이익은 전년 동기 대비 줄었다.", False),   # 명시 기간이 있으면 그대로
+    ("해당 반기 매출은 150조원이다.", True),
+    ("같은 회계연도 매출은 333.6조원이다.", True),
+    ("당분기 영업이익은 89.5조원이다.", False),    # as_of로 해석된다(2026Q2) → ambiguous 아님
+    ("이번 분기 매출은 171.5조원이다.", False),
+    ("2분기 영업이익은 4.7조원이고 같은 분기 매출은 74.6조원이다.", False),   # 연도 없는 '2분기'도 해석된 기간
+    ("2025년 2분기 영업이익은 전년 동기 대비 줄었다.", False),
     ("2025년 2분기 매출은 74.6조원, 같은 분기 영업이익은 4.7조원이다.", False),
     ("전년 동기 매출은 74.6조원이다.", False),
-    ("2분기 영업이익은 4.7조원이다.", False),
+    ("전년  동기 매출은 74.6조원이다.", False),
+    ("동기 영업이익은 4.7조원이다.", False),       # 맨 '동기'는 목록에서 뺐다
+    ("비동기 처리로 매출 10조원을 올렸다.", False),
+    ("동기 부여로 영업이익이 4.7조원 늘었다.", False),
+    ("동기화 설비 매출은 1조원이다.", False),
 ])
 def test_relative_only_period_is_ambiguous(text, ambiguous):
     assert scope.assess(text, SAMSUNG, as_of=AS_OF, names=NAMES).ambiguous_period is ambiguous
     assert scope.period_scope(text, AS_OF).ambiguous_period is ambiguous
+
+
+def test_last_year_same_quarter_spacing_independent():
+    a = scope.extract_periods("전년 동기 매출은 74.6조원이다.", AS_OF)
+    b = scope.extract_periods("전년  동기 매출은 74.6조원이다.", AS_OF)
+    c = scope.extract_periods("전년동기 매출은 74.6조원이다.", AS_OF)
+    assert [m.period.label for m in a] == [m.period.label for m in b] == [m.period.label for m in c] == ["2025Q2"]
