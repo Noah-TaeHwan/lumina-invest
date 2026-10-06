@@ -253,7 +253,7 @@ def test_assess_search_periods_from_claim_period():
     s = scope.assess("2026년 2분기 매출은 171.5조원이다.", SAMSUNG, as_of=AS_OF, names=NAMES)
     assert "2026Q2" in s.search_periods and "2026H1" in s.search_periods and "2025" not in s.search_periods
     s = scope.assess("매출은 171.5조원이다.", SAMSUNG, as_of=AS_OF, names=NAMES)
-    assert s.search_periods is None  # 기간 불명이면 전체
+    assert s.search_periods == scope.recent_periods(AS_OF) and s.period_assumed  # 기간 불명이면 최근 1년 보고서
 
 
 # ---- 1단계 규칙 분류 ----
@@ -453,3 +453,25 @@ def test_assess_with_inherited_period():
 ])
 def test_relative_units(text, units):
     assert scope.relative_units(text) == units
+
+
+# ---- 기간 없는 문장의 근거 시점: 기준 시점 끝에서 12개월 안에 끝나는 보고서 기간만 ----
+
+@pytest.mark.parametrize("as_of, want", [
+    ("2026Q2", ["2025Q3", "2025Q4", "2025", "2026Q1", "2026Q2", "2026H1"]),
+    ("2026H1", ["2025Q3", "2025Q4", "2025", "2026Q1", "2026Q2", "2026H1"]),
+    ("2025", ["2025Q1", "2025Q2", "2025H1", "2025Q3", "2025Q4", "2025"]),
+    ("2026Q1", ["2025Q2", "2025H1", "2025Q3", "2025Q4", "2025", "2026Q1"]),
+])
+def test_recent_periods(as_of, want):
+    assert sorted(scope.recent_periods(Period.parse(as_of))) == sorted(want)
+
+
+def test_no_period_sentence_searches_recent_reports():
+    s = scope.assess("삼성전자는 D램 시장 점유율 1위를 지켰다.", SAMSUNG, as_of=AS_OF, names=NAMES)
+    assert (s.mentions, s.period_assumed) == ([], True)
+    assert sorted(s.search_periods) == sorted(scope.recent_periods(AS_OF))
+    p = scope.period_scope("삼성전자는 D램 시장 점유율 1위를 지켰다.", AS_OF)
+    assert p.period_assumed and sorted(p.search_periods) == sorted(scope.recent_periods(AS_OF))
+    s = scope.assess("2025년 매출은 333.6조원이다.", SAMSUNG, as_of=AS_OF, names=NAMES)   # 기간 있는 문장은 그대로
+    assert not s.period_assumed and s.search_periods == scope.search_periods([Period(2025, "year")])
