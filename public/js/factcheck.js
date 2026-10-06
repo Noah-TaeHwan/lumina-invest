@@ -43,7 +43,7 @@ const REASONS = {
   future_period: '아직 공시되지 않은 기간',
   not_claim: '사실 주장이 아님',
   other_company: '다른 회사가 주어',
-  other_company_inherited: '앞 문장이 다른 회사 얘기라 이 문장은 검수하지 않음',
+  other_company_inherited: '앞 문장이 다른 회사 얘기',
   subject_ambiguous: '앞 문장에 두 회사가 함께 나와 어느 회사 얘기인지 알 수 없음',
   derived: '파생 지표',
   rule: '규칙으로 검수 대상',
@@ -92,6 +92,7 @@ function reasonLabel(code) {
     const tail = c.slice(i + 1);
     if (own(REASON_DETAIL, c)) return `${own(REASONS, head) || head} — ${own(REASON_DETAIL, c)}`;
     if (head === 'other_company') return `다른 회사(${tail})가 주어`;
+    if (head === 'other_company_inherited') return `앞 문장이 다른 회사(${tail}) 얘기`;
     if (head === 'period_inherited') return `앞 문장의 기간(${periodLabel(tail)})으로 해석`;
     if (own(REASONS, head)) return `${own(REASONS, head)}(${tail})`;
   }

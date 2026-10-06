@@ -416,8 +416,9 @@ def test_force_check_judges_every_sentence_and_keeps_scope_flag():
     assert (on[0].category, on[0].status) == ("checked", "supported")
     assert (on[1].category, on[1].status, on[1].reason) == ("other_company", "supported",
                                                               "period_assumed:recent,other_company:SK")
-    assert (on[2].category, on[2].status, on[2].reason) == ("out_of_scope", "supported",
-                                                              "period_assumed:recent,forecast")
+    # 'SK는 …'(이름+는)이 회사 문맥 기준이 되어 셋째 문장은 SK를 이어받는다: 다른 회사가 우선, 범위 밖 사유는 함께
+    assert (on[2].category, on[2].status, on[2].reason) == (
+        "other_company", "supported", "period_assumed:recent,other_company_inherited:SK,forecast")
 
 
 def test_module_level_check_passes_force_check():
@@ -1128,17 +1129,100 @@ def test_common_word_names_do_not_change_subject(middle, facts):
     assert (rs[2].status, rs[2].reason) == ("supported", "xbrl_exact"), middle
 
 
-def test_other_company_without_number_does_not_change_subject(facts):
-    # 한계(고정): 숫자 없는 다른 회사 문장은 회사 문맥을 바꾸지 않는다 → 다음 이름 없는 숫자 문장은 선택 회사로 판정
+def test_other_company_topic_without_number_changes_subject(facts):
+    # 주어 자리에서 회사 이름이 은·는·이·가와 바로 붙으면 숫자가 없어도 회사 문맥 기준 문장이다
     from conftest import prelim_rows
     rs = _run_names(f"SK하이닉스는 견조한 실적을 냈다. {PLAIN_Q2}", COMMON_NAMES, facts + prelim_rows())
-    assert "inherited" not in (rs[1].reason or "")
-    assert (rs[1].status, rs[1].reason) == ("supported", "xbrl_exact")
+    assert (rs[1].status, rs[1].category, rs[1].reason) == ("skipped", "other_company",
+                                                             "other_company_inherited:SK하이닉스")
+
+
+@pytest.mark.parametrize("middle", [
+    "애플과 LG 등 주요 고객사 수요가 견조했다.",     # 나열: 이름 뒤가 '등'
+    "모바일 부문은 기아 등 자동차 고객 확대로 성장했다.",  # 수식
+    "도움이 컸다.",                                # 흔한 낱말 목록
+])
+def test_listing_or_common_word_without_number_does_not_change_subject(middle, facts):
+    from conftest import prelim_rows
+    rs = _run_names(f"{SS_REV} {middle} {PLAIN_Q2}", COMMON_NAMES, facts + prelim_rows())
+    assert (rs[2].status, rs[2].reason) == ("supported", "xbrl_exact"), middle
 
 
 def test_other_company_number_sentence_still_inherits_past_plain_middle():
     rs = _run_names(f"{SK_S} 환율 상승도 이익에 도움이 됐다. {PLAIN}", COMMON_NAMES, SS_FACTS)
     assert (rs[2].status, rs[2].reason) == ("skipped", "other_company_inherited:SK하이닉스")
+
+
+# ---- 채점 세트 v2·교차 검수: 흔한 낱말과 같은 상장사명, 상속을 푸는 이름은 주어 자리만, 직접 검수 ----
+
+SS_REV_25 = "삼성전자의 2025년 2분기 매출은 74.6조원이다."
+
+
+def test_common_word_name_in_subject_with_number_is_not_company():
+    rs = _run_names(f"{SS_REV_25} 나노 공정 비중이 20%다. {PLAIN}", COMMON_NAMES, SS_FACTS)
+    assert "other_company" not in (rs[1].reason or "") and rs[1].category != "other_company"
+    assert (rs[2].status, rs[2].reason) == ("supported", "xbrl_exact")
+
+
+def test_common_word_name_before_selected_company_is_not_company():
+    text = "가격 상승도 도움이 되면서 삼성전자의 2025년 2분기 연결 영업이익은 4.7조원이었다."
+    (r,) = _run_names(text, COMMON_NAMES, SS_FACTS).values()
+    assert r.category == "checked" and r.status != "skipped"
+    assert r.xbrl is not None and r.xbrl["amount"] == 4_676_057_000_000
+
+
+@pytest.mark.parametrize("prefix", ["(주)나노", "㈜나노", "주식회사 나노", "나노(주)"])
+def test_common_word_name_with_legal_mark_is_company(prefix):
+    rs = _run_names(f"{prefix}의 2025년 2분기 연결 영업이익은 9.2조원이다. {PLAIN}", COMMON_NAMES, SS_FACTS)
+    assert (rs[0].status, rs[0].category) == ("skipped", "other_company"), prefix
+    assert (rs[1].status, rs[1].reason) == ("skipped", "other_company_inherited:나노"), prefix
+
+
+def test_real_other_company_still_skipped_with_common_names():
+    rs = _run_names(f"{SK_S} {PLAIN}", COMMON_NAMES, SS_FACTS)
+    assert (rs[0].status, rs[0].category) == ("skipped", "other_company")
+    assert (rs[1].status, rs[1].reason) == ("skipped", "other_company_inherited:SK하이닉스")
+
+
+@pytest.mark.parametrize("tail", [
+    "2025년 2분기 연결 영업이익은 4.7조원이며 나노 공정이 적용됐다.",
+    "2025년 2분기 연결 영업이익은 4.7조원으로 LG를 앞섰다.",
+])
+def test_name_outside_subject_does_not_stop_inheritance(tail):
+    store, jev = FakeStore(default=NOISE), FakeJev()
+    p = FactcheckPipeline(store=store, jev=jev, facts=SS_FACTS, names=COMMON_NAMES, user_id="anon:test")
+    rs = by_idx(asyncio.run(_collect_async(p, f"{SK_S} {tail}")))
+    assert (rs[1].status, rs[1].category, rs[1].reason) == ("skipped", "other_company",
+                                                             "other_company_inherited:SK하이닉스"), tail
+    assert store.calls == [] and jev.calls == []
+
+
+def test_selected_common_word_company_name_is_exact():
+    # 선택 회사가 흔한 낱말 이름이면 그 이름은 회사다(결정적 ✅의 '남은 글자' 검사에서도 이름 자리로 지운다)
+    nano = "00994994"
+    facts = [_fact(nano, OP, 4_676_057_000_000, "2025Q2", "2025-04-01", "2025-06-30", SS_RCEPT)]
+    p = FactcheckPipeline(store=FakeStore(default=NOISE), jev=FakeJev(), facts=facts, names=COMMON_NAMES,
+                          user_id="anon:test")
+
+    async def go():
+        return [r async for r in p.check(nano, "나노의 2025년 2분기 연결 영업이익은 4.7조원이다.", as_of="2026H1")]
+    (r,) = asyncio.run(go())
+    assert (r.status, r.reason) == ("supported", "xbrl_exact")
+
+
+async def _collect_async(p, text, **kw):
+    return [r async for r in p.check(SAMSUNG, text, as_of="2026H1", **kw)]
+
+
+def test_force_check_inherited_other_company_keeps_category_with_scope_reason():
+    jev = FakeJev()
+    p = FactcheckPipeline(store=FakeStore(default=NOISE), jev=jev, facts=SS_FACTS, names=NAMES, user_id="anon:test")
+    text = "SK하이닉스의 2025년 2분기 영업이익은 9.2조원이다. 2025년 2분기 연결 영업이익은 9.2조원으로 예상된다."
+    rs = by_idx(asyncio.run(_collect_async(p, text, force_check=True)))
+    r = rs[1]
+    assert r.category == "other_company" and r.status != "contradicted" and r.xbrl is None
+    assert "other_company_inherited:SK하이닉스" in r.reason and "forecast" in r.reason
+    assert "xbrl_mismatch" not in r.reason
 
 
 # ---- 근사 표시어 금액은 조기 ⚠️ 하지 않는다(유효숫자 2자리 미만이면 결정적 ✅도 아님) ----
@@ -1243,3 +1327,64 @@ def scope_search_periods_2024():
     from app.services.factcheck import scope as sc
     from app.services.factcheck.scope import Period as P
     return sc.search_periods([P(2024, "year")])
+
+
+# ---- 'A에서 B로' + '전 분기': A=비교 기준 기간, B=주장 기간(오경보 ⚠️ 없음) ----
+
+HY_FROM = [_fact(HYNIX, OP, 37_610_000_000_000, "2026Q1", "2026-01-01", "2026-03-31", "r26q1"),
+           _fact(HYNIX, OP, 60_540_000_000_000, "2026Q2", "2026-04-01", "2026-06-30", "r26q2")]
+
+
+@pytest.mark.parametrize("text, contradicted", [
+    ("SK하이닉스의 2026년 2분기 연결 영업이익은 전 분기 37.6조원에서 60.5조원으로 늘었다.", False),
+    ("SK하이닉스의 2026년 2분기 연결 영업이익은 전 분기 32.1조원에서 60.5조원으로 늘었다.", True),
+    ("SK하이닉스의 2026년 2분기 연결 영업이익은 전 분기 37.6조원에서 70.5조원으로 늘었다.", True),
+])
+def test_from_to_previous_quarter_pairing(text, contradicted):
+    r = _check(HYNIX, text, FakeStore(default=NOISE), FakeJev(), HY_FROM)
+    assert (r.status == "contradicted") is contradicted, (text, r.status, r.reason, r.xbrl)
+    if contradicted:
+        assert r.reason == "xbrl_mismatch"
+
+
+# ---- #69 검수: 'A에서 B로' 짝은 연결/별도 판단을 같게, B에 자기 기간이 붙으면 비교 기준 규칙을 쓰지 않는다 ----
+
+SS_Q1 = [_fact(SAMSUNG, OP, 6_685_000_000_000, "2025Q1", "2025-01-01", "2025-03-31", "20250515000001"),
+         _fact(SAMSUNG, OP, 1_000_000_000_000, "2025Q1", "2025-01-01", "2025-03-31", "20250515000001", fs="OFS")]
+
+
+def _from_check(text):
+    return _check(SAMSUNG, text, FakeStore(default=[Q2_PASSAGE]), FakeJev({"": ("support", 0)}), SS_FACTS + SS_Q1)
+
+
+def test_from_to_separate_mark_applies_to_both_amounts():
+    # A(1.0조)는 별도 Q1과 맞지만 B(4.7조)는 별도 Q2(1.19조)와 다르다 — 연결 Q2와 맞춰 ✅가 되면 안 된다
+    r = _from_check("2025년 2분기 별도 영업이익은 전 분기 1.0조원에서 4.7조원으로 늘었다.")
+    assert (r.status, r.reason) == ("contradicted", "xbrl_mismatch")
+    assert (r.xbrl["fs_div"], r.xbrl["period"]) == ("OFS", "2025Q2")
+
+
+@pytest.mark.parametrize("text", [
+    "2025년 2분기 연결 영업이익은 전 분기 6.7조원에서 4.7조원으로 줄었다.",
+    "2025년 2분기 영업이익은 전 분기 6.7조원에서 4.7조원으로 줄었다.",
+])
+def test_from_to_consolidated_pair_unchanged(text):
+    r = _from_check(text)
+    assert r.status != "contradicted" and r.xbrl["fs_div"] == "CFS", (r.status, r.reason)
+
+
+def test_from_to_unmarked_separate_pair_is_separate_only():
+    r = _from_check("2025년 2분기 영업이익은 전 분기 1.0조원에서 1.2조원으로 늘었다.")
+    assert (r.status, r.reason) == ("no_evidence", "separate_only")
+
+
+def test_from_to_unmarked_mixed_fs_pair_is_mismatch():
+    # A는 별도, B는 연결과만 맞는 짝: 한 재무제표로 둘 다 맞지 않으면 짝을 섞어 ✅로 만들지 않는다
+    r = _from_check("2025년 2분기 영업이익은 전 분기 1.0조원에서 4.7조원으로 늘었다.")
+    assert r.status == "contradicted"
+
+
+def test_from_to_own_period_on_b_disables_base_rule():
+    r = _from_check("2025년 2분기 연결 영업이익은 전 분기 6.7조원에서 2025년 1분기 4.7조원으로 집계됐다.")
+    assert r.status != "supported"
+    assert (r.status, r.xbrl["period"]) == ("contradicted", "2025Q1")  # main처럼 B를 2025년 1분기와 대조

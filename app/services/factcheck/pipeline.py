@@ -78,10 +78,11 @@ _DIGIT = re.compile(r"\d")
 
 def _inherited_subject(named: Sequence[dict[str, str]], anchors: Sequence[dict[str, str]], i: int,
                        corp_code: str) -> str | None:
-    """주어 없는 문장의 회사 상속. 문장 i에 회사 이름이 하나도 없으면(지시어 '같은 회사·동사·당사'도 이름이 아니다)
-    가장 가까운 기준 앞 문장(anchors: 주어 자리에 회사 이름이 있는 숫자 문장)을 본다: 선택 회사만이면 None(지금처럼
-    판정), 다른 회사만이면 'other_company_inherited:<회사명>', 선택 회사와 다른 회사가 함께면 'subject_ambiguous'.
-    기준 문장이 없으면 None. 문장 i 자체는 이름이 어디에든 있으면 상속하지 않는다(덜 건너뛰는 쪽)."""
+    """주어 없는 문장의 회사 상속. 문장 i의 주어 자리에 회사 이름이 없으면(named: 주어 자리 이름. 지시어 '같은 회사·
+    동사·당사'도 이름이 아니다) 가장 가까운 기준 앞 문장(anchors: 주어 자리에 회사 이름이 있는 숫자 문장, 또는 이름이
+    은·는·이·가와 바로 붙은 문장)을 본다: 선택 회사만이면 None(지금처럼 판정), 다른 회사만이면
+    'other_company_inherited:<회사명>', 선택 회사와 다른 회사가 함께면 'subject_ambiguous'. 기준 문장이 없으면 None.
+    주어 밖 이름('…4.7조원으로 LG를 앞섰다')은 상속을 풀지 않는다."""
     if named[i]:
         return None
     for j in range(i - 1, -1, -1):
@@ -202,7 +203,7 @@ def amount_only(sentence: str, sc: scope.Scope, xr: xbrl_check.XbrlResult, names
     def blank(a: int, b: int) -> None:
         chars[a:b] = " " * (b - a)
 
-    for c, name, a, b in names.mentions(sentence):
+    for c, name, a, b in names.mentions(sentence, corp_code):
         if c != corp_code:
             continue
         seg = sentence[a:b]
@@ -480,10 +481,11 @@ class FactcheckPipeline:
                                           user_id=self.user_id)
         todo: list[tuple[int, str, str, str | None, scope.Scope, xbrl_check.XbrlResult, str]] = []
         own = [scope.extract_periods(s, as_of_p) for s in sentences]
-        named = [scope.company_names_in(s, self.names) for s in sentences]
-        # 회사 문맥을 정하는 앞 문장: 주어 자리에 회사 이름이 있고 숫자가 있는 문장만('환율 상승도 이익에 도움이 됐다'의
-        # '도움' 같은 일상어 상장사명, 숫자 없는 서술 문장은 회사 문맥을 바꾸지 않는다)
-        anchors = [scope.subject_company_names(s, self.names) if _DIGIT.search(s) else {} for s in sentences]
+        named = [scope.subject_company_names(s, self.names, corp_code) for s in sentences]
+        # 회사 문맥을 정하는 앞 문장: 주어 자리에 회사 이름이 있는 숫자 문장, 또는 숫자가 없어도 이름이 은·는·이·가와
+        # 바로 붙은 문장('SK하이닉스는 견조한 실적을 냈다'). 나열·수식('LG 등')과 흔한 낱말 이름('도움')은 기준이 아니다
+        anchors = [named[i] if _DIGIT.search(s) else scope.topic_company_names(s, self.names, corp_code)
+                   for i, s in enumerate(sentences)]
         subjects = [_inherited_subject(named, anchors, i, corp_code) for i in range(len(sentences))]
         # 기간을 물려줄 수 없는 문장: 다른 회사가 주어(그 회사의 기간), 회사를 이어받아 건너뛴 문장, force_check면
         # 범위 밖 문장도
@@ -507,7 +509,10 @@ class FactcheckPipeline:
                 if not force_check:
                     yield SentenceResult(i, s, sc.category, "skipped", [], None, _join(sc.reason, inh))
                     continue
-                category, note = sc.category, _join(sc.reason, inh)
+                if subjects[i]:  # 상속한 다른 회사가 우선: 범위 밖 사유는 함께 남긴다
+                    note = _join(subjects[i], sc.reason, inh)
+                else:
+                    category, note = sc.category, _join(sc.reason, inh)
                 sc = scope.period_scope(s, as_of_p, inherited=inherited)
             if category == "other_company":  # 다른 회사 수치를 선택 회사 XBRL로 대조하지 않는다(force_check)
                 xr = xbrl_check.XbrlResult("none", [])

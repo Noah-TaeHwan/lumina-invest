@@ -276,7 +276,9 @@ async def s_quota(browser, base, ck):
 
 async def s_skipped(browser, base, ck):
     print("[skipped] 건너뛴 문장 펼치기·수동 검수")
-    redone = {**R3, "status": "supported", "category": "checked", "reason": None, "evidence": [EVID]}
+    # 직접 검수 결과에 회사 상속 사유가 붙어도 '검수하지 않음'처럼 읽히지 않는다(중립 문구)
+    redone = {**R3, "status": "supported", "category": "other_company", "reason": "other_company_inherited:SK하이닉스",
+              "evidence": [EVID]}
     fake = FakeFc(polls=[(200, job("done", ALL))],
                   after_recheck=[(200, job("running", ALL)), (200, job("done", [R0, R1, R2, redone, R4]))])
     ctx, page = await open_fc(browser, base, fake)
@@ -298,6 +300,11 @@ async def s_skipped(browser, base, ck):
           f"skipped: 검수·수동 검수 POST는 JSON Content-Type {fake.ctypes}")
     ck.ok(await page.is_hidden("#fc-skipped"), "skipped: 건너뛴 문장이 없으면 상자를 숨긴다")
     ck.ok(await badges(page) == ["⚠️", "❔", "✅", "✅", "✅"], f"skipped: 검수 결과로 옮겨진다 {await badges(page)}")
+    moved = page.locator("#fc-list > li").filter(has_text=SENTS[3])
+    await moved.locator("summary").click()
+    moved_text = await moved.inner_text()
+    ck.ok("앞 문장이 다른 회사(SK하이닉스) 얘기" in moved_text and "검수하지 않음" not in moved_text,
+          f"skipped: 직접 검수 결과의 회사 상속 사유는 중립 문구 {moved_text!r}")
     clean(ck, page, "skipped")
     await ctx.close()
 
