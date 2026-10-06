@@ -298,10 +298,10 @@ def test_known_usage_with_missing_attempt_charges_cap_for_missing():
     assert fm.charge_from_record(fm.CallRecord(sent=2, raw=[fm._MISSING, 0])) == 2 * CAP  # 0 보고도 모르는 시도
 
 
-# ── T4-B4: 401/403 연속이면 차단 ────────────────────────────────────────────
+# ── T4-B4: 401 연속이면 차단, 시험 호출로 다시 연다 ─────────────────────────
 
 class _Status:
-    """http_status만 바꿔 돌려주는 ServiceJevClient 대역(요청 수를 센다)."""
+    """http_status만 바꿔 돌려주는 ServiceJevClient 대역(요청 수를 센다). statuses 끝 값은 계속 쓴다."""
 
     def __init__(self, statuses):
         self.statuses, self.calls = list(statuses), 0
@@ -318,32 +318,97 @@ class _Status:
                                 None if ok else f"HTTP {status}", None if ok else "http_4xx", status)
 
 
-def test_three_consecutive_auth_rejections_trip_breaker():
+def _run_many(mj, led, n):
+    async def go():
+        return [await ask(mj, led) for _ in range(n)]
+    return asyncio.run(go())
+
+
+def test_three_consecutive_401_trip_breaker():
     fired = []
-    inner = _Status([401, 403, 401, 200])
+    inner = _Status([401, 401, 401, 200])
     mj = fm.MeteredJev(inner, on_auth_block=lambda: fired.append(1))
     led = fm.Ledger(10 ** 9)
-
-    async def go():
-        return [await ask(mj, led) for _ in range(5)]
-
-    rs = asyncio.run(go())
+    rs = _run_many(mj, led, 5)
     assert inner.calls == 3 and fired == [1] and mj.blocked  # 세 번째에서 끊고, 그 뒤로는 보내지 않는다
     assert [r.error_code for r in rs[3:]] == ["no_api_key", "no_api_key"]
     assert led.charged == 3 * CAP  # 막힌 뒤 호출은 한도를 쓰지 않는다
 
 
+def test_403_is_logged_but_never_trips(caplog):
+    """403은 WAF처럼 문장 내용으로도 날 수 있어 세지 않는다(익명 사용자가 데모를 닫지 못하게). 로그만 남긴다."""
+    import logging
+
+    caplog.set_level(logging.WARNING)
+    inner = _Status([403])
+    mj = fm.MeteredJev(inner, on_auth_block=lambda: None)
+    _run_many(mj, fm.Ledger(10 ** 9), 6)
+    assert not mj.blocked and inner.calls == 6
+    assert "factcheck_auth_forbidden" in caplog.text
+
+
+def test_403_between_401s_neither_counts_nor_resets():
+    inner = _Status([401, 403, 401, 403, 401])
+    mj = fm.MeteredJev(inner, on_auth_block=lambda: None)
+    _run_many(mj, fm.Ledger(10 ** 9), 5)
+    assert mj.blocked  # 401이 세 번(403은 끼어도 지우지 않는다)
+
+
 def test_success_between_rejections_resets_breaker():
     inner = _Status([401, 401, 200, 401, 401, 200])
     mj = fm.MeteredJev(inner, on_auth_block=lambda: None)
-    led = fm.Ledger(10 ** 9)
-
-    async def go():
-        for _ in range(6):
-            await ask(mj, led)
-
-    asyncio.run(go())
+    _run_many(mj, fm.Ledger(10 ** 9), 6)
     assert not mj.blocked and inner.calls == 6
+
+
+def test_probe_reopens_breaker_on_success_inside_ledger(caplog):
+    import logging
+
+    caplog.set_level(logging.INFO)
+    events = []
+    inner = _Status([401, 401, 401])
+    mj = fm.MeteredJev(inner, on_auth_block=lambda: events.append("block"),
+                       on_auth_unblock=lambda: events.append("unblock"))
+    led = fm.Ledger(10 ** 9)
+    _run_many(mj, led, 3)
+    assert mj.blocked
+    inner.statuses = [200]  # 키를 바꿨다
+
+    async def probe():
+        tok = fm.bind(led)
+        try:
+            return await mj.probe(user_id="auth-probe")
+        finally:
+            fm.unbind(tok)
+
+    assert asyncio.run(probe()) is True
+    assert not mj.blocked and events == ["block", "unblock"]
+    assert led.charged == 3 * CAP + 100  # 시험 호출도 원장 안에서 센다
+    assert "factcheck_auth_blocked" in caplog.text and "factcheck_auth_unblocked" in caplog.text
+    assert _run_many(mj, led, 1)[0].ok  # 다시 보낸다
+
+
+def test_probe_still_rejected_keeps_breaker_closed():
+    inner = _Status([401])
+    mj = fm.MeteredJev(inner, on_auth_block=lambda: None)
+    led = fm.Ledger(10 ** 9)
+    _run_many(mj, led, 3)
+
+    async def probe():
+        tok = fm.bind(led)
+        try:
+            return await mj.probe(user_id="auth-probe")
+        finally:
+            fm.unbind(tok)
+
+    assert asyncio.run(probe()) is False and mj.blocked and inner.calls == 4
+
+
+def test_probe_without_ledger_sends_nothing():
+    inner = _Status([401])
+    mj = fm.MeteredJev(inner)
+    _run_many(mj, fm.Ledger(10 ** 9), 3)
+    assert asyncio.run(mj.probe(user_id="auth-probe")) is False and inner.calls == 3
 
 
 def test_real_client_401_propagates_status_and_trips():

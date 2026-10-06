@@ -6,9 +6,13 @@
 - 시작(prepare, 단계마다 실패를 따로 알린다): 마이그레이션 → PostgreSQL 연결 → 오래된 미정산 예약 복구(실행 마감 + 여유) →
   판정 API 키 확인 → 데이터·파이프라인 조립(T2 pipeline.build_pipeline, 파일이 없으면 예외) → sweeper.
   어느 단계든 실패하면 검수 엔드포인트는 503(startup_failed / no_api_key / data_unavailable)이고 /api/health가 그 이유와
-  각 단계 결과를 보인다(503). 복구가 실패하면 한도·익명 키를 공개하지 않는다. XBRL 행·상장사명·문단이 하나라도 0이면
-  data_unavailable(FACTCHECK_ALLOW_NO_DATA로만 허용) — 데이터 누락이 조용히 ❔만 내는 잘못된 판정이 되지 않게.
-  준비 상태는 시작 때 한 번 정한다(Qdrant·데이터를 나중에 올렸으면 재시작한다).
+  각 단계 결과를 보인다(503). 복구가 실패하면 한도·익명 키를 공개하지 않는다. 상장사명이 없거나 Qdrant가 안 되거나 데모
+  회사 중 하나라도 XBRL 행·문단이 0이면 data_unavailable(FACTCHECK_ALLOW_NO_DATA로만 허용) — 데이터 누락이 조용히 ❔만 내는
+  잘못된 판정이 되지 않게.
+- 준비가 안 됐으면 RECHECK_S(30초)마다 안 된 단계만 다시 확인해, 회복하면 재시작 없이 연다. 이미 준비된 앱은 데이터를 다시
+  읽지 않는다(분기 갱신은 앱 재시작).
+- 판정 키 차단기: 401이 이어지면(metering) 검수를 no_api_key로 닫고, AUTH_PROBE_S(10분)마다 한도 예약·정산 안에서 시험
+  호출 1회로 다시 확인해 받아들여지면 연다.
 - 종료(shutdown): 실행 중 검수 취소 → 정산 대기 → 파이프라인·PostgreSQL 연결 닫기.
 - 공개 경로(허용 목록): /, /factcheck.html, /js/factcheck.js, /favicon.ico, /api/health, /api/factcheck/*.
   원본 화면 스크립트(/js 전체)·/css·/docs·/redoc·/openapi.json은 열지 않는다.
@@ -54,9 +58,12 @@ def make_store() -> Any:
     return default_store()
 
 
-def make_jev(on_auth_block: Callable[[], None] | None = None) -> metering.MeteredJev:
-    """계량 래퍼로 감싼 실제 ServiceJevClient. 401·403이 이어지면 on_auth_block을 부른다. 테스트에서 바꾼다(외부 호출 없음)."""
-    return metering.service_client(api_key=lambda: load_api_key(), on_auth_block=on_auth_block)
+def make_jev(on_auth_block: Callable[[], None] | None = None,
+             on_auth_unblock: Callable[[], None] | None = None) -> metering.MeteredJev:
+    """계량 래퍼로 감싼 실제 ServiceJevClient. 401이 이어지면 on_auth_block, 시험 호출이 성공하면 on_auth_unblock을 부른다.
+    테스트에서 바꾼다(외부 호출 없음)."""
+    return metering.service_client(api_key=lambda: load_api_key(), on_auth_block=on_auth_block,
+                                   on_auth_unblock=on_auth_unblock)
 
 
 def data_dir_path(raw: str | None = None) -> Path:
@@ -83,12 +90,15 @@ class Readiness:
 
 
 RECHECK_S = 30.0  # 준비가 안 됐을 때 다시 확인하는 간격(일시 장애에서 재시작 없이 회복)
+AUTH_PROBE_S = 600.0  # 판정 키가 막힌 뒤 시험 호출 간격(한도 예약·정산 안에서 1회)
+AUTH_PROBE_KEY = "auth-probe"  # 시험 호출 예약의 한도 키(익명 키와 섞이지 않는다)
 CORPS = [c["corp_code"] for c in factcheck.COMPANIES]
 
 _readiness = Readiness()
 _pipeline: Any = None
 _state: dict = {}
 _recheck_task: asyncio.Task | None = None
+_auth_probe_task: asyncio.Task | None = None
 
 
 def _empty_data() -> dict:
@@ -133,7 +143,7 @@ async def assemble(data_dir: Path, *, allow_no_data: bool = False,
     from app.services.factcheck import pipeline as fp
     from app.services.factcheck.scope import CompanyIndex
 
-    store, jev = make_store(), make_jev(on_auth_block)
+    store, jev = make_store(), make_jev(on_auth_block, _on_auth_unblock)
     shell = type("P", (), {"store": store, "jev": jev})()
     try:
         try:
@@ -162,14 +172,55 @@ async def assemble(data_dir: Path, *, allow_no_data: bool = False,
 
 
 def _on_auth_block() -> None:
-    """판정 키 차단기가 열렸다: 검수를 no_api_key로 닫는다(한도·익명 키는 그대로). 재시작 전까지 다시 열지 않는다."""
-    global _readiness
+    """판정 키 차단기가 열렸다(401 연속): 검수를 no_api_key로 닫고(한도·익명 키는 그대로) 시험 호출 작업을 띄운다."""
+    global _readiness, _auth_probe_task
     _state["auth_rejected"] = True
     checks = _state.setdefault("checks", {})
     checks["api_key_rejected"] = True
     factcheck.set_not_ready("no_api_key")
     _readiness = Readiness(False, "no_api_key", checks)
-    print("[WARN] 판정 API 키가 거부돼(401·403 연속) 검수를 닫았다 — 키를 바꾸고 재시작한다")
+    print(f"[WARN] 판정 API 키가 거부돼(401 연속) 검수를 닫았다 — {_state.get('auth_probe_s', AUTH_PROBE_S):g}초마다 "
+          "시험 호출로 다시 확인한다")
+    if _auth_probe_task is None or _auth_probe_task.done():
+        _auth_probe_task = asyncio.ensure_future(_auth_probe_loop(_state.get("auth_probe_s", AUTH_PROBE_S)))
+
+
+def _on_auth_unblock() -> None:
+    """시험 호출이 성공했다: 키 거부 표시를 지운다(검수는 _auth_probe_loop가 _attempt로 다시 연다)."""
+    _state["auth_rejected"] = False
+    _state.setdefault("checks", {})["api_key_rejected"] = False
+
+
+async def _auth_probe_loop(interval_s: float) -> None:
+    """막혀 있는 동안 interval_s마다 시험 호출 1회: 한도에 예약(AUTH_PROBE_KEY, 하루 실행 횟수에서는 세지 않음) → 원장 안에서
+    probe → 원장 값으로 정산. 성공하면 준비 상태를 다시 맞춰 연다."""
+    while _state.get("auth_rejected"):
+        await asyncio.sleep(interval_s)
+        pipeline, quota = _state.get("pipeline"), _state.get("quota")
+        if pipeline is None or quota is None:
+            continue
+        try:
+            res = await quota.reserve(AUTH_PROBE_KEY, metering.reservation_for(1, triage=False), count_run=False)
+        except Exception as e:  # noqa: BLE001 — 한도가 없으면 시험도 하지 않는다
+            print(f"[WARN] 판정 키 시험 호출 예약 실패: {type(e).__name__}")
+            continue
+        ledger, ok = metering.Ledger(res.est), False
+        token = metering.bind(ledger)
+        try:
+            ok = await pipeline.jev.probe(user_id=AUTH_PROBE_KEY)
+        except Exception as e:  # noqa: BLE001
+            print(f"[WARN] 판정 키 시험 호출 실패: {type(e).__name__}")
+        finally:
+            metering.unbind(token)
+            try:
+                await quota.settle(res, ledger.close())
+            except Exception as e:  # noqa: BLE001 — 미정산 예약은 오래된 예약 복구가 예약량으로 정산한다
+                print(f"[WARN] 판정 키 시험 호출 정산 실패: {type(e).__name__}")
+        if ok:
+            r = await _attempt()
+            print("[factcheck] 판정 키가 다시 받아들여져 검수를 연다" if r.ready else
+                  f"[WARN] 판정 키는 회복했지만 아직 준비 안 됨: {r.code}")
+            return
 
 
 async def _attempt() -> Readiness:
@@ -238,11 +289,9 @@ async def _attempt() -> Readiness:
 
 
 async def _recheck_loop(interval_s: float) -> None:
-    """준비될 때까지 interval_s마다 다시 확인한다. 판정 키가 거부돼 닫힌 것은 다시 열지 않는다."""
+    """준비될 때까지 interval_s마다 다시 확인한다(판정 키 거부로 닫힌 것은 _auth_probe_loop가 맡는다)."""
     while True:
         await asyncio.sleep(interval_s)
-        if _state.get("auth_rejected"):
-            return
         try:
             r = await _attempt()
         except Exception as e:  # noqa: BLE001 — 다음 주기에 다시 한다
@@ -254,7 +303,7 @@ async def _recheck_loop(interval_s: float) -> None:
 
 
 async def prepare(*, data_dir: Path | str | None = None, allow_no_data: bool | None = None,
-                  recheck_s: float = RECHECK_S) -> Readiness:
+                  recheck_s: float = RECHECK_S, auth_probe_s: float = AUTH_PROBE_S) -> Readiness:
     """시작 단계를 돌리고 라우트에 한도·익명 키·파이프라인·준비 안 된 이유를 넣는다(lifespan·테스트 공용).
     준비가 안 됐으면 recheck_s마다 다시 확인하는 작업을 띄워, 회복하면 연다(열린 뒤 닫는 것은 키 차단기뿐)."""
     global _recheck_task
@@ -262,7 +311,7 @@ async def prepare(*, data_dir: Path | str | None = None, allow_no_data: bool | N
     allow = cfg.FACTCHECK_ALLOW_NO_DATA if allow_no_data is None else allow_no_data
     _state.clear()
     _state.update(data_dir=data_dir_path(str(data_dir) if data_dir else None), allow=allow, quota=None, keyer=None,
-                  pipeline=None, auth_rejected=False,
+                  pipeline=None, auth_rejected=False, auth_probe_s=auth_probe_s,
                   checks={"migrations": None, "db": False, "recovery": False, "api_key": False,
                           "api_key_rejected": False, "data": _empty_data(), "allow_no_data": allow})
     r = await _attempt()
@@ -274,11 +323,12 @@ async def prepare(*, data_dir: Path | str | None = None, allow_no_data: bool | N
 
 async def shutdown() -> None:
     """재확인을 멈추고, 실행 중 검수를 취소하고 정산을 기다린 뒤 연결을 닫는다."""
-    global _readiness, _pipeline, _recheck_task
-    if _recheck_task is not None:
-        _recheck_task.cancel()
-        await asyncio.gather(_recheck_task, return_exceptions=True)
-        _recheck_task = None
+    global _readiness, _pipeline, _recheck_task, _auth_probe_task
+    for task in (_recheck_task, _auth_probe_task):
+        if task is not None:
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+    _recheck_task = _auth_probe_task = None
     await factcheck.get_jobs().close()
     factcheck.configure(quota=None)
     await close_pipeline(_pipeline)

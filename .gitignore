@@ -20,6 +20,8 @@ build/
 .env.local
 .env.portfolio
 .env.factcheck
+# Qdrant 스냅샷(DART 파생, 수백 MB) — public 저장소에 커밋하지 않는다
+*.snapshot
 
 # Data (large CSV files)
 data/09*/

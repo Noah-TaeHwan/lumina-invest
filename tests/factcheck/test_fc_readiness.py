@@ -93,8 +93,8 @@ def boot(fc_pg, monkeypatch):
     def no_network(request):
         raise AssertionError("테스트에서 외부 JEV 호출이 나갔다")
 
-    monkeypatch.setattr(fm_main, "make_jev", lambda on_auth_block=None: metering.service_client(
-        api_key="k", transport=httpx.MockTransport(no_network), on_auth_block=on_auth_block))
+    monkeypatch.setattr(fm_main, "make_jev", lambda on_auth_block=None, on_auth_unblock=None: metering.service_client(
+        api_key="k", transport=httpx.MockTransport(no_network), on_auth_block=on_auth_block, on_auth_unblock=on_auth_unblock))
 
     def go(*, store=None, **kw):
         monkeypatch.setattr(fm_main, "make_store", lambda: store or Store())
@@ -251,8 +251,8 @@ def test_not_ready_rechecks_and_opens_after_transient_failure(fc_pg, monkeypatch
     monkeypatch.setattr(settings, "DATABASE_URL", fc_pg)
     monkeypatch.setattr(settings, "RUN_MIGRATIONS_ON_STARTUP", False)
     monkeypatch.setattr(fm_main, "load_api_key", lambda: "test-key")
-    monkeypatch.setattr(fm_main, "make_jev", lambda on_auth_block=None: metering.service_client(
-        api_key="k", transport=httpx.MockTransport(lambda r: httpx.Response(500)), on_auth_block=on_auth_block))
+    monkeypatch.setattr(fm_main, "make_jev", lambda on_auth_block=None, on_auth_unblock=None: metering.service_client(
+        api_key="k", transport=httpx.MockTransport(lambda r: httpx.Response(500)), on_auth_block=on_auth_block, on_auth_unblock=on_auth_unblock))
     store = Store(fail_exists=1)
     monkeypatch.setattr(fm_main, "make_store", lambda: store)
     d = data_dir(tmp_path)
@@ -280,34 +280,81 @@ def test_not_ready_rechecks_and_opens_after_transient_failure(fc_pg, monkeypatch
     assert fm_main._recheck_task is None  # 종료하면 재확인 작업도 멈춘다
 
 
-# ── T4-B4: 판정 키 거부가 이어지면 닫는다 ───────────────────────────────────
+# ── T4-B4: 401이 이어지면 닫고, 시험 호출로 다시 연다 ─────────────────────
 
-def test_auth_rejection_trip_closes_and_stays_closed(fc_pg, monkeypatch, tmp_path):
+def _auth_boot(monkeypatch, fc_pg, tmp_path, responses):
+    """판정 응답 순서(responses, 끝 값 반복)를 정한 MockTransport로 준비시킨다."""
+    seq = list(responses)
+
+    def handler(request):
+        status = seq.pop(0) if len(seq) > 1 else seq[0]
+        if status == 200:
+            return httpx.Response(200, json={"model": "jev-1.13.0", "usage": {"input_tokens": 321, "output_tokens": 1},
+                                             "answers": {"p1": {"type": "choice", "probabilities": {
+                                                 "supports": 0.1, "contradicts": 0.1, "says_nothing": 0.8}}}})
+        return httpx.Response(status)
+
     monkeypatch.setattr(settings, "DATABASE_URL", fc_pg)
     monkeypatch.setattr(settings, "RUN_MIGRATIONS_ON_STARTUP", False)
     monkeypatch.setattr(fm_main, "load_api_key", lambda: "test-key")
-    monkeypatch.setattr(fm_main, "make_jev", lambda on_auth_block=None: metering.service_client(
-        api_key="k", transport=httpx.MockTransport(lambda r: httpx.Response(401)), on_auth_block=on_auth_block))
+    monkeypatch.setattr(fm_main, "make_jev", lambda on_auth_block=None, on_auth_unblock=None: metering.service_client(
+        api_key="k", transport=httpx.MockTransport(handler), on_auth_block=on_auth_block,
+        on_auth_unblock=on_auth_unblock))
     monkeypatch.setattr(fm_main, "make_store", lambda: Store())
-    d = data_dir(tmp_path)
+    return data_dir(tmp_path)
+
+
+async def _health(path="/api/health"):
+    transport = httpx.ASGITransport(app=fm_main.app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://t", headers=ORIGIN) as c:
+        return await c.get(path)
+
+
+def test_auth_block_closes_and_failed_probe_keeps_it_closed(fc_pg, monkeypatch, tmp_path):
+    d = _auth_boot(monkeypatch, fc_pg, tmp_path, [401])
 
     async def run():
-        ready = await fm_main.prepare(data_dir=d, recheck_s=0.05)
+        ready = await fm_main.prepare(data_dir=d, recheck_s=0.05, auth_probe_s=0.05)
         try:
-            factcheck._pipeline.jev.on_auth_block()  # 차단기가 열린 것과 같다
-            await asyncio.sleep(0.3)  # 재확인 주기가 여러 번 돌아도
-            transport = httpx.ASGITransport(app=fm_main.app)
-            async with httpx.AsyncClient(transport=transport, base_url="http://t", headers=ORIGIN) as c:
-                health = await c.get("/api/health")
-                post = await c.post("/api/factcheck", json={"corp_code": SAMSUNG, "source": "my_draft",
-                                                            "text": "2025년 매출은 300조원이다."})
-            return ready, health, post, factcheck._quota
+            factcheck._pipeline.jev.blocked = True
+            fm_main._on_auth_block()  # 차단기가 열린 것과 같다
+            await asyncio.sleep(0.4)  # 시험 호출이 여러 번 돌아도 401이면 닫힌 채
+            health = await _health()
+            return ready, health, factcheck._quota
         finally:
             await fm_main.shutdown()
 
-    ready, health, post, quota = asyncio.run(run())
-    assert ready.ready  # 처음엔 열렸다
+    ready, health, quota = asyncio.run(run())
+    assert ready.ready
     assert health.status_code == 503 and health.json()["code"] == "no_api_key"
     assert health.json()["checks"]["api_key_rejected"] is True
-    assert post.status_code == 503 and post.json()["detail"]["code"] == "no_api_key"
     assert quota is not None  # 한도·익명 키는 그대로(키만 막는다)
+
+
+def test_auth_probe_success_reopens_and_is_settled_in_quota(fc_pg, monkeypatch, tmp_path):
+    """차단 뒤 일정 간격으로 가벼운 시험 호출 1회(한도 예약·정산 안에서). 성공하면 다시 연다."""
+    d = _auth_boot(monkeypatch, fc_pg, tmp_path, [200])
+
+    async def run():
+        await fm_main.prepare(data_dir=d, recheck_s=0.05, auth_probe_s=0.05)
+        try:
+            factcheck._pipeline.jev.blocked = True
+            fm_main._on_auth_block()
+            closed = await _health()
+            for _ in range(100):
+                opened = await _health()
+                if opened.status_code == 200:
+                    break
+                await asyncio.sleep(0.05)
+            async with factcheck._quota._factory() as db:
+                from sqlalchemy import text as sql
+                rows = (await db.execute(sql("SELECT key, est, actual, settled_at IS NOT NULL FROM "
+                                             "factcheck_reservations WHERE count_run = false"))).all()
+            return closed, opened, [tuple(r) for r in rows], factcheck._not_ready
+        finally:
+            await fm_main.shutdown()
+
+    closed, opened, rows, not_ready = asyncio.run(run())
+    assert closed.status_code == 503 and opened.status_code == 200 and not_ready is None
+    assert opened.json()["checks"]["api_key_rejected"] is False
+    assert rows and rows[0][0] == "auth-probe" and rows[0][2] == 321 and rows[0][3] is True

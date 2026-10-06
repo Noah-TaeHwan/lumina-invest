@@ -488,3 +488,17 @@ def test_key_shortfall_from_own_running_reservation_is_busy(fc_pg):
         return busy.value.code
 
     assert asyncio.run(go()) == "cap_key_busy"
+
+
+def test_key_tokens_exhausted_after_settled_use_is_not_busy(fc_pg):
+    """오늘 실제로 쓴 양(used)만으로 키 상한을 넘으면 '잠시 뒤'가 아니라 소진(cap_key_tokens)이다(#64 검수 2)."""
+    async def go():
+        engine, factory = _factory(fc_pg)
+        q = _quota(factory, key_tokens=10_000)
+        await q.settle(await q.reserve("k1", 6_000), 6_000)
+        with pytest.raises(fq.QuotaExceeded) as ei:
+            await q.reserve("k1", 6_000)
+        await engine.dispose()
+        return ei.value.code
+
+    assert asyncio.run(go()) == "cap_key_tokens"

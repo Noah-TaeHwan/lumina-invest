@@ -1,7 +1,8 @@
 # app/services/factcheck/settings.py
 """팩트체커 설정(환경변수·ENV_FILE). 앱 공용 Settings(app/config.py)를 고치지 않으려고 따로 둔다.
 
-- FACTCHECK_DAILY_*: 하루 상한. 금액이 아니라 실행 횟수·JEV 입력 토큰 수다. 공개 값은 노아가 공개 전에 정한다.
+- FACTCHECK_DAILY_*: 하루 상한. 금액이 아니라 실행 횟수·JEV 입력 토큰 수다. 공개 데모의 전체 상한은 1천만 토큰/일
+  (2026-10-06 노아 결정 — compose.factcheck.yml·.env.factcheck.example이 10,000,000으로 채운다). 코드 기본값은 보수적으로 둔다.
   예약은 상한 기준이라(metering.reservation_for) 30문장 검수 하나가 1,736,000 토큰((30 + 1) × 56,000)을 예약한다.
   키별·전체 상한은 '그날 실제 사용량 + 검수 하나의 예약'보다 커야 큰 검수가 시작될 수 있다.
 - FACTCHECK_TRUSTED_PROXIES: X-Forwarded-For를 믿을 앞단 프록시 주소(쉼표, IP 또는 CIDR). 비어 있으면 XFF를 쓰지 않는다

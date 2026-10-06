@@ -7,9 +7,10 @@
 # - 밖에 여는 포트는 Caddy 80/443뿐이다. PostgreSQL·Qdrant·Ollama·앱 포트는 열지 않는다.
 # - 앱은 uvicorn 워커 1개만 쓴다: 검수 job이 프로세스 메모리에 있어(jobs.py) 워커가 둘 이상이면 폴링이 다른 워커로 가
 #   404가 난다. 늘리려면 job 저장소를 공유 저장소로 옮겨야 한다.
-# - uvicorn --proxy-headers는 쓰지 않는다: 접속 상대(request.client)가 Caddy로 남아야 앱의 신뢰 프록시 검사
-#   (TRUST_PROXY + FACTCHECK_TRUSTED_PROXIES = Caddy 고정 주소)가 X-Forwarded-For를 한 번만 읽는다. Caddy 2.7+는 들어온
-#   X-Forwarded-For를 믿지 않고 실제 접속 주소로 다시 쓴다.
+# - uvicorn의 프록시 헤더 처리는 끈다(--no-proxy-headers, uvicorn 기본은 켜짐·127.0.0.1만 신뢰): 접속 상대
+#   (request.client)가 Caddy로 남아야 앱의 신뢰 프록시 검사(TRUST_PROXY + FACTCHECK_TRUSTED_PROXIES = Caddy 고정 주소)가
+#   X-Forwarded-For를 한 번만 읽는다. Caddy 2.7+는 들어온 X-Forwarded-For를 믿지 않고 실제 접속 주소로 다시 쓴다.
+#   Caddy 주소(172.30.1.10)와 FACTCHECK_TRUSTED_PROXIES는 함께 바꾼다 — 한쪽만 바뀌면 모든 사용자가 한 익명 키로 묶인다.
 # - 판정 API 키는 파일(호스트 권한 0600)로 읽기 전용 마운트한다. 키 값은 환경변수·이미지·Git에 넣지 않는다.
 # - 데이터(xbrl_facts.json·corp_names.json)는 읽기 전용 마운트, 문단은 Qdrant 스냅샷으로 복원한다(docs/deploy/factcheck.md).
 # - 앱 healthcheck는 /api/health(준비 안 되면 503)다. Caddy는 앱 healthy를 기다리지 않는다 — 준비 안 됨일 때도 health
@@ -21,13 +22,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: ["uvicorn", "app.factcheck_main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+    command: ["uvicorn", "app.factcheck_main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1",
+              "--no-proxy-headers"]
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-factcheck}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.factcheck}@postgres:5432/${POSTGRES_DB:-factcheck}
       QDRANT_URL: http://qdrant:6333
       OLLAMA_BASE_URL: http://ollama:11434
-      EMBED_MODEL: nomic-embed-text
+      EMBED_MODEL: ${OLLAMA_EMBED_MODEL:?Set OLLAMA_EMBED_MODEL (the embedding model tag used for loading) in .env.factcheck}
       RUN_MIGRATIONS_ON_STARTUP: "true"
       COOKIE_SECURE: "true"
       TRUST_PROXY: "true"
@@ -36,7 +38,7 @@ services:
       FACTCHECK_DATA_DIR: /data/factcheck
       FACTCHECK_DAILY_ANON_RUNS: ${FACTCHECK_DAILY_ANON_RUNS:-3}
       FACTCHECK_DAILY_KEY_TOKENS: ${FACTCHECK_DAILY_KEY_TOKENS:-2500000}
-      FACTCHECK_DAILY_GLOBAL_TOKENS: ${FACTCHECK_DAILY_GLOBAL_TOKENS:-3000000}
+      FACTCHECK_DAILY_GLOBAL_TOKENS: ${FACTCHECK_DAILY_GLOBAL_TOKENS:-10000000}  # 1천만 토큰/일(2026-10-06 노아 결정)
       AWS_EC2_METADATA_DISABLED: "true"
     volumes:
       - ${TYPESAFE_KEY_FILE:?Set TYPESAFE_KEY_FILE to the host path of the TypeSafe JEV key file (mode 0600)}:/root/.config/typesafe/api_key:ro
@@ -95,16 +97,19 @@ services:
       retries: 20
 
   ollama:
-    image: ollama/ollama:latest  # 로컬(compose.portfolio.yml)과 같은 태그. 로컬에서 확인한 버전으로 고정을 권한다
+    # 이미지·모델 태그를 고정한다(적재 때와 같은 임베딩이어야 검색이 맞는다). 값은 로컬에서 확인해 .env.factcheck에 적는다
+    image: ollama/ollama:${OLLAMA_TAG:?Set OLLAMA_TAG (ollama/ollama image tag verified locally) in .env.factcheck}
     restart: unless-stopped
-    # CPU로 임베딩 모델(nomic-embed-text, 적재 때와 같은 모델)만 쓴다. 시작할 때 받아 둔다(이미 있으면 바로 끝난다)
-    entrypoint: ["/bin/sh", "-c", "ollama serve & pid=$$!; sleep 5; ollama pull nomic-embed-text; wait $$pid"]
+    environment:
+      OLLAMA_EMBED_MODEL: ${OLLAMA_EMBED_MODEL:?Set OLLAMA_EMBED_MODEL in .env.factcheck}
+    # CPU로 임베딩 모델만 쓴다. 시작할 때 받아 둔다(이미 있으면 바로 끝난다)
+    entrypoint: ["/bin/sh", "-c", "ollama serve & pid=$$!; sleep 5; ollama pull \"$${OLLAMA_EMBED_MODEL}\"; wait $$pid"]
     volumes:
       - ollama_models:/root/.ollama
     networks:
       - backend
     healthcheck:
-      test: ["CMD-SHELL", "ollama show nomic-embed-text >/dev/null 2>&1"]
+      test: ["CMD-SHELL", "ollama show \"$${OLLAMA_EMBED_MODEL}\" >/dev/null 2>&1"]
       interval: 10s
       timeout: 5s
       retries: 30
@@ -137,9 +142,11 @@ services:
 
 networks:
   edge:
+    # 서브넷이 서버의 다른 네트워크와 겹치면 subnet·ip_range·Caddy ipv4_address·FACTCHECK_TRUSTED_PROXIES를 함께 바꾼다
     ipam:
       config:
         - subnet: 172.30.1.0/24
+          ip_range: 172.30.1.128/25  # 동적 할당은 .128~ — Caddy 고정 주소(.10)와 겹치지 않는다
   backend: {}
 
 volumes:
