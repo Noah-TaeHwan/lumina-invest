@@ -210,3 +210,24 @@ def test_load_all_from_collect_output(tmp_path):
             "00126380-20260814003699-II-0", "00126380-20260814003699-III-0"} == set(rows)
     assert rows["00126380-20260730800123-CORR-0"]["is_correction"] is True
     assert rows["00126380-20260814003699-III-0"]["period"] == "2026H1"
+
+
+def test_load_all_prunes_documents_dropped_from_manifest(tmp_path):
+    """정정 공시가 나와 목록에서 밀린 정기보고서는 지우고, 목록에 없는 회사의 문서는 그대로 둔다."""
+    st = store.FactcheckStore(AsyncQdrantClient(location=":memory:"), FakeEmbed())
+    old = _doc(rcept_no="20260310002820", report_type="annual", period="2025", report_nm="사업보고서 (2025.12)")
+    other = _doc(corp=HYNIX, rcept_no="20260317000635", report_type="annual", period="2025")
+    _run(st.load_document(old, _passages(old, 2)))
+    _run(st.load_document(other, _passages(other, 1)))
+    sec = '<SECTION-1><TITLE>{}</TITLE><P>{} 문단</P></SECTION-1>'
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "N.xml").write_text(
+        "".join(sec.format(t, t) for t in ("I. 회사의 개요", "II. 사업의 내용", "III. 재무에 관한 사항")))
+    new = {"corp_code": SAMSUNG, "corp_name": "삼성전자", "rcept_no": "20260402000200", "report_type": "annual",
+           "report_nm": "[기재정정]사업보고서 (2025.12)", "period": "2025", "rcept_dt": "20260402",
+           "is_correction": True, "superseded": False, "path": "docs/N.xml"}
+    (tmp_path / "documents.json").write_text(json.dumps([new], ensure_ascii=False))
+    summary = _run(store.load_all(st, tmp_path))
+    assert summary["pruned"] == ["20260310002820"]
+    assert sorted({(p["corp_code"], p["rcept_no"]) for p in _all(st)}) == [
+        (SAMSUNG, "20260402000200"), (HYNIX, "20260317000635")]

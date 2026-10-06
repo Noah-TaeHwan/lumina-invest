@@ -200,9 +200,20 @@ def doc_meta(d: dict) -> DocMeta:
 
 
 async def load_all(st: FactcheckStore, data_dir: Path) -> dict:
-    """documents.json의 모든 문서를 적재한다. 기간을 못 읽은 문서·분해 실패 문서는 건너뛰고 센다."""
+    """documents.json의 모든 문서를 적재한다. 기간을 못 읽은 문서·분해 실패 문서는 건너뛰고 센다.
+
+    documents.json에 있는 회사의 적재 문서 중 목록에서 빠진 문서(예: 정정 공시가 나와 최종본에서 밀린 정기보고서)는
+    지운다(pruned). 목록에 없는 회사의 문서는 건드리지 않는다.
+    """
     docs = json.loads((Path(data_dir) / "documents.json").read_text())
-    summary = {"documents": 0, "passages": 0, "embedded": 0, "updated": 0, "removed": 0, "failed": []}
+    summary = {"documents": 0, "passages": 0, "embedded": 0, "updated": 0, "removed": 0, "pruned": [],
+               "failed": []}
+    listed = {(d["corp_code"], d["rcept_no"]) for d in docs}
+    for have in await st.documents():
+        key = (have["corp_code"], have["rcept_no"])
+        if have["corp_code"] in {c for c, _ in listed} and key not in listed:
+            await st.delete_document(*key)
+            summary["pruned"].append(have["rcept_no"])
     for d in docs:
         if not d.get("period") or d.get("parse_error"):
             summary["failed"].append({"rcept_no": d["rcept_no"], "error": d.get("parse_error", "no period")})
