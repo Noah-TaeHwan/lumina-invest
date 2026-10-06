@@ -239,6 +239,7 @@ macOS에서 채팅이 느리면 [채팅이 느릴 때(macOS)](PORTFOLIO_LOCAL.md
 
 ## 상세 자료
 
+- [프로젝트 개요 — 기획·동작 원리·구조·현재 상태 한 장 정리](docs/project-overview.md)
 - [로컬 실행 가이드](PORTFOLIO_LOCAL.md)
 - [JEV Gate Lab 설계](docs/superpowers/specs/2026-10-01-jev-gate-lab-design.md) · [판정력 리포트](docs/lab/stage1-predict-report.md)
 - [근거 판정 엔진 설계](docs/superpowers/specs/2026-10-02-evidence-assistant-design.md) · [Stage 1 리포트](docs/lab/evidence-stage1-report.md)
