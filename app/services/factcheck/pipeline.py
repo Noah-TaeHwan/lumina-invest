@@ -440,6 +440,8 @@ class FactcheckPipeline:
         partial = xr.status in ("match", "partial")
 
         def done(status: str, evidence: list, reason: str | None) -> SentenceResult:
+            if sc.period_assumed and status in ("supported", "contradicted"):  # 기간이 없어 최근 1년 보고서로 확인
+                reason = _join(reason, "period_assumed:recent")
             return SentenceResult(idx, sentence, category, status, evidence, xbrl, _join(reason, note))
 
         async with req:

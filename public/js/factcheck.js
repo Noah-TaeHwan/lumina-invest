@@ -28,6 +28,7 @@ const REASONS = {
   xbrl_mismatch: 'XBRL 재무 수치와 다름',
   period_ambiguous: '기간이 분명하지 않아 판정하지 않음',
   period_inherited: '앞 문장의 기간으로 해석',
+  'period_assumed:recent': '기간이 없어 최근 1년 보고서로 확인',
   no_passages: '검색 범위에서 관련 공시 문단을 찾지 못함',
   busy: '요청이 몰려 판정하지 못함(잠시 뒤 다시)',
   timeout: '판정이 시간 안에 끝나지 않음',
