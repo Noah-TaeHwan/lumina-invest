@@ -151,8 +151,28 @@ class FactcheckStore:
         if stale:
             await self.client.delete(self.collection, wait=True,
                                      points_selector=qm.PointIdsList(points=[point_id(x) for x in stale]))
+        await self._supersede_group(doc)
         return LoadResult(len(new), len(embed_ids), len(meta_ids), len(new) - len(embed_ids) - len(meta_ids),
                           len(stale))
+
+    async def _supersede_group(self, doc: DocMeta) -> None:
+        """같은 회사·종류·기간·연결/별도의 다른 접수번호 문서 중 가장 늦은 공시(접수일·접수번호)만 남기고 나머지를
+        superseded=True로 표시한다. 정정으로 공시 목록에서 밀린 옛 문서가 prune 없이 남아도 현재값으로 검색되지 않게."""
+        flt = qm.Filter(must=[qm.FieldCondition(key=k, match=qm.MatchValue(value=v)) for k, v in
+                              (("corp_code", doc.corp_code), ("report_type", doc.report_type), ("period", doc.period))])
+        docs: dict[str, dict] = {}
+        for p in await self._scroll(flt, ("rcept_no", "rcept_dt", "superseded", "fs_div")):
+            if p.get("fs_div") == doc.fs_div:
+                d = docs.setdefault(p["rcept_no"], {**p, "corp_code": doc.corp_code})
+                d["superseded"] = d.get("superseded") and p.get("superseded")  # 한 문단이라도 False면 아직 현재값
+        group = list(docs.values())
+        if len(group) < 2:
+            return
+        latest = max(group, key=lambda d: (d["rcept_dt"], d["rcept_no"]))
+        for d in group:
+            if d is not latest and not d.get("superseded"):
+                await self.client.set_payload(self.collection, payload={"superseded": True},
+                                              points=_doc_filter(d["corp_code"], d["rcept_no"]), wait=True)
 
     async def delete_document(self, corp_code: str, rcept_no: str) -> int:
         """문서 하나의 문단을 모두 지운다. 지운 수를 돌려준다."""
@@ -231,7 +251,8 @@ def doc_meta(d: dict) -> DocMeta:
 async def load_all(st: FactcheckStore, data_dir: Path, *, prune: bool = False) -> dict:
     """documents.json의 모든 문서를 적재한다. 기간을 못 읽은 문서·분해 실패 문서는 건너뛰고 센다.
 
-    - 실패한 문서에 예전 적재본이 있으면 지운다(cleared). 정정 공시를 이번에 못 읽었는데 옛 문단이 남아 현재값처럼
+    - 분해(파싱) 실패 문서에 예전 적재본이 있으면 지운다(cleared). 임베딩·저장 오류(stage='load')는 기존 적재본을
+      그대로 둔다(load_document는 모두 임베딩한 뒤 쓰므로 실패해도 기존본이 온전하다). 정정 공시를 이번에 못 읽었는데 옛 문단이 남아 현재값처럼
       검색되지 않게 한다.
     - prune=True면 documents.json에 있는 회사의 적재 문서 중 목록에서 빠진 문서(예: 정정 공시로 최종본에서 밀린
       정기보고서)를 지운다(pruned). 부분 목록으로 돌려 유효 문서를 지우는 일을 막으려고 기본은 끈다.
@@ -248,19 +269,25 @@ async def load_all(st: FactcheckStore, data_dir: Path, *, prune: bool = False) -
                 await st.delete_document(*key)
                 summary["pruned"].append(have["rcept_no"])
     for d in docs:
-        error = None
+        error = passages = None
         if not d.get("period") or d.get("parse_error"):
             error = d.get("parse_error", "no period")
         else:
             try:
-                res = await st.load_document(doc_meta(d), document_passages(data_dir, d))
+                passages = document_passages(data_dir, d)
             except ValueError as exc:
                 error = str(exc)
-        if error is not None:
-            summary["failed"].append({"rcept_no": d["rcept_no"], "error": error})
+        if error is not None:  # 분해(파싱) 실패: 옛 값이 현재값처럼 남지 않게 기존 적재본을 지운다
+            summary["failed"].append({"rcept_no": d["rcept_no"], "stage": "parse", "error": error})
             n = await st.delete_document(d["corp_code"], d["rcept_no"])
             if n:
                 summary["cleared"][d["rcept_no"]] = n
+            continue
+        try:
+            res = await st.load_document(doc_meta(d), passages)
+        except Exception as exc:  # noqa: BLE001 — 임베딩·저장 오류는 기존 적재본을 그대로 두고 센다
+            summary["failed"].append({"rcept_no": d["rcept_no"], "stage": "load",
+                                      "error": f"{type(exc).__name__}: {str(exc)[:200]}"})
             continue
         summary["documents"] += 1
         for k in ("passages", "embedded", "updated", "removed"):

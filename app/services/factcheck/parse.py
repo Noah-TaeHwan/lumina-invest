@@ -294,7 +294,7 @@ class PrelimCorrection:
 class PrelimReport:
     """잠정실적 공시 하나. period는 당기실적 기간(예: 2026Q2), original_date는 정정 대상 원 공시 제출일."""
 
-    title: str
+    title: str  # 공시 제목(본문 xforms_title, 없으면 HTML <title>). 둘 다 없으면 빈 문자열
     period: str
     period_start: str
     period_end: str
@@ -318,6 +318,10 @@ _ITEM = re.compile(r"-\s*(.+?)\((당해실적|누계실적)\)\s*$")
 _GROUP_TAG = re.compile(r"\(['’]?\d{2}\.\d[QH]\)\s*$")
 _BASES = ("당해실적", "누계실적")
 _EXPECTED_HEADER = ["구분", "당기실적", "전기실적", "전기대비", "전년동기실적", "전년동기대비"]
+# 구양식(2025년 10월 이전): 실적기간 표 없이 본표 머리 아래 줄에 기간 — "('25.2Q)" 또는 "(2023년 3분기)"
+_HEAD_PERIOD = re.compile(r"^\(\s*(?:['’]?(?P<yy>\d{2})\.(?P<q>[1-4])Q|(?P<yyyy>\d{4})\s*년\s*(?P<q2>[1-4])\s*분기)\s*\)$")
+_HEAD_KEYS = ("당기실적", "전기실적", "전년동기실적")
+_HTML_TITLE = re.compile(r"<title>(.*?)</title>", re.S | re.I)
 
 
 def _cell_lines(fragment: str) -> list[str]:
@@ -356,6 +360,44 @@ def _turn(s: str) -> str | None:
     return None if s in ("", "-") else s
 
 
+def _rate(s: str) -> tuple[Decimal | None, str | None]:
+    """구양식 증감률 칸: 숫자면 (값, None), '적자전환'·'흑자전환' 같은 글이면 (None, 그 글)."""
+    v = _num(s)
+    return (v, None) if v is not None else (None, _turn(s))
+
+
+def _quarter_span(year: int, q: int) -> tuple[str, str]:
+    """분기 단독 기간 (시작일, 종료일)."""
+    nxt = date(year + q // 4, 3 * q % 12 + 1, 1)
+    return date(year, 3 * q - 2, 1).isoformat(), date.fromordinal(nxt.toordinal() - 1).isoformat()
+
+
+def _head_periods(flat: list[list[str]]) -> dict[str, tuple[str, str]]:
+    """구양식: 본표 머리('구분' 줄) 바로 아래 기간 줄에서 당기·전기·전년동기 분기와 누계 기간을 만든다."""
+    i = next((i for i, f in enumerate(flat) if f and f[0] == "구분"), None)
+    if i is None or i + 1 >= len(flat):
+        return {}
+    cells = flat[i + 1]
+    ms = [_HEAD_PERIOD.match(c.strip()) for c in cells]
+    if len(cells) != 3 or not all(ms):
+        return {}
+    out: dict[str, tuple[str, str]] = {}
+    for key, m in zip(_HEAD_KEYS, ms, strict=True):
+        year = 2000 + int(m["yy"]) if m["yy"] else int(m["yyyy"])
+        out[key] = _quarter_span(year, int(m["q"] or m["q2"]))
+    cur, prior_y = out["당기실적"], out["전년동기실적"]
+    out["당기누계실적"] = (f"{cur[0][:4]}-01-01", cur[1])
+    out["전년동기누적실적"] = (f"{prior_y[0][:4]}-01-01", prior_y[1])
+    return out
+
+
+def _header_ok(header: list[str] | None) -> bool:
+    """신양식 머리글 그대로, 또는 구양식('전기대비증감율(%)')의 '증감율(%)'을 떼면 같은 머리글."""
+    if header is None:
+        return False
+    return [re.sub(r"증감율\(%\)$", "", h).strip() for h in header] == _EXPECTED_HEADER
+
+
 def _corrections(rows: list[list[list[str]]]) -> list[PrelimCorrection]:
     """'정정항목 | 정정전 | 정정후' 표에서 숫자 항목만 꺼낸다(줄 단위로 항목과 값을 맞춘다)."""
     out: list[PrelimCorrection] = []
@@ -390,10 +432,12 @@ def parse_prelim(doc: str) -> PrelimReport:
             if len(dates) == 2:
                 periods[f[0]] = tuple("-".join(d) for d in dates)  # type: ignore[assignment]
     if "당기실적" not in periods:
+        periods = _head_periods(flat)
+    if "당기실적" not in periods:
         raise ValueError("prelim: 실적기간(당기실적)을 찾지 못했다")
     start, end = periods["당기실적"]
     header = next((f for f in flat if f and f[0] == "구분"), None)
-    if header != _EXPECTED_HEADER:
+    if not _header_ok(header):
         raise ValueError(f"prelim: 예상과 다른 본표 머리글 {header}")
     unit = next((m.group(1) for f in flat for c in f if (m := _UNIT_CELL.search(c))), "")
     if unit not in UNIT_MULTIPLIER:
@@ -402,14 +446,20 @@ def parse_prelim(doc: str) -> PrelimReport:
     figures: list[PrelimFigure] = []
     account = ""
     for f in flat:
-        if len(f) == 9 and f[1] in _BASES:
+        if len(f) in (9, 7) and f[1] in _BASES:  # 신양식 9칸(전환 여부 칸 있음), 구양식 7칸
             account, basis, vals = f[0], f[1], f[2:]
-        elif len(f) == 8 and f[0] in _BASES and account:
+        elif len(f) in (8, 6) and f[0] in _BASES and account:
             basis, vals = f[0], f[1:]
         else:
             continue
-        nums = [_num(v) for v in vals]
-        fig = PrelimFigure(account, basis, nums[0], nums[1], nums[2], nums[4], nums[5], _turn(vals[3]), _turn(vals[6]))
+        if len(vals) == 7:
+            nums = [_num(v) for v in vals]
+            fig = PrelimFigure(account, basis, nums[0], nums[1], nums[2], nums[4], nums[5], _turn(vals[3]),
+                               _turn(vals[6]))
+        else:  # 구양식: 당기·전기·전기대비·전년동기·전년동기대비, 전환 여부는 증감률 칸에 글로 적힌다
+            (qoq, qoq_turn), (yoy, yoy_turn) = _rate(vals[2]), _rate(vals[4])
+            nums = [_num(vals[0]), _num(vals[1]), qoq, _num(vals[3]), yoy]
+            fig = PrelimFigure(account, basis, nums[0], nums[1], qoq, nums[3], yoy, qoq_turn, yoy_turn)
         if any(v is not None for v in nums):
             figures.append(fig)
     if not figures:
@@ -421,7 +471,10 @@ def parse_prelim(doc: str) -> PrelimReport:
     m = _KDATE.search(original or "")
     original_date = f"{int(m.group(1)):04d}{int(m.group(2)):02d}{int(m.group(3)):02d}" if m else None
     tm = re.search(r'class="xforms_title".*?<span[^>]*>(.*?)</span>', doc, re.S)
-    title = _text(tm.group(1)) if tm else "영업(잠정)실적(공정공시)"
+    hm = _HTML_TITLE.search(doc)
+    # <title>은 '회사/보고서명/(제출일)보고서명' 꼴이라 둘째 칸을 쓴다
+    html_title = _text(hm.group(1)).split("/") if hm else []
+    title = _text(tm.group(1)) if tm else (html_title[1] if len(html_title) > 1 else "".join(html_title))
     return PrelimReport(title=title, period=period_label(date.fromisoformat(start), date.fromisoformat(end)),
                         period_start=start, period_end=end, unit=unit, is_correction=is_correction,
                         original_date=original_date if is_correction else None, figures=figures,
@@ -445,7 +498,8 @@ def prelim_passages(corp_code: str, rcept_no: str, rep: PrelimReport) -> list[Pa
     적용하지 않으므로 값마다 단위가 있어야 '171.5조원'은 맞고 '171.50% 증가'는 틀리게 대조된다.
     """
     u = rep.unit
-    head = f"[{rep.title} {rep.period}({rep.period_start}~{rep.period_end})]"
+    name = rep.title or "영업(잠정)실적(공정공시)"
+    head = f"[{name} {rep.period}({rep.period_start}~{rep.period_end})]"
     by_acc: dict[str, list[str]] = {}
     for f in rep.figures:
         span = _span(rep, "당기누계실적") if f.basis == "누계실적" else ""
@@ -466,7 +520,7 @@ def prelim_passages(corp_code: str, rcept_no: str, rep: PrelimReport) -> list[Pa
             suf = "%" if "%" in c.group else u
             items.append(("para", f"{c.group.replace('(%)', '')} {c.item}({c.basis}): "
                                   f"정정 전 {_fmt(c.before, suf)} → 정정 후 {_fmt(c.after, suf)}"))
-        chunks = pack([("title", f"{rep.title} {rep.period} 정정 공시(원 공시 {orig} 제출분의 값을 정정)")] + items)
+        chunks = pack([("title", f"{name} {rep.period} 정정 공시(원 공시 {orig} 제출분의 값을 정정)")] + items)
         out += [Passage(passage_id(corp_code, rcept_no, CORR, i), corp_code, rcept_no, CORR, i, t)
                 for i, t in enumerate(chunks)]
     return out
@@ -478,16 +532,19 @@ PRELIM_ACCOUNTS = {"매출액": "ifrs-full_Revenue", "영업이익": "dart_Opera
 
 
 def prelim_fs_div(title: str) -> str:
-    """잠정실적 제목으로 연결(CFS)/별도(OFS) 기준. '연결'이 들면 CFS."""
+    """잠정실적 제목으로 연결(CFS)/별도(OFS) 기준. '연결'이 들면 CFS, 제목이 없으면 기본 연결(CFS)."""
+    if not title.strip():
+        return "CFS"
     return "CFS" if "연결" in title else "OFS"
 
 
 def prelim_facts(corp_code: str, rcept_no: str, rep: PrelimReport, *, rcept_dt: str | None = None,
-                 is_correction: bool = False, superseded: bool = False) -> list[dict]:
+                 is_correction: bool = False, superseded: bool = False, fs_div: str | None = None) -> list[dict]:
     """잠정실적의 당기 값을 XBRL 계약 행으로(report_type="preliminary").
 
     당해실적 = 당기 분기 단독(cumulative=False), 누계실적 = 연초부터 누적(cumulative=True, 1분기는 단독과 같아 뺀다).
     값은 정정 공시면 정정 후 값(본표)이다. 전기·전년동기 값은 정기 XBRL에 있으므로 넣지 않는다.
+    fs_div를 주면(collect가 공시 목록 보고서명으로 정한 manifest 값) 그 기준, 없으면 원문 제목으로 정한다(제목도 없으면 연결).
     rounding_unit은 공시 값의 마지막 자리(예: 171.50조원 → 10^10원)라 대조 쪽이 반올림 허용 폭으로 쓴다.
     """
     from app.services.factcheck.xbrl import ACCOUNTS, UNIT  # 순환 import 없음(xbrl은 parse를 import하지 않는다)
@@ -509,7 +566,7 @@ def prelim_facts(corp_code: str, rcept_no: str, rep: PrelimReport, *, rcept_dt: 
             "corp_code": corp_code,
             "period": period_label(date.fromisoformat(start), date.fromisoformat(end)),
             "period_start": start, "period_end": end, "value_kind": "duration", "cumulative": cumulative,
-            "fs_div": prelim_fs_div(rep.title), "account_id": acc, "account_nm": ACCOUNTS[acc],
+            "fs_div": fs_div or prelim_fs_div(rep.title), "account_id": acc, "account_nm": ACCOUNTS[acc],
             "amount": to_won(f.current, rep.unit), "currency": "KRW", "unit": UNIT,
             "rcept_no": rcept_no, "rcept_dt": rcept_dt or rcept_no[:8], "is_correction": bool(is_correction),
             "report_type": "preliminary", "superseded": bool(superseded),

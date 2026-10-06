@@ -256,3 +256,39 @@ def test_superseded_rows_ignored(facts):
     old = [dict(r, amount=r["amount"] - 10 ** 12, superseded=True, rcept_no="old") for r in prelim_rows()]
     rows = _without_half(facts) + prelim_rows() + old
     assert run("2026년 2분기 매출은 170.5조원이다.", rows).status == "mismatch"
+
+
+# ---- PR #56 후속 3번: 여러 계정 '각각'·계정 뒤 기간·별도 힌트 전파·superseded만 ----
+
+@pytest.mark.parametrize("text, status", [
+    ("2025년 매출과 영업이익은 각각 333.6조원, 43.6조원이다.", "match"),
+    ("2025년 매출과 영업이익은 각각 333.6조원, 50조원이다.", "mismatch"),
+    ("2025년 매출과 영업이익은 333.6조원, 43.6조원이다.", "match"),
+    ("2025년 매출과 영업이익은 각각 333.6조원이다.", "none"),          # 계정 2개·금액 1개: 짝을 모른다
+    ("2024년 매출 300.9조원, 매출은 2025년 333.6조원이다.", "match"),  # 계정 뒤·금액 앞 기간
+    ("매출은 2025년 333.6조원이다.", "match"),
+    ("2025년 별도 매출은 238조원, 영업이익은 43.6조원이다.", "match"),  # '별도'는 다음 절로 번지지 않는다
+    ("2025년 매출이 늘었고 영업이익은 43.6조원이다.", "match"),  # 이어지지 않은 계정은 묶지 않는다
+    ("2025년 매출, 영업이익은 각각 333.6조원, 43.6조원이다.", "match"),
+])
+def test_followup_amount_structures(text, status, facts):
+    assert run(text, facts).status == status
+
+
+def test_only_superseded_rows_is_unknown():
+    row = _row("ifrs-full_Revenue", 300 * T, period="2025")
+    row["superseded"] = True
+    assert run("2025년 매출은 100조원이다.", [row]).status == "unknown"
+
+
+def test_preliminary_negative_mwon_loss():
+    # SK하이닉스 2023년 3분기 잠정 영업손실 -1,791,961백만원(구양식 고정 자료)
+    from app.services.factcheck import parse
+    from conftest import FIXTURES
+    rep = parse.parse_prelim(parse.decode((FIXTURES / "prelim_skhynix_2023Q3_mwon_loss.xml").read_bytes()))
+    rows = parse.prelim_facts(HYNIX, "20231026000001", rep)
+    r = xbrl_check.check("2023년 3분기 영업손실은 1조 7,920억원이다.", rows, corp_code=HYNIX, as_of=AS_OF,
+                         names=NAMES)
+    assert r.status == "match"
+    r = xbrl_check.check("2023년 3분기 영업이익은 1.8조원이다.", rows, corp_code=HYNIX, as_of=AS_OF, names=NAMES)
+    assert r.status == "mismatch"

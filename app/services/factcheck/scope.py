@@ -42,6 +42,11 @@ class Period:
     n: int = 0
     cumulative: bool = False
 
+    def __post_init__(self) -> None:
+        ok = {"year": (0,), "quarter": (1, 2, 3, 4), "half": (1, 2)}.get(self.kind)
+        if ok is None or (self.kind != "year" and self.n not in ok):
+            raise ValueError(f"잘못된 기간: {self.kind} {self.n}")
+
     @property
     def label(self) -> str:
         """데이터 계약의 기간 표기: 'YYYY' / 'YYYYQn' / 'YYYYH1'(하반기는 'YYYYH2')."""
@@ -119,7 +124,8 @@ _YEAR_ABS = re.compile(
     rf"|{_APOS}(?P<y2>\d{{2}})\s*(?:년도|년)"
     rf"|(?<![\d,.'‘’])(?P<y2b>\d{{2}})년(?=\s*(?:[1-4]\s*분기|[1-4]Q|[상하]반기|[12]H|1\s*[~∼\-])))" + _SUB)
 _CUM = r"(?P<cum>\s*(?:누적|누계))?"
-_YQ = re.compile(rf"(?<![\w.])(?P<y>{_Y4})\s*(?P<k>[QH])(?P<n>[1-4])(?![\w])" + _CUM)  # 2026Q2·2026H1·2025 Q3
+# 2026Q2·2026H1·2025 Q3. 뒤에 한글 조사('2026Q2의')는 와도 되고, H는 1·2만('2026H3'은 기간이 아니다)
+_YQ = re.compile(rf"(?<![\w.])(?P<y>{_Y4})\s*(?:Q(?P<qn>[1-4])|H(?P<hn>[12]))(?![0-9A-Za-z])" + _CUM)
 _QYY = re.compile(rf"(?<![\w.])(?P<q>[1-4])Q(?:{_APOS}?(?P<yy>\d{{2}})|\s*(?P<yyyy>{_Y4}))(?![\d.])" + _CUM)
 _HYY = re.compile(rf"(?<![\w.])(?P<h>[12])H(?:{_APOS}?(?P<yy>\d{{2}})|\s*(?P<yyyy>{_Y4}))(?![\d.])")
 _YYDOT = re.compile(rf"(?<![\d.]){_APOS}?(?P<yy>{_Y4}|\d{{2}})\.\s*(?:(?P<q>[1-4])Q|(?P<h>[12])H)(?![A-Za-z])" + _CUM)
@@ -129,7 +135,8 @@ _YEAR_REL = re.compile(r"(?P<rel>올해|금년|당해\s*연도|이번\s*해|재�
 _SAME_Q_LAST_YEAR = re.compile(r"(?:전년|작년)\s*동기")
 _QUARTER_REL = re.compile(r"(?P<rel>이번\s*분기|최근\s*분기|당\s*분기|직전\s*분기|전\s*분기|지난\s*분기)")
 _BARE = re.compile(r"(?:(?P<c1>1)\s*[~∼\-]\s*(?P<c2>[2-4])\s*분기|(?<![\d.])(?P<q>[1-4])\s*분기"
-                   r"|(?<![\w.])(?P<qq>[1-4])Q(?![\w'‘’])|(?P<hk>[상하])반기|(?<![\w.])(?P<h>[12])H(?![\w'‘’]))"
+                   r"|(?<![\w.])(?P<qq>[1-4])Q(?![0-9A-Za-z'‘’])|(?P<hk>[상하])반기"
+                   r"|(?<![\w.])(?P<h>[12])H(?![0-9A-Za-z'‘’]))"
                    r"(?P<cum>\s*(?:누적|누계))?")
 _REL_YEAR_DELTA = {"올해": 0, "금년": 0, "당해연도": 0, "이번해": 0, "작년": -1, "지난해": -1, "전년도": -1, "전년": -1,
                    "재작년": -2, "지지난해": -2}
@@ -156,6 +163,16 @@ def _with_sub(year: int, m: re.Match) -> Period:
 
 def extract_periods(text: str, as_of: Period) -> list[PeriodMention]:
     """문장 속 주장 기간을 위치 순서로 돌려준다. 비교 기준('전년 대비')은 빼고, 상대·연도 없는 표현은 as_of로 푼다."""
+    return _scan(text, as_of)[0]
+
+
+def period_spans(text: str, as_of: Period) -> list[tuple[int, int]]:
+    """문장 속 모든 기간 표현 구간(주장 기간 + 비교 기준 '2024년 대비'·'전년 대비'). 숫자 확인 전에 지우는 데 쓴다."""
+    return _scan(text, as_of)[1]
+
+
+def _scan(text: str, as_of: Period) -> tuple[list[PeriodMention], list[tuple[int, int]]]:
+    """(주장 기간 목록, 모든 기간 표현 구간)."""
     taken: list[tuple[int, int]] = [(m.start(), m.end()) for m in _COMPARE.finditer(text)]
     out: list[PeriodMention] = []
 
@@ -172,8 +189,8 @@ def extract_periods(text: str, as_of: Period) -> list[PeriodMention]:
 
     for m in _YQ.finditer(text):
         if free(m):
-            y, n = int(m["y"]), int(m["n"])
-            add(m, quarter(y, n, m["cum"]) if m["k"] == "Q" else Period(y, "half", n))
+            y = int(m["y"])
+            add(m, quarter(y, int(m["qn"]), m["cum"]) if m["qn"] else Period(y, "half", int(m["hn"])))
     for m in _QYY.finditer(text):
         if free(m):
             add(m, quarter(_yy(m["yy"] or m["yyyy"]), int(m["q"]), m["cum"]))
@@ -220,7 +237,7 @@ def extract_periods(text: str, as_of: Period) -> list[PeriodMention]:
         if shifted:  # 연도 없는 분기가 기준 시점 뒤면 가장 최근의 그 분기(한 해 전) — 확신할 수 없는 해석
             p = Period(p.year - 1, p.kind, p.n, p.cumulative)
         add(m, p, relative=not before, shifted=shifted)
-    return sorted(out, key=lambda x: x.start)
+    return sorted(out, key=lambda x: x.start), sorted(taken)
 
 
 def _all_labels(year: int) -> list[Period]:
@@ -367,6 +384,7 @@ class Scope:
     search_periods: list[str] | None = None
     report_types: list[str] | None = None
     derived: str | None = None
+    period_spans: list[tuple[int, int]] = field(default_factory=list)  # 숫자 확인 전에 지울 기간 표현 구간(비교 기준 포함)
 
     @property
     def periods(self) -> list[Period]:
@@ -375,10 +393,10 @@ class Scope:
 
 def period_scope(text: str, as_of: Period) -> Scope:
     """범위 밖 판별 없이 검색 범위만 붙인 Scope(force_check용). 증감률이면 잠정실적만 검색한다."""
-    mentions = extract_periods(text, as_of)
+    mentions, spans = _scan(text, as_of)
     growth = derived_kind(text) == "growth" and bool(PRELIM_GROWTH_ACCOUNTS.search(text))
     return Scope("checked", None, mentions, search_periods(m.period for m in mentions),
-                 ["preliminary"] if growth else None, derived_kind(text))
+                 ["preliminary"] if growth else None, derived_kind(text), spans)
 
 
 def assess(text: str, corp_code: str, *, as_of: Period, names: Mapping[str, Iterable[str]] | CompanyIndex) -> Scope:
@@ -392,17 +410,17 @@ def assess(text: str, corp_code: str, *, as_of: Period, names: Mapping[str, Iter
         return Scope("out_of_scope", "market")
     if FORECAST.search(text):
         return Scope("out_of_scope", "forecast")
-    mentions = extract_periods(text, as_of)
+    mentions, spans = _scan(text, as_of)
     if any(m.period.end > as_of.end for m in mentions):
-        return Scope("out_of_scope", "future_period", mentions)
+        return Scope("out_of_scope", "future_period", mentions, period_spans=spans)
     sp = search_periods(m.period for m in mentions)
     kind = derived_kind(text)
     if kind == "growth":
         if PRELIM_GROWTH_ACCOUNTS.search(text):
-            return Scope("checked", "derived:growth", mentions, sp, ["preliminary"], kind)
-        return Scope("derived", "derived:growth_unsupported", mentions, derived=kind)
+            return Scope("checked", "derived:growth", mentions, sp, ["preliminary"], kind, spans)
+        return Scope("derived", "derived:growth_unsupported", mentions, derived=kind, period_spans=spans)
     if kind == "margin":
-        return Scope("checked", "derived:margin", mentions, sp, None, kind)
+        return Scope("checked", "derived:margin", mentions, sp, None, kind, spans)
     if kind == "other":
-        return Scope("derived", "derived:other", mentions, derived=kind)
-    return Scope("checked", None, mentions, sp)
+        return Scope("derived", "derived:other", mentions, derived=kind, period_spans=spans)
+    return Scope("checked", None, mentions, sp, period_spans=spans)

@@ -499,3 +499,30 @@ def test_build_pipeline_from_t1_corp_names(facts):
     assert (rs[0].category, rs[0].reason) == ("other_company", "other_company:SK")
     assert rs[1].category == "checked"
     assert (rs[2].category, rs[2].reason) == ("other_company", "other_company:SK하이닉스")  # 전각도 정규화
+
+
+# ---- PR #56 후속 1·3·4번 ----
+
+def test_shifted_period_matching_xbrl_is_not_supported(facts):
+    # as_of 2026H1의 '3분기'(2025Q3로 당김)가 XBRL과 맞아도 기간 해석을 확신할 수 없으므로 최대 ❔
+    p = make(FakeStore(default=[passage("3분기 매출액은 86.1조원이다.")]), FakeJev({"86.1": ("support", 0)}), facts)
+    (r,) = collect(p, "3분기 매출은 86.1조원이다.")
+    assert (r.status, r.reason) == ("no_evidence", "period_ambiguous")
+
+
+def test_force_check_other_company_numbers_not_refuted_by_selected_xbrl(facts):
+    jev = FakeJev()
+    p = make(FakeStore(default=[Q2_PASSAGE]), jev, facts)
+
+    async def go():
+        return [r async for r in p.check(SAMSUNG, "SK하이닉스의 2026년 2분기 매출은 79.3조원이다.", as_of="2026H1",
+                                         force_check=True)]
+    (r,) = asyncio.run(go())
+    assert r.category == "other_company" and r.status != "contradicted" and r.xbrl is None
+    assert len(jev.calls) == 1
+
+
+def test_comparison_period_digits_removed_before_number_check():
+    p = make(FakeStore(default=[passage("매출액은 333.6조원으로 10.9% 늘었다.")]), FakeJev({"대비": ("support", 0)}))
+    (r,) = collect(p, "2025년 매출은 2024년 대비 10.9% 늘어 333.6조원이다.")
+    assert r.status == "supported"

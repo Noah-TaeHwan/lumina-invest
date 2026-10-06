@@ -295,3 +295,77 @@ def test_load_all_clears_previous_load_of_document_that_failed_now(tmp_path):
     assert [f["rcept_no"] for f in summary["failed"]] == ["20260730800123"]
     assert summary["cleared"] == {"20260730800123": 2}
     assert _all(st) == []
+
+
+# ── PR #55 마지막 코멘트 반영(후속) ─────────────────────────────────────────────
+
+_SEC = '<SECTION-1><TITLE>{}</TITLE><P>{}</P></SECTION-1>'
+
+
+def _regular_xml(body: str) -> str:
+    return "".join(_SEC.format(t, f"{t} {body}") for t in ("I. 회사의 개요", "II. 사업의 내용", "III. 재무에 관한 사항"))
+
+
+def test_load_all_keeps_previous_load_when_embedding_fails(tmp_path):
+    """임베딩·저장 오류는 기존 적재본을 지우지 않는다(파싱 실패만 기존본을 정리한다)."""
+    class BadEmbed(FakeEmbed):
+        async def __call__(self, text):
+            if "새 본문" in text:
+                raise ValueError("embedding: invalid response")
+            return await super().__call__(text)
+
+    st = store.FactcheckStore(AsyncQdrantClient(location=":memory:"), BadEmbed())
+    old = _doc(rcept_no="20260814003699", report_type="half", period="2026H1")
+    _run(st.load_document(old, _passages(old, 2)))
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "R.xml").write_text(_regular_xml("새 본문"))
+    d = {"corp_code": SAMSUNG, "corp_name": "삼성전자", "rcept_no": old.rcept_no, "report_type": "half",
+         "report_nm": "반기보고서 (2026.06)", "period": "2026H1", "rcept_dt": "20260814", "is_correction": False,
+         "superseded": False, "path": "docs/R.xml"}
+    (tmp_path / "documents.json").write_text(json.dumps([d], ensure_ascii=False))
+    summary = _run(store.load_all(st, tmp_path))
+    assert [(f["rcept_no"], f["stage"]) for f in summary["failed"]] == [(old.rcept_no, "load")]
+    assert summary["cleared"] == {}
+    assert len(_all(st)) == 2
+
+
+def test_load_all_parse_failure_is_marked_parse_stage(tmp_path):
+    st = store.FactcheckStore(AsyncQdrantClient(location=":memory:"), FakeEmbed())
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "X.xml").write_text(_SEC.format("II. 사업의 내용", "II"))
+    d = {"corp_code": SAMSUNG, "rcept_no": "20260515001111", "report_type": "quarter", "report_nm": "x",
+         "period": "2026Q1", "rcept_dt": "20260515", "path": "docs/X.xml"}
+    (tmp_path / "documents.json").write_text(json.dumps([d], ensure_ascii=False))
+    assert [f["stage"] for f in _run(store.load_all(st, tmp_path))["failed"]] == ["parse"]
+
+
+def test_loading_correction_marks_older_same_period_document_superseded(tmp_path):
+    """정정으로 목록에서 밀린 옛 정기보고서(prune 없이 남은 것)는 적재 때 superseded로 표시해 검색에서 뺀다."""
+    q = "사업 내용"
+    emb = FakeEmbed({store.QUERY_PREFIX + q: np.random.default_rng(5).normal(size=DIM).tolist()})
+    st = store.FactcheckStore(AsyncQdrantClient(location=":memory:"), emb)
+    old = _doc(rcept_no="20260310002820", report_type="annual", period="2025", report_nm="사업보고서 (2025.12)")
+    _run(st.load_document(old, _passages(old, 2)))
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "N.xml").write_text(_regular_xml("정정본"))
+    new = {"corp_code": SAMSUNG, "corp_name": "삼성전자", "rcept_no": "20260402000200", "report_type": "annual",
+           "report_nm": "[기재정정]사업보고서 (2025.12)", "period": "2025", "rcept_dt": "20260402",
+           "is_correction": True, "superseded": False, "path": "docs/N.xml"}
+    (tmp_path / "documents.json").write_text(json.dumps([new], ensure_ascii=False))
+    _run(store.load_all(st, tmp_path))
+    flags = {(p["rcept_no"], p["superseded"]) for p in _all(st)}
+    assert flags == {("20260310002820", True), ("20260402000200", False)}
+    assert {h["rcept_no"] for h in _run(st.search(SAMSUNG, q, k=10))} == {"20260402000200"}
+
+
+def test_loading_older_document_after_newer_marks_the_older_one():
+    st = store.FactcheckStore(AsyncQdrantClient(location=":memory:"), FakeEmbed())
+    new = _doc(rcept_no="20260730800123", report_type="preliminary", period="2026Q2", fs_div="CFS")
+    old = _doc(rcept_no="20260707800001", report_type="preliminary", period="2026Q2", fs_div="CFS")
+    other_fs = _doc(rcept_no="20260707800002", report_type="preliminary", period="2026Q2", fs_div="OFS")
+    other_period = _doc(rcept_no="20260407800001", report_type="preliminary", period="2026Q1", fs_div="CFS")
+    for d in (new, old, other_fs, other_period):
+        _run(st.load_document(d, _passages(d, 1)))
+    flags = {p["rcept_no"]: p["superseded"] for p in _all(st)}
+    assert flags == {"20260730800123": False, "20260707800001": True, "20260707800002": False,
+                     "20260407800001": False}
