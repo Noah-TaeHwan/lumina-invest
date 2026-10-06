@@ -471,6 +471,42 @@ def is_list_lead(text: str) -> bool:
     return not re.search(r"\d", text) and bool(_LIST_LEAD.search(text))
 
 
+# 제목: 앞부분이 '(회사명) (기간) (리뷰·점검·…)'이고 ':'·'：'·'—'·'–'로 나뉜 문장, 또는 끝 문장부호·서술어미 없는 짧은 제목 줄
+_HEADER_SPLIT = re.compile(r"\s*[:：—–]\s*")
+_HEADER_KIND = re.compile(r"(?:리뷰|점검|분석|프리뷰|코멘트|요약|정리)$")
+_HEADER_MAX = 40  # 짧은 제목 줄의 최대 글자 수
+# 글 소개: '다음은·아래는 … (메모·초안·정리·답변·요약)(이다·입니다)'
+_INTRO = re.compile(r"^\s*(?:다음은|아래는)\s.*(?:메모|초안|정리|답변|요약)(?:이다|입니다|다)\s*[.!]?\s*$")
+
+
+def _has_amount_digit(text: str, as_of: Period) -> bool:
+    """기간 표현('2026년 2분기')의 숫자를 빼고도 숫자가 남는가(금액·비율 숫자)."""
+    chars = list(text)
+    for a, b in period_spans(text, as_of):
+        chars[a:b] = " " * (b - a)
+    return bool(re.search(r"\d", "".join(chars)))
+
+
+def is_header(text: str, as_of: Period, names: Mapping[str, Iterable[str]] | CompanyIndex,
+              corp_code: str | None = None) -> bool:
+    """리포트 제목 줄인가(금액 숫자 없음). ① 앞부분이 기간·회사명을 담고 '리뷰·점검·분석·프리뷰·코멘트·요약·정리'로
+    끝나며 ':'·'：'·'—'·'–'로 나뉜 문장, ② 같은 꼴로 끝나는 짧은 줄(끝 문장부호·서술어미 없음)."""
+    if _has_amount_digit(text, as_of):
+        return False
+    parts = _HEADER_SPLIT.split(text.strip(), maxsplit=1)
+    head = parts[0].strip()
+    if not _HEADER_KIND.search(head):
+        return False
+    if not (extract_periods(head, as_of) or company_mentions(head, names, corp_code)):
+        return False
+    return len(parts) == 2 or len(head) <= _HEADER_MAX  # 나뉘지 않았으면 짧은 줄만(키워드로 끝나 서술어미가 없다)
+
+
+def is_intro(text: str, as_of: Period) -> bool:
+    """글을 여는 소개 문장인가('다음은 2분기 실적에 대해 내가 정리한 메모다.', 금액 숫자 없음)."""
+    return not _has_amount_digit(text, as_of) and bool(_INTRO.search(text))
+
+
 def relative_units(text: str) -> set[str]:
     """문장 속 상대 기간 표현의 단위: quarter('같은 분기·당분기·동 분기·해당 분기·이번 분기') / half('반기') /
     year('해·연도·회계연도') / any('같은 기간·동 기간·해당 기간'). 앞 문장 기간을 이어받을 때 단위를 맞추는 데 쓴다."""

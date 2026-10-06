@@ -66,7 +66,8 @@ const REASONS = {
 const REASON_DETAIL = {
   'not_claim:question': '질문 문장',
   'not_claim:phrase': '자료 언급·답변 불가 표현',
-  'not_claim:lead': '목록 머리말',
+  'not_claim:lead': '목록 머리말·글 소개',
+  'not_claim:header': '제목',
   'not_claim:short': '짧은 문장',
   'derived:growth': '증감률(잠정실적으로 대조)',
   'derived:growth_unsupported': '증감률(대조할 수 없는 형태)',

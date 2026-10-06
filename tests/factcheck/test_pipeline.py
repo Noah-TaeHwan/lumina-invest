@@ -1388,3 +1388,36 @@ def test_from_to_own_period_on_b_disables_base_rule():
     r = _from_check("2025년 2분기 연결 영업이익은 전 분기 6.7조원에서 2025년 1분기 4.7조원으로 집계됐다.")
     assert r.status != "supported"
     assert (r.status, r.xbrl["period"]) == ("contradicted", "2025Q1")  # main처럼 B를 2025년 1분기와 대조
+
+
+# ---- 제목·글 소개 문장은 건너뛴다. 뒤 본문 문장의 기간·회사 상속은 그대로 ----
+
+HDR_NAMES = {**NAMES, "01515323": ["LG에너지솔루션"], "00164742": ["현대차"]}
+
+
+@pytest.mark.parametrize("text, reason", [
+    ("LG에너지솔루션 2026년 3분기 프리뷰: 북미 수요가 바닥을 지났다.", "not_claim:header"),
+    ("현대차 2025년 연간 실적 점검 — 환율이 이익을 지켰다", "not_claim:header"),
+    ("다음은 2분기 실적에 대해 내가 정리한 메모다.", "not_claim:lead"),
+    ("아래는 고객 질문에 대한 답변 초안입니다.", "not_claim:lead"),
+])
+def test_header_and_intro_sentences_skipped(text, reason):
+    (r,) = _run_names(text, HDR_NAMES, SS_FACTS).values()
+    assert (r.status, r.category, r.reason) == ("skipped", "opinion", reason)
+
+
+def test_header_keeps_period_inheritance_for_body():
+    rs = _run_names("삼성전자 2025년 2분기 실적 리뷰: 메모리가 회복했다.\n같은 분기 연결 영업이익은 4.7조원이다.",
+                    HDR_NAMES, SS_FACTS)
+    assert (rs[0].status, rs[0].reason) == ("skipped", "not_claim:header")
+    assert (rs[1].status, rs[1].reason) == ("supported", "xbrl_exact,period_inherited:2025Q2")
+
+
+@pytest.mark.parametrize("title, other", [
+    ("LG에너지솔루션 2025년 2분기 프리뷰: 북미 수요가 바닥을 지났다.", "LG에너지솔루션"),
+    ("현대차 2025년 연간 실적 점검 — 환율이 이익을 지켰다", "현대차"),
+])
+def test_header_keeps_company_context_for_body(title, other):
+    # 지금 동작 고정: 다른 회사 이름 + 기간 숫자가 있는 제목 줄은 회사 문맥 기준 문장이다
+    rs = _run_names(f"{title}\n2025년 2분기 연결 영업이익은 4.7조원이다.", HDR_NAMES, SS_FACTS)
+    assert (rs[1].status, rs[1].reason) == ("skipped", f"other_company_inherited:{other}")
