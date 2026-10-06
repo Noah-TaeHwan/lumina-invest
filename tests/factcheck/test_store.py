@@ -227,7 +227,71 @@ def test_load_all_prunes_documents_dropped_from_manifest(tmp_path):
            "report_nm": "[기재정정]사업보고서 (2025.12)", "period": "2025", "rcept_dt": "20260402",
            "is_correction": True, "superseded": False, "path": "docs/N.xml"}
     (tmp_path / "documents.json").write_text(json.dumps([new], ensure_ascii=False))
-    summary = _run(store.load_all(st, tmp_path))
+    assert _run(store.load_all(st, tmp_path))["pruned"] == []  # 기본은 정리하지 않는다
+    assert len({p["rcept_no"] for p in _all(st)}) == 3
+    summary = _run(store.load_all(st, tmp_path, prune=True))
     assert summary["pruned"] == ["20260310002820"]
     assert sorted({(p["corp_code"], p["rcept_no"]) for p in _all(st)}) == [
         (SAMSUNG, "20260402000200"), (HYNIX, "20260317000635")]
+
+
+# ── PR #55 검수 반영 ──────────────────────────────────────────────────────────
+
+def _history_store():
+    q = "2분기 매출액은?"
+    emb = FakeEmbed({store.QUERY_PREFIX + q: np.random.default_rng(3).normal(size=DIM).tolist()})
+    st = store.FactcheckStore(AsyncQdrantClient(location=":memory:"), emb)
+    orig = _doc(rcept_no="20260707800001", report_type="preliminary", period="2026Q2", superseded=True,
+                fs_div="CFS")
+    corr = _doc(rcept_no="20260730800123", report_type="preliminary", period="2026Q2", is_correction=True,
+                fs_div="CFS")
+    _run(st.load_document(orig, _passages(orig, 2, section="PRELIM")))
+    _run(st.load_document(corr, _passages(corr, 2, section="PRELIM") + [
+        Passage(store.passage_id(SAMSUNG, corr.rcept_no, "CORR", 0), SAMSUNG, corr.rcept_no, "CORR", 0,
+                "정정 전 171.00 → 정정 후 171.50")]))
+    return st, q
+
+
+def test_search_excludes_superseded_and_correction_history_by_default():
+    st, q = _history_store()
+    hits = _run(st.search(SAMSUNG, q, k=10))
+    assert {(h["rcept_no"], h["section"]) for h in hits} == {("20260730800123", "PRELIM")}
+    hist = _run(st.search(SAMSUNG, q, k=10, include_history=True))
+    assert {(h["rcept_no"], h["section"]) for h in hist} == {
+        ("20260707800001", "PRELIM"), ("20260730800123", "PRELIM"), ("20260730800123", "CORR")}
+    assert {h["fs_div"] for h in hist} == {"CFS"}
+
+
+def test_latest_period_skips_superseded_documents():
+    st = store.FactcheckStore(AsyncQdrantClient(location=":memory:"), FakeEmbed())
+    assert _run(st.latest_period(SAMSUNG)) is None
+    for d in (_doc(rcept_no="20260310002820", report_type="annual", period="2025"),
+              _doc(rcept_no="20260515001111", report_type="quarter", period="2026Q1"),
+              _doc(rcept_no="20260814003699", report_type="half", period="2026H1"),
+              _doc(rcept_no="20261008800001", report_type="preliminary", period="2026Q3", superseded=True),
+              _doc(corp=HYNIX, rcept_no="20261020800002", report_type="preliminary", period="2026Q4")):
+        _run(st.load_document(d, _passages(d, 1)))
+    assert _run(st.latest_period(SAMSUNG)) == "2026H1"
+    later = _doc(rcept_no="20261009800003", report_type="preliminary", period="2026Q3")
+    _run(st.load_document(later, _passages(later, 1)))
+    assert _run(st.latest_period(SAMSUNG)) == "2026Q3"
+    assert store.period_key("2025") > store.period_key("2025Q3") > store.period_key("2025H1") \
+        == store.period_key("2025Q2") > store.period_key("2025Q1")
+
+
+def test_load_all_clears_previous_load_of_document_that_failed_now(tmp_path):
+    """이번에 분해 실패한 문서의 예전 적재본은 지운다(옛 값이 현재값처럼 남지 않게)."""
+    st = store.FactcheckStore(AsyncQdrantClient(location=":memory:"), FakeEmbed())
+    old = _doc(rcept_no="20260730800123", report_type="preliminary", period="2026Q2", is_correction=True)
+    _run(st.load_document(old, _passages(old, 2, section="PRELIM")))
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "P.xml").write_text("<html>바뀐 양식</html>")
+    doc = {"corp_code": SAMSUNG, "corp_name": "삼성전자", "rcept_no": "20260730800123",
+           "report_type": "preliminary", "report_nm": "[기재정정]연결재무제표기준영업(잠정)실적(공정공시)",
+           "period": "2026Q2", "rcept_dt": "20260730", "is_correction": True, "superseded": False,
+           "fs_div": "CFS", "path": "docs/P.xml"}
+    (tmp_path / "documents.json").write_text(json.dumps([doc], ensure_ascii=False))
+    summary = _run(store.load_all(st, tmp_path))
+    assert [f["rcept_no"] for f in summary["failed"]] == ["20260730800123"]
+    assert summary["cleared"] == {"20260730800123": 2}
+    assert _all(st) == []

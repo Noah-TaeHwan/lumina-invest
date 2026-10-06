@@ -8,12 +8,14 @@
   다른 문서는 건드리지 않는다. 본문(sha256)이 같고 메타만 바뀌면(예: superseded) 임베딩 없이 payload만 고친다.
   임베딩이 모두 끝난 뒤에 쓰므로 임베딩 도중 실패하면 이전 적재가 그대로 남는다.
 - payload(설계 데이터 계약): passage_id·corp_code·rcept_no·report_type·report_nm·period·rcept_dt·section·idx·text.
-  확장: sha256(재적재 건너뛰기), is_correction(정정 공시), superseded(같은 기간에 더 늦은 공시가 있음), corp_name.
+  확장: sha256(재적재 건너뛰기), is_correction(정정 공시), superseded(같은 기간에 더 늦은 공시가 있음), corp_name,
+  fs_div(잠정실적의 연결/별도 기준).
+- 검색은 기본으로 현재값만 본다(superseded 문서·CORR 이력 문단 제외, include_history=True면 포함).
 - payload 색인: corp_code·rcept_no·period·report_type(keyword).
 - 임베딩은 근거 모드와 같은 nomic-embed-text 문서/질문 접두어. 클라이언트(AsyncQdrantClient)·임베딩은 주입한다.
 
 CLI(로컬 전용, Ollama·Qdrant 필요):
-    python -m app.services.factcheck.store load [--data lab/data/factcheck]   # collect 산출을 문단으로 적재
+    python -m app.services.factcheck.store load [--data lab/data/factcheck] [--prune]  # collect 산출을 적재
     python -m app.services.factcheck.store snapshot                           # 컬렉션 스냅샷 생성
 """
 from __future__ import annotations
@@ -43,9 +45,10 @@ K = 8
 UPSERT_BATCH = 64
 _SCROLL_PAGE = 256
 PAYLOAD_FIELDS = ("passage_id", "corp_code", "corp_name", "rcept_no", "report_type", "report_nm", "period",
-                  "rcept_dt", "section", "idx", "text", "sha256", "is_correction", "superseded")
+                  "rcept_dt", "section", "idx", "text", "sha256", "is_correction", "superseded", "fs_div")
 SEARCH_FIELDS = ("passage_id", "corp_code", "rcept_no", "report_type", "report_nm", "period", "rcept_dt",
-                 "section", "idx", "text", "is_correction", "superseded")
+                 "section", "idx", "text", "is_correction", "superseded", "fs_div")
+HISTORY_SECTIONS = ("CORR",)  # 정정 전/후 이력 문단(기본 검색에서 뺀다)
 
 
 @dataclass(frozen=True)
@@ -61,6 +64,7 @@ class DocMeta:
     is_correction: bool = False
     superseded: bool = False
     corp_name: str = ""
+    fs_div: str | None = None  # 잠정실적의 연결(CFS)/별도(OFS) 기준. 정기보고서는 None(한 문서에 둘 다 있음)
 
 
 @dataclass(frozen=True)
@@ -74,6 +78,12 @@ class LoadResult:
     removed: int
 
 
+def period_key(period: str) -> tuple[int, int]:
+    """기간 이름의 순서 키(끝나는 시점): 'YYYYQ1'(1) < 'YYYYH1'='YYYYQ2'(2) < 'YYYYQ3'(3) < 'YYYYQ4'='YYYY'(4)."""
+    y, rest = int(period[:4]), period[4:]
+    return y, {"": 4, "H1": 2}.get(rest) or int(rest[1:])
+
+
 def _doc_filter(corp_code: str, rcept_no: str) -> qm.Filter:
     return qm.Filter(must=[qm.FieldCondition(key="corp_code", match=qm.MatchValue(value=corp_code)),
                            qm.FieldCondition(key="rcept_no", match=qm.MatchValue(value=rcept_no))])
@@ -83,7 +93,7 @@ def _payload(doc: DocMeta, p: Passage) -> dict:
     return {"passage_id": p.id, "corp_code": doc.corp_code, "corp_name": doc.corp_name, "rcept_no": doc.rcept_no,
             "report_type": doc.report_type, "report_nm": doc.report_nm, "period": doc.period,
             "rcept_dt": doc.rcept_dt, "section": p.section, "idx": p.idx, "text": p.text, "sha256": p.sha256,
-            "is_correction": doc.is_correction, "superseded": doc.superseded}
+            "is_correction": doc.is_correction, "superseded": doc.superseded, "fs_div": doc.fs_div}
 
 
 class FactcheckStore:
@@ -153,15 +163,23 @@ class FactcheckStore:
         return len(ids)
 
     async def search(self, corp_code: str, query: str, k: int = K, *, periods: Sequence[str] | None = None,
-                     report_types: Sequence[str] | None = None) -> list[dict]:
-        """질문 임베딩과 cosine 상위 k개 문단. 회사는 필수, 기간·보고서 종류는 고르면 그 안에서만."""
+                     report_types: Sequence[str] | None = None, include_history: bool = False) -> list[dict]:
+        """질문 임베딩과 cosine 상위 k개 문단. 회사는 필수, 기간·보고서 종류는 고르면 그 안에서만.
+
+        기본은 현재값만: 더 늦은 공시로 대체된 문서(superseded)와 정정 전/후 이력 문단(CORR)을 뺀다.
+        이력까지 보려면 include_history=True.
+        """
         must = [qm.FieldCondition(key="corp_code", match=qm.MatchValue(value=corp_code))]
+        must_not = [] if include_history else [
+            qm.FieldCondition(key="superseded", match=qm.MatchValue(value=True)),
+            qm.FieldCondition(key="section", match=qm.MatchAny(any=list(HISTORY_SECTIONS)))]
         if periods:
             must.append(qm.FieldCondition(key="period", match=qm.MatchAny(any=list(periods))))
         if report_types:
             must.append(qm.FieldCondition(key="report_type", match=qm.MatchAny(any=list(report_types))))
         qv = list(await self.embed(QUERY_PREFIX + query))
-        res = await self.client.query_points(self.collection, query=qv, query_filter=qm.Filter(must=must),
+        res = await self.client.query_points(self.collection, query=qv,
+                                             query_filter=qm.Filter(must=must, must_not=must_not or None),
                                              limit=k, with_payload=True, with_vectors=False)
         return [{**{f: p.payload.get(f) for f in SEARCH_FIELDS}, "score": p.score} for p in res.points]
 
@@ -169,10 +187,21 @@ class FactcheckStore:
         """적재된 문서 목록(회사·접수번호 순): 메타와 문단 수."""
         out: dict[tuple[str, str], dict] = {}
         for p in await self._scroll(None, ("corp_code", "rcept_no", "report_type", "report_nm", "period",
-                                           "rcept_dt", "is_correction", "superseded")):
+                                           "rcept_dt", "is_correction", "superseded", "fs_div")):
             d = out.setdefault((p["corp_code"], p["rcept_no"]), {**p, "passages": 0})
             d["passages"] += 1
         return [out[k] for k in sorted(out)]
+
+    async def latest_period(self, corp_code: str) -> str | None:
+        """그 회사의 대체되지 않은 문서(잠정실적 포함) 중 가장 늦은 기간. 없으면 None.
+
+        같은 시점에 끝나는 기간(반기 'YYYYH1'와 잠정실적 'YYYYQ2')은 접수일이 늦은 쪽을 돌려준다.
+        """
+        docs = [d for d in await self.documents() if d["corp_code"] == corp_code and not d.get("superseded")
+                and d.get("period")]
+        if not docs:
+            return None
+        return max(docs, key=lambda d: (period_key(d["period"]), d["rcept_dt"], d["rcept_no"]))["period"]
 
     async def snapshot(self) -> str:
         """컬렉션 스냅샷을 만들고 이름을 돌려준다(서버 모드 Qdrant에서만)."""
@@ -199,29 +228,39 @@ def doc_meta(d: dict) -> DocMeta:
     return DocMeta(**{k: d[k] for k in DocMeta.__dataclass_fields__ if k in d})
 
 
-async def load_all(st: FactcheckStore, data_dir: Path) -> dict:
+async def load_all(st: FactcheckStore, data_dir: Path, *, prune: bool = False) -> dict:
     """documents.json의 모든 문서를 적재한다. 기간을 못 읽은 문서·분해 실패 문서는 건너뛰고 센다.
 
-    documents.json에 있는 회사의 적재 문서 중 목록에서 빠진 문서(예: 정정 공시가 나와 최종본에서 밀린 정기보고서)는
-    지운다(pruned). 목록에 없는 회사의 문서는 건드리지 않는다.
+    - 실패한 문서에 예전 적재본이 있으면 지운다(cleared). 정정 공시를 이번에 못 읽었는데 옛 문단이 남아 현재값처럼
+      검색되지 않게 한다.
+    - prune=True면 documents.json에 있는 회사의 적재 문서 중 목록에서 빠진 문서(예: 정정 공시로 최종본에서 밀린
+      정기보고서)를 지운다(pruned). 부분 목록으로 돌려 유효 문서를 지우는 일을 막으려고 기본은 끈다.
     """
     docs = json.loads((Path(data_dir) / "documents.json").read_text())
     summary = {"documents": 0, "passages": 0, "embedded": 0, "updated": 0, "removed": 0, "pruned": [],
-               "failed": []}
-    listed = {(d["corp_code"], d["rcept_no"]) for d in docs}
-    for have in await st.documents():
-        key = (have["corp_code"], have["rcept_no"])
-        if have["corp_code"] in {c for c, _ in listed} and key not in listed:
-            await st.delete_document(*key)
-            summary["pruned"].append(have["rcept_no"])
+               "cleared": {}, "failed": []}
+    if prune:
+        listed = {(d["corp_code"], d["rcept_no"]) for d in docs}
+        corps = {c for c, _ in listed}
+        for have in await st.documents():
+            key = (have["corp_code"], have["rcept_no"])
+            if have["corp_code"] in corps and key not in listed:
+                await st.delete_document(*key)
+                summary["pruned"].append(have["rcept_no"])
     for d in docs:
+        error = None
         if not d.get("period") or d.get("parse_error"):
-            summary["failed"].append({"rcept_no": d["rcept_no"], "error": d.get("parse_error", "no period")})
-            continue
-        try:
-            res = await st.load_document(doc_meta(d), document_passages(data_dir, d))
-        except ValueError as exc:
-            summary["failed"].append({"rcept_no": d["rcept_no"], "error": str(exc)})
+            error = d.get("parse_error", "no period")
+        else:
+            try:
+                res = await st.load_document(doc_meta(d), document_passages(data_dir, d))
+            except ValueError as exc:
+                error = str(exc)
+        if error is not None:
+            summary["failed"].append({"rcept_no": d["rcept_no"], "error": error})
+            n = await st.delete_document(d["corp_code"], d["rcept_no"])
+            if n:
+                summary["cleared"][d["rcept_no"]] = n
             continue
         summary["documents"] += 1
         for k in ("passages", "embedded", "updated", "removed"):
@@ -244,7 +283,7 @@ async def _amain(args) -> int:
     st = default_store()
     try:
         if args.cmd == "load":
-            summary = await load_all(st, args.data)
+            summary = await load_all(st, args.data, prune=args.prune)
             summary["collection_documents"] = len(await st.documents())
             print(json.dumps(summary, ensure_ascii=False))
             return 1 if summary["failed"] else 0
@@ -260,6 +299,8 @@ def main(argv: list[str] | None = None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     ld = sub.add_parser("load", help="collect 산출(documents.json·docs/)을 문단으로 적재")
     ld.add_argument("--data", type=Path, default=Path("lab/data/factcheck"))
+    ld.add_argument("--prune", action="store_true",
+                    help="목록(documents.json)에 있는 회사의 적재 문서 중 목록에서 빠진 문서를 지운다")
     sub.add_parser("snapshot", help="컬렉션 스냅샷 생성")
     return asyncio.run(_amain(ap.parse_args(argv)))
 

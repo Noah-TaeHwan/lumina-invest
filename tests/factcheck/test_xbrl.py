@@ -151,3 +151,19 @@ def test_fetch_sends_params_and_treats_013_as_empty():
     assert seen[0].url.path.endswith("/fnlttSinglAcntAll.json")
     assert (p["corp_code"], p["bsns_year"], p["reprt_code"], p["fs_div"], p["crtfc_key"]) == (
         "00126380", "2026", "11012", "CFS", "KEY")
+
+
+def test_periodic_rows_are_marked_and_not_superseded():
+    rows = _rows("xbrl_samsung_2026_11012_CFS.json")
+    assert {r["report_type"] for r in rows} == {"periodic"}
+    assert {r["superseded"] for r in rows} == {False}
+    assert {r["rounding_unit"] for r in rows} == {1}
+
+
+def test_duplicate_account_column_in_one_response_raises():
+    resp = _resp("xbrl_samsung_2026_11012_CFS.json")
+    dup = next(r for r in resp["list"] if r["account_id"] == "ifrs-full_Revenue")
+    resp["list"].append(dup | {"thstrm_amount": "1"})
+    import pytest
+    with pytest.raises(ValueError, match="ifrs-full_Revenue"):
+        xbrl.facts_from_response(resp, fs_div="CFS")

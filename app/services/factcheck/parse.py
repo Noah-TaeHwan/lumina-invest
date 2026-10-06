@@ -1,13 +1,15 @@
 # app/services/factcheck/parse.py
 """공시 원문 → 근거 문단. 정기보고서 I·II·III절과 잠정실적(공정공시) xforms HTML.
 
-- 정기보고서: 근거 모드의 `evidence.passages.blocks()`·`pack()`을 그대로 쓰고(표 행에 제목·단위·열 머리글),
-  절 찾기만 새로 한다. 근거 모드의 `sections()`는 I절의 '1. 회사의 개요'와 II절만 찾고 닫는 태그가 있어야
-  잡히므로, 여기서는 `<SECTION-1` 시작 위치로 잘라(다음 시작 또는 문서 끝까지) I·II·III절 전체를 잡는다.
-  III절(재무에 관한 사항)에서는 분량 때문에 제목에 '주석'이 든 하위 절을 뺀다(설계 T0: 주석은 2주 밖).
+- 정기보고서: 근거 모드의 `evidence.passages.pack()`·`_text()`를 import해 쓰고, 표 펼치기는 `table_blocks()`로
+  새로 한다(같은 출력 형식). 근거 모드 `blocks()`는 TABLE-GROUP·여러 줄 머리·ROWSPAN/COLSPAN·하위 머리·재무제표
+  기간을 다루지 못하는데 사전등록 해시 대상이라 고칠 수 없다. 절 찾기도 새로 한다: 근거 모드 `sections()`는
+  I절의 '1. 회사의 개요'와 II절만 찾고 닫는 태그가 있어야 잡히므로, `<SECTION-1` 시작 위치로 잘라 I·II·III절
+  전체를 잡는다. III절에서는 제목에 '주석'이 든 하위 절을 뺀다(1주차 범위).
 - 잠정실적: DART 문서 XML이 아니라 xforms HTML(TABLE 대신 table·td, 단위 조원)이라 전용 파서를 쓴다.
   정정 공시는 본표에 정정 후 값이 실리고, 맨 앞 '정정신고(보고)' 블록에 정정 전/후 값이 따로 있다.
   정정 전 값은 숫자 대조에서 맞는 값으로 잡히지 않도록 본표 문단(PRELIM)에 넣지 않고 정정 문단(CORR)에만 둔다.
+  문단의 금액에는 단위(조원), 증감률에는 %를 값마다 붙인다. 당기 값은 XBRL 계약 행으로도 낸다(prelim_facts).
 - 문단 ID = `{corp_code}-{rcept_no}-{section}-{idx}`(설계 Outside Voice #3, 문서 단위 적재·삭제용).
 """
 from __future__ import annotations
@@ -18,7 +20,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from decimal import Decimal, InvalidOperation
 
-from app.services.evidence.passages import Passage, _key, _text, blocks, pack
+from app.services.evidence.passages import Passage, _key, _text, pack
 from app.services.factcheck.xbrl import period_label
 
 SECTIONS = ("I", "II", "III")
@@ -77,37 +79,172 @@ def split_sections(xml: str) -> dict[str, str]:
     return out
 
 
-_TABLE_GROUP = re.compile(r"</?TABLE-GROUP\b[^>]*>")
-_TABLE = re.compile(r"<TABLE\b[^>]*>(.*?)</TABLE>", re.S)
+_BLOCK = re.compile(r"<TITLE\b[^>]*>(.*?)</TITLE>|<P\b[^>]*>(.*?)</P>|<TABLE\b(?!-)[^>]*>(.*?)</TABLE>", re.S)
+_THEAD = re.compile(r"<THEAD\b[^>]*>(.*?)</THEAD>", re.S)
 _ROW = re.compile(r"<TR\b[^>]*>(.*?)</TR>", re.S)
-_CELL = re.compile(r"<(TD|TH|TE|TU)\b[^>]*>(.*?)</\1>", re.S)
-_UNIT_TEXT = re.compile(r"단위\s*[:：]")
+_CELL = re.compile(r"<(TD|TH|TE|TU)\b([^>]*)>(.*?)</\1>", re.S)
+_UNIT = re.compile(r"단위\s*[:：]\s*([^)\]]+)")
+_SUBHEAD = re.compile(r"[가-하]\.\s*\S")
+_SUBHEAD_MAX = 40
+_NUMERIC = re.compile(r"[\d,.\s△()%\-]*")
+_KI = re.compile(r"제\s*(\d+)\s*기")
+_DOT_DATE = re.compile(r"\d{4}\.\d{2}\.\d{2}")
 
 
-def _cover_table(m: re.Match) -> str:
-    """재무제표 머리 표(한 칸짜리 행 여러 개: 표 이름·기간·단위)를 한 행 표(표 이름 | 단위)로 바꾼다.
+def _attr_int(attrs: str, name: str) -> int:
+    m = re.search(rf'{name}\s*=\s*"?(\d+)', attrs, re.I)
+    return max(1, int(m.group(1))) if m else 1
 
-    `blocks()`는 한 행짜리 표만 캡션·단위 줄로 보므로, 이렇게 해야 다음 데이터 표 행에 단위가 붙는다.
+
+def _grid(rows_xml: list[str]) -> list[list[tuple[str, bool]]]:
+    """표 행들을 ROWSPAN·COLSPAN을 펼친 격자로. 칸 = (글자, COLSPAN으로 복사된 칸인가)."""
+    grid: list[list[tuple[str, bool]]] = []
+    carry: dict[int, tuple[str, int]] = {}  # 열 → (글자, 아래로 더 차지할 행 수)
+    for r in rows_xml:
+        row: dict[int, tuple[str, bool]] = {}
+        new_carry: dict[int, tuple[str, int]] = {}
+        col = 0
+        for _, attrs, frag in _CELL.findall(r):
+            text, cs, rs = _text(frag), _attr_int(attrs, "COLSPAN"), _attr_int(attrs, "ROWSPAN")
+            while col in carry:
+                col += 1
+            for k in range(cs):
+                row[col + k] = (text, k > 0)
+                if rs > 1:
+                    new_carry[col + k] = (text, rs - 1)
+            col += cs
+        for c, (text, left) in carry.items():
+            row[c] = (text, False)
+            if left > 1:
+                new_carry[c] = (text, left - 1)
+        carry = new_carry
+        grid.append([row.get(i, ("", False)) for i in range(max(row) + 1)] if row else [])
+    return grid
+
+
+def _cover_periods(lines: list[str]) -> dict[str, tuple[str, str]]:
+    """재무제표 머리 표의 기간 줄 → {기 번호: (시작, 끝)}. 시점이면 시작 = 끝. 예: '제 58 기 반기말 2026.06.30 현재'."""
+    out: dict[str, tuple[str, str]] = {}
+    for ln in lines:
+        ki, dates = _KI.search(ln), _DOT_DATE.findall(ln)
+        if ki and dates:
+            out[ki.group(1)] = (dates[0], dates[-1])
+    return out
+
+
+def _three_months(end: str) -> str:
+    """'2026.06.30' → 그 분기의 첫날 '2026.04.01'."""
+    y, m, _ = end.split(".")
+    return f"{y}.{int(m) - 2:02d}.01"
+
+
+def _with_period(label: str, periods: dict[str, tuple[str, str]]) -> str:
+    """열 이름에 머리 표의 실제 기간을 붙인다. '3개월' 열은 끝 날짜가 든 분기만."""
+    ki = _KI.search(label)
+    if not ki or ki.group(1) not in periods:
+        return label
+    start, end = periods[ki.group(1)]
+    if start == end:
+        return f"{label}({end})"
+    if "3개월" in label:
+        return f"{label}({_three_months(end)}~{end})"
+    return f"{label}({start}~{end})"
+
+
+def _header_labels(grid: list[list[tuple[str, bool]]], n_head: int) -> list[str]:
+    """머리 행(여러 줄일 수 있음)을 열마다 위→아래로 이어 붙인 열 이름. 같은 글자가 이어지면 한 번만."""
+    width = max(len(r) for r in grid[:n_head])
+    out = []
+    for c in range(width):
+        parts: list[str] = []
+        for r in grid[:n_head]:
+            t = r[c][0] if c < len(r) else ""
+            if t and (not parts or parts[-1] != t):
+                parts.append(t)
+        out.append(" ".join(parts))
+    return out
+
+
+def table_blocks(section_xml: str) -> list[tuple[str, str]]:
+    """절 안의 제목·문단·표 행을 문서 순서대로 펼친다(근거 모드 `blocks()`의 팩트체커판, 출력 형식은 같다).
+
+    `blocks()`와 다른 점(근거 모드 코드는 사전등록 해시 대상이라 고치지 않고 여기서 새로 한다):
+    - `<TABLE-GROUP>`을 표로 잘못 잡지 않는다(재무제표 제목·머리 표가 삼켜지던 문제).
+    - '가. 요약연결재무정보'처럼 짧은 '가.~하.' 문단을 하위 머리로 보고 '상위 > 하위'로 행 접두에 넣는다.
+    - ROWSPAN·COLSPAN을 펼친다. 머리가 여러 줄(THEAD)이면 열마다 이어 붙인다('제 58 기 반기 3개월').
+    - 재무제표 머리 표(한 칸짜리 행: 표 이름·기간·단위)에서 캡션·단위와 함께 기 번호별 실제 기간을 읽어 열 이름에
+      붙인다('제 58 기 반기 3개월(2026.04.01~2026.06.30)', '제 58 기 반기말(2026.06.30)').
+    - 표 안의 기간 행(첫 칸이 비고 나머지가 숫자 아닌 글자, 예: '2026년 6월말')은 행으로 내지 않고 그 아래 행의
+      열 이름에 붙인다('제58기(2026년 6월말)'). 표 중간에 다시 나오면 바꾼다.
     """
-    rows = [[_text(c) for _, c in _CELL.findall(r)] for r in _ROW.findall(m.group(1))]
-    cells = [[c for c in r if c] for r in rows]
-    cells = [c for c in cells if c]
-    if len(cells) < 2 or any(len(c) != 1 for c in cells):
-        return m.group(0)
-    units = [c[0] for c in cells if _UNIT_TEXT.search(c[0])]
-    if not units:
-        return m.group(0)
-    return f"<TABLE><TR><TD>{htmllib.escape(cells[0][0])}</TD><TD>{htmllib.escape(units[0])}</TD></TR></TABLE>"
-
-
-def normalize_tables(section_xml: str) -> str:
-    """`blocks()` 전에 표 구조를 고친다(근거 모드 코드는 고치지 않는다).
-
-    1) `<TABLE-GROUP>` 태그를 지운다. `blocks()`의 `<TABLE\\b`가 `<TABLE-GROUP`에도 걸려 재무제표 제목과 머리 표를
-       삼키기 때문이다(III절 재무제표가 TABLE-GROUP으로 묶여 있다).
-    2) 재무제표 머리 표를 한 행 캡션·단위 표로 바꾼다(_cover_table).
-    """
-    return _TABLE.sub(_cover_table, _TABLE_GROUP.sub("", section_xml))
+    out: list[tuple[str, str]] = []
+    title, sub, unit, caption = "", "", "", ""
+    periods: dict[str, tuple[str, str]] = {}
+    for m in _BLOCK.finditer(section_xml):
+        t, p, tb = m.groups()
+        if t is not None:
+            title, sub, unit, caption, periods = _text(t), "", "", "", {}
+            out.append(("title", title))
+            continue
+        heading = f"{title} > {sub}" if sub else title
+        if p is not None:
+            txt = _text(p)
+            if not txt:
+                continue
+            u = _UNIT.search(txt)
+            if u and len(txt) < 60:
+                unit = u.group(1).strip()
+                continue
+            if _SUBHEAD.match(txt):
+                if len(txt) <= _SUBHEAD_MAX:  # 짧은 '가.~하.' 문단 = 하위 머리
+                    sub = txt
+                    out.append(("title", f"{title} > {sub}" if title else sub))
+                    continue
+                sub = ""  # 본문이 붙은 다음 항목('라. … 당사는 …')이 시작되면 앞 하위 머리는 끝난다
+            out.append(("para", txt))
+            continue
+        thead = _THEAD.search(tb)
+        rows_xml = _ROW.findall(tb)
+        grid = [r for r in _grid(rows_xml) if any(t for t, _ in r)]
+        if not grid:
+            continue
+        cells = [[t for t, copy in r if t and not copy] for r in grid]
+        flat = [c for r in cells for c in r]
+        if any(c.startswith("※") for c in flat) and not any(_NUMERIC.fullmatch(c) for c in flat):
+            out += [("para", " ".join(r)) for r in cells if r]  # 표로 그린 주석 줄(※ …)은 문단으로
+            continue
+        if len(grid) == 1 or all(len(c) == 1 for c in cells):  # 캡션·단위 줄(한 행) 또는 재무제표 머리 표
+            units = [_UNIT.search(c) for c in flat]
+            if any(units):
+                unit = next(u for u in units if u).group(1).strip()
+                rest = [c for c, u in zip(flat, units) if not u]
+                found = _cover_periods(rest)
+                if found:
+                    periods = found
+                    rest = [c for c in rest if not (_KI.search(c) and _DOT_DATE.search(c))]
+                caption = " ".join(rest)
+            else:
+                out.append(("para", " | ".join(flat)))
+            continue
+        n_head = len(_ROW.findall(thead.group(1))) if thead else 1
+        n_head = max(1, min(n_head, len(grid) - 1))
+        labels = [_with_period(h, periods) for h in _header_labels(grid, n_head)]
+        current = list(labels)
+        prefix = f"[{heading} 표" + (f", {caption}" if caption else "") + (f", 단위 {unit}" if unit else "") + "] "
+        for r in grid[n_head:]:
+            vals = [("" if copy else t) for t, copy in r]
+            if len(vals) == len(labels) and not vals[0] and any(vals[1:]) \
+                    and not any(_NUMERIC.fullmatch(v) for v in vals[1:] if v):
+                current = [labels[0]] + [f"{h}({v})" if v else h for h, v in zip(labels[1:], vals[1:])]
+                continue
+            if len(vals) == len(current):
+                parts = [f"{h}: {v}" if h else v for h, v in zip(current, vals) if v]
+            else:
+                parts = [v for v in vals if v]
+            if parts:
+                out.append(("row", prefix + " | ".join(parts)))
+        unit, caption, periods = "", "", {}
+    return out
 
 
 def regular_passages(corp_code: str, rcept_no: str, xml: str,
@@ -120,7 +257,7 @@ def regular_passages(corp_code: str, rcept_no: str, xml: str,
     out: list[Passage] = []
     for sec in SECTIONS:
         if sec in secs:
-            for i, text in enumerate(pack(blocks(normalize_tables(secs[sec])))):
+            for i, text in enumerate(pack(table_blocks(secs[sec]))):
                 out.append(Passage(passage_id(corp_code, rcept_no, sec, i), corp_code, rcept_no, sec, i, text))
     return out
 
@@ -291,8 +428,9 @@ def parse_prelim(doc: str) -> PrelimReport:
                         corrections=_corrections(rows) if is_correction else [], periods=periods)
 
 
-def _fmt(v: Decimal | None) -> str:
-    return "-" if v is None else format(v, ",")
+def _fmt(v: Decimal | None, suffix: str = "") -> str:
+    """값 표기. 금액은 단위(조원), 증감률은 %를 값 바로 뒤에 붙여 숫자 대조가 금액·비율을 섞지 않게 한다."""
+    return "-" if v is None else f"{format(v, ',')}{suffix}"
 
 
 def _span(rep: PrelimReport, key: str) -> str:
@@ -301,16 +439,21 @@ def _span(rep: PrelimReport, key: str) -> str:
 
 
 def prelim_passages(corp_code: str, rcept_no: str, rep: PrelimReport) -> list[Passage]:
-    """잠정실적을 문단으로: 계정마다 본표 문단 하나(PRELIM), 정정 공시면 정정 전/후 문단(CORR)."""
-    head = f"[{rep.title} {rep.period}({rep.period_start}~{rep.period_end}), 단위 {rep.unit}]"
+    """잠정실적을 문단으로: 계정마다 본표 문단 하나(PRELIM), 정정 공시면 정정 전/후 문단(CORR).
+
+    금액마다 단위(예: 171.50조원), 증감률마다 %(예: 28.11%)를 붙인다. 머리에 '표'가 없어 `numbers.py`가 표 단위를
+    적용하지 않으므로 값마다 단위가 있어야 '171.5조원'은 맞고 '171.50% 증가'는 틀리게 대조된다.
+    """
+    u = rep.unit
+    head = f"[{rep.title} {rep.period}({rep.period_start}~{rep.period_end})]"
     by_acc: dict[str, list[str]] = {}
     for f in rep.figures:
         span = _span(rep, "당기누계실적") if f.basis == "누계실적" else ""
-        parts = [f"당기실적 {_fmt(f.current)}"]
+        parts = [f"당기실적 {_fmt(f.current, u)}"]
         if f.basis == "당해실적":
-            parts += [f"전기실적 {_fmt(f.prior_q)}", f"전기대비 증감율(%) {_fmt(f.qoq_pct)}"]
+            parts += [f"전기실적 {_fmt(f.prior_q, u)}", f"전기대비 증감율 {_fmt(f.qoq_pct, '%')}"]
             parts += [f"전기대비 {f.qoq_turn}"] if f.qoq_turn else []
-        parts += [f"전년동기실적 {_fmt(f.prior_y)}", f"전년동기대비 증감율(%) {_fmt(f.yoy_pct)}"]
+        parts += [f"전년동기실적 {_fmt(f.prior_y, u)}", f"전년동기대비 증감율 {_fmt(f.yoy_pct, '%')}"]
         parts += [f"전년동기대비 {f.yoy_turn}"] if f.yoy_turn else []
         label = f"{f.account}({f.basis}{', ' + span if span else ''})"
         by_acc.setdefault(f.account, []).append(f"{label}: " + " | ".join(parts))
@@ -318,9 +461,60 @@ def prelim_passages(corp_code: str, rcept_no: str, rep: PrelimReport) -> list[Pa
                    f"{head} " + " / ".join(lines)) for i, lines in enumerate(by_acc.values())]
     if rep.corrections:
         orig = f"{rep.original_date[:4]}-{rep.original_date[4:6]}-{rep.original_date[6:]}" if rep.original_date else "?"
-        items = [("para", f"{c.group} {c.item}({c.basis}): 정정 전 {_fmt(c.before)} → 정정 후 {_fmt(c.after)}")
-                 for c in rep.corrections]
+        items = []
+        for c in rep.corrections:
+            suf = "%" if "%" in c.group else u
+            items.append(("para", f"{c.group.replace('(%)', '')} {c.item}({c.basis}): "
+                                  f"정정 전 {_fmt(c.before, suf)} → 정정 후 {_fmt(c.after, suf)}"))
         chunks = pack([("title", f"{rep.title} {rep.period} 정정 공시(원 공시 {orig} 제출분의 값을 정정)")] + items)
         out += [Passage(passage_id(corp_code, rcept_no, CORR, i), corp_code, rcept_no, CORR, i, t)
                 for i, t in enumerate(chunks)]
+    return out
+
+
+PRELIM_ACCOUNTS = {"매출액": "ifrs-full_Revenue", "영업이익": "dart_OperatingIncomeLoss",
+                   "당기순이익": "ifrs-full_ProfitLoss",
+                   "지배기업 소유주지분 순이익": "ifrs-full_ProfitLossAttributableToOwnersOfParent"}
+
+
+def prelim_fs_div(title: str) -> str:
+    """잠정실적 제목으로 연결(CFS)/별도(OFS) 기준. '연결'이 들면 CFS."""
+    return "CFS" if "연결" in title else "OFS"
+
+
+def prelim_facts(corp_code: str, rcept_no: str, rep: PrelimReport, *, rcept_dt: str | None = None,
+                 is_correction: bool = False, superseded: bool = False) -> list[dict]:
+    """잠정실적의 당기 값을 XBRL 계약 행으로(report_type="preliminary").
+
+    당해실적 = 당기 분기 단독(cumulative=False), 누계실적 = 연초부터 누적(cumulative=True, 1분기는 단독과 같아 뺀다).
+    값은 정정 공시면 정정 후 값(본표)이다. 전기·전년동기 값은 정기 XBRL에 있으므로 넣지 않는다.
+    rounding_unit은 공시 값의 마지막 자리(예: 171.50조원 → 10^10원)라 대조 쪽이 반올림 허용 폭으로 쓴다.
+    """
+    from app.services.factcheck.xbrl import ACCOUNTS, UNIT  # 순환 import 없음(xbrl은 parse를 import하지 않는다)
+
+    mult = UNIT_MULTIPLIER[rep.unit]
+    out: list[dict] = []
+    for f in rep.figures:
+        acc = PRELIM_ACCOUNTS.get(f.account)
+        if acc is None or f.current is None:
+            continue
+        if f.basis == "당해실적":
+            start, end, cumulative = rep.period_start, rep.period_end, False
+        else:
+            span = rep.periods.get("당기누계실적")
+            if not span or span[0] == rep.period_start:
+                continue
+            start, end, cumulative = span[0], span[1], True
+        out.append({
+            "corp_code": corp_code,
+            "period": period_label(date.fromisoformat(start), date.fromisoformat(end)),
+            "period_start": start, "period_end": end, "value_kind": "duration", "cumulative": cumulative,
+            "fs_div": prelim_fs_div(rep.title), "account_id": acc, "account_nm": ACCOUNTS[acc],
+            "amount": to_won(f.current, rep.unit), "currency": "KRW", "unit": UNIT,
+            "rcept_no": rcept_no, "rcept_dt": rcept_dt or rcept_no[:8], "is_correction": bool(is_correction),
+            "report_type": "preliminary", "superseded": bool(superseded),
+            "rounding_unit": int(Decimal(1).scaleb(f.current.as_tuple().exponent) * mult),
+            "column": "thstrm_add" if cumulative else "thstrm", "sj_div": "PRELIM", "reprt_code": None,
+            "bsns_year": start[:4],
+        })
     return out

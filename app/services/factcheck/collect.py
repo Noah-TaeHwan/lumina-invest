@@ -8,9 +8,12 @@
 - 정기보고서: 보고서명 '사업보고서 (2025.12)'·'반기보고서 (2026.06)'·'분기보고서 (2025.03)'에서 종류·기간을 읽고,
   기간마다 가장 늦게 낸 1건(정정 포함)만 고른다. '[첨부정정]'·'[첨부추가]'는 다른 후보가 없을 때만 고른다.
 - 잠정실적: 보고서명에 '영업(잠정)실적'이 든 공시를 원 공시·정정 공시 모두 남긴다. 어느 값을 쓸지(정정 > 원본)는
-  판정 쪽(T2)이 정하고, 여기서는 같은 회사·기간에서 더 늦은 공시가 있으면 superseded=True로 표시한다.
+  판정 쪽(T2)이 정하고, 여기서는 같은 회사·기간·연결/별도에서 더 늦은 공시가 있으면 superseded=True로 표시한다.
+  당기 값은 XBRL 계약 행(report_type="preliminary")으로도 xbrl_facts.json에 넣는다(최신 분기는 정기보고서 전).
+  정정 잠정실적을 읽지 못하면 원 공시 값이 현재값으로 남을 수 있어 CLI가 종료 코드 1로 알린다.
 - 원문: 근거 모드의 `download_document`(zip 안 가장 큰 xml, 원장 SHA-256)를 그대로 쓴다.
 - XBRL: 고른 정기보고서마다 fnlttSinglAcntAll을 연결(CFS)·별도(OFS)로 받아 계약 행으로 바꾼다(xbrl.py).
+  응답은 그 보고서의 최신 정정본이라 --end 뒤에 접수된 행은 버린다(기준 시점에 없던 값).
 - 산출(out 아래, lab/data/는 gitignore): docs/{rcept_no}.xml, ledger.jsonl, documents.json(문서 목록·메타),
   xbrl_facts.json, corp_names.json(상장사명 사전).
 """
@@ -27,7 +30,7 @@ import httpx
 
 from app.services.evidence.dart import _json, download_document, fetch_corp_codes, load_dart_key
 from app.services.factcheck import corp_names
-from app.services.factcheck.parse import decode, parse_prelim
+from app.services.factcheck.parse import decode, parse_prelim, prelim_facts, prelim_fs_div
 from app.services.factcheck.xbrl import FS_DIVS, facts_from_response, fetch_accounts, save_facts
 
 DEFAULT_CORPS = ("00126380", "00164779")  # 삼성전자, SK하이닉스
@@ -91,16 +94,20 @@ def pick_regular(items: list[dict]) -> list[dict]:
 
 
 def pick_prelim(items: list[dict]) -> list[dict]:
-    """거래소공시 목록에서 영업(잠정)실적 공정공시만(원 공시·정정 모두). 기간은 원문을 읽은 뒤 채운다."""
-    out = [_meta(it, "preliminary", None) for it in items if PRELIM_MARK in it["report_nm"]]
+    """거래소공시 목록에서 영업(잠정)실적 공정공시만(원 공시·정정 모두). 기간은 원문을 읽은 뒤 채운다.
+
+    보고서명에 '연결'이 들면 연결(CFS), 아니면 별도(OFS) 기준으로 fs_div를 단다.
+    """
+    out = [_meta(it, "preliminary", None) | {"fs_div": prelim_fs_div(it["report_nm"])}
+           for it in items if PRELIM_MARK in it["report_nm"]]
     return sorted(out, key=lambda d: (d["rcept_dt"], d["rcept_no"]))
 
 
 def mark_superseded(docs: list[dict]) -> None:
-    """같은 회사·종류·기간에서 가장 늦은 공시만 superseded=False, 나머지는 True(제자리 수정)."""
+    """같은 회사·종류·기간·연결/별도에서 가장 늦은 공시만 superseded=False, 나머지는 True(제자리 수정)."""
     groups: dict[tuple, list[dict]] = {}
     for d in docs:
-        groups.setdefault((d["corp_code"], d["report_type"], d["period"]), []).append(d)
+        groups.setdefault((d["corp_code"], d["report_type"], d["period"], d.get("fs_div")), []).append(d)
     for ds in groups.values():
         latest = max(ds, key=lambda d: (d["rcept_dt"], d["rcept_no"]))
         for d in ds:
@@ -118,7 +125,8 @@ def collect(client: httpx.Client, key: str, corps, bgn: str, end: str, out_dir: 
     docs_dir, ledger = out_dir / "docs", out_dir / "ledger.jsonl"
     manifest: list[dict] = []
     facts: list[dict] = []
-    n_reg = n_pre = 0
+    reports: dict[str, object] = {}  # 잠정실적 rcept_no → PrelimReport
+    n_reg = n_pre = after_end = 0
     for corp in corps:
         listed = list_filings(client, key, corp, bgn, end, "A")
         regular = pick_regular(listed)
@@ -129,7 +137,8 @@ def collect(client: httpx.Client, key: str, corps, bgn: str, end: str, out_dir: 
             d["path"] = path.relative_to(out_dir).as_posix()
             if d["report_type"] == "preliminary":
                 try:
-                    d["period"] = parse_prelim(decode(path.read_bytes())).period
+                    reports[d["rcept_no"]] = parse_prelim(decode(path.read_bytes()))
+                    d["period"] = reports[d["rcept_no"]].period
                 except ValueError as exc:
                     d["parse_error"] = str(exc)
             manifest.append(d)
@@ -142,13 +151,24 @@ def collect(client: httpx.Client, key: str, corps, bgn: str, end: str, out_dir: 
                 if not rows:
                     continue
                 src = by_rcept.get(rows[0]["rcept_no"])  # XBRL이 가리키는 접수번호(고른 문서와 다를 수 있다)
-                facts += facts_from_response(resp, fs_div=fs, rcept_dt=src["rcept_dt"] if src else None,
-                                             is_correction=_is_correction(src["report_nm"]) if src else False)
+                got = facts_from_response(resp, fs_div=fs, rcept_dt=src["rcept_dt"] if src else None,
+                                          is_correction=_is_correction(src["report_nm"]) if src else False)
+                kept = [f for f in got if f["rcept_dt"] <= end]  # --end 뒤에 낸 정정본 값은 기준 시점에 없었다
+                after_end += len(got) - len(kept)
+                facts += kept
     mark_superseded(manifest)
+    for d in manifest:
+        if d["rcept_no"] in reports:
+            facts += prelim_facts(d["corp_code"], d["rcept_no"], reports[d["rcept_no"]], rcept_dt=d["rcept_dt"],
+                                  is_correction=d["is_correction"], superseded=d["superseded"])
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "documents.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=1))
     save_facts(out_dir / "xbrl_facts.json", facts)
-    return {"documents": len(manifest), "regular": n_reg, "preliminary": n_pre, "xbrl_rows": len(facts)}
+    return {"documents": len(manifest), "regular": n_reg, "preliminary": n_pre, "xbrl_rows": len(facts),
+            "xbrl_after_end": after_end,
+            "parse_errors": {d["rcept_no"]: d["parse_error"] for d in manifest if d.get("parse_error")},
+            "correction_parse_errors": [d["rcept_no"] for d in manifest
+                                        if d.get("parse_error") and d["is_correction"]]}
 
 
 def collect_corp_names(client: httpx.Client, key: str, out_dir: Path) -> int:
@@ -183,6 +203,13 @@ def main(argv: list[str] | None = None) -> int:
             summary["corp_names"] = collect_corp_names(client, key, args.out)
     summary["range"] = [bgn, args.end]
     print(json.dumps(summary, ensure_ascii=False))
+    for rno, err in summary["parse_errors"].items():
+        kind = "정정 공시" if rno in summary["correction_parse_errors"] else "공시"
+        print(f"{kind} {rno} 분해 실패: {err}", file=sys.stderr)
+    if summary["correction_parse_errors"]:
+        print("정정 잠정실적을 읽지 못해 원 공시 값이 현재값으로 남을 수 있다. 양식을 확인한 뒤 다시 수집하라.",
+              file=sys.stderr)
+        return 1
     return 0
 
 

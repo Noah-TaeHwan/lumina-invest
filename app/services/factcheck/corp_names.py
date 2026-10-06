@@ -55,3 +55,13 @@ def index(entries: list[dict]) -> dict[str, list[str]]:
 def lookup(idx: dict[str, list[str]], name: str) -> list[str]:
     """이름을 정규화해 정확히 같은 키의 corp_code 목록. 없으면 빈 목록(부분 일치는 하지 않는다)."""
     return list(idx.get(normalize(name), []))
+
+
+def by_corp_code(entries: list[dict]) -> dict[str, list[str]]:
+    """corp_code → 그 회사의 이름 목록(사전 순서 유지, 중복 없음). T2 `CompanyIndex`가 받는 형식."""
+    out: dict[str, list[str]] = {}
+    for e in entries:
+        names = out.setdefault(e["corp_code"], [])
+        if e["corp_name"] not in names:
+            names.append(e["corp_name"])
+    return out

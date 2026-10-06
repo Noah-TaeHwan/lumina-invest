@@ -3,7 +3,10 @@
 
 계약(설계 Outside Voice #1): 행 하나 = 한 회사·한 기간·한 계정·연결/별도 하나의 값.
 `{corp_code, period, period_start, period_end, value_kind, cumulative, fs_div, account_id, account_nm, amount(원),
-currency, unit, rcept_no, rcept_dt, is_correction}`에 출처 칸 `column`·`sj_div`·`reprt_code`·`bsns_year`를 더한다.
+currency, unit, rcept_no, rcept_dt, is_correction}`에 출처 칸 `column`·`sj_div`·`reprt_code`·`bsns_year`와
+`report_type`(정기 XBRL은 "periodic", 잠정실적은 parse.prelim_facts의 "preliminary"), `superseded`,
+`rounding_unit`(금액이 반올림된 원 단위: XBRL 1, 잠정실적 조원 둘째 자리면 10^10)을 더한다.
+한 응답 안에서 (account_id, 칸)이 겹치면 어느 값이 맞는지 모르므로 ValueError로 멈춘다.
 
 - 기간 이름 `period`는 끝나는 시점으로 붙인다: 1년 "YYYY", 1~6월 "YYYYH1", 그 밖은 끝 분기 "YYYYQn".
   3분기 누적(1~9월)은 따로 이름이 없어 "YYYYQ3" + cumulative=True다. 그래서 값을 찾을 때는
@@ -110,6 +113,7 @@ def facts_from_response(resp: dict, *, fs_div: str, rcept_dt: str | None = None,
     if fs_div not in FS_DIVS:
         raise ValueError(f"fs_div must be CFS or OFS: {fs_div}")
     out: list[dict] = []
+    seen: set[tuple[str, str]] = set()
     for r in _pick_rows(resp.get("list") or []):
         end_month, year = REPORT_CODES[r["reprt_code"]], int(r["bsns_year"])
         instant = r["account_id"] in INSTANT_ACCOUNTS
@@ -119,6 +123,9 @@ def facts_from_response(resp: dict, *, fs_div: str, rcept_dt: str | None = None,
             amount = _amount(r.get(f"{col}_amount"))
             if amount is None:
                 continue
+            if (r["account_id"], col) in seen:
+                raise ValueError(f"duplicate {r['account_id']} {col} in one response ({r['rcept_no']})")
+            seen.add((r["account_id"], col))
             em = 12 if (instant and col != "thstrm") else end_month  # 시점 값의 전기·전전기 = 그해 말
             start, end = _span(year + off, em, kind)
             out.append({
@@ -130,6 +137,7 @@ def facts_from_response(resp: dict, *, fs_div: str, rcept_dt: str | None = None,
                 "amount": amount, "currency": r.get("currency") or "KRW", "unit": UNIT,
                 "rcept_no": r["rcept_no"], "rcept_dt": rcept_dt or r["rcept_no"][:8],
                 "is_correction": bool(is_correction),
+                "report_type": "periodic", "superseded": False, "rounding_unit": 1,
                 "column": col, "sj_div": r["sj_div"], "reprt_code": r["reprt_code"], "bsns_year": r["bsns_year"],
             })
     return out
