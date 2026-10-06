@@ -65,7 +65,7 @@ def test_migration_0011_table_constraints_and_downgrade(pg):
             return cols, uniques, indexes, fks, version
 
     cols, uniques, indexes, fks, version = asyncio.run(info())
-    assert version == "0011"
+    assert version >= "0011"  # head가 0011 이후(0012 factcheck_quota 등)여도 0011 표는 그대로다
     assert cols == {
         "id": ("uuid", None, "NO"), "user_id": ("uuid", None, "NO"),
         "symbol": ("character varying", 20, "NO"), "name": ("character varying", 100, "YES"),
@@ -86,7 +86,7 @@ def test_migration_0011_table_constraints_and_downgrade(pg):
         assert asyncio.run(journal_left()) == ["judgment_entries", "judgment_updates"]  # 표만 사라진다
     finally:
         alembic_upgrade(pg)
-    assert asyncio.run(info())[4] == "0011"
+    assert asyncio.run(info())[4] == version  # 다시 head로
 
 
 def test_model_reexported():
