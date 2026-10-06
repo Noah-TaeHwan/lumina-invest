@@ -689,3 +689,36 @@ def test_explicit_period_with_same_quarter_phrase_unchanged(facts):
 ])
 def test_xbrl_line_period_text(label, cumulative, instant, want):
     assert pipeline._period_text(label, cumulative, instant) == want
+
+
+# ---- 재검수: 잠정실적 행의 근거 줄 머리말, separate_only + 다른 계정 불일치 ----
+
+def _prelim_q2(correction: bool):
+    from conftest import prelim_rows
+    return [dict(r, is_correction=correction) for r in prelim_rows()]
+
+
+@pytest.mark.parametrize("correction, head", [(True, "[잠정실적 정정 공시 값]"), (False, "[잠정실적 공시 값]")])
+def test_preliminary_row_line_is_not_labeled_as_financial_statement(correction, head):
+    store, jev = FakeStore(default=NOISE), TextJev("잠정실적")
+    r = _check(SAMSUNG, "삼성전자의 2026년 2분기 확정 연결 영업이익은 89.5조원이다.", store, jev, _prelim_q2(correction))
+    first = _texts(jev)[0]
+    assert first == f"{head} 삼성전자 연결 영업이익 2026년 2분기(3개월): 89,490,000백만원 — 접수번호 20260730000001"
+    assert XBRL_HEAD not in first
+    assert r.evidence[0]["report_nm"] == "영업(잠정)실적(공정공시)" and r.evidence[0]["section"] == "XBRL"
+
+
+def test_periodic_row_line_keeps_financial_statement_head():
+    jev = TextJev(XBRL_HEAD)
+    _check(SAMSUNG, "삼성전자의 2025년 2분기 연결 영업이익은 4.68조원이다.", FakeStore(default=NOISE), jev, SS_FACTS)
+    assert _texts(jev)[0].startswith(XBRL_HEAD)
+
+
+def test_separate_only_with_other_account_mismatch_is_contradicted():
+    # 영업이익은 별도로만 맞고(separate_only), 매출은 연결·별도 모두 틀림 → ⚠️ xbrl_mismatch(검색·JEV 없음)
+    rows = SS_FACTS + [_fact(SAMSUNG, REV, 50_000_000_000_000, "2025Q2", "2025-04-01", "2025-06-30", SS_RCEPT,
+                             fs="OFS", nm="매출액")]
+    store, jev = FakeStore(default=NOISE), FakeJev()
+    r = _check(SAMSUNG, "삼성전자의 2025년 2분기 영업이익은 1.2조원, 매출은 100조원이다.", store, jev, rows)
+    assert (r.status, r.reason) == ("contradicted", "xbrl_mismatch")
+    assert r.xbrl["account_nm"] == "매출액" and store.calls == [] and jev.calls == []

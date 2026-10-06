@@ -407,6 +407,14 @@ def test_period_spans_include_comparison_bases():
     ("비동기 처리로 매출 10조원을 올렸다.", False),
     ("동기 부여로 영업이익이 4.7조원 늘었다.", False),
     ("동기화 설비 매출은 1조원이다.", False),
+    # 한글 경계: 다른 낱말 속 '동 기간·같은 해·동 분기'는 상대 기간이 아니다
+    ("가동 기간 동안 매출은 10조원이다.", False),
+    ("활동 기간 영업이익은 4.7조원이다.", False),
+    ("같은 해외 법인 매출은 10조원이다.", False),
+    ("변동 분기 매출은 1조원이다.", False),
+    ("이해당 분기 매출은 1조원이다.", False),
+    ("같은 해에 매출은 333.6조원이다.", True),
+    ("같은 해의 영업이익은 43.6조원이다.", True),
 ])
 def test_relative_only_period_is_ambiguous(text, ambiguous):
     assert scope.assess(text, SAMSUNG, as_of=AS_OF, names=NAMES).ambiguous_period is ambiguous

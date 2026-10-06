@@ -96,12 +96,22 @@ def _amount_text(amount, unit: str) -> str:
     return f"{d:,f}백만원" if d != d.to_integral_value() else f"{int(d):,}백만원"
 
 
-XBRL_HEAD = "[재무제표(XBRL) 값]"
+XBRL_HEAD = "[재무제표(XBRL) 값]"  # 정기보고서(확정) 행
+PRELIM_HEAD = "[잠정실적 공시 값]"  # 잠정실적 행 — 확정 재무제표 값처럼 보이지 않게
+PRELIM_CORR_HEAD = "[잠정실적 정정 공시 값]"
+
+
+def _line_head(it: xbrl_check.XbrlItem) -> str:
+    """근거 줄 머리말: 잠정실적 행이면 잠정(정정) 공시 값, 정기보고서 행만 재무제표(XBRL) 값."""
+    if it.report_type == "preliminary":
+        return PRELIM_CORR_HEAD if it.is_correction else PRELIM_HEAD
+    return XBRL_HEAD
 XBRL_SECTION = "XBRL"
 
 
 def xbrl_passages(xr: xbrl_check.XbrlResult, company: str) -> list[dict]:
     """XBRL과 모두 맞은 문장(xr.status == 'match')의 항목마다 근거 한 줄 문단. separate_only가 섞이면 없다.
+    머리말은 행의 보고서 종류를 따른다(정기 '[재무제표(XBRL) 값]', 잠정 '[잠정실적 (정정) 공시 값]').
 
     원문 문단은 열(당기·전기·누계)과 기준(연결·별도)을 코드로 가를 수 없어 숫자만 맞는 엉뚱한 문단을 고를 수 있다.
     고른 XBRL 행 값(회사·연결/별도·계정·기간·단독/누적·부호 있는 금액·접수번호)을 한 줄로 만들어 판정 문단 맨 앞에
@@ -112,7 +122,7 @@ def xbrl_passages(xr: xbrl_check.XbrlResult, company: str) -> list[dict]:
     for it in xr.items:
         fs = {"CFS": "연결", "OFS": "별도"}.get(it.fs_div or "", it.fs_div or "")
         instant = it.account_id in xbrl_check.INSTANT_ACCOUNTS
-        text = (f"{XBRL_HEAD} {company} {fs} {it.account_nm} {_period_text(it.period, it.cumulative, instant)}: "
+        text = (f"{_line_head(it)} {company} {fs} {it.account_nm} {_period_text(it.period, it.cumulative, instant)}: "
                 f"{_amount_text(it.amount, it.unit)} — 접수번호 {it.rcept_no}")
         out.append({"passage_id": f"XBRL-{it.rcept_no}-{it.account_id}-{it.period}-{it.fs_div}",
                     "rcept_no": it.rcept_no, "report_nm": it.report_nm, "period": it.period,

@@ -100,6 +100,7 @@ class XbrlItem:
     cumulative: bool | None = None
     is_correction: bool | None = None
     column: str | None = None
+    report_type: str | None = None  # 고른 행의 보고서 종류(periodic / preliminary)
     report_nm: str | None = None  # 고른 행의 원 보고서명(가능할 때: '반기보고서 (2025.06)'·'영업(잠정)실적(공정공시)')
 
 
@@ -269,7 +270,7 @@ def _item(status: str, claim: AmountClaim, account_id: str, row: Mapping, period
     nm = DISPLAY[account_id] if account_id in (OWNERS, "margin") else row.get("account_nm") or DISPLAY[account_id]
     return XbrlItem(status, account_id, nm, row.get("period") or period.label, fs_div, amount, claim.value_text,
                     row.get("rcept_no"), note, unit, row.get("cumulative"), row.get("is_correction"), row.get("column"),
-                    report_name(row))
+                    row.get("report_type"), report_name(row))
 
 
 def _compare_account(claim: AmountClaim, facts: Sequence[Mapping], corp_code: str, account_id: str, period: Period,
