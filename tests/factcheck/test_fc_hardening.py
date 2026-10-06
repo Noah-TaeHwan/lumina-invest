@@ -229,3 +229,55 @@ def test_busy_reservation_message_says_try_again_soon(fc_pg):
     d = second.json()["detail"]
     assert d["code"] == "cap_global_busy" and "잠시 뒤" in d["message"] and "내일" not in d["message"]
     assert second.headers.get("retry-after") == "60"
+
+
+
+# ── #64 후속: B7 공백 없는 짧은 문장, C3 재검수 시작 전 취소 ──────────────────
+
+def test_sentence_limit_counts_short_sentences_without_spaces(fc_pg):
+    """'네.네.네.'처럼 공백 없이 이어 붙여도 문장마다 센다(B7). 소수점(3.5)은 여전히 경계가 아니다."""
+    async def go(env):
+        async with env.client() as c:
+            packed = await c.post("/api/factcheck", json=body(text_="네." * 31))
+            dots = await c.post("/api/factcheck", json=body(text_="매출은 3.5조원이다.이익은 1.2조원이다."))
+        return packed, dots
+
+    packed, dots = run(fc_pg, go)
+    assert packed.status_code == 422 and packed.json()["detail"]["sentences"] == 31
+    assert dots.status_code == 202
+
+
+def test_count_sentences_rules():
+    from app.routes.factcheck import count_sentences
+
+    assert count_sentences("네." * 31) == 31
+    assert count_sentences("매출은 3.5조원이다.이익은 1.2조원이다.") == 2
+    assert count_sentences("그렇다... 그래서 좋다!정말?") == 3
+    assert count_sentences("네. 네.\n네") == 3
+
+
+def test_recheck_cancelled_before_start_keeps_original_failure(fc_pg):
+    """실패한 job의 재검수 작업이 첫 실행 전에 취소돼도 원래 오류(pipeline_error)를 cancelled로 덮지 않는다(C3)."""
+    text = "앞으로도 좋을까? 2025년 매출은 300조원이다. 2024년 매출은 250조원이다."
+
+    async def go(env):
+        async with env.client() as c:
+            job = (await c.post("/api/factcheck", json=body(text_=text))).json()["job_id"]
+            failed = await poll_done(c, job)
+            orig = env.jobs.spawn
+
+            def spawn_then_cancel(j, coro):
+                task = orig(j, coro)
+                task.cancel()  # 재검수 작업이 첫 단계를 돌기 전에 취소
+                return task
+
+            env.jobs.spawn = spawn_then_cancel
+            r = await c.post(f"/api/factcheck/{job}/recheck/0", json={})
+            await env.jobs.drain()
+            after = (await c.get(f"/api/factcheck/{job}")).json()
+        return failed, r, after, await reservations(env)
+
+    failed, r, after, res = run(fc_pg, go, exc=RuntimeError("boom"))
+    assert failed["error"]["code"] == "pipeline_error" and r.status_code == 202
+    assert after["status"] == "failed" and after["error"]["code"] == "pipeline_error"
+    assert all(row[3] for row in res)  # 취소된 재검수 예약도 정산됐다
