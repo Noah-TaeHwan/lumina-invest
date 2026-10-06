@@ -382,3 +382,22 @@ def test_period_spans_include_comparison_bases():
     assert [m.period.label for m in s.mentions] == ["2025"]   # 주장 기간
     spans = [text[a:b] for a, b in s.period_spans]             # 숫자 제거용 구간(비교 기준 포함)
     assert "2025년" in spans and "2024년" in spans
+
+
+# ---- 실데이터 스모크 결함 2: 상대 기간 표현만 있는 문장 ----
+
+@pytest.mark.parametrize("text, ambiguous", [
+    ("같은 분기 연결 영업이익은 89.5조원이다.", True),
+    ("같은 기간 매출은 74.6조원이다.", True),
+    ("동기 영업이익은 4.7조원이다.", True),
+    ("당분기 영업이익은 89.5조원이다.", True),
+    ("이번 분기 매출은 171.5조원이다.", True),
+    ("같은 해 매출은 333.6조원이다.", True),
+    ("2025년 2분기 영업이익은 전년 동기 대비 줄었다.", False),   # 명시 기간이 있으면 그대로
+    ("2025년 2분기 매출은 74.6조원, 같은 분기 영업이익은 4.7조원이다.", False),
+    ("전년 동기 매출은 74.6조원이다.", False),
+    ("2분기 영업이익은 4.7조원이다.", False),
+])
+def test_relative_only_period_is_ambiguous(text, ambiguous):
+    assert scope.assess(text, SAMSUNG, as_of=AS_OF, names=NAMES).ambiguous_period is ambiguous
+    assert scope.period_scope(text, AS_OF).ambiguous_period is ambiguous

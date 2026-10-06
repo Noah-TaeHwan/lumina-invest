@@ -203,6 +203,26 @@ class FactcheckStore:
                                              limit=k, with_payload=True, with_vectors=False)
         return [{**{f: p.payload.get(f) for f in SEARCH_FIELDS}, "score": p.score} for p in res.points]
 
+    async def passages(self, corp_code: str, *, rcept_nos: Sequence[str] | None = None,
+                       periods: Sequence[str] | None = None, report_types: Sequence[str] | None = None,
+                       include_history: bool = False) -> list[dict]:
+        """임베딩 없이 메타 조건(회사 필수, 접수번호·기간·보고서 종류)으로 문단을 읽는다(SEARCH_FIELDS).
+
+        검색과 같이 기본은 현재값만(superseded 문서·CORR 이력 문단 제외). XBRL과 맞은 계정 문장의 근거 문단을 같은
+        접수번호 문서·같은 기간 잠정실적에서 찾을 때 쓴다(dense 검색이 날짜 많은 문단에 밀리는 문제). 문서 하나는
+        수백 문단이라 scroll로 충분하다.
+        """
+        must = [qm.FieldCondition(key="corp_code", match=qm.MatchValue(value=corp_code))]
+        for key, values in (("rcept_no", rcept_nos), ("period", periods), ("report_type", report_types)):
+            if values is not None and not values:
+                return []  # 빈 조건은 '아무것도 없음'(전체가 아니다)
+            if values:
+                must.append(qm.FieldCondition(key=key, match=qm.MatchAny(any=list(values))))
+        rows = await self._scroll(qm.Filter(must=must), SEARCH_FIELDS)
+        if not include_history:
+            rows = [r for r in rows if not r.get("superseded") and r.get("section") not in HISTORY_SECTIONS]
+        return sorted(rows, key=lambda r: (str(r.get("rcept_no")), str(r.get("section")), r.get("idx") or 0))
+
     async def documents(self) -> list[dict]:
         """적재된 문서 목록(회사·접수번호 순): 메타와 문단 수."""
         out: dict[tuple[str, str], dict] = {}

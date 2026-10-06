@@ -369,3 +369,20 @@ def test_loading_older_document_after_newer_marks_the_older_one():
     flags = {p["rcept_no"]: p["superseded"] for p in _all(st)}
     assert flags == {"20260730800123": False, "20260707800001": True, "20260707800002": False,
                      "20260407800001": False}
+
+
+# ── 메타 필터로 문단 읽기(실데이터 스모크 결함 1: 계정 문장의 근거 문단) ──────────────
+
+def test_passages_by_meta_excludes_superseded_and_history_by_default():
+    st, _ = _history_store()
+    half = _doc(rcept_no="20260814003699", report_type="half", period="2026H1")
+    _run(st.load_document(half, _passages(half, 3)))
+    got = _run(st.passages(SAMSUNG, rcept_nos=["20260814003699"]))
+    assert sorted(p["passage_id"] for p in got) == [f"00126380-20260814003699-II-{i}" for i in range(3)]
+    assert set(got[0]) == set(store.SEARCH_FIELDS)
+    pre = _run(st.passages(SAMSUNG, periods=["2026Q2"], report_types=["preliminary"]))
+    assert {(p["rcept_no"], p["section"]) for p in pre} == {("20260730800123", "PRELIM")}  # 대체본·CORR 제외
+    hist = _run(st.passages(SAMSUNG, periods=["2026Q2"], report_types=["preliminary"], include_history=True))
+    assert {(p["rcept_no"], p["section"]) for p in hist} == {
+        ("20260707800001", "PRELIM"), ("20260730800123", "PRELIM"), ("20260730800123", "CORR")}
+    assert _run(st.passages(HYNIX, rcept_nos=["20260814003699"])) == []  # 회사는 필수 조건

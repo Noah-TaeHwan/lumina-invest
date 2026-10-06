@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import calendar
 import re
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import date
 
@@ -138,6 +138,10 @@ _BARE = re.compile(r"(?:(?P<c1>1)\s*[~∼\-]\s*(?P<c2>[2-4])\s*분기|(?<![\d.])
                    r"|(?<![\w.])(?P<qq>[1-4])Q(?![0-9A-Za-z'‘’])|(?P<hk>[상하])반기"
                    r"|(?<![\w.])(?P<h>[12])H(?![0-9A-Za-z'‘’]))"
                    r"(?P<cum>\s*(?:누적|누계))?")
+# 앞 문장에 기대는 상대 기간('같은 분기·같은 기간·동기·당분기·이번 분기·같은 해'). 명시 기간 없이 이것만 있으면
+# 어느 기간인지 문장만으로 알 수 없다(앞 문장 상속은 다음 단계) → 판정을 최대 ❔로 둔다
+SAME_PERIOD = re.compile(r"같은\s*(?:분기|기간|해|연도|반기)|해당\s*(?:분기|기간|연도)|당\s*분기|이번\s*분기|동\s*분기"
+                         r"|(?<!전년)(?<!작년)(?<!전년\s)(?<!작년\s)동기")
 _REL_YEAR_DELTA = {"올해": 0, "금년": 0, "당해연도": 0, "이번해": 0, "작년": -1, "지난해": -1, "전년도": -1, "전년": -1,
                    "재작년": -2, "지지난해": -2}
 
@@ -385,10 +389,16 @@ class Scope:
     report_types: list[str] | None = None
     derived: str | None = None
     period_spans: list[tuple[int, int]] = field(default_factory=list)  # 숫자 확인 전에 지울 기간 표현 구간(비교 기준 포함)
+    ambiguous_period: bool = False  # 명시 기간 없이 '같은 분기' 같은 상대 기간만 있다(판정 최대 ❔)
 
     @property
     def periods(self) -> list[Period]:
         return [m.period for m in self.mentions]
+
+
+def relative_only(text: str, mentions: Sequence[PeriodMention]) -> bool:
+    """명시(절대) 기간 표현 없이 '같은 분기·동기·당분기·이번 분기·같은 해' 같은 상대 기간만 있는가."""
+    return bool(SAME_PERIOD.search(text)) and not any(not m.relative for m in mentions)
 
 
 def period_scope(text: str, as_of: Period) -> Scope:
@@ -396,7 +406,7 @@ def period_scope(text: str, as_of: Period) -> Scope:
     mentions, spans = _scan(text, as_of)
     growth = derived_kind(text) == "growth" and bool(PRELIM_GROWTH_ACCOUNTS.search(text))
     return Scope("checked", None, mentions, search_periods(m.period for m in mentions),
-                 ["preliminary"] if growth else None, derived_kind(text), spans)
+                 ["preliminary"] if growth else None, derived_kind(text), spans, relative_only(text, mentions))
 
 
 def assess(text: str, corp_code: str, *, as_of: Period, names: Mapping[str, Iterable[str]] | CompanyIndex) -> Scope:
@@ -411,16 +421,18 @@ def assess(text: str, corp_code: str, *, as_of: Period, names: Mapping[str, Iter
     if FORECAST.search(text):
         return Scope("out_of_scope", "forecast")
     mentions, spans = _scan(text, as_of)
+    amb = relative_only(text, mentions)
     if any(m.period.end > as_of.end for m in mentions):
-        return Scope("out_of_scope", "future_period", mentions, period_spans=spans)
+        return Scope("out_of_scope", "future_period", mentions, period_spans=spans, ambiguous_period=amb)
     sp = search_periods(m.period for m in mentions)
     kind = derived_kind(text)
     if kind == "growth":
         if PRELIM_GROWTH_ACCOUNTS.search(text):
-            return Scope("checked", "derived:growth", mentions, sp, ["preliminary"], kind, spans)
-        return Scope("derived", "derived:growth_unsupported", mentions, derived=kind, period_spans=spans)
+            return Scope("checked", "derived:growth", mentions, sp, ["preliminary"], kind, spans, amb)
+        return Scope("derived", "derived:growth_unsupported", mentions, derived=kind, period_spans=spans,
+                     ambiguous_period=amb)
     if kind == "margin":
-        return Scope("checked", "derived:margin", mentions, sp, None, kind, spans)
+        return Scope("checked", "derived:margin", mentions, sp, None, kind, spans, amb)
     if kind == "other":
-        return Scope("derived", "derived:other", mentions, derived=kind, period_spans=spans)
-    return Scope("checked", None, mentions, sp, period_spans=spans)
+        return Scope("derived", "derived:other", mentions, derived=kind, period_spans=spans, ambiguous_period=amb)
+    return Scope("checked", None, mentions, sp, period_spans=spans, ambiguous_period=amb)

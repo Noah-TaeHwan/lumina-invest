@@ -12,7 +12,10 @@ evidence.numbers.number_check).
 - 동시성(D9): 요청당 JEV 동시 4, 서버 전체 동시 8(인스턴스 세마포어). 호출마다 시간 초과 → unjudged('timeout'),
   실행 마감(30초)에 남은 문장 → unjudged('busy').
 - 기준 시점 as_of 기본값: 저장소 latest_period(잠정실적 포함) → 오늘까지 끝난 분기. XBRL 행의 최신 기간으로 정하지 않는다.
-  연도 없는 분기를 한 해 당겨 해석한 문장(scope shifted)은 ⚠️·✅를 내지 않고 최대 ❔('period_ambiguous')다.
+  연도 없는 분기를 한 해 당겨 해석한 문장(scope shifted)과 명시 기간 없이 '같은 분기·동기·당분기' 같은 상대 기간만
+  있는 문장은 ⚠️·✅를 내지 않고 최대 ❔('period_ambiguous')다.
+- XBRL과 맞은 금액 항목이 있으면 그 행의 접수번호 문서·같은 기간 잠정실적에서 계정 이름과 숫자가 맞는 현재값 문단을
+  저장소 passages(메타 필터)로 찾아 dense 검색 결과 앞에 둔다(최대 3개, 전체 k 유지). ✅는 여전히 JEV 지지일 때만.
 - 숫자 확인(number_check)은 문장에서 기간 표현을 지운 뒤 한다('2분기'의 2가 문단 숫자로 요구되지 않게).
 - force_check(사용자의 '직접 검수 요청'): 1단계 분류와 '검수 안 함'을 건너뛰고 모든 문장을 대조한다. 범위 밖 판별 결과는
   category·reason에 그대로 남긴다.
@@ -45,6 +48,13 @@ JEV_TIMEOUT_S = 10.0  # 호출 하나(ServiceJevClient 재시도 포함)의 상�
 DEADLINE_S = 30.0  # 검수 실행 하나의 판정 마감
 EVIDENCE_KEYS = ("rcept_no", "report_nm", "period", "section", "text", "superseded", "is_correction")
 HISTORY_SECTIONS = ("CORR",)  # 정정 전/후 이력 문단(T1 store.search 기본 제외와 같다)
+ANCHOR_MAX = 3  # XBRL 일치 계정 문장에서 앞에 붙이는 근거 문단 수 상한
+# XBRL 계정 → 근거 문단이 담아야 할 계정 이름(하나라도)
+ANCHOR_KEYWORDS = {
+    xbrl_check.OPERATING: ("영업이익", "영업손실"), xbrl_check.REVENUE: ("매출",),
+    xbrl_check.NET: ("순이익", "순손실"), xbrl_check.OWNERS: ("순이익", "순손실"),
+    xbrl_check.ASSETS: ("자산",), xbrl_check.LIABILITIES: ("부채",), xbrl_check.EQUITY: ("자본",),
+}
 
 log = logging.getLogger("app.factcheck.pipeline")
 
@@ -56,6 +66,17 @@ def _today() -> date:
 
 def _join(*reasons: str | None) -> str | None:
     return ",".join(r for r in reasons if r) or None
+
+
+def _pid(p: Mapping) -> tuple:
+    """문단 식별자(passage_id, 없으면 접수번호·절·순번)."""
+    return (p.get("passage_id"),) if p.get("passage_id") else (p.get("rcept_no"), p.get("section"), p.get("idx"))
+
+
+def _ambiguous(sc: scope.Scope) -> bool:
+    """기간 해석을 확신할 수 없는 문장: 연도 없는 분기를 당겨 풀었거나(shifted), 명시 기간 없이 '같은 분기' 같은
+    상대 기간만 있다. 이런 문장은 ✅·⚠️를 내지 않는다(최대 ❔ period_ambiguous)."""
+    return sc.ambiguous_period or any(m.shifted for m in sc.mentions)
 
 
 def _without_periods(sentence: str, spans: Sequence[tuple[int, int]]) -> str:
@@ -183,21 +204,61 @@ class FactcheckPipeline:
         # T1 store.search는 기본으로 대체된 문서·정정 이력 문단을 뺀다. 다른 저장소가 섞어 줘도 판정에 쓰지 않는다
         return [p for p in rows if not p.get("superseded") and p.get("section") not in HISTORY_SECTIONS]
 
+    async def _anchor_passages(self, corp_code: str, sentence: str, sc: scope.Scope,
+                               xr: xbrl_check.XbrlResult) -> list[dict]:
+        """XBRL과 맞은 금액 항목의 근거 문단: 그 행의 접수번호 문서와 같은 기간 잠정실적 문서에서, 현재값(대체·CORR
+        제외)이고 계정 이름이 들어 있고 문장 숫자(기간 표현을 지운 것)가 number_check로 맞는 문단만, 최대 ANCHOR_MAX개.
+        dense 검색이 날짜가 많은 문단에 밀려 정답 문단을 놓치는 문제를 막는다. 저장소에 passages가 없으면 빈 목록."""
+        reader = getattr(self.store, "passages", None)
+        items = [it for it in xr.items if it.status == "match" and it.account_id in ANCHOR_KEYWORDS]
+        if not callable(reader) or not items:
+            return []
+        claim = _without_periods(sentence, sc.period_spans)
+        out: list[dict] = []
+        seen: set = set()
+        for it in items:
+            words = ANCHOR_KEYWORDS[it.account_id]
+            queries = []
+            if it.rcept_no:
+                queries.append({"rcept_nos": [it.rcept_no], "periods": None, "report_types": None})
+            if it.period:
+                queries.append({"rcept_nos": None, "periods": [it.period], "report_types": ["preliminary"]})
+            for q in queries:
+                try:
+                    rows = reader(corp_code, **q)
+                    rows = list(await rows if inspect.isawaitable(rows) else rows)
+                except Exception as exc:  # noqa: BLE001 — 저장소 오류는 실행 전체 실패로 올린다
+                    raise StoreUnavailable(type(exc).__name__) from exc
+                for p in rows:
+                    text = p.get("text") or ""
+                    if p.get("superseded") or p.get("section") in HISTORY_SECTIONS or _pid(p) in seen \
+                            or not any(w in text for w in words) or not number_check(claim, text):
+                        continue
+                    seen.add(_pid(p))
+                    out.append(p)
+                    if len(out) >= ANCHOR_MAX:
+                        return out
+        return out
+
     async def _judge_one(self, idx: int, sentence: str, category: str, note: str | None, sc: scope.Scope,
                          xr: xbrl_check.XbrlResult, corp_code: str, req: asyncio.Semaphore) -> SentenceResult:
         """문장 하나: 문단 검색 → JEV 판정 → SYS 규칙. note는 force_check 때의 범위 밖 표시."""
         xbrl = xr.primary()
         partial = xr.status in ("match", "partial")
-        ambiguous = any(m.shifted for m in sc.mentions)
+        ambiguous = _ambiguous(sc)
 
         def done(status: str, evidence: list, reason: str | None) -> SentenceResult:
-            # 기간을 당겨 해석한 문장: 기간 해석을 확신할 수 없으므로 ⚠️·✅ 모두 내지 않는다(최대 ❔)
-            if ambiguous and status in ("contradicted", "supported"):
+            # 기간 해석을 확신할 수 없는 문장(당긴 분기·상대 기간만): ⚠️·✅ 모두 내지 않고 ❔ period_ambiguous
+            if ambiguous and status in ("contradicted", "supported", "no_evidence"):
                 status, evidence, reason = "no_evidence", [], "period_ambiguous"
             return SentenceResult(idx, sentence, category, status, evidence, xbrl, _join(reason, note))
 
         async with req:
             passages = await self._search(corp_code, sentence, sc)
+            anchors = await self._anchor_passages(corp_code, sentence, sc, xr)
+            if anchors:  # XBRL과 맞은 계정의 공시 문단을 앞에(중복 제거, 전체 k 유지)
+                ids = {_pid(p) for p in anchors}
+                passages = (anchors + [p for p in passages if _pid(p) not in ids])[:self.k]
             if not passages:
                 return done("no_evidence", [], "xbrl_partial" if partial else "no_passages")
             texts = [p.get("text") or "" for p in passages]
@@ -243,7 +304,7 @@ class FactcheckPipeline:
                 xr = xbrl_check.XbrlResult("none", [])
             else:
                 xr = xbrl_check.check(s, self.facts, corp_code=corp_code, as_of=as_of_p, names=self.names)
-            if xr.status == "mismatch" and not any(m.shifted for m in sc.mentions):
+            if xr.status == "mismatch" and not _ambiguous(sc):
                 yield SentenceResult(i, s, category, "contradicted", [], xr.primary(), _join("xbrl_mismatch", note))
                 continue
             todo.append((i, s, category, note, sc, xr))
