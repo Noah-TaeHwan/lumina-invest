@@ -173,7 +173,9 @@ async def prepare(*, data_dir: Path | str | None = None, allow_no_data: bool | N
             code = "startup_failed"
             print(f"[WARN] 시작 실패 — 미정산 예약 복구(한도 비공개): {type(e).__name__}")
     try:
-        load_api_key()
+        key = load_api_key()
+        if not isinstance(key, str) or not key.strip():
+            raise ValueError("empty api key")  # 빈 키 파일도 키 없음과 같다(예외 없이 ""를 돌려준다)
         checks["api_key"] = True
     except Exception as e:  # noqa: BLE001
         code = code or "no_api_key"

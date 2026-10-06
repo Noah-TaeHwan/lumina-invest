@@ -161,3 +161,28 @@ def test_relative_data_dir_resolves_against_repo_root(monkeypatch):
     p = fm_main.data_dir_path()
     assert p.is_absolute() and p.parts[-3:] == ("lab", "data", "factcheck")
     assert p.parent.parent.parent.resolve() == fm_main.ROOT_PATH.resolve()
+
+
+@pytest.mark.parametrize("empty", ["", "   ", "\n"])
+def test_empty_api_key_is_not_ready(boot, tmp_path, monkeypatch, empty):
+    """키 파일이 비어 있으면(load_api_key가 예외 없이 빈 문자열) 키 없음과 같다(#61 검수 3)."""
+    monkeypatch.setattr(fm_main, "load_api_key", lambda: empty)
+    ready, health, post, pipeline = boot(data_dir=data_dir(tmp_path))
+    assert not ready.ready and ready.code == "no_api_key" and pipeline is None
+    assert health.status_code == 503 and health.json()["checks"]["api_key"] is False
+    assert post.status_code == 503 and post.json()["detail"]["code"] == "no_api_key"
+
+
+def test_real_make_jev_is_audited_service_client():
+    """운영 조립(make_jev)이 원시 usage 기록 훅을 단 ServiceJevClient인지(#61 검수 4). 퇴행하면 B5 검증이 사라진다.
+    클라이언트만 만들고 요청은 보내지 않는다."""
+    from app.lib.jev_service import ServiceJevClient
+
+    mj = fm_main.make_jev()
+    try:
+        assert isinstance(mj, metering.MeteredJev) and mj.audited is True
+        assert isinstance(mj.inner, ServiceJevClient)
+        hooks = mj.inner._client.event_hooks
+        assert metering._on_request in hooks["request"] and metering._on_response in hooks["response"]
+    finally:
+        asyncio.run(mj.inner.aclose())

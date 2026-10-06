@@ -56,7 +56,8 @@ R2 = res(2, SENTS[2], "no_evidence", reason="xbrl_partial,restated",  # 영업�
          xbrl={"account_nm": "영업이익률", "period": "2025", "fs_div": "CFS", "amount": 11.61, "unit": "%",
                "note": "restated"})
 R3 = res(3, SENTS[3], "skipped", category="opinion", reason="not_claim:question")
-R4 = res(4, SENTS[4], "supported", reason="zz_new_code")  # 화면이 모르는 코드는 원문 그대로
+# 화면이 모르는 코드는 원문 그대로(객체 상속 속성 이름도 표에 걸리지 않는다, #61 검수 5)
+R4 = res(4, SENTS[4], "supported", reason="zz_new_code,__proto__,constructor,constructor:x,toString")
 ALL = [R0, R1, R2, R3, R4]
 
 
@@ -214,7 +215,10 @@ async def s_first(browser, base, ck):
     ck.ok("비고: 재작성된 비교값과 일치" in body2, f"first: XBRL 비고 {body2!r}")
     last = page.locator("#fc-list > li").last
     await last.locator("summary").click()
-    ck.ok("zz_new_code" in await last.inner_text(), "first: 모르는 사유 코드는 원문 그대로")
+    last_text = await last.inner_text()
+    ck.ok("zz_new_code · __proto__ · constructor · constructor:x · toString" in last_text
+          and "[object" not in last_text and "function" not in last_text,
+          f"first: 모르는 사유 코드(상속 속성 이름 포함)는 원문 그대로 {last_text!r}")
     ck.ok(not await page.is_disabled("#fc-submit"), "first: 끝나면 다시 보낼 수 있다")
     clean(ck, page, "first")
     await ctx.close()

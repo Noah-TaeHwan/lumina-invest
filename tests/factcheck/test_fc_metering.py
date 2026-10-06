@@ -258,3 +258,41 @@ def test_real_client_without_api_key_sends_nothing_and_costs_nothing():
         return r.error_code, led.charged, len(seen)
 
     assert asyncio.run(go()) == ("no_api_key", 0, 0)
+
+
+# ── #61 교차 검수: 0토큰 환급·확인된 사용량보다 적은 정산 ─────────────────────
+
+def test_real_client_success_reporting_zero_tokens_is_not_free():
+    """요청이 나갔는데 usage.input_tokens=0이면 그 시도는 비정상(요청 상한) — 0 환급 금지(#61 검수 1)."""
+    async def go():
+        mj, seen = _real(lambda req: httpx.Response(200, json=_payload(0)))
+        led = fm.Ledger(10 ** 9)
+        try:
+            r = await ask(mj, led)
+        finally:
+            await mj.inner.aclose()
+        return r.ok, led.charged, len(seen)
+
+    ok, charged, n = asyncio.run(go())
+    assert ok and n == 1 and charged == CAP
+
+
+@pytest.mark.parametrize("raw,expected", [
+    ([None, 84_000], 84_000),  # 비정상이 섞여도 확인된 큰 사용량보다 적게 정산하지 않는다
+    ([None, 10], SLOT),  # 확인된 합이 작으면 호출 몫
+    (["1", 70_000], 70_000),
+    ([True], SLOT),
+])
+def test_abnormal_mixed_with_known_usage_never_charges_below_known(raw, expected, caplog):
+    """비정상 값이 섞이면 max(호출 몫, 확인된 합 + 값 없는 시도 × 상한)(#61 검수 2)."""
+    import logging
+
+    caplog.set_level(logging.ERROR)
+    assert fm.charge_from_record(fm.CallRecord(sent=len(raw), raw=list(raw))) == expected
+    if expected > SLOT:
+        assert "token_cap_exceeded" in caplog.text  # 상한을 넘는 확인된 사용량은 이 경로에서도 로그
+
+
+def test_known_usage_with_missing_attempt_charges_cap_for_missing():
+    assert fm.charge_from_record(fm.CallRecord(sent=2, raw=[fm._MISSING, 900])) == 900 + CAP
+    assert fm.charge_from_record(fm.CallRecord(sent=2, raw=[fm._MISSING, 0])) == 2 * CAP  # 0 보고도 모르는 시도

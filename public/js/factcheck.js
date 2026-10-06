@@ -70,18 +70,23 @@ const REASON_DETAIL = {
   'jev:fact': '사실', 'jev:uncertain': '애매해서 검수',
 };
 
+/** 표에 그 키가 직접 있을 때만 값(객체가 물려받은 __proto__·constructor·toString 같은 이름에 걸리지 않게). */
+function own(table, key) {
+  return Object.prototype.hasOwnProperty.call(table, key) ? table[key] : undefined;
+}
+
 /** 사유 코드 하나를 한국어로: 정확히 맞는 표 → 'X:세부' → 앞부분 표 + (세부) → 원문. */
 function reasonLabel(code) {
   const c = String(code).trim();
   if (!c) return '';
-  if (REASONS[c]) return REASONS[c];
+  if (own(REASONS, c)) return own(REASONS, c);
   const i = c.indexOf(':');
   if (i > 0) {
     const head = c.slice(0, i);
     const tail = c.slice(i + 1);
-    if (REASON_DETAIL[c]) return `${REASONS[head] || head} — ${REASON_DETAIL[c]}`;
+    if (own(REASON_DETAIL, c)) return `${own(REASONS, head) || head} — ${own(REASON_DETAIL, c)}`;
     if (head === 'other_company') return `다른 회사(${tail})가 주어`;
-    if (REASONS[head]) return `${REASONS[head]}(${tail})`;
+    if (own(REASONS, head)) return `${own(REASONS, head)}(${tail})`;
   }
   return c;
 }
@@ -162,7 +167,7 @@ function evidenceNode(ev) {
 
 /** 확인한 문장 하나(펼치면 근거). */
 function resultNode(r) {
-  const b = BADGE[r.status] || BADGE.unjudged;
+  const b = own(BADGE, r.status) || BADGE.unjudged;
   const li = el('li', null, r.status);
   li.dataset.idx = r.idx;
   li.dataset.status = r.status;
@@ -179,7 +184,7 @@ function resultNode(r) {
   if (why) body.appendChild(el('p', why, 'muted reason'));
   if (r.xbrl) {
     const x = r.xbrl;
-    const parts = [x.account_nm, x.period && `기간 ${x.period}`, FS_DIV[x.fs_div] || x.fs_div, xbrlAmount(x)].filter(Boolean);
+    const parts = [x.account_nm, x.period && `기간 ${x.period}`, own(FS_DIV, x.fs_div) || x.fs_div, xbrlAmount(x)].filter(Boolean);
     body.appendChild(el('div', `XBRL 재무 수치: ${parts.join(' · ')}`, 'xbrl'));
     const note = reasonText(x.note);
     if (note) body.appendChild(el('div', `비고: ${note}`, 'xbrl muted xbrl-note'));
@@ -199,7 +204,7 @@ function skippedNode(r, state) {
   const wrap = el('div', null, 'body');
   wrap.style.paddingTop = '10px';
   wrap.appendChild(el('div', r.text, 'sent'));
-  const why = [CATEGORY[r.category], reasonText(r.reason)].filter(Boolean).join(' — ') || '검수 대상이 아니라고 분류됨';
+  const why = [own(CATEGORY, r.category), reasonText(r.reason)].filter(Boolean).join(' — ') || '검수 대상이 아니라고 분류됨';
   wrap.appendChild(el('span', `이유: ${why}`, 'label'));
   const btn = el('button', '이 문장 검수 요청', 'secondary fc-recheck');
   btn.type = 'button';
@@ -226,7 +231,7 @@ function render(state, job) {
   showJobError(job.error && job.error.message);
 
   const checked = results.filter((r) => r.status !== 'skipped')
-    .sort((a, b) => ((ORDER[a.status] ?? 9) - (ORDER[b.status] ?? 9)) || (a.idx - b.idx));
+    .sort((a, b) => ((own(ORDER, a.status) ?? 9) - (own(ORDER, b.status) ?? 9)) || (a.idx - b.idx));
   const list = $('fc-list');
   // 폴링으로 다시 그려도 사용자가 펼친 문장은 펼친 채로 둔다
   const open = new Set([...list.querySelectorAll('li')].filter((li) => li.querySelector('details')?.open)

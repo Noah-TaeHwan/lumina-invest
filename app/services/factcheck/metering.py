@@ -112,16 +112,18 @@ def _over(reported: int) -> None:
 
 
 def charge_from_record(rec: CallRecord) -> int:
-    """HTTP 훅 기록으로 청구 토큰을 낸다. 요청이 안 나갔으면 0. 응답에 usage 값이 있는데 진짜 정수가 아니면(true·1.9·"1"·음수·
-    null) 비정상이라 호출 몫 그대로. 그 밖에는 나간 요청마다 정수 값, 값이 없는 시도(실패 응답·시간 초과)는 요청 상한."""
+    """HTTP 훅 기록으로 청구 토큰을 낸다. 요청이 안 나갔으면 0.
+    나간 요청마다: usage 값이 0보다 큰 진짜 정수면 그 값(확인된 사용량), 값이 없거나(실패 응답·시간 초과로 응답 없음) 0을
+    보고하면 그 시도는 요청 상한(나간 요청의 0 보고는 믿지 않는다 — 0 환급 금지). 응답에 usage 값이 있는데 진짜 정수가
+    아니면(true·1.9·"1"·음수·null) 비정상이라 max(호출 몫, 확인된 합 + 모르는 시도 × 상한) — 확인된 사용량보다 절대 적지 않게."""
     if rec.sent == 0:
         return 0  # 요청이 나가지 않았다(API 키 없음·캐시)
-    if any(v is not _MISSING and not _valid_int(v) for v in rec.raw):
-        return _slot()
-    known = [v for v in rec.raw if _valid_int(v)]
-    charge = sum(known) + REQUEST_TOKEN_CAP * (rec.sent - len(known))
+    abnormal = [v for v in rec.raw if v is not _MISSING and not _valid_int(v)]
+    known = [v for v in rec.raw if _valid_int(v) and v > 0]
     _over(sum(known))
-    return charge
+    unknown = max(0, rec.sent - len(known) - len(abnormal))  # 값 없음·0 보고·응답 없는 시도
+    base = sum(known) + REQUEST_TOKEN_CAP * unknown
+    return max(_slot(), base) if abnormal else base
 
 
 def charge_for(result: Any, usage: dict) -> int:
