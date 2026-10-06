@@ -23,9 +23,9 @@ import re
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import date
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 
-from app.services.evidence.numbers import number_check
+from app.services.evidence.numbers import number_check, parse
 from app.services.factcheck import scope
 from app.services.factcheck.scope import CompanyIndex, Period
 
@@ -216,10 +216,19 @@ def select_fact(facts: Iterable[Mapping], corp_code: str, account_id: str, perio
     return rows[0] if rows else None
 
 
-def _same_amount(claim: AmountClaim, amount: int) -> bool:
+def _same_amount(claim: AmountClaim, amount: int, rounding_unit: int = 1) -> bool:
+    """부호가 같고 number_check로 같은 값. 공시 값이 rounding_unit(잠정실적 10^10원 등)으로 반올림돼 있으면, 그보다
+    자세한 주장은 그 단위로 반올림해 맞춘다('171.499조' ↔ 171.50조)."""
     if amount and claim.negative != (amount < 0):
         return False
-    return number_check(claim.value_text, str(abs(amount)))
+    if number_check(claim.value_text, str(abs(amount))):
+        return True
+    if rounding_unit > 1:
+        nums = parse(claim.value_text)
+        if len(nums) == 1 and nums[0].kind == "abs" and nums[0].step < rounding_unit:
+            unit = Decimal(rounding_unit)
+            return (abs(nums[0].value) / unit).to_integral_value(ROUND_HALF_UP) == Decimal(abs(amount)) / unit
+    return False
 
 
 def _item(status: str, claim: AmountClaim, account_id: str, row: Mapping, period: Period, fs_div: str,
@@ -237,7 +246,7 @@ def _compare_account(claim: AmountClaim, facts: Sequence[Mapping], corp_code: st
         return None
     note = "restated" if len({int(r["amount"]) for r in rows}) > 1 else None
     for r in rows:
-        if _same_amount(claim, int(r["amount"])):
+        if _same_amount(claim, int(r["amount"]), int(r.get("rounding_unit") or 1)):
             return _item("match", claim, account_id, r, period, fs_div, int(r["amount"]), note=note)
     return _item("mismatch", claim, account_id, rows[0], period, fs_div, int(rows[0]["amount"]), note=note)
 

@@ -35,7 +35,7 @@ from app.services.evidence import judge
 from app.services.evidence.claims import claim_spans
 from app.services.evidence.numbers import number_check
 from app.services.evidence.runner import DEFAULT_POLICY
-from app.services.factcheck import scope, triage, xbrl_check
+from app.services.factcheck import corp_names, scope, triage, xbrl_check
 from app.services.factcheck.scope import CompanyIndex, Period
 
 K = 8
@@ -44,6 +44,7 @@ GLOBAL_CONCURRENCY = 8
 JEV_TIMEOUT_S = 10.0  # 호출 하나(ServiceJevClient 재시도 포함)의 상한
 DEADLINE_S = 30.0  # 검수 실행 하나의 판정 마감
 EVIDENCE_KEYS = ("rcept_no", "report_nm", "period", "section", "text", "superseded", "is_correction")
+HISTORY_SECTIONS = ("CORR",)  # 정정 전/후 이력 문단(T1 store.search 기본 제외와 같다)
 
 log = logging.getLogger("app.factcheck.pipeline")
 
@@ -176,9 +177,11 @@ class FactcheckPipeline:
         try:
             r = self.store.search(corp_code, sentence, periods=sc.search_periods, report_types=sc.report_types,
                                   k=self.k)
-            return list(await r if inspect.isawaitable(r) else r)
+            rows = list(await r if inspect.isawaitable(r) else r)
         except Exception as exc:  # noqa: BLE001 — 저장소 오류는 실행 전체 실패로 올린다
             raise StoreUnavailable(type(exc).__name__) from exc
+        # T1 store.search는 기본으로 대체된 문서·정정 이력 문단을 뺀다. 다른 저장소가 섞어 줘도 판정에 쓰지 않는다
+        return [p for p in rows if not p.get("superseded") and p.get("section") not in HISTORY_SECTIONS]
 
     async def _judge_one(self, idx: int, sentence: str, category: str, note: str | None, sc: scope.Scope,
                          xr: xbrl_check.XbrlResult, corp_code: str, req: asyncio.Semaphore) -> SentenceResult:
@@ -271,6 +274,18 @@ class FactcheckPipeline:
                 t.cancel()
             if tasks:
                 await asyncio.gather(*tasks, return_exceptions=True)
+
+
+def build_pipeline(*, store: Any, jev: Any, corp_entries: Sequence[Mapping] | None = None,
+                   corp_names_path: str | None = None, facts: Sequence[Mapping] | None = None,
+                   facts_path: str | None = None, **kw) -> FactcheckPipeline:
+    """T1 산출물로 파이프라인을 만든다: 상장사명 사전(corp_names JSON 항목 또는 경로 → by_corp_code),
+    XBRL 계약 행(목록 또는 xbrl.save_facts 경로), 저장소(FactcheckStore). 나머지 인자는 FactcheckPipeline으로."""
+    from app.services.factcheck import xbrl  # 실행 시점 import(경로를 줄 때만 쓴다)
+    entries = list(corp_entries) if corp_entries is not None else corp_names.load(corp_names_path) \
+        if corp_names_path else []
+    rows = list(facts) if facts is not None else xbrl.load_facts(facts_path) if facts_path else []
+    return FactcheckPipeline(store=store, jev=jev, names=CompanyIndex.from_entries(entries), facts=rows, **kw)
 
 
 _default: FactcheckPipeline | None = None

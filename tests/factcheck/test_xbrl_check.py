@@ -88,7 +88,7 @@ def test_mismatch_reports_disclosed_value(facts):
     assert (it.account_nm, it.period, it.fs_div, it.amount) == ("매출액", "2026Q2", "CFS", 171499470000000)
     assert r.primary() == {"account_nm": "매출액", "period": "2026Q2", "fs_div": "CFS", "amount": 171499470000000,
                            "unit": "원", "rcept_no": "20260814003699", "cumulative": False, "is_correction": False,
-                           "column": "thstrm_amount", "note": None}
+                           "column": "thstrm", "note": None}
 
 
 def test_multiple_amounts_and_partial(facts):
@@ -221,3 +221,38 @@ def test_margin_sign_and_unit():
     assert run("2026년 2분기 영업이익률은 20% 적자다.", rows).status == "match"
     r = run("2026년 2분기 영업이익률은 -20%다.", rows)
     assert r.primary()["unit"] == "%" and r.primary()["amount"] == -20.0
+
+
+# ---- T1 연동: 정기·잠정 계약 행(report_type periodic/preliminary), 반올림 단위 ----
+
+def _without_half(facts):
+    return [r for r in facts if not (r["corp_code"] == SAMSUNG and r["bsns_year"] == "2026")]
+
+
+def test_preliminary_rows_check_latest_quarter(facts):
+    # 반기보고서 전(잠정실적만 있는 최신 분기): 정정 후 잠정값 171.50조로 대조
+    from conftest import prelim_rows
+    rows = _without_half(facts) + prelim_rows()
+    r = run("2026년 2분기 매출은 171.5조원이다.", rows)
+    assert r.status == "match" and r.items[0].rcept_no == "20260730000001"
+    assert run("2026년 2분기 매출은 171.0조원이다.", rows).status == "mismatch"   # 정정 전 값
+    assert run("2026년 상반기 영업이익은 146.73조원이다.", rows).status == "match"  # 누계실적
+    # 반기보고서(확정)가 들어오면 확정 값이 대표
+    r = run("2026년 2분기 매출은 171.5조원이다.", facts + prelim_rows())
+    assert r.status == "match" and r.items[0].rcept_no == "20260814003699"
+
+
+def test_preliminary_rounding_unit():
+    # 잠정실적은 조원 둘째 자리(10^10원)로 반올림된 값 — 더 자세한 주장은 그 단위로 맞춘다
+    from conftest import prelim_rows
+    rows = prelim_rows()
+    assert run("2026년 2분기 매출은 171.499조원이다.", rows).status == "match"
+    assert run("2026년 2분기 매출은 171조 4,990억원이다.", rows).status == "match"
+    assert run("2026년 2분기 매출은 171.44조원이다.", rows).status == "mismatch"
+
+
+def test_superseded_rows_ignored(facts):
+    from conftest import prelim_rows
+    old = [dict(r, amount=r["amount"] - 10 ** 12, superseded=True, rcept_no="old") for r in prelim_rows()]
+    rows = _without_half(facts) + prelim_rows() + old
+    assert run("2026년 2분기 매출은 170.5조원이다.", rows).status == "mismatch"

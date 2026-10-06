@@ -325,7 +325,7 @@ def test_xbrl_result_keeps_selected_row_fields(facts):
     (r,) = collect(p, "2026년 2분기 매출은 171.5조원으로 HBM 판매 호조 덕분이다.")
     assert sub(r.xbrl, ("unit", "rcept_no", "cumulative", "is_correction", "column")) == {
         "unit": "원", "rcept_no": "20260814003699", "cumulative": False, "is_correction": False,
-        "column": "thstrm_amount"}
+        "column": "thstrm"}
 
 
 class SlowStore(FakeStore):
@@ -425,3 +425,77 @@ def test_module_level_check_passes_force_check():
         assert r.status == "no_evidence"
     finally:
         pipeline.configure(None)
+
+
+# ---- T1 연동: 실제 FactcheckStore(메모리 Qdrant)·corp_names 사전 ----
+
+def _real_store():
+    import numpy as np
+    from qdrant_client import AsyncQdrantClient
+
+    from app.services.evidence.passages import Passage
+    from app.services.factcheck import store as fstore
+    rng = np.random.default_rng(3)
+    vecs: dict[str, list[float]] = {}
+
+    async def embed(text):
+        return vecs.setdefault(text, rng.normal(size=8).tolist())
+
+    st = fstore.FactcheckStore(AsyncQdrantClient(location=":memory:"), embed)
+
+    def doc(rcept_no, report_type, period, **kw):
+        return fstore.DocMeta(corp_code=SAMSUNG, rcept_no=rcept_no, report_type=report_type,
+                              report_nm=f"{report_type} {period}", period=period, rcept_dt=rcept_no[:8], **kw)
+
+    def ps(d, texts, section="II"):
+        return [Passage(fstore.passage_id(SAMSUNG, d.rcept_no, section, i), SAMSUNG, d.rcept_no, section, i, t)
+                for i, t in enumerate(texts)]
+
+    async def load():
+        cur = doc("20260730000001", "preliminary", "2026Q2", is_correction=True)
+        old = doc("20260707000001", "preliminary", "2026Q2", superseded=True)
+        await st.load_document(cur, ps(cur, ["현재값 문단 매출액 171.50조원"]) + ps(cur, ["정정 이력 171.00"], "CORR"))
+        await st.load_document(old, ps(old, ["대체된 문단 매출액 171.00조원"]))
+    asyncio.run(load())
+    return st
+
+
+def test_real_store_current_values_only_and_latest_period():
+    st = _real_store()
+    jev = FakeJev()
+
+    async def go():
+        p = make(st, jev)
+        return [r async for r in p.check(SAMSUNG, "2분기 HBM 판매가 늘었다.")]  # as_of 없음 → store.latest_period
+    (r,) = asyncio.run(go())
+    assert r.status == "no_evidence"
+    (call,) = jev.calls
+    assert "현재값 문단" in call["state"]
+    assert "대체된 문단" not in call["state"] and "정정 이력" not in call["state"]
+    assert asyncio.run(st.latest_period(SAMSUNG)) == "2026Q2"
+
+
+def test_pipeline_drops_superseded_and_history_passages_from_any_store():
+    old = dict(passage("대체된 문단", rcept_no="old"), superseded=True)
+    corr = dict(passage("정정 이력", idx=1), section="CORR")
+    jev = FakeJev()
+    collect(make(FakeStore(default=[old, corr, Q2_PASSAGE]), jev), "2분기 HBM 판매가 늘었다.")
+    (call,) = jev.calls
+    assert call["state"].splitlines()[2:] == [f"[Passage 1] {Q2_TEXT}"]
+
+
+def test_build_pipeline_from_t1_corp_names(facts):
+    from app.services.factcheck import corp_names
+    entries = [{"corp_code": SAMSUNG, "corp_name": "삼성전자", "stock_code": "005930",
+                "norm": corp_names.normalize("삼성전자")},
+               {"corp_code": "00181712", "corp_name": "SK", "stock_code": "034730", "norm": "SK"},
+               {"corp_code": "00164779", "corp_name": "SK하이닉스", "stock_code": "000660",
+                "norm": corp_names.normalize("SK하이닉스")}]
+    p = pipeline.build_pipeline(store=FakeStore(default=[Q2_PASSAGE]), jev=FakeJev(), corp_entries=entries,
+                                facts=facts)
+    assert p.names.display(SAMSUNG) == "삼성전자"
+    rs = by_idx(collect(p, "SK는 2분기 매출 79.3조원을 기록했다.\n(주)삼성전자는 2분기 HBM 판매가 늘었다.\n"
+                           "ＳＫ하이닉스는 HBM 1위다."))
+    assert (rs[0].category, rs[0].reason) == ("other_company", "other_company:SK")
+    assert rs[1].category == "checked"
+    assert (rs[2].category, rs[2].reason) == ("other_company", "other_company:SK하이닉스")  # 전각도 정규화

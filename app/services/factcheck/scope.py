@@ -20,7 +20,14 @@ from dataclasses import dataclass, field
 from datetime import date
 
 from app.services.evidence.subject import _GENERIC as GENERIC_WORDS
-from app.services.evidence.subject import COMMON_WORD_NAMES, normalize
+from app.services.evidence.subject import COMMON_WORD_NAMES
+from app.services.evidence.subject import normalize as _subject_normalize
+from app.services.factcheck import corp_names
+
+
+def normalize(name: str) -> str:
+    """회사명 비교 키: T1 corp_names.normalize(NFKC·(주)·공백·대문자) 뒤 영문 법인 접미(Co., Ltd. 등)도 뗀다."""
+    return corp_names.normalize(_subject_normalize(name))
 
 HORIZON_YEARS = 2  # 주장 기간 뒤 몇 년 안의 보고서까지 검색하나(비교값)
 PRELIM_GROWTH_ACCOUNTS = re.compile(r"매출|영업\s*이익(?!\s*률)")  # 잠정실적 공시에 증감율이 있는 계정
@@ -262,6 +269,11 @@ class CompanyIndex:
                 k = normalize(n)
                 if len(k) >= 2 and k not in common:
                     self._idx.setdefault(k, (corp, n))
+
+    @classmethod
+    def from_entries(cls, entries: Iterable[Mapping]) -> "CompanyIndex":
+        """T1 상장사명 사전(corp_names.build/load 항목)에서 만든다(corp_names.by_corp_code 형식)."""
+        return cls(corp_names.by_corp_code(list(entries)))
 
     def display(self, corp_code: str) -> str:
         """화면·JEV state용 회사 이름(사전의 첫 이름, 없으면 corp_code)."""
