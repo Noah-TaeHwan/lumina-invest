@@ -206,3 +206,26 @@ def test_no_api_key_calls_are_settled_at_zero(fc_pg):
     done, rows = run(fc_pg, go, jev=NoKey())
     assert all(x["status"] in ("unjudged", "skipped") for x in done["results"])
     assert rows["global"][1:] == (0, 0)
+
+
+# ── T4-B3: 일시 혼잡 안내 ──────────────────────────────────────────────────
+
+def test_busy_reservation_message_says_try_again_soon(fc_pg):
+    from app.services.factcheck import metering as fm
+    from app.services.factcheck import quota as fq
+
+    async def go(env):
+        async with env.client() as a, env.client(client_ip="198.51.100.2") as b:
+            first = await a.post("/api/factcheck", json=body())  # 예약을 잡은 채 막혀 있다
+            second = await b.post("/api/factcheck", json=body())
+            env.pipeline.block.set()
+            await poll_done(a, first.json()["job_id"])
+        return first, second
+
+    block = asyncio.Event()
+    limits = fq.QuotaLimits(runs=3, key_tokens=10 ** 9, global_tokens=fm.reservation_for(5) + fm.reservation_for(2))
+    first, second = run(fc_pg, go, limits=limits, block=block)
+    assert first.status_code == 202 and second.status_code == 429
+    d = second.json()["detail"]
+    assert d["code"] == "cap_global_busy" and "잠시 뒤" in d["message"] and "내일" not in d["message"]
+    assert second.headers.get("retry-after") == "60"

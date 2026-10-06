@@ -21,6 +21,8 @@
 from __future__ import annotations
 
 import hashlib
+import json
+import logging
 import secrets
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -31,6 +33,8 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.services.factcheck import settings as fc_settings
 from app.services.factcheck.jobs import JOB_DEADLINE_S
+
+log = logging.getLogger("app.factcheck.quota")
 
 KST = timezone(timedelta(hours=9))
 GLOBAL_KEY = "global"
@@ -66,7 +70,8 @@ class Reservation:
 
 
 class QuotaExceeded(Exception):
-    """예약 실패. code ∈ {cap_runs, cap_key_tokens, cap_global}."""
+    """예약 실패. code ∈ {cap_runs, cap_key_tokens, cap_global, cap_key_busy, cap_global_busy}.
+    *_busy: 오늘 쓴 양(used)만으로는 들어가는데 다른 검수의 예약(reserved) 때문에 잠시 모자라다(예약이 풀리면 된다)."""
 
     def __init__(self, code: str):
         super().__init__(code)
@@ -95,7 +100,7 @@ _TAKE_KEY = text(
 _TAKE_GLOBAL = text(
     "UPDATE factcheck_quota SET count = count + :inc, reserved = reserved + :est, updated_at = now() "
     "WHERE key = :g AND day = :d AND used + reserved + :est <= :cap RETURNING count")
-_COUNT = text("SELECT count FROM factcheck_quota WHERE key = :k AND day = :d")
+_ROW = text("SELECT count, used FROM factcheck_quota WHERE key = :k AND day = :d")
 _RECORD = text("INSERT INTO factcheck_reservations (id, key, day, est, count_run) VALUES (:id, :k, :d, :est, :cr)")
 _CLOSE = text("UPDATE factcheck_reservations SET settled_at = now(), actual = :actual "
               "WHERE id = :id AND settled_at IS NULL RETURNING key, day, est")
@@ -134,12 +139,17 @@ class FactcheckQuota:
                 took = (await db.execute(_TAKE_KEY, {"k": key, "d": d, "inc": inc, "est": est,
                                                      "runs": self.limits.runs, "cap": self.limits.key_tokens})).first()
                 if took is None:
-                    count = (await db.execute(_COUNT, {"k": key, "d": d})).scalar() or 0
-                    raise QuotaExceeded("cap_runs" if count_run and count >= self.limits.runs else "cap_key_tokens")
+                    row = (await db.execute(_ROW, {"k": key, "d": d})).first()
+                    if count_run and row.count >= self.limits.runs:
+                        raise QuotaExceeded("cap_runs")
+                    busy = row.used + est <= self.limits.key_tokens  # 진행 중 예약이 풀리면 들어간다
+                    raise QuotaExceeded("cap_key_busy" if busy else "cap_key_tokens")
                 took = (await db.execute(_TAKE_GLOBAL, {"g": GLOBAL_KEY, "d": d, "inc": inc, "est": est,
                                                         "cap": self.limits.global_tokens})).first()
-                if took is None:
-                    raise QuotaExceeded("cap_global")  # 예외로 begin()이 롤백한다(키 행 예약도 함께 취소)
+                if took is None:  # 예외로 begin()이 롤백한다(키 행 예약도 함께 취소)
+                    row = (await db.execute(_ROW, {"k": GLOBAL_KEY, "d": d})).first()
+                    raise QuotaExceeded("cap_global_busy" if row.used + est <= self.limits.global_tokens
+                                        else "cap_global")
                 await db.execute(_RECORD, {"id": rid, "k": key, "d": d, "est": est, "cr": count_run})
         return Reservation(rid, key, d, est)
 
@@ -162,14 +172,19 @@ class FactcheckQuota:
         return True
 
     async def settle_stale(self, older_than_s: float = STALE_S) -> int:
-        """older_than_s보다 오래된 미정산 예약을 예약량으로 정산하고 그 수를 돌려준다."""
+        """older_than_s보다 오래된 미정산 예약을 예약량으로 정산하고 그 수를 돌려준다. 행마다 따로 정산해, 한 행이
+        실패해도(SettleMismatch 등) 로그만 남기고 나머지를 계속한다(그 행은 다음 복구 때 다시 시도)."""
         async with self._factory() as db:
             rows = (await db.execute(_STALE, {"s": float(older_than_s)})).all()
         n = 0
         for r in rows:
-            async with self._factory() as db:
-                async with db.begin():
-                    n += await self._settle_in(db, r.id, r.est)
+            try:
+                async with self._factory() as db:
+                    async with db.begin():
+                        n += await self._settle_in(db, r.id, r.est)
+            except Exception as exc:  # noqa: BLE001
+                log.error(json.dumps({"event": "factcheck_stale_settle_failed", "reservation": r.id,
+                                      "error": type(exc).__name__}))
         return n
 
 

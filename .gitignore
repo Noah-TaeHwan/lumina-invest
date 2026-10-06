@@ -19,6 +19,7 @@ build/
 .env.dev
 .env.local
 .env.portfolio
+.env.factcheck
 
 # Data (large CSV files)
 data/09*/

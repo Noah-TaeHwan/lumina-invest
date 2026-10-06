@@ -40,6 +40,8 @@ MAX_ATTEMPTS = 2
 SLOT_TOKENS = REQUEST_TOKEN_CAP * MAX_ATTEMPTS
 TRIAGE_CALLS = 1
 BOUND_OVERHEAD = 256  # HTTP 본문 밖 모델 측 틀·특수 토큰 여유
+AUTH_TRIP_AFTER = 3  # 401·403이 이만큼 이어지면 키가 막힌 것으로 본다(키 폐기·만료 때 한도만 타는 것을 막는다)
+AUTH_STATUSES = frozenset({401, 403})
 
 log = logging.getLogger("app.factcheck.metering")
 
@@ -165,12 +167,14 @@ async def _on_response(response: httpx.Response) -> None:
 
 
 def service_client(*, api_key: str | Callable[[], str] = jev.load_api_key,
-                   transport: httpx.AsyncBaseTransport | None = None) -> "MeteredJev":
+                   transport: httpx.AsyncBaseTransport | None = None,
+                   on_auth_block: Callable[[], None] | None = None) -> "MeteredJev":
     """실제 ServiceJevClient를 계량 래퍼로 감싼다. 원시 응답 기록 훅을 단 httpx 클라이언트를 넣고, Redis 캐시·근거 모드 한도는
     쓰지 않는다(빈 캐시·빈 기록기 — 한도는 factcheck_quota가 한다)."""
     client = httpx.AsyncClient(timeout=TIMEOUT_S, transport=transport,
                                event_hooks={"request": [_on_request], "response": [_on_response]})
-    return MeteredJev(ServiceJevClient(_NoCache(), _NoQuota(), api_key=api_key, client=client), audited=True)
+    return MeteredJev(ServiceJevClient(_NoCache(), _NoQuota(), api_key=api_key, client=client), audited=True,
+                      on_auth_block=on_auth_block)
 
 
 class _NoCache:
@@ -194,9 +198,24 @@ class MeteredJev:
     """ServiceJevClient(또는 같은 ask 모양)를 감싸 원장 안에서만 유료 호출을 보낸다. 프로세스에 하나 두고 파이프라인에 넣는다.
     audited=True면 inner의 HTTP 훅 기록(CallRecord)으로 청구한다(service_client가 만든다)."""
 
-    def __init__(self, inner: Any, *, audited: bool = False):
+    def __init__(self, inner: Any, *, audited: bool = False, on_auth_block: Callable[[], None] | None = None):
         self.inner = inner
         self.audited = audited
+        self.on_auth_block = on_auth_block  # 차단기가 열릴 때 한 번 부른다(진입점이 검수를 no_api_key로 닫는다)
+        self.blocked = False
+        self._auth_failures = 0
+
+    def _note_status(self, status: Any) -> None:
+        """401·403이 AUTH_TRIP_AFTER번 이어지면 막는다. 다른 응답이 오면 센 것을 지운다. 막히면 재시작 전까지 그대로."""
+        if status in AUTH_STATUSES:
+            self._auth_failures += 1
+            if self._auth_failures >= AUTH_TRIP_AFTER and not self.blocked:
+                self.blocked = True
+                log.error(json.dumps({"event": "factcheck_auth_blocked", "consecutive": self._auth_failures}))
+                if self.on_auth_block is not None:
+                    self.on_auth_block()
+        elif status is not None:
+            self._auth_failures = 0
 
     async def ask(self, state: str, questions: dict, *, user_id: str, log_ctx: dict | None = None,
                   usage: dict | None = None) -> ServiceJevResult:
@@ -204,6 +223,8 @@ class MeteredJev:
         ledger = _LEDGER.get()
         if ledger is None or ledger.closed:
             return _refused(state, questions, "unmetered")
+        if self.blocked:  # 판정 키가 막혔다: 보내지 않고 한도도 쓰지 않는다
+            return _refused(state, questions, "no_api_key")
         if request_bound(state, questions) > REQUEST_TOKEN_CAP:
             ledger.refused += 1
             return _refused(state, questions, "request_too_large")
@@ -221,6 +242,7 @@ class MeteredJev:
         finally:
             _CALL.reset(token)
         # 예외·취소는 여기 오지 않는다: 잡아 둔 몫이 그대로 남는다
+        self._note_status(getattr(result, "http_status", None))
         if not ledger.closed:
             charge = charge_from_record(rec) if self.audited else charge_for(result, inner_usage)
             ledger.charged += charge - slot

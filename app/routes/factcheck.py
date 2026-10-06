@@ -68,7 +68,11 @@ CAP_MESSAGES = {
     "cap_runs": "익명 검수는 하루 3회까지입니다. 오늘 3회를 모두 썼습니다. 내일(한국 시간 자정 이후) 다시 써 주세요.",
     "cap_key_tokens": "오늘 이 연결에서 쓸 수 있는 검수량을 모두 썼습니다. 내일(한국 시간 자정 이후) 다시 써 주세요.",
     "cap_global": "오늘 검수 한도에 도달했습니다. 내일(한국 시간 자정 이후) 다시 써 주세요.",
+    # 오늘 한도가 남았는데 진행 중인 다른 검수의 예약 때문에 잠시 모자라다(예약이 풀리면 된다)
+    "cap_key_busy": "앞서 시작한 검수가 끝나기를 기다리는 중입니다. 잠시 뒤(1~3분) 다시 시도해 주세요.",
+    "cap_global_busy": "지금 다른 검수가 진행 중이라 잠시 자리가 없습니다. 잠시 뒤(1~3분) 다시 시도해 주세요.",
 }
+BUSY_RETRY_AFTER_S = 60
 BUSY = {"code": "busy", "message": "지금 검수 요청이 많습니다. 잠시 뒤 다시 시도해 주세요."}
 NOT_FOUND = {"code": "not_found", "message": "검수 결과를 찾을 수 없습니다. 15분이 지나 만료됐거나 다른 브라우저에서 시작한 검수입니다."}
 UNAVAILABLE = {"code": "quota_unavailable", "message": "검수 한도를 확인할 수 없어 지금은 검수를 받지 않습니다."}
@@ -97,6 +101,12 @@ def configure(*, quota: FactcheckQuota | None, pipeline: Any = None, keyer: Anon
     (NOT_READY 키: data_unavailable / no_api_key / startup_failed)를 넣는다."""
     global _quota, _pipeline, _keyer, _not_ready
     _quota, _pipeline, _keyer, _not_ready = quota, pipeline, keyer, not_ready
+
+
+def set_not_ready(code: str) -> None:
+    """준비 안 된 이유만 바꾼다(한도·익명 키·파이프라인은 그대로). 판정 키 차단기 등이 부른다."""
+    global _not_ready
+    _not_ready = code
 
 
 def get_quota() -> FactcheckQuota:
@@ -325,7 +335,8 @@ async def _reserve(quota: FactcheckQuota, key: str, est: int, *, count_run: bool
     try:
         return await quota.reserve(key, est, count_run=count_run)
     except QuotaExceeded as exc:
-        raise HTTPException(429, {"code": exc.code, "message": CAP_MESSAGES[exc.code]})
+        headers = {"Retry-After": str(BUSY_RETRY_AFTER_S)} if exc.code.endswith("_busy") else None
+        raise HTTPException(429, {"code": exc.code, "message": CAP_MESSAGES[exc.code]}, headers=headers)
     except Exception as exc:  # noqa: BLE001 — 한도를 셀 수 없으면 부르지 않는다
         log.error(json.dumps({"event": "factcheck_quota_failed", "error": type(exc).__name__}))
         raise HTTPException(503, UNAVAILABLE)
