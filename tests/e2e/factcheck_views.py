@@ -7,7 +7,7 @@ pytest 수집 대상이 아니다(파일명이 test_* 가 아님).
     python tests/e2e/factcheck_views.py
 종료 코드 0 = 모든 확인 통과, 1 = 실패 있음. 실패 기록은 evidence_views.py와 같은 tests/e2e/_artifacts/(gitignore).
 
-시나리오: 첫 검수(점진 표시·⚠️❔ 먼저·근거 펼치기·XBRL·textContent), 입력 초과 안내(2,000자·30문장), 한도 소진(3회·전체),
+시나리오: 첫 검수(점진 표시·⚠️❔ 먼저·근거 펼치기·XBRL·textContent), 입력 초과 안내(2,000자·30문장), 한도 소진(3회·전체·혼잡),
 건너뛴 문장 펼치기·수동 검수, 만료(404), 모바일 375px 가로 넘침 없음.
 """
 import asyncio
@@ -83,6 +83,7 @@ class FakeFc:
         self.post, self.polls = post, list(polls or [(200, job("done", ALL))])
         self.recheck, self.after_recheck = recheck, after_recheck
         self.calls: list[tuple[str, str, dict | None]] = []
+        self.ctypes: list[str] = []  # POST마다 보낸 Content-Type
 
     def respond(self, method, path, query, body):
         self.calls.append((method, path, body))
@@ -141,6 +142,8 @@ async def open_fc(browser, base, fake: FakeFc, *, width=1280, height=900):
                 body = json.loads(route.request.post_data)
             except ValueError:
                 body = None
+        if route.request.method == "POST":  # 서버는 JSON Content-Type만 받는다(교차 출처 차단)
+            fake.ctypes.append((await route.request.all_headers()).get("content-type", ""))
         status, payload = fake.respond(route.request.method, path, query, body)
         await route.fulfill(status=status, content_type="application/json", body=json.dumps(payload))
 
@@ -240,6 +243,12 @@ async def s_quota(browser, base, ck):
     await page.wait_for_function("document.getElementById('fc-error').innerText.startsWith('오늘 검수 한도')")
     ck.ok(await page.inner_text("#fc-error") == glob, "quota: 전체 한도 안내")
     ck.ok(await page.is_hidden("#fc-result"), "quota: 결과 영역은 열리지 않는다")
+    busy = "지금 검수 요청이 많습니다. 잠시 뒤 다시 시도해 주세요."
+    fake.post = (503, {"detail": {"code": "busy", "message": busy}})
+    await page.click("#fc-submit")
+    await page.wait_for_function("document.getElementById('fc-error').innerText.startsWith('지금 검수 요청이')")
+    ck.ok(await page.inner_text("#fc-error") == busy and not await page.is_disabled("#fc-submit"),
+          "quota: 혼잡(503) 안내 뒤 다시 보낼 수 있다")
     clean(ck, page, "quota")
     await ctx.close()
 
@@ -263,6 +272,8 @@ async def s_skipped(browser, base, ck):
     await page.wait_for_function("document.getElementById('fc-summary').innerText.endsWith('건너뜀 0')")
     ck.ok([p for m, p, _ in fake.calls if m == "POST" and "recheck" in p] == [f"/api/factcheck/{JOB}/recheck/3"],
           "skipped: 수동 검수 요청 경로")
+    ck.ok(fake.ctypes and all(c.startswith("application/json") for c in fake.ctypes),
+          f"skipped: 검수·수동 검수 POST는 JSON Content-Type {fake.ctypes}")
     ck.ok(await page.is_hidden("#fc-skipped"), "skipped: 건너뛴 문장이 없으면 상자를 숨긴다")
     ck.ok(await badges(page) == ["⚠️", "❔", "✅", "✅", "✅"], f"skipped: 검수 결과로 옮겨진다 {await badges(page)}")
     clean(ck, page, "skipped")

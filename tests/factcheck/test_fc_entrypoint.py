@@ -45,8 +45,28 @@ def test_factcheck_entrypoint_exposes_only_allowlisted_paths():
     api = {p for p in paths if p.startswith("/api")}
     assert api == {"/api/health", "/api/factcheck/companies", "/api/factcheck", "/api/factcheck/{job_id}",
                    "/api/factcheck/{job_id}/recheck/{idx}"}
-    assert {"/", "/factcheck.html", "/js", "/css"} <= paths
-    assert "/app.html" not in paths and "/login.html" not in paths
+    assert {"/", "/factcheck.html", "/js/factcheck.js", "/favicon.ico"} <= paths
+    assert not {"/app.html", "/login.html", "/js", "/css", "/docs", "/redoc", "/openapi.json"} & paths
+
+
+def test_factcheck_entrypoint_serves_only_its_own_static_files_and_no_docs():
+    """원본 화면 스크립트(sysadmin.js 등)·문서 경로는 열리지 않는다(검수 결과 13)."""
+    code = ("import asyncio, json, httpx, app.factcheck_main as m\n"
+            "async def go():\n"
+            "    t = httpx.ASGITransport(app=m.app)\n"
+            "    async with httpx.AsyncClient(transport=t, base_url='http://t') as c:\n"
+            "        paths = ['/', '/factcheck.html', '/js/factcheck.js', '/favicon.ico', '/js/sysadmin.js', '/js/core.js',\n"
+            "                 '/css/app.css', '/app.html', '/docs', '/redoc', '/openapi.json']\n"
+            "        return {p: (await c.get(p)).status_code for p in paths}\n"
+            "print(json.dumps(asyncio.run(go())))")
+    out = subprocess.run([sys.executable, "-c", code], cwd=ROOT, capture_output=True, text=True, timeout=120,
+                         env={"PATH": "/usr/bin:/bin", "DATABASE_URL": "postgresql+asyncpg://x:x@localhost/x",
+                              "PYTHONPATH": str(ROOT)})
+    assert out.returncode == 0, out.stderr
+    codes = json.loads(out.stdout.strip().splitlines()[-1])
+    assert all(codes[p] == 200 for p in ("/", "/factcheck.html", "/js/factcheck.js", "/favicon.ico")), codes
+    assert all(codes[p] == 404 for p in ("/js/sysadmin.js", "/js/core.js", "/css/app.css", "/app.html", "/docs",
+                                         "/redoc", "/openapi.json")), codes
 
 
 def _main_router_registrations() -> list[str]:

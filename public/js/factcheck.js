@@ -239,7 +239,8 @@ async function recheck(state, idx, btn) {
   let res;
   try {
     res = await fetch(`/api/factcheck/${encodeURIComponent(state.jobId)}/recheck/${idx}`,
-      { method: 'POST', credentials: 'same-origin' });
+      // 서버는 교차 출처 요청을 막으려고 JSON Content-Type만 받는다
+      { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: '{}' });
   } catch (_) {
     btn.disabled = false;
     return showJobError('서버에 연결하지 못했습니다. 잠시 뒤 다시 시도해 주세요.');
