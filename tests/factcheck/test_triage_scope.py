@@ -443,3 +443,13 @@ def test_assess_with_inherited_period():
     assert [m.period.label for m in s.mentions] == ["2026Q2"]
     p = scope.period_scope(text, AS_OF, inherited=q2)
     assert [m.period.label for m in p.mentions] == ["2025Q2"] and not p.ambiguous_period
+
+
+@pytest.mark.parametrize("text, units", [
+    ("같은 분기 매출", {"quarter"}), ("당분기 매출", {"quarter"}), ("동 분기 매출", {"quarter"}),
+    ("해당 분기 매출", {"quarter"}), ("같은 반기 매출", {"half"}), ("해당 반기 매출", {"half"}),
+    ("같은 해 매출", {"year"}), ("같은 연도 매출", {"year"}), ("같은 회계연도 매출", {"year"}),
+    ("같은 기간 매출", {"any"}), ("동 기간 매출", {"any"}), ("해당 기간 매출", {"any"}),
+])
+def test_relative_units(text, units):
+    assert scope.relative_units(text) == units

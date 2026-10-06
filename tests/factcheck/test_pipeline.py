@@ -154,12 +154,12 @@ def test_compound_sentence_partial_confirmation(facts):
     assert r.xbrl["amount"] == 171499470000000
 
 
-def test_xbrl_match_alone_is_not_supported(facts):
-    # 숫자 하나 일치를 문장 전체 ✅로 올리지 않는다(Codex #2): JEV가 지지하지 않으면 ❔
-    p = make(FakeStore(default=[passage("반도체 사업 개요")]), FakeJev(), facts)
+def test_xbrl_match_alone_amount_only_sentence_is_exact(facts):
+    # 금액 주장만 + XBRL 일치 → 결정적 대조 ✅(xbrl_exact, JEV 없음). 설계 문서 Codex #2 예외(2026-10-06 개정)
+    jev = FakeJev()
+    p = make(FakeStore(default=[passage("반도체 사업 개요")]), jev, facts)
     (r,) = collect(p, "2026년 2분기 매출은 171.5조원이다.")
-    assert (r.status, r.reason) == ("no_evidence", "xbrl_partial")
-
+    assert (r.status, r.reason) == ("supported", "xbrl_exact") and jev.calls == []
 
 def test_xbrl_mismatch_is_contradicted_without_jev(facts):
     jev = FakeJev({"172": ("support", 0)})
@@ -591,20 +591,21 @@ def _check(corp, text, store, jev, facts):
     return r
 
 
+# JEV 경로(금액 외 낱말이 있는 문장)에서 근거 줄이 판정 문단 0번인지 본다. 금액 주장만인 문장은 xbrl_exact로 JEV를 안 탄다
 @pytest.mark.parametrize("corp, text, line", [
-    (SAMSUNG, "삼성전자의 2025년 2분기 연결 영업이익은 4.68조원이다.",
+    (SAMSUNG, "삼성전자의 2025년 2분기 연결 영업이익은 4.68조원으로 HBM 덕분이다.",
      "삼성전자 연결 영업이익 2025년 2분기(3개월): 4,676,057백만원 — 접수번호 20250814003156"),
-    (SAMSUNG, "삼성전자의 2025년 2분기 연결 영업이익은 4.7조원이다.",
+    (SAMSUNG, "삼성전자의 2025년 2분기 연결 영업이익은 4.7조원으로 HBM 덕분이다.",
      "삼성전자 연결 영업이익 2025년 2분기(3개월): 4,676,057백만원 — 접수번호 20250814003156"),
-    (SAMSUNG, "삼성전자의 2025년 상반기 연결 영업이익은 11.4조원이다.",     # 누적 행
+    (SAMSUNG, "삼성전자의 2025년 상반기 연결 영업이익은 11.4조원으로 HBM 덕분이다.",     # 누적 행
      "삼성전자 연결 영업이익 2025년 상반기(누적): 11,361,329백만원 — 접수번호 20250814003156"),
-    (SAMSUNG, "삼성전자의 2025년 2분기 별도 영업이익은 1.19조원이다.",     # OFS 힌트
+    (SAMSUNG, "삼성전자의 2025년 2분기 별도 영업이익은 1.19조원으로 HBM 덕분이다.",     # OFS 힌트
      "삼성전자 별도 영업이익 2025년 2분기(3개월): 1,190,832백만원 — 접수번호 20250814003156"),
-    (SAMSUNG, "삼성전자의 2025년 1~3분기 연결 영업이익은 23.5조원이다.",    # 3분기 누적 행
+    (SAMSUNG, "삼성전자의 2025년 1~3분기 연결 영업이익은 23.5조원으로 HBM 덕분이다.",    # 3분기 누적 행
      "삼성전자 연결 영업이익 2025년 1~3분기(누적): 23,527,391백만원 — 접수번호 20251114002447"),
-    (HYNIX, "SK하이닉스의 2023년 3분기 연결 영업손실은 1.79조원이었다.",   # 음수 행
+    (HYNIX, "SK하이닉스의 2023년 3분기 연결 영업손실은 1.79조원으로 HBM 탓이었다.",   # 음수 행
      "SK하이닉스 연결 영업이익 2023년 3분기(3개월): -1,791,961백만원 — 접수번호 20231114002574"),
-    (SAMSUNG, "삼성전자의 2025년 2분기 연결 영업이익률은 6.3%다.",
+    (SAMSUNG, "삼성전자의 2025년 2분기 연결 영업이익률은 6.3%로 HBM 덕분이다.",
      "삼성전자 연결 영업이익률 2025년 2분기(3개월): 6.27% — 접수번호 20250814003156"),
 ])
 def test_xbrl_line_is_first_passage(corp, text, line):
@@ -711,7 +712,8 @@ def test_preliminary_row_line_is_not_labeled_as_financial_statement(correction, 
 
 def test_periodic_row_line_keeps_financial_statement_head():
     jev = TextJev(XBRL_HEAD)
-    _check(SAMSUNG, "삼성전자의 2025년 2분기 연결 영업이익은 4.68조원이다.", FakeStore(default=NOISE), jev, SS_FACTS)
+    _check(SAMSUNG, "삼성전자의 2025년 2분기 연결 영업이익은 4.68조원으로 HBM 덕분이다.", FakeStore(default=NOISE), jev,
+           SS_FACTS)
     assert _texts(jev)[0].startswith(XBRL_HEAD)
 
 
@@ -729,7 +731,8 @@ def test_separate_only_with_other_account_mismatch_is_contradicted():
 
 def test_all_items_matched_lines_joined_into_one_passage():
     store, jev = FakeStore(default=NOISE), TextJev(XBRL_HEAD)
-    r = _check(SAMSUNG, "삼성전자의 2025년 2분기 연결 매출은 74.6조원, 영업이익은 4.7조원이다.", store, jev, SS_FACTS)
+    r = _check(SAMSUNG, "삼성전자의 2025년 2분기 연결 매출은 74.6조원, 영업이익은 4.7조원으로 HBM 덕분이다.", store, jev,
+               SS_FACTS)
     first = _texts(jev)[0]
     assert "74,566,317백만원" in first and "4,676,057백만원" in first
     assert first.count(XBRL_HEAD) == 2 and len(_texts(jev)) == 8
@@ -773,7 +776,7 @@ def test_inherit_previous_sentence_period_mismatch():
 def test_inherit_previous_sentence_period_supported():
     rs = _run_text("삼성전자의 2025년 2분기 연결 매출은 74.6조원이다. 같은 분기 연결 영업이익은 4.7조원이다.",
                    FakeStore(default=NOISE), TextJev(XBRL_HEAD), SS_FACTS)
-    assert (rs[1].status, rs[1].reason) == ("supported", "period_inherited:2025Q2")
+    assert (rs[1].status, rs[1].reason) == ("supported", "xbrl_exact,period_inherited:2025Q2")  # 금액 주장만
 
 
 def test_inherit_skips_sentences_without_period():
@@ -798,3 +801,211 @@ def test_inherit_uses_nearest_previous_period():
     rs = _run_text("2024년 2분기 매출은 74.1조원이다. 삼성전자의 2025년 2분기 연결 매출은 74.6조원이다. "
                    "같은 분기 연결 영업이익은 89.5조원이다.", FakeStore(default=NOISE), FakeJev(), SS_FACTS)
     assert rs[2].reason == "xbrl_mismatch,period_inherited:2025Q2"
+
+
+# ---- 금액 주장만으로 된 문장의 결정적 ✅(xbrl_exact, JEV 0회) ----
+
+SS = "삼성전자의 2025년 2분기 연결 영업이익은"
+
+
+@pytest.mark.parametrize("text", [
+    f"{SS} 4.7조원이다.",
+    f"{SS} 4.68조원이다.",
+    f"{SS} 약 4.7조원이다.",
+    f"{SS} 4.7조원을 기록했다.",
+    f"{SS} 4.7조원으로 집계됐다.",
+    "2025년 2분기 연결 영업이익은 4.7조원이었다.",
+    "삼성전자의 2025년 2분기 연결 매출은 74.6조원, 영업이익은 4.7조원이다.",
+    "삼성전자의 2025년 2분기 연결 매출은 74.6조원 그리고 영업이익은 4.7조원입니다.",
+    "삼성전자의 2025년 2분기 연결 영업이익률은 6.27%였다.",
+    "SK하이닉스의 2023년 3분기 연결 영업손실은 1.79조원이었다.",
+])
+def test_amount_only_sentence_is_exact_without_jev(text):
+    corp = HYNIX if text.startswith("SK하이닉스") else SAMSUNG
+    store, jev = FakeStore(default=NOISE), FakeJev()
+    r = _check(corp, text, store, jev, SS_FACTS + HY_FACTS)
+    assert (r.status, r.reason) == ("supported", "xbrl_exact"), text
+    assert jev.calls == [] and store.calls == [], text
+    assert r.evidence[0]["section"] == "XBRL" and r.evidence[0]["text"].startswith(XBRL_HEAD)
+
+
+@pytest.mark.parametrize("text", [
+    f"{SS} 4.7조원으로 사상 최대다.",
+    f"{SS} 4.7조원으로 전년 대비 감소했다.",
+    f"{SS} 4.7조원으로 HBM 덕분이다.",
+    f"{SS} 4.7조원으로 흑자다.",
+    f"{SS} 약간 4.7조원이다.",
+    "삼성전자의 2025년 2분기 연결 기준 영업이익은 4.7조원이다.",
+    f"{SS} 4.7조원 집계됐다.",                                      # '집계됐다'는 '로 집계됐다'만
+    "삼성전자 SK하이닉스 2025년 2분기 연결 영업이익은 4.7조원이다.",   # 다른 회사 이름은 지우지 않는다
+])
+def test_extra_words_go_to_jev(text):
+    store, jev = FakeStore(default=NOISE), FakeJev()
+    r = _check(SAMSUNG, text, store, jev, SS_FACTS)
+    assert (r.status, r.reason) == ("no_evidence", "xbrl_partial"), text
+    assert len(jev.calls) == 1, text
+
+
+def test_exact_not_used_for_mismatch_partial_separate_ambiguous_shifted(facts):
+    cases = [
+        (f"{SS} 8.4조원이다.", ("contradicted", "xbrl_mismatch")),
+        ("삼성전자의 2025년 2분기 연결 영업이익은 4.7조원, 순이익은 6.7조원이다.", ("no_evidence", "xbrl_partial")),
+        ("삼성전자의 2025년 2분기 영업이익은 1.2조원이다.", ("no_evidence", "separate_only")),
+        ("같은 분기 연결 영업이익은 4.7조원이다.", ("no_evidence", "period_ambiguous")),
+    ]
+    for text, want in cases:
+        r = _check(SAMSUNG, text, FakeStore(default=NOISE), FakeJev(), SS_FACTS)
+        assert (r.status, r.reason) == want, text
+    (r,) = collect(make(FakeStore(default=NOISE), FakeJev(), facts), "3분기 매출은 86.1조원이다.")  # shifted
+    assert (r.status, r.reason) == ("no_evidence", "period_ambiguous")
+
+
+def test_exact_not_used_for_force_checked_out_of_scope():
+    jev = TextJev(XBRL_HEAD)
+    p = FactcheckPipeline(store=FakeStore(default=NOISE), jev=jev, facts=SS_FACTS, names=NAMES, user_id="anon:test")
+
+    async def go(text):
+        return [r async for r in p.check(SAMSUNG, text, as_of="2026H1", force_check=True)]
+    (r,) = asyncio.run(go("SK하이닉스의 2025년 2분기 연결 영업이익은 4.7조원이다."))   # 다른 회사
+    assert r.reason != "xbrl_exact" and "xbrl_exact" not in (r.reason or "")
+    (r,) = asyncio.run(go("삼성전자의 2025년 2분기 연결 영업이익은 4.7조원으로 예상된다."))   # 범위 밖(전망)
+    assert "xbrl_exact" not in (r.reason or "") and len(jev.calls) >= 1
+
+
+def test_exact_with_inherited_period_keeps_reason():
+    rs = _run_text("삼성전자의 2025년 2분기 연결 매출은 74.6조원이다. 같은 분기 연결 영업이익은 4.7조원이다.",
+                   FakeStore(default=NOISE), FakeJev(), SS_FACTS)
+    assert (rs[0].status, rs[0].reason) == ("supported", "xbrl_exact")
+    assert (rs[1].status, rs[1].reason) == ("supported", "xbrl_exact,period_inherited:2025Q2")
+
+
+def test_jev_sentence_gets_inherited_period_in_parentheses():
+    jev = FakeJev()
+    rs = _run_text("삼성전자의 2025년 2분기 연결 매출은 74.6조원이다. 같은 분기 연결 영업이익은 4.7조원으로 HBM 덕분이다.",
+                   FakeStore(default=NOISE), jev, SS_FACTS)
+    (call,) = jev.calls
+    assert call["claim"] == "같은 분기(2025년 2분기) 연결 영업이익은 4.7조원으로 HBM 덕분이다."
+    assert rs[1].text == "같은 분기 연결 영업이익은 4.7조원으로 HBM 덕분이다."   # 화면 원문은 그대로
+
+
+# ---- 상속 기간의 단위 맞춤 ----
+
+H1_FACTS = SS_FACTS + [_fact(SAMSUNG, REV, 153_706_800_000_000, "2025H1", "2025-01-01", "2025-06-30", SS_RCEPT,
+                             cumulative=True, nm="매출액")]
+
+
+@pytest.mark.parametrize("text, reason", [
+    ("2025년 상반기 연결 매출은 153.7조원이다. 같은 분기 연결 영업이익은 4.7조원이다.", "period_ambiguous"),
+    ("2025년 2분기 연결 매출은 74.6조원이다. 같은 반기 연결 영업이익은 11.4조원이다.", "period_ambiguous"),
+    ("2025년 2분기 연결 매출은 74.6조원이다. 같은 해 연결 영업이익은 43.6조원이다.", "period_ambiguous"),
+    ("2025년 상반기 연결 매출은 153.7조원이다. 같은 반기 연결 영업이익은 11.4조원이다.", "xbrl_exact,period_inherited:2025H1"),
+    ("2025년 상반기 연결 매출은 153.7조원이다. 같은 기간 연결 영업이익은 11.4조원이다.", "xbrl_exact,period_inherited:2025H1"),
+    ("2025년 2분기 연결 매출은 74.6조원이다. 동 기간 연결 영업이익은 4.7조원이다.", "xbrl_exact,period_inherited:2025Q2"),
+])
+def test_inherit_requires_matching_unit(text, reason):
+    rs = _run_text(text, FakeStore(default=NOISE), FakeJev(), H1_FACTS)
+    assert rs[1].reason == reason, text
+
+
+@pytest.mark.parametrize("text, reason", [
+    (f"{SS} 4.7조원으로 시장 기대치를 넘었다.", "forecast"),   # '기대' → 범위 밖(전망 표지)
+    (f"{SS} 4.7조원으로 컨센서스를 웃돌았다.", "market"),      # '컨센서스' → 범위 밖(시장)
+])
+def test_expectation_words_are_out_of_scope_not_exact(text, reason):
+    store, jev = FakeStore(default=NOISE), FakeJev()
+    r = _check(SAMSUNG, text, store, jev, SS_FACTS)
+    assert (r.status, r.reason) == ("skipped", reason) and jev.calls == []
+
+
+# ---- PR #63 적대 검수: 결정적 ✅(xbrl_exact)의 틀린 ✅ 경로 막기 ----
+
+def _not_exact(text, facts=SS_FACTS, corp=SAMSUNG):
+    r = _check(corp, text, FakeStore(default=NOISE), FakeJev(), facts)
+    assert "xbrl_exact" not in (r.reason or ""), (text, r.status, r.reason)
+    return r
+
+
+@pytest.mark.parametrize("text", [
+    f"{SS} - 4.68조원이다.",                      # 띄어 쓴 ASCII 빼기표
+    f"{SS} 4.68조원으로 前年比 減少.",              # 한자
+    f"{SS} 4.68조원(↓)이다.",                     # 기호
+    f"{SS} 4.68조원이다!?",
+])
+def test_residual_symbols_block_exact(text):
+    r = _not_exact(text)
+    assert r.status != "supported"
+
+
+@pytest.mark.parametrize("text", [f"{SS} −4.68조원이다.", f"{SS} △4.68조원이다."])
+def test_unicode_minus_and_triangle_are_negative(text):
+    # '−'(U+2212)·'△'(DART 음수 표기)는 음수 → 실제 흑자 4.68조와 어긋남 ⚠️(결정적 ✅ 아님)
+    r = _not_exact(text)
+    assert (r.status, r.reason) == ("contradicted", "xbrl_mismatch")
+
+
+def test_unicode_minus_loss_matches_negative_fact():
+    r = _check(HYNIX, "SK하이닉스의 2023년 3분기 연결 영업이익은 △1.79조원이었다.", FakeStore(default=NOISE), FakeJev(),
+               HY_FACTS)
+    assert (r.status, r.reason) == ("supported", "xbrl_exact")
+    r = _check(HYNIX, "SK하이닉스의 2023년 3분기 연결 영업이익은 −1.79조원이었다.", FakeStore(default=NOISE), FakeJev(),
+               HY_FACTS)
+    assert (r.status, r.reason) == ("supported", "xbrl_exact")
+
+
+@pytest.mark.parametrize("text", [
+    "삼성전자의 2025년 1분기 및 2분기 연결 영업이익은 4.7조원이다.",
+    "삼성전자의 2025년 1분기, 2분기 연결 영업이익은 4.7조원이다.",
+    "삼성전자의 2025년 1분기도 2분기도 연결 영업이익은 4.7조원이다.",
+    "삼성전자의 2025년 6월 말 연결 영업이익은 4.7조원이다.",        # 월 표기는 결정적 ✅ 금지
+    "삼성전자의 2025년 6월 연결 영업이익은 4.7조원이다.",
+])
+def test_period_set_must_match_items(text):
+    _not_exact(text)
+
+
+@pytest.mark.parametrize("text", [
+    "삼성전자의 2025년 2분기 연결 및 별도 영업이익은 4.68조원이다.",
+    "삼성전자의 2025년 2분기 영업이익은 4.68조원(별도)이다.",
+    "삼성전자의 2025년 2분기 연결 영업이익은 4.68조원, 별도도 같다.",
+])
+def test_fs_words_must_match_items(text):
+    _not_exact(text)
+
+
+def test_fs_word_matching_item_is_exact():
+    r = _check(SAMSUNG, "삼성전자의 2025년 2분기 별도 영업이익은 1.19조원이다.", FakeStore(default=NOISE), FakeJev(), SS_FACTS)
+    assert (r.status, r.reason) == ("supported", "xbrl_exact")
+
+
+@pytest.mark.parametrize("text", [f"{SS} 4조원이다.", f"{SS} 약 4조원이다.", f"{SS} 5조원이다.",
+                                  f"{SS} 4.6조원이다."])   # 4.676조를 버림해야 맞는 값(반올림이면 4.7)
+def test_coarse_amount_goes_to_jev(text):
+    # 유효숫자 1자리·버림 일치는 결정적 ✅ 금지(number_check 자체는 그대로 — ⚠️로 바꾸지 않는다)
+    r = _not_exact(text)
+    assert r.reason != "xbrl_mismatch" or text.endswith("5조원이다.")
+
+
+@pytest.mark.parametrize("text", [f"{SS} 4.7조원이다.", f"{SS} 4.68조원이다.",
+                                  "삼성전자의 2025년 2분기 연결 매출은 74.6조원이다.",
+                                  "삼성전자의 2025년 2분기 연결 영업이익률은 6.27%였다."])
+def test_precise_amount_still_exact(text):
+    r = _check(SAMSUNG, text, FakeStore(default=NOISE), FakeJev(), SS_FACTS)
+    assert (r.status, r.reason) == ("supported", "xbrl_exact"), text
+
+
+def test_no_inherit_from_other_company_sentence():
+    rs = _run_text("SK하이닉스의 2025년 2분기 연결 매출은 22.2조원이다. 같은 분기 연결 영업이익은 4.68조원이다.",
+                   FakeStore(default=NOISE), FakeJev(), SS_FACTS)
+    assert rs[0].category == "other_company"
+    assert (rs[1].status, rs[1].reason) == ("no_evidence", "period_ambiguous")
+
+
+def test_company_name_keeps_following_particle():
+    _not_exact("2025년 2분기 연결 영업이익은 삼성전자보다 4.68조원이다.")
+
+
+def test_account_name_with_period_word_not_exact():
+    net = "ifrs-full_ProfitLoss"
+    rows = [_fact(SAMSUNG, net, 34_451_351_000_000, "2025", "2025-01-01", "2025-12-31", "r1", nm="당기순이익",
+                  reprt_code="11011")]
+    _not_exact("삼성전자의 2025년 연결 반기순이익은 34.5조원이다.", rows)

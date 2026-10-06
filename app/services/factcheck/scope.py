@@ -399,6 +399,28 @@ class Scope:
         return [m.period for m in self.mentions]
 
 
+def relative_units(text: str) -> set[str]:
+    """문장 속 상대 기간 표현의 단위: quarter('같은 분기·당분기·동 분기·해당 분기·이번 분기') / half('반기') /
+    year('해·연도·회계연도') / any('같은 기간·동 기간·해당 기간'). 앞 문장 기간을 이어받을 때 단위를 맞추는 데 쓴다."""
+    out = set()
+    for m in SAME_PERIOD.finditer(text):
+        t = m.group(0)
+        out.add("quarter" if "분기" in t else "half" if "반기" in t else "any" if "기간" in t else "year")
+    return out
+
+
+def unit_accepts(unit: str, p: Period) -> bool:
+    """상대 기간 단위가 이어받을 기간을 받을 수 있는가: 분기류 ← 분기 단독(YYYYQn), 반기류 ← YYYYH1/H2,
+    해·연도류 ← YYYY, 기간류 ← 무엇이든."""
+    if unit == "quarter":
+        return p.kind == "quarter" and not p.cumulative
+    if unit == "half":
+        return p.kind == "half"
+    if unit == "year":
+        return p.kind == "year"
+    return True
+
+
 def relative_only(text: str, mentions: Sequence[PeriodMention]) -> bool:
     """해석된 기간이 하나도 없고(연도 없는 '2분기'·'당분기'도 해석되면 기간이 있다) '같은 분기' 같은 상대 기간 표현이
     있는가."""
