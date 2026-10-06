@@ -141,6 +141,11 @@ docker compose -f compose.factcheck.yml --env-file .env.factcheck exec postgres 
 
 ## 7. 운영 메모
 
+- **키가 막힌 동안의 시험 호출 비용:** 차단 중 10분마다 하는 시험 호출이 401을 받으면 응답에 사용량 값이 없어 회당 요청
+  상한(28,000 토큰)으로 `auth-probe` 키 한도에 정산된다. 키별 상한(2,500,000)으로 하루 약 89회까지이고, 넘으면 그날은 시험
+  호출이 멈춘다(다음 날 다시 시작). 이 사용량은 전체 상한(1천만 토큰/일)에서도 최대 그만큼 빠진다. 키를 바꾼 뒤 시험 호출을
+  기다리지 않고 바로 열려면 앱을 재시작한다(`docker compose … restart app`).
+
 - `FACTCHECK_ALLOWED_ORIGINS`는 compose가 `https://${FACTCHECK_DOMAIN}`으로 채운다. 비우면 TLS 프록시 뒤에서 브라우저 POST가
   모두 403이 된다.
 - 앱은 Caddy 고정 주소(172.30.1.10)만 신뢰 프록시로 보고 X-Forwarded-For의 사용자 주소로 익명 한도를 센다(리드 실측:

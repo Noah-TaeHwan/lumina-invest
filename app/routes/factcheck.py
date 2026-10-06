@@ -81,7 +81,8 @@ NOT_READY = {  # 진입점 준비 상태(factcheck_main.prepare)가 검수를 �
     "no_api_key": "판정 API 키가 설정되지 않아 지금은 검수를 받지 않습니다.",
     "startup_failed": "서버 준비 중 오류가 있어 지금은 검수를 받지 않습니다.",
 }
-_SENTENCE_END = re.compile(r"(?<=[.!?？！。])\s+|\n+")
+# 문장부호(연속 부호는 한 덩어리) 뒤에서 나눈다. 단 뒤가 숫자면(3.5조) 경계가 아니다. 줄바꿈도 경계
+_SENTENCE_END = re.compile(r"(?<=[.!?？！。])(?![.!?？！。\d])\s*|\n+")
 
 router = APIRouter(prefix="/api/factcheck", tags=["factcheck"])
 
@@ -187,8 +188,8 @@ def key_source(ip: str) -> str:
 
 
 def count_sentences(text: str) -> int:
-    """입력 제한용 문장 수: 문장부호(. ! ? 와 전각) 뒤 공백·줄바꿈으로 나눈 비지 않은 조각 수. claim_spans와 달리 짧은 문장
-    ('네.')도 센다. 소수점(3.5조)은 뒤에 공백이 없어 경계가 아니다."""
+    """입력 제한용 문장 수: 문장부호(. ! ? 와 전각) 뒤·줄바꿈에서 나눈 비지 않은 조각 수. claim_spans와 달리 짧은 문장
+    ('네.')도, 공백 없이 이어 붙인 문장('네.네.')도 센다. 부호 뒤가 숫자면(소수점 3.5) 경계가 아니고, 이어진 부호(...)는 하나다."""
     return sum(1 for piece in _SENTENCE_END.split(text) if piece.strip())
 
 
@@ -325,7 +326,9 @@ def _launch(job: Job, pipeline: Any, jobs: JobStore, quota: FactcheckQuota, res:
 
     def done(t: asyncio.Task) -> None:
         if t.cancelled() and job.status == "running":
-            job.status, job.error = "failed", {"code": "cancelled", "message": "서버가 검수를 멈췄습니다. 다시 시도해 주세요."}
+            cancelled = {"code": "cancelled", "message": "서버가 검수를 멈췄습니다. 다시 시도해 주세요."}
+            # 수동 검수가 첫 실행 전에 취소돼도 이전 오류(예: pipeline_error)는 덮지 않는다(_run의 prev 규칙과 같게)
+            job.status, job.error = "failed", (prev[1] if prev is not None and prev[1] else cancelled)
         ensure_settled(jobs, quota, res, ledger)
 
     task.add_done_callback(done)
