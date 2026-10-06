@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>공시 팩트체커</title>
+  <link rel="icon" href="/favicon.ico" />
+  <!-- 외부 CSS·폰트 없이 인라인 스타일만 쓴다(배포판·e2e에서 화면이 네트워크에 기대지 않게) -->
+  <style>
+    :root {
+      --bg: #f7f7f5; --panel: #ffffff; --ink: #1d1d1f; --muted: #5f6368; --line: #dcdcd7;
+      --accent: #1f5fbf; --warn: #a15c00; --warn-bg: #fff4e0; --unk: #4a4f8a; --unk-bg: #eef0fb;
+      --ok: #1e7a3c; --ok-bg: #e7f5ec; --gray-bg: #f0f0ee; --err: #b3261e; --err-bg: #fdecea;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #16171a; --panel: #1f2024; --ink: #ececec; --muted: #a3a7ad; --line: #34363c;
+        --accent: #7aa7ff; --warn: #f0b45a; --warn-bg: #3a2c14; --unk: #b3b8ff; --unk-bg: #262a45;
+        --ok: #79d39a; --ok-bg: #18301f; --gray-bg: #26272b; --err: #ff9a91; --err-bg: #3b1c1a;
+      }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink);
+           font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif; }
+    main { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+    h1 { font-size: 1.5rem; margin: 0 0 8px; }
+    h2 { font-size: 1.05rem; margin: 0 0 8px; }
+    p { margin: 0 0 8px; }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+    .lede { font-size: 1rem; }
+    .muted { color: var(--muted); font-size: .9rem; }
+    .scope { font-weight: 600; }
+    ul.weak { margin: 4px 0 0; padding-left: 1.2em; }
+    label.field { display: block; font-weight: 600; margin: 12px 0 4px; }
+    select, textarea, button { font: inherit; color: inherit; }
+    select, textarea { width: 100%; max-width: 100%; background: var(--panel); border: 1px solid var(--line);
+                       border-radius: 8px; padding: 8px; }
+    textarea { min-height: 180px; resize: vertical; }
+    fieldset { border: 0; padding: 0; margin: 12px 0 0; }
+    fieldset legend { font-weight: 600; padding: 0; margin-bottom: 4px; }
+    .choices { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+    .choices label { display: inline-flex; align-items: center; gap: 4px; }
+    .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
+    .count.over { color: var(--err); font-weight: 600; }
+    button { cursor: pointer; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent);
+             color: #fff; padding: 8px 16px; font-weight: 600; }
+    button.secondary { background: transparent; color: var(--accent); padding: 4px 10px; font-weight: 500; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    .notice { border-radius: 8px; padding: 10px 12px; margin-top: 12px; overflow-wrap: anywhere; }
+    .notice.error { background: var(--err-bg); color: var(--err); }
+    .notice.info { background: var(--gray-bg); }
+    .hidden { display: none !important; }
+    .summary { font-weight: 600; font-size: 1.05rem; overflow-wrap: anywhere; }
+    .progress { margin-top: 4px; }
+    ol.results { list-style: none; padding: 0; margin: 12px 0 0; }
+    ol.results > li { border: 1px solid var(--line); border-radius: 10px; margin-top: 8px; overflow: hidden; }
+    ol.results details > summary { list-style: none; cursor: pointer; padding: 10px 12px; display: flex; gap: 8px;
+                                    align-items: flex-start; }
+    ol.results details > summary::-webkit-details-marker { display: none; }
+    .badge { flex: none; min-width: 1.6em; text-align: center; }
+    .sent { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+    li.contradicted { background: var(--warn-bg); }
+    li.no_evidence { background: var(--unk-bg); }
+    li.supported { background: var(--ok-bg); }
+    li.unjudged, li.skipped { background: var(--gray-bg); }
+    .label { display: block; font-size: .85rem; color: var(--muted); }
+    .body { padding: 0 12px 12px 12px; }
+    .ev { border-left: 3px solid var(--line); padding: 4px 0 4px 10px; margin-top: 8px; overflow-wrap: anywhere; }
+    .ev .meta { font-size: .85rem; color: var(--muted); }
+    .xbrl { margin-top: 8px; font-size: .9rem; overflow-wrap: anywhere; }
+    details.skipped-box { margin-top: 12px; }
+    details.skipped-box > summary { cursor: pointer; font-weight: 600; }
+    footer { margin-top: 24px; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>공시 팩트체커</h1>
+    <p class="lede" id="fc-lede">분석글을 붙여 넣으면 문장마다 DART 공시와 대조합니다. ✅는 검색된 공시 문단과 일치한다는 뜻이고, 사실 보증·발행 승인이 아닙니다.</p>
+  </header>
+
+  <section class="panel" id="fc-about" aria-label="검색 범위와 알려진 약점">
+    <p class="scope" id="fc-scope">데모 범위: 삼성전자·SK하이닉스 최근 3년 정기보고서(사업·반기·분기)·잠정실적·XBRL 재무 수치</p>
+    <p class="muted">알려진 약점</p>
+    <ul class="weak muted" id="fc-weak">
+      <li>주어가 바뀐 문장(다른 부문·제품·고객사 이름)을 잘 못 거릅니다.</li>
+      <li>증감률·영업이익률 밖의 파생 지표와 명시하지 않은 기간은 검수하지 않거나 범위 밖으로 표시합니다.</li>
+      <li>✅는 검색된 공시와 일치한다는 뜻이고, 사실 보증·발행 승인이 아닙니다.</li>
+    </ul>
+  </section>
+
+  <form class="panel" id="fc-form" novalidate>
+    <h2>검수할 글</h2>
+    <label class="field" for="fc-company">회사</label>
+    <select id="fc-company" required>
+      <option value="00126380">삼성전자</option>
+      <option value="00164779">SK하이닉스</option>
+    </select>
+
+    <fieldset id="fc-source">
+      <legend>출처</legend>
+      <div class="choices">
+        <label><input type="radio" name="source" value="my_draft" checked /> 내 초안</label>
+        <label><input type="radio" name="source" value="ai_answer" /> AI 답변</label>
+        <label><input type="radio" name="source" value="others" /> 남의 글</label>
+      </div>
+    </fieldset>
+
+    <label class="field" for="fc-text">붙여넣기</label>
+    <textarea id="fc-text" placeholder="분석글이나 AI 답변을 붙여 넣으세요. 한 번에 2,000자, 검수 대상 문장 30개까지입니다."></textarea>
+    <div class="row">
+      <span class="count muted" id="fc-count">0 / 2,000자</span>
+      <button type="submit" id="fc-submit">검수하기</button>
+    </div>
+    <p class="muted" id="fc-privacy">문장과 공시 문단이 판정을 위해 TypeSafe(외부 API)로 전송됩니다. 붙여 넣은 원문은 서버 DB·로그에 저장하지 않고, 결과는 15분 뒤 사라집니다. 로그인 없이 하루 3회까지 쓸 수 있습니다.</p>
+    <div class="notice error hidden" id="fc-error" role="alert"></div>
+  </form>
+
+  <section class="panel hidden" id="fc-result" aria-live="polite">
+    <h2>검수 결과</h2>
+    <p class="summary" id="fc-summary"></p>
+    <p class="muted progress" id="fc-progress"></p>
+    <div class="notice error hidden" id="fc-job-error" role="alert"></div>
+    <ol class="results" id="fc-list"></ol>
+    <details class="skipped-box hidden" id="fc-skipped">
+      <summary id="fc-skipped-title"></summary>
+      <p class="muted">검수하지 않은 문장입니다. 분류가 틀렸다고 보이면 문장마다 한 번 검수를 요청할 수 있습니다.</p>
+      <ol class="results" id="fc-skipped-list"></ol>
+    </details>
+  </section>
+
+  <footer class="muted">AI 판정이며 사실 보증이 아닙니다. 발행 판단은 글쓴이가 합니다.</footer>
+</main>
+<script type="module" src="/js/factcheck.js"></script>
+</body>
+</html>
