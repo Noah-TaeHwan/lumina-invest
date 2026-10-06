@@ -7,9 +7,10 @@
   소유주지분 순이익을 둘 다 후보로 보고, 하나라도 맞으면 일치, 둘 다 있는데 어느 것도 안 맞으면 불일치, 한쪽만 있고 안
   맞으면 판단 불가(unknown)다. 매출원가·매출총이익·유형자산·자본금, 제품·부문 매출('HBM 매출')은 대조하지 않는다.
 - 금액과 기간 짝: 계정 뒤 첫 금액. 'X에서 Y로'면 뒤 금액(Y)이 주장 기간 값이고, '각각'이면 앞의 기간들과 순서대로 짝짓는다.
+  금액 없이 이어진 계정 묶음은 계정 수와 금액 수가 같을 때만 순서대로 짝짓는다. 기간은 금액 앞 가장 가까운 표현.
 - 기간은 scope.extract_periods로 푼 주장 기간(as_of 기준)을 시작·끝 날짜로 맞춘다: 'n분기'는 분기 단독, '상반기'·'누적'은
   1월 1일부터 누적, 재무상태표 계정은 기간 끝 시점 값. XBRL에 없는 기간(4분기 단독 등)은 unknown.
-- 연결/별도는 그 계정 절(앞 금액 또는 절 경계 뒤 ~ 이 금액)에 적힌 것만 본다(없으면 앞 절을 잇는다). 표시가 없으면 연결 우선, 연결이
+- 연결/별도는 그 계정 절(앞 금액 또는 절 경계 뒤 ~ 이 금액)에 적힌 것만 본다(다음 절로 잇지 않는다). 표시가 없으면 연결 우선, 연결이
   어긋나고 별도가 맞으면 맞음 + 'separate_only'.
 - 같은 기간·계정 행이 여럿이면: 대체된 행(superseded) 제외, 확정이 있으면 확정만. 잠정은 순위 1위 하나만(정정·나중 공시가
   앞선다). 확정 행들(원 보고값·뒤 보고서의 재작성 비교값)은 모두 후보로, 하나라도 맞으면 일치 + 'restated'(값이 서로
@@ -55,6 +56,7 @@ _MONEY = re.compile(r"-?\d[\d,]*(?:\.\d+)?(?:\s*(?:조|십억|억|천만|백만|
 _PERCENT = re.compile(r"[-−]?\d[\d,]*(?:\.\d+)?\s*%(?!p)")
 # 절 경계(연결/별도 표시가 미치는 범위를 끊는다): 쉼표·세미콜론·연결 어미
 _CLAUSE_BREAK = re.compile(r"[,;]|지만|는데|으며|이며|며\s|고\s")
+_JOIN = re.compile(r"\s*(?:과|와|및|,|·|그리고)?\s*")  # 계정 묶음의 이음말('매출과 영업이익', '매출, 영업이익')
 _FROM = re.compile(r"\s*에서")  # 'X에서 Y로'의 '에서'
 _EACH = re.compile(r"각각")
 # 계정 바로 앞 토큰으로 허용하는 수식어(회사 전체 값). 그 밖의 명사가 앞에 붙으면 제품·부문 값으로 보고 대조하지 않는다
@@ -137,29 +139,47 @@ def _company_wide(text: str, pos: int, names: CompanyIndex | None) -> bool:
 
 def amount_claims(text: str, names: CompanyIndex | None = None) -> list[AmountClaim]:
     """계정 언급마다 그 뒤(다음 계정 언급 전까지)의 금액(이익률이면 퍼센트)을 짝짓는다.
-    'X에서 Y로'면 Y, '각각 A, B'면 금액마다 하나씩(period_idx = 계정 앞 기간 표현 순번), 그 밖은 첫 금액."""
+
+    - 금액 없이 이어진 계정 묶음('매출과 영업이익은 333.6조원, 43.6조원')은 묶음 계정 수와 금액 수가 같을 때만 순서대로
+      짝짓고, 다르면 짝을 모르므로 대조하지 않는다.
+    - 계정 하나에 '각각 A, B'면 금액마다 하나씩(period_idx = 계정 앞 기간 표현 순번).
+    - 'X에서 Y로'면 Y. 그 밖은 첫 금액.
+    """
     hits = list(_ACCOUNT.finditer(text))
-    out = []
+    out: list[AmountClaim] = []
+    pending: list[re.Match] = []  # 금액 없이 앞에 늘어선 계정(같은 종류끼리만 묶는다)
     for i, m in enumerate(hits):
         kind = m.lastgroup
         if kind != "margin" and not _company_wide(text, m.start(), names):
+            pending = []
             continue
         end = hits[i + 1].start() if i + 1 < len(hits) else len(text)
-        values = list((_PERCENT if kind == "margin" else _MONEY).finditer(text, m.end(), end))
+        pattern = _PERCENT if kind == "margin" else _MONEY
+        values = list(pattern.finditer(text, m.end(), end))
+        if pending and not _JOIN.fullmatch(text, pending[-1].end(), m.start()):
+            pending = []  # 바로 이어진 계정끼리만 묶는다
         if not values:
+            pending.append(m)
             continue
-        acc = _GROUP_ACCOUNT[kind]
-        if len(values) >= 2 and _EACH.search(text, m.end(), values[0].start()):
-            picked = [(v, j) for j, v in enumerate(values)]
+        group, pending = pending + [m], []
+        if any((g.lastgroup == "margin") != (kind == "margin") for g in group):
+            group = [m]
+        if len(group) > 1:
+            if len(values) != len(group):
+                continue  # 계정과 금액 수가 다르면 짝을 모른다
+            picked = [(g, v, None) for g, v in zip(group, values, strict=True)]
+        elif len(values) >= 2 and _EACH.search(text, m.end(), values[0].start()):
+            picked = [(m, v, j) for j, v in enumerate(values)]
         elif len(values) >= 2 and _FROM.match(text, values[0].end()):
-            picked = [(values[1], None)]
+            picked = [(m, values[1], None)]
         else:
-            picked = [(values[0], None)]
-        for v, j in picked:
+            picked = [(m, values[0], None)]
+        for g, v, j in picked:
             raw = v.group(0)
-            negative = bool(_LOSS.search(m.group(0))) or raw[0] in "-−" or \
+            negative = bool(_LOSS.search(g.group(0))) or raw[0] in "-−" or \
                 bool(_LOSS.search(text, v.end(), min(end, v.end() + 6))) or bool(_LOSS.search(text, m.end(), v.start()))
-            out.append(AmountClaim(acc, m.group(0), raw.lstrip("-−"), m.start(), negative, v.start(), v.end(), j))
+            out.append(AmountClaim(_GROUP_ACCOUNT[g.lastgroup], g.group(0), raw.lstrip("-−"), g.start(), negative,
+                                   v.start(), v.end(), j))
     return out
 
 
@@ -204,7 +224,7 @@ def candidate_rows(facts: Iterable[Mapping], corp_code: str, account_id: str, pe
     instant = account_id in INSTANT_ACCOUNTS
     rows = [dict(r) for r in facts if r.get("corp_code") == corp_code and r.get("account_id") == account_id
             and r.get("fs_div") == fs_div and _period_matches(r, period, instant)]
-    live = [r for r in rows if not r.get("superseded")] or rows
+    live = [r for r in rows if not r.get("superseded")]  # 대체된 행만 있으면 후보 없음(unknown)
     final = [r for r in live if r.get("report_type") != "preliminary"]
     ranked = sorted(final or live, key=_rank, reverse=True)
     return ranked if final else ranked[:1]
@@ -288,11 +308,12 @@ def _merge_note(*notes: str | None) -> str | None:
 
 
 def _claim_period(claim: AmountClaim, mentions: list[scope.PeriodMention]) -> Period | None:
-    """'각각'이면 계정 앞 기간 표현의 같은 순번. 그 밖은 주장 앞의 가장 가까운 기간 표현, 앞에 없고 문장에 기간이
-    하나뿐이면 그것."""
-    before = [m for m in mentions if m.start < claim.pos]
+    """'각각'이면 계정 앞 기간 표현의 같은 순번. 그 밖은 금액 앞의 가장 가까운 기간 표현('매출은 2025년 333.6조원'도
+    2025), 앞에 없고 문장에 기간이 하나뿐이면 그것."""
     if claim.period_idx is not None:
-        return before[claim.period_idx].period if claim.period_idx < len(before) else None
+        listed = [m for m in mentions if m.start < claim.pos]
+        return listed[claim.period_idx].period if claim.period_idx < len(listed) else None
+    before = [m for m in mentions if m.start < claim.value_start]
     if before:
         return before[-1].period
     return mentions[0].period if len(mentions) == 1 else None
@@ -306,11 +327,11 @@ def check(text: str, facts: Sequence[Mapping], *, corp_code: str, as_of: Period,
         return XbrlResult("none", [])
     mentions = scope.extract_periods(text, as_of)
     items: list[XbrlItem] = []
-    prev_end, hint = 0, None
+    prev_end = 0
     for c in claims:
         breaks = [b.end() for b in _CLAUSE_BREAK.finditer(text, prev_end, c.pos)]
         start = max([prev_end] + breaks)
-        hint = fs_div_hint(text[start:c.value_end]) or hint  # 이 계정 절의 표시, 없으면 앞 절을 잇는다
+        hint = fs_div_hint(text[start:c.value_end])  # 이 계정 절에 적힌 표시만(다음 절로 번지지 않는다)
         prev_end = c.value_end
         period = _claim_period(c, mentions)
         if period is None:

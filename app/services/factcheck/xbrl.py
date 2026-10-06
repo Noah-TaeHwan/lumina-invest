@@ -16,6 +16,9 @@ currency, unit, rcept_no, rcept_dt, is_correction}`에 출처 칸 `column`·`sj_
   분기·반기의 전년 동기 비교값(frmtrm_q·frmtrm_add)도 `column`으로 출처를 남겨 함께 둔다.
 - 재무상태표(instant): period_start = period_end = 그 시점. 분기·반기의 frmtrm은 전기말(전년 12월 31일).
 - 손익은 IS(손익계산서)를 쓰고, 그 계정이 IS에 없으면 CIS(포괄손익계산서)를 쓴다(SK하이닉스는 CIS만).
+  지배기업 소유주지분 순이익이 IS·CIS에 없으면 자본변동표(SCE)의 당기순이익 행 중 '…|지배기업 소유주…' 합계
+  구성요소(경로 두 단계, 하위 구성요소 아님)를 쓴다. 자본변동표 값은 연초부터 누적이라 분기·반기는 thstrm_add·
+  frmtrm_add(누적) 칸으로 둔다(1분기는 단독=누적).
   현금흐름표(CF)·자본변동표(SCE)는 쓰지 않는다. account_detail이 '-'인 합계 행만 쓴다.
 - 결산월은 12월로 가정한다(삼성전자·SK하이닉스). 응답에는 접수일·정정 여부가 없어 호출자가 공시 목록에서
   넘긴다. 접수일이 없으면 접수번호 앞 8자리(DART 접수일)를 쓴다.
@@ -23,6 +26,7 @@ currency, unit, rcept_no, rcept_dt, is_correction}`에 출처 칸 `column`·`sj_
 from __future__ import annotations
 
 import json
+import re
 from datetime import date
 from pathlib import Path
 
@@ -51,6 +55,13 @@ _FLOW_COLS = {
     6: [("thstrm", 0, "q"), ("thstrm_add", 0, "ytd"), ("frmtrm_q", -1, "q"), ("frmtrm_add", -1, "ytd")],
     9: [("thstrm", 0, "q"), ("thstrm_add", 0, "ytd"), ("frmtrm_q", -1, "q"), ("frmtrm_add", -1, "ytd")],
     12: [("thstrm", 0, "fy"), ("frmtrm", -1, "fy"), ("bfefrmtrm", -2, "fy")],
+}
+# 자본변동표(SCE) 칸: 응답 칸 이름 → (계약 칸 이름, 연도 차이, 종류, 응답 칸). 분기·반기 값은 연초부터 누적이다
+_SCE_COLS = {
+    3: [("thstrm", 0, "q", "thstrm"), ("frmtrm_q", -1, "q", "frmtrm_q")],
+    6: [("thstrm_add", 0, "ytd", "thstrm"), ("frmtrm_add", -1, "ytd", "frmtrm_q")],
+    9: [("thstrm_add", 0, "ytd", "thstrm"), ("frmtrm_add", -1, "ytd", "frmtrm_q")],
+    12: [("thstrm", 0, "fy", "thstrm"), ("frmtrm", -1, "fy", "frmtrm"), ("bfefrmtrm", -2, "fy", "bfefrmtrm")],
 }
 _INSTANT_COLS = {3: [("thstrm", 0), ("frmtrm", -1)], 6: [("thstrm", 0), ("frmtrm", -1)],
                  9: [("thstrm", 0), ("frmtrm", -1)], 12: [("thstrm", 0), ("frmtrm", -1), ("bfefrmtrm", -2)]}
@@ -95,15 +106,31 @@ def _span(year: int, end_month: int, kind: str) -> tuple[date, date]:
     return date(year, 1, 1), end  # ytd·fy
 
 
+OWNERS = "ifrs-full_ProfitLossAttributableToOwnersOfParent"
+_OWNERS_DETAIL = re.compile(r"^[^|]+\|\s*지배기업\S*\s*소유주")  # '자본의 구성요소 [도메인]|지배기업 소유주지분' 등
+
+
+def _sce_owner_rows(items: list[dict]) -> list[dict]:
+    """자본변동표(SCE) 당기순이익 행 중 지배기업 소유주지분 합계 구성요소(경로 두 단계)를 지배주주 순이익 행으로."""
+    out = []
+    for r in items:
+        detail = r.get("account_detail") or ""
+        if r.get("sj_div") == "SCE" and r.get("account_id") == "ifrs-full_ProfitLoss" and \
+                detail.count("|") == 1 and _OWNERS_DETAIL.match(detail):
+            out.append({**r, "account_id": OWNERS, "_sce": True})
+    return out[:1]
+
+
 def _pick_rows(items: list[dict]) -> list[dict]:
-    """고정 계정의 합계 행만 고른다: 재무상태표는 BS, 손익은 IS 우선·없으면 CIS."""
+    """고정 계정의 합계 행만 고른다: 재무상태표는 BS, 손익은 IS 우선·없으면 CIS, 지배주주 순이익은 그다음 SCE."""
     out: list[dict] = []
     for acc in ACCOUNTS:
         rows = [r for r in items if r.get("account_id") == acc and (r.get("account_detail") or "-") == "-"]
         if acc in INSTANT_ACCOUNTS:
             out += [r for r in rows if r.get("sj_div") == "BS"]
         else:
-            out += [r for r in rows if r.get("sj_div") == "IS"] or [r for r in rows if r.get("sj_div") == "CIS"]
+            got = [r for r in rows if r.get("sj_div") == "IS"] or [r for r in rows if r.get("sj_div") == "CIS"]
+            out += got or (_sce_owner_rows(items) if acc == OWNERS else [])
     return out
 
 
@@ -118,9 +145,9 @@ def facts_from_response(resp: dict, *, fs_div: str, rcept_dt: str | None = None,
         end_month, year = REPORT_CODES[r["reprt_code"]], int(r["bsns_year"])
         instant = r["account_id"] in INSTANT_ACCOUNTS
         cols = ([(c, off, "inst") for c, off in _INSTANT_COLS[end_month]] if instant
-                else _FLOW_COLS[end_month])
-        for col, off, kind in cols:
-            amount = _amount(r.get(f"{col}_amount"))
+                else _SCE_COLS[end_month] if r.get("_sce") else _FLOW_COLS[end_month])
+        for col, off, kind, *src in cols:
+            amount = _amount(r.get(f"{src[0] if src else col}_amount"))
             if amount is None:
                 continue
             if (r["account_id"], col) in seen:
