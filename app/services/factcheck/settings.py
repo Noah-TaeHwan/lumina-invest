@@ -8,6 +8,7 @@
   (app/config.py의 TRUST_PROXY도 켜져 있어야 한다).
 - FACTCHECK_ALLOWED_ORIGINS: POST를 받을 Origin(쉼표, 예 https://fc.example). 비어 있으면 Origin의 호스트가 요청 Host와
   같아야 한다.
+- FACTCHECK_DATA_DIR: T1 수집 산출(xbrl_facts.json·corp_names.json) 폴더. 파일이 없으면 XBRL 대조 없이 뜬다.
 """
 from __future__ import annotations
 
@@ -28,6 +29,7 @@ class FactcheckSettings(BaseSettings):
     FACTCHECK_DAILY_GLOBAL_TOKENS: int = 3_000_000
     FACTCHECK_TRUSTED_PROXIES: str = ""
     FACTCHECK_ALLOWED_ORIGINS: str = ""
+    FACTCHECK_DATA_DIR: str = "lab/data/factcheck"
 
 
 def load() -> FactcheckSettings:
