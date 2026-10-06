@@ -26,6 +26,7 @@ const REASONS = {
   xbrl_partial: '숫자는 XBRL과 일치, 나머지는 공시에서 못 찾음',
   xbrl_mismatch: 'XBRL 재무 수치와 다름',
   period_ambiguous: '기간이 분명하지 않아 판정하지 않음',
+  period_inherited: '앞 문장의 기간으로 해석',
   no_passages: '검색 범위에서 관련 공시 문단을 찾지 못함',
   busy: '요청이 몰려 판정하지 못함(잠시 뒤 다시)',
   timeout: '판정이 시간 안에 끝나지 않음',
@@ -86,9 +87,19 @@ function reasonLabel(code) {
     const tail = c.slice(i + 1);
     if (own(REASON_DETAIL, c)) return `${own(REASONS, head) || head} — ${own(REASON_DETAIL, c)}`;
     if (head === 'other_company') return `다른 회사(${tail})가 주어`;
+    if (head === 'period_inherited') return `앞 문장의 기간(${periodLabel(tail)})으로 해석`;
     if (own(REASONS, head)) return `${own(REASONS, head)}(${tail})`;
   }
   return c;
+}
+
+/** 기간 표기 'YYYY'·'YYYYQn'·'YYYYH1'을 '2025년'·'2025년 2분기'·'2025년 상반기'로. 모르는 꼴은 그대로. */
+function periodLabel(p) {
+  const m = /^(\d{4})(?:Q([1-4])|H([12]))?$/.exec(String(p));
+  if (!m) return String(p);
+  if (m[2]) return `${m[1]}년 ${m[2]}분기`;
+  if (m[3]) return `${m[1]}년 ${m[3] === '1' ? '상' : '하'}반기`;
+  return `${m[1]}년`;
 }
 
 /** 쉼표로 이어진 사유 코드를 한국어로 이어 붙인다. 없으면 빈 문자열. */

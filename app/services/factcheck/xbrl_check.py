@@ -335,12 +335,13 @@ def _claim_period(claim: AmountClaim, mentions: list[scope.PeriodMention]) -> Pe
 
 
 def check(text: str, facts: Sequence[Mapping], *, corp_code: str, as_of: Period,
-          names: CompanyIndex | None = None) -> XbrlResult:
-    """문장 속 계정 금액·영업이익률 주장을 XBRL 행과 대조한다. names는 '삼성전자의 매출'처럼 회사 이름이 앞말일 때 쓴다."""
+          names: CompanyIndex | None = None, mentions: Sequence[scope.PeriodMention] | None = None) -> XbrlResult:
+    """문장 속 계정 금액·영업이익률 주장을 XBRL 행과 대조한다. names는 '삼성전자의 매출'처럼 회사 이름이 앞말일 때 쓴다.
+    mentions를 주면(앞 문장 기간 상속 등 scope가 정한 기간) 문장에서 다시 뽑지 않고 그것을 쓴다."""
     claims = amount_claims(text, names)
     if not claims:
         return XbrlResult("none", [])
-    mentions = scope.extract_periods(text, as_of)
+    mentions = list(mentions) if mentions is not None else scope.extract_periods(text, as_of)
     items: list[XbrlItem] = []
     prev_end = 0
     for c in claims:

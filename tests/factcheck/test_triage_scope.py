@@ -426,3 +426,20 @@ def test_last_year_same_quarter_spacing_independent():
     b = scope.extract_periods("전년  동기 매출은 74.6조원이다.", AS_OF)
     c = scope.extract_periods("전년동기 매출은 74.6조원이다.", AS_OF)
     assert [m.period.label for m in a] == [m.period.label for m in b] == [m.period.label for m in c] == ["2025Q2"]
+
+
+# ---- 앞 문장 기간 상속(scope 쪽): inherited 기간을 주면 상대 기간 표현 자리에 그 기간을 둔다 ----
+
+def test_assess_with_inherited_period():
+    text = "같은 분기 연결 영업이익은 89.5조원이다."
+    q2 = Period(2025, "quarter", 2)
+    s = scope.assess(text, SAMSUNG, as_of=AS_OF, names=NAMES, inherited=q2)
+    assert (s.category, s.ambiguous_period) == ("checked", False)
+    assert [m.period.label for m in s.mentions] == ["2025Q2"]
+    assert text[s.mentions[0].start:s.mentions[0].end] == "같은 분기"
+    assert "2025Q2" in s.search_periods and (0, 5) in s.period_spans
+    # 해석된 기간이 있는 문장에는 상속하지 않는다
+    s = scope.assess("2026년 2분기 영업이익은 89.5조원이다.", SAMSUNG, as_of=AS_OF, names=NAMES, inherited=q2)
+    assert [m.period.label for m in s.mentions] == ["2026Q2"]
+    p = scope.period_scope(text, AS_OF, inherited=q2)
+    assert [m.period.label for m in p.mentions] == ["2025Q2"] and not p.ambiguous_period
