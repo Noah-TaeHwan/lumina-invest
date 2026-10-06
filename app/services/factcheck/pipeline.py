@@ -16,6 +16,7 @@ evidence.numbers.number_check).
 from __future__ import annotations
 
 import asyncio
+import copy
 import inspect
 import json
 import logging
@@ -109,13 +110,14 @@ class FactcheckPipeline:
     store: search(corp_code, query, *, periods, report_types, k) → 문단 payload 목록(동기·비동기 모두 받는다),
            선택적으로 latest_period(corp_code) → 'YYYYQn' 등(기준 시점 기본값).
     jev: ServiceJevClient(ask(state, questions, *, user_id, log_ctx)). facts: XBRL 계약 행 목록.
-    names: 상장사명 사전(corp_code → 이름들) 또는 CompanyIndex. user_id: 한도·로그용 호출자 키(익명 키 해시 등).
+    names: 상장사명 사전(corp_code → 이름들) 또는 CompanyIndex. user_id: 한도·로그용 호출자 키(익명 키 해시 등) —
+    요청마다 for_user로 바꾼 사본을 쓰면 서버 전체 동시성(global_limit)이 공유된다.
     """
 
     def __init__(self, *, store: Any, jev: Any, names: Mapping[str, Iterable[str]] | CompanyIndex,
                  facts: Sequence[Mapping] = (), user_id: str = "factcheck", tau_s: float = DEFAULT_POLICY.tau_s,
                  tau_c: float = DEFAULT_POLICY.tau_c, k: int = K, per_request: int = PER_REQUEST_CONCURRENCY,
-                 global_limit: int = GLOBAL_CONCURRENCY, jev_timeout_s: float = JEV_TIMEOUT_S,
+                 global_limit: int | asyncio.Semaphore = GLOBAL_CONCURRENCY, jev_timeout_s: float = JEV_TIMEOUT_S,
                  deadline_s: float = DEADLINE_S, jev_triage: bool = triage.JEV_TRIAGE_ENABLED):
         self.store = store
         self.jev = jev
@@ -127,7 +129,13 @@ class FactcheckPipeline:
         self.per_request = per_request
         self.deadline_s = deadline_s
         self.jev_triage = jev_triage
-        self._global = asyncio.Semaphore(global_limit)
+        self._global = global_limit if isinstance(global_limit, asyncio.Semaphore) else asyncio.Semaphore(global_limit)
+
+    def for_user(self, user_id: str) -> "FactcheckPipeline":
+        """호출자 키만 바꾼 얕은 사본. 서버 전체 동시성 세마포어·사전·XBRL 행을 공유한다(요청마다 쓴다)."""
+        p = copy.copy(self)
+        p.user_id = user_id
+        return p
 
     async def _as_of(self, corp_code: str, as_of: str | None) -> Period:
         """기준 시점: 인자 → 저장소 latest_period → 그 회사 XBRL 행의 가장 늦은 기간 → 오늘까지 끝난 분기."""

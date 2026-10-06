@@ -321,3 +321,20 @@ def test_jev_triage_flag_passed_through():
     p = make(FakeStore(default=[Q2_PASSAGE]), jev)
     (r,) = collect(p, "회사는 HBM 사업을 확대하고 있다.")
     assert (r.status, r.reason) == ("skipped", "no_fact_marker") and jev.calls == []
+
+
+def test_for_user_shares_global_concurrency():
+    # 요청마다 for_user 사본을 써도 서버 전체 동시성(D9)은 하나의 세마포어로 묶인다
+    jev = FakeJev({"HBM": ("sleep", 0.05)})
+    base = make(FakeStore(default=[passage("HBM")]), jev, global_limit=1)
+    a, b = base.for_user("anon:a"), base.for_user("anon:b")
+    assert (a.user_id, b.user_id, base.user_id) == ("anon:a", "anon:b", "anon:test")
+
+    async def go():
+        async def run(p):
+            return [r async for r in p.check(SAMSUNG, "2분기 HBM 판매.\n3분기 HBM 판매.", as_of="2026H1")]
+        return await asyncio.gather(run(a), run(b))
+
+    ra, rb = asyncio.run(go())
+    assert len(ra) == len(rb) == 2 and jev.max_active == 1
+    assert {c["user_id"] for c in jev.calls} == {"anon:a", "anon:b"}
