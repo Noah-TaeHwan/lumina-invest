@@ -32,7 +32,7 @@ COMPANIES = {"companies": [{"corp_code": "00126380", "corp_name": "삼성전자"
              "weaknesses": ["주어가 바뀐 문장(다른 부문·제품·고객사 이름)을 잘 못 거릅니다.",
                             "증감률·영업이익률 밖의 파생 지표와 명시하지 않은 기간은 검수하지 않거나 범위 밖으로 표시합니다.",
                             "✅는 검색된 공시와 일치한다는 뜻이고, 사실 보증·발행 승인이 아닙니다."],
-             "max_chars": 2000, "max_targets": 30}
+             "max_chars": 2000, "max_targets": 30, "anon_runs": 5}  # 서버 설정 값(기본 3과 다르게 둬 화면이 따르는지 본다)
 DRAFT = ("삼성전자의 2026년 상반기 매출은 153조원이다. 2025년 영업이익은 50조원이다. HBM 매출은 줄었다. "
          "앞으로도 좋을까? 2025년 연구개발비는 35조원이다.")
 EVID = {"rcept_no": "20260814000123", "report_nm": "반기보고서 (2026.06)", "period": "2026H1",
@@ -82,8 +82,9 @@ class FakeFc:
     """시나리오별 가짜 팩트체커 API. polls는 GET마다 하나씩 꺼내는 응답(마지막은 계속 준다)."""
 
     def __init__(self, *, post=STARTED, polls=None, recheck=(202, {"job_id": JOB, "status": "running"}),
-                 after_recheck=None):
+                 after_recheck=None, companies=(200, COMPANIES)):
         self.post, self.polls = post, list(polls or [(200, job("done", ALL))])
+        self.companies = companies
         self.recheck, self.after_recheck = recheck, after_recheck
         self.calls: list[tuple[str, str, dict | None]] = []
         self.ctypes: list[str] = []  # POST마다 보낸 Content-Type
@@ -91,7 +92,7 @@ class FakeFc:
     def respond(self, method, path, query, body):
         self.calls.append((method, path, body))
         if path == "/api/factcheck/companies":
-            return 200, COMPANIES
+            return self.companies
         if path == "/api/factcheck" and method == "POST":
             return self.post
         if re.fullmatch(r"/api/factcheck/[^/]+/recheck/\d+", path) and method == "POST":
@@ -184,7 +185,10 @@ async def s_first(browser, base, ck):
     ck.ok("✅는 검색된 공시 문단과 일치한다는 뜻이고, 사실 보증·발행 승인이 아닙니다" in lede, "first: 랜딩 문구")
     ck.ok("삼성전자·SK하이닉스" in await page.inner_text("#fc-scope"), "first: 검색 범위 상시 표시")
     ck.ok("주어가 바뀐 문장" in await page.inner_text("#fc-weak"), "first: 알려진 약점 상시 표시")
-    ck.ok("TypeSafe(외부 API)로 전송" in await page.inner_text("#fc-privacy"), "first: 외부 전송 고지")
+    privacy = await page.inner_text("#fc-privacy")
+    ck.ok("TypeSafe(외부 API)로 전송" in privacy, "first: 외부 전송 고지")
+    ck.ok("로그인 없이 하루 5회까지 쓸 수 있습니다" in privacy and "3회" not in privacy,
+          f"first: 익명 횟수 안내는 서버 값(anon_runs) {privacy!r}")
     await submit(page)
     await page.wait_for_function("document.getElementById('fc-progress').innerText.includes('검수 중… 2 / 5')")
     ck.ok(await badges(page) == ["⚠️", "✅"], f"first: 중간 결과가 먼저 보인다 {await badges(page)}")
@@ -322,6 +326,17 @@ async def s_expired(browser, base, ck):
     await ctx.close()
 
 
+async def s_runs_unknown(browser, base, ck):
+    print("[runs] 서버 값을 못 받으면 숫자 없이 안내")
+    fake = FakeFc(companies=(500, {"detail": "error"}))
+    ctx, page = await open_fc(browser, base, fake)
+    await page.wait_for_function("document.body.dataset.fcCompanies === 'failed'")
+    privacy = await page.inner_text("#fc-privacy")
+    ck.ok("로그인 없이" in privacy and not re.search(r"\d+회", privacy), f"runs: 틀린 숫자 대신 숫자 없는 문장 {privacy!r}")
+    clean(ck, page, "runs")
+    await ctx.close()
+
+
 async def s_mobile(browser, base, ck):
     print("[mobile] 375px 폭")
     long_ev = {**EVID, "text": LONG, "report_nm": LONG[:60]}
@@ -357,7 +372,7 @@ async def main() -> int:
     ck = ev._CK = ev.Checks()
     async with async_playwright() as p:
         browser = await p.chromium.launch(executable_path=ev._chromium())
-        for scenario in (s_first, s_over, s_quota, s_skipped, s_expired, s_mobile):
+        for scenario in (s_first, s_over, s_quota, s_skipped, s_expired, s_runs_unknown, s_mobile):
             try:
                 await scenario(browser, base, ck)
             except Exception as exc:  # noqa: BLE001 — 한 시나리오가 죽어도 나머지를 본다
