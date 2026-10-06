@@ -369,3 +369,4 @@ def test_loading_older_document_after_newer_marks_the_older_one():
     flags = {p["rcept_no"]: p["superseded"] for p in _all(st)}
     assert flags == {"20260730800123": False, "20260707800001": True, "20260707800002": False,
                      "20260407800001": False}
+

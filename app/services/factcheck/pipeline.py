@@ -12,7 +12,11 @@ evidence.numbers.number_check).
 - 동시성(D9): 요청당 JEV 동시 4, 서버 전체 동시 8(인스턴스 세마포어). 호출마다 시간 초과 → unjudged('timeout'),
   실행 마감(30초)에 남은 문장 → unjudged('busy').
 - 기준 시점 as_of 기본값: 저장소 latest_period(잠정실적 포함) → 오늘까지 끝난 분기. XBRL 행의 최신 기간으로 정하지 않는다.
-  연도 없는 분기를 한 해 당겨 해석한 문장(scope shifted)은 ⚠️·✅를 내지 않고 최대 ❔('period_ambiguous')다.
+  연도 없는 분기를 한 해 당겨 해석한 문장(scope shifted)과 명시 기간 없이 '같은 분기·동기·당분기' 같은 상대 기간만
+  있는 문장은 ⚠️·✅를 내지 않고 최대 ❔('period_ambiguous')다.
+- 문장의 금액이 XBRL과 모두 맞으면(separate_only 제외) 고른 XBRL 행 값으로 만든 근거 한 줄을 판정 문단 맨 앞에 둔다
+  (원문 문단 대신 — 원문은 열·연결/별도를 코드로 가를 수 없다). 저장소 추가 호출 없음. ✅는 여전히 JEV 지지일 때만.
+- 해석된 기간 없이 상대 기간만 있는 문장, 별도로만 맞은 문장(separate_only)은 검색·JEV 없이 ❔.
 - 숫자 확인(number_check)은 문장에서 기간 표현을 지운 뒤 한다('2분기'의 2가 문단 숫자로 요구되지 않게).
 - force_check(사용자의 '직접 검수 요청'): 1단계 분류와 '검수 안 함'을 건너뛰고 모든 문장을 대조한다. 범위 밖 판별 결과는
   category·reason에 그대로 남긴다.
@@ -29,6 +33,7 @@ import logging
 from collections.abc import AsyncIterator, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import date
+from decimal import Decimal
 from typing import Any
 
 from app.services.evidence import judge
@@ -56,6 +61,74 @@ def _today() -> date:
 
 def _join(*reasons: str | None) -> str | None:
     return ",".join(r for r in reasons if r) or None
+
+
+def _ambiguous(sc: scope.Scope) -> bool:
+    """기간 해석을 확신할 수 없는 문장: 연도 없는 분기를 당겨 풀었거나(shifted), 해석된 기간 없이 '같은 분기' 같은
+    상대 기간만 있다. 이런 문장은 ✅·⚠️를 내지 않는다(최대 ❔ period_ambiguous)."""
+    return sc.ambiguous_period or any(m.shifted for m in sc.mentions)
+
+
+def _period_text(label: str | None, cumulative: bool | None, instant: bool) -> str:
+    """XBRL 근거 줄의 기간 표기: '2025년 2분기(3개월)'·'2025년 1~3분기(누적)'·'2025년 상반기(누적)'·'2025년 연간'·
+    재무상태표면 '2025년 말'·'2026년 6월 말'·'2025년 3분기 말'."""
+    try:
+        p = Period.parse(label or "")
+    except ValueError:
+        return label or "기간 불명"
+    y = f"{p.year}년"
+    if p.kind == "year":
+        return f"{y} 말" if instant else f"{y} 연간"
+    if p.kind == "half":
+        if instant:
+            return f"{y} {6 * p.n}월 말"
+        return f"{y} {'상' if p.n == 1 else '하'}반기" + ("(누적)" if p.n == 1 else "(6개월)")
+    if instant:
+        return f"{y} {p.n}분기 말"
+    return f"{y} 1~{p.n}분기(누적)" if cumulative and p.n > 1 else f"{y} {p.n}분기(3개월)"
+
+
+def _amount_text(amount, unit: str) -> str:
+    """부호 있는 금액(백만원, 천 단위 쉼표) 또는 비율(소수 둘째 자리 %)."""
+    if unit == "%":
+        return f"{float(amount):.2f}%"
+    d = (Decimal(int(amount)) / Decimal(10 ** 6)).normalize()
+    return f"{d:,f}백만원" if d != d.to_integral_value() else f"{int(d):,}백만원"
+
+
+XBRL_HEAD = "[재무제표(XBRL) 값]"  # 정기보고서(확정) 행
+PRELIM_HEAD = "[잠정실적 공시 값]"  # 잠정실적 행 — 확정 재무제표 값처럼 보이지 않게
+PRELIM_CORR_HEAD = "[잠정실적 정정 공시 값]"
+
+
+def _line_head(it: xbrl_check.XbrlItem) -> str:
+    """근거 줄 머리말: 잠정실적 행이면 잠정(정정) 공시 값, 정기보고서 행만 재무제표(XBRL) 값."""
+    if it.report_type == "preliminary":
+        return PRELIM_CORR_HEAD if it.is_correction else PRELIM_HEAD
+    return XBRL_HEAD
+XBRL_SECTION = "XBRL"
+
+
+def xbrl_passages(xr: xbrl_check.XbrlResult, company: str) -> list[dict]:
+    """XBRL과 모두 맞은 문장(xr.status == 'match')의 항목마다 근거 한 줄 문단. separate_only가 섞이면 없다.
+    머리말은 행의 보고서 종류를 따른다(정기 '[재무제표(XBRL) 값]', 잠정 '[잠정실적 (정정) 공시 값]').
+
+    원문 문단은 열(당기·전기·누계)과 기준(연결·별도)을 코드로 가를 수 없어 숫자만 맞는 엉뚱한 문단을 고를 수 있다.
+    고른 XBRL 행 값(회사·연결/별도·계정·기간·단독/누적·부호 있는 금액·접수번호)을 한 줄로 만들어 판정 문단 맨 앞에
+    둔다. ✅는 여전히 JEV가 문장 전체를 지지할 때만이다."""
+    if xr.status != "match" or any("separate_only" in (it.note or "") for it in xr.items):
+        return []
+    out = []
+    for it in xr.items:
+        fs = {"CFS": "연결", "OFS": "별도"}.get(it.fs_div or "", it.fs_div or "")
+        instant = it.account_id in xbrl_check.INSTANT_ACCOUNTS
+        text = (f"{_line_head(it)} {company} {fs} {it.account_nm} {_period_text(it.period, it.cumulative, instant)}: "
+                f"{_amount_text(it.amount, it.unit)} — 접수번호 {it.rcept_no}")
+        out.append({"passage_id": f"XBRL-{it.rcept_no}-{it.account_id}-{it.period}-{it.fs_div}",
+                    "rcept_no": it.rcept_no, "report_nm": it.report_nm, "period": it.period,
+                    "section": XBRL_SECTION, "text": text, "superseded": False,
+                    "is_correction": bool(it.is_correction)})
+    return out
 
 
 def _without_periods(sentence: str, spans: Sequence[tuple[int, int]]) -> str:
@@ -185,19 +258,29 @@ class FactcheckPipeline:
 
     async def _judge_one(self, idx: int, sentence: str, category: str, note: str | None, sc: scope.Scope,
                          xr: xbrl_check.XbrlResult, corp_code: str, req: asyncio.Semaphore) -> SentenceResult:
-        """문장 하나: 문단 검색 → JEV 판정 → SYS 규칙. note는 force_check 때의 범위 밖 표시."""
+        """문장 하나: 문단 검색 → JEV 판정 → SYS 규칙. note는 force_check 때의 범위 밖 표시.
+
+        해석된 기간 없이 상대 기간만 있는 문장(period_ambiguous)과 연결/별도 표시 없이 별도로만 맞은 문장
+        (separate_only)은 검색·JEV 없이 바로 ❔다(결과가 ❔로 정해져 있으니 익명 한도를 쓰지 않는다)."""
         xbrl = xr.primary()
+        if sc.ambiguous_period:
+            return SentenceResult(idx, sentence, category, "no_evidence", [], xbrl, _join("period_ambiguous", note))
+        if any("separate_only" in (it.note or "") for it in xr.items):
+            return SentenceResult(idx, sentence, category, "no_evidence", [], xbrl, _join("separate_only", note))
         partial = xr.status in ("match", "partial")
-        ambiguous = any(m.shifted for m in sc.mentions)
+        ambiguous = _ambiguous(sc)
 
         def done(status: str, evidence: list, reason: str | None) -> SentenceResult:
-            # 기간을 당겨 해석한 문장: 기간 해석을 확신할 수 없으므로 ⚠️·✅ 모두 내지 않는다(최대 ❔)
-            if ambiguous and status in ("contradicted", "supported"):
+            # 기간 해석을 확신할 수 없는 문장(당긴 분기·상대 기간만): ⚠️·✅ 모두 내지 않고 ❔ period_ambiguous
+            if ambiguous and status in ("contradicted", "supported", "no_evidence"):
                 status, evidence, reason = "no_evidence", [], "period_ambiguous"
             return SentenceResult(idx, sentence, category, status, evidence, xbrl, _join(reason, note))
 
         async with req:
             passages = await self._search(corp_code, sentence, sc)
+            lines = xbrl_passages(xr, self.names.display(corp_code))
+            if lines:  # XBRL 근거 줄을 맨 앞에(전체 k 유지)
+                passages = (lines + passages)[:self.k]
             if not passages:
                 return done("no_evidence", [], "xbrl_partial" if partial else "no_passages")
             texts = [p.get("text") or "" for p in passages]
@@ -243,7 +326,7 @@ class FactcheckPipeline:
                 xr = xbrl_check.XbrlResult("none", [])
             else:
                 xr = xbrl_check.check(s, self.facts, corp_code=corp_code, as_of=as_of_p, names=self.names)
-            if xr.status == "mismatch" and not any(m.shifted for m in sc.mentions):
+            if xr.status == "mismatch" and not _ambiguous(sc):
                 yield SentenceResult(i, s, category, "contradicted", [], xr.primary(), _join("xbrl_mismatch", note))
                 continue
             todo.append((i, s, category, note, sc, xr))

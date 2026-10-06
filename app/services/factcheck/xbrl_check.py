@@ -100,6 +100,8 @@ class XbrlItem:
     cumulative: bool | None = None
     is_correction: bool | None = None
     column: str | None = None
+    report_type: str | None = None  # 고른 행의 보고서 종류(periodic / preliminary)
+    report_nm: str | None = None  # 고른 행의 원 보고서명(가능할 때: '반기보고서 (2025.06)'·'영업(잠정)실적(공정공시)')
 
 
 @dataclass
@@ -251,11 +253,24 @@ def _same_amount(claim: AmountClaim, amount: int, rounding_unit: int = 1) -> boo
     return False
 
 
+_REPORT_NM = {"11011": ("사업보고서", "12"), "11012": ("반기보고서", "06"), "11013": ("분기보고서", "03"),
+              "11014": ("분기보고서", "09")}
+
+
+def report_name(row: Mapping) -> str | None:
+    """계약 행의 원 보고서명: 정기는 reprt_code·bsns_year로 'OO보고서 (YYYY.MM)', 잠정실적은 공시 이름. 모르면 None."""
+    if row.get("report_type") == "preliminary":
+        return "영업(잠정)실적(공정공시)"
+    got = _REPORT_NM.get(str(row.get("reprt_code") or ""))
+    return f"{got[0]} ({row.get('bsns_year')}.{got[1]})" if got and row.get("bsns_year") else None
+
+
 def _item(status: str, claim: AmountClaim, account_id: str, row: Mapping, period: Period, fs_div: str,
           amount, unit: str = "원", note: str | None = None) -> XbrlItem:
     nm = DISPLAY[account_id] if account_id in (OWNERS, "margin") else row.get("account_nm") or DISPLAY[account_id]
     return XbrlItem(status, account_id, nm, row.get("period") or period.label, fs_div, amount, claim.value_text,
-                    row.get("rcept_no"), note, unit, row.get("cumulative"), row.get("is_correction"), row.get("column"))
+                    row.get("rcept_no"), note, unit, row.get("cumulative"), row.get("is_correction"), row.get("column"),
+                    row.get("report_type"), report_name(row))
 
 
 def _compare_account(claim: AmountClaim, facts: Sequence[Mapping], corp_code: str, account_id: str, period: Period,
