@@ -431,7 +431,7 @@ def other_company(text: str, corp_code: str, names: Mapping[str, Iterable[str]] 
 # ---- 파생 지표·범위 밖 표현 ----
 
 _PCT = re.compile(r"\d[\d,]*(?:\.\d+)?\s*(?P<u>%p|%포인트|%|퍼센트)")
-_MARGIN = re.compile(r"영업\s*이익률|이익률|마진율")
+_MARGIN = re.compile(r"영업\s*이익률|이익률|마진율|(?<![A-Za-z])OPM(?![A-Za-z])")  # OPM: 영업이익률 영문 약어
 _GROWTH = re.compile(r"YoY|QoQ|전년\s*동기\s*대비|전년\s*대비|전분기\s*대비|전\s*분기\s*대비|전기\s*대비|직전\s*분기\s*대비"
                      r"|증가율|감소율|증감률|증감율|성장률|성장|증가|감소|늘|줄|급증|급감|상승|하락")
 MARKET = re.compile(r"목표\s*주가|목표가|주가|시가\s*총액|시총|PER(?![A-Za-z])|PBR(?![A-Za-z])|EV/EBITDA|투자\s*의견"

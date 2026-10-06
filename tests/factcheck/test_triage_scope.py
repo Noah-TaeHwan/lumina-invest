@@ -622,3 +622,12 @@ def test_english_aliases_constant_and_display():
 def test_english_alias_only_for_listed_corp():
     idx = scope.CompanyIndex({SK: ["SK"]})  # 사전에 SK하이닉스가 없으면 별칭도 없다(데모 범위 밖 사전)
     assert scope.company_mentions("SK hynix의 실적", idx) == [(SK, "SK")]
+
+
+@pytest.mark.parametrize("text, kind", [
+    ("OPM 41.4%를 기록했다.", "margin"),
+    ("영업이익률(OPM)은 41.4%다.", "margin"),
+    ("DRAM 점유율은 36%다.", "other"),
+])
+def test_opm_derived_kind(text, kind):
+    assert scope.derived_kind(text) == kind

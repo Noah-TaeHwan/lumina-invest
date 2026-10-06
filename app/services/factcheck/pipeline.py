@@ -181,6 +181,8 @@ def amount_only(sentence: str, sc: scope.Scope, xr: xbrl_check.XbrlResult, names
     items = xr.items
     if not items or any(it.status != "match" for it in items):
         return False
+    if sc.derived == "other":  # 대조 못 하는 퍼센트 주장이 남아 있다
+        return False
     # 기간 집합
     claimed = {m.period for m in sc.mentions}
     if not claimed or claimed != {it.claim_period for it in items}:
@@ -503,6 +505,10 @@ class FactcheckPipeline:
             inherited = _inherited_period(s, own, i, blocked)
             inh = f"period_inherited:{inherited.label}" if inherited else None
             sc = scope.assess(s, corp_code, as_of=as_of_p, names=self.names, inherited=inherited)
+            if sc.reason == "derived:other" and xbrl_check.amount_claims(s, self.names, corp_code):
+                # 대조 못 하는 퍼센트('점유율 36%', '1.2%p')가 섞여도 XBRL로 대조할 금액·이익률 주장은 대조한다
+                # (남은 주장이 있으니 결정적 ✅는 amount_only가 막는다)
+                sc = scope.period_scope(s, as_of_p, inherited=inherited)
             category, note = "checked", inh
             if subjects[i]:  # force_check: 판정은 하되 다른 회사 문장처럼(선택 회사 XBRL로 대조하지 않는다)
                 category, note = "other_company", _join(subjects[i], inh)

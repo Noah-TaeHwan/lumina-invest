@@ -489,3 +489,13 @@ def test_from_to_mixed_fs_pair_items():
     assert r.status == "mismatch"
     assert [(it.status, it.fs_div, it.period) for it in r.items] == [("mismatch", "CFS", "2025Q1"),
                                                                      ("match", "CFS", "2025Q2")]
+
+
+def test_opm_is_margin_claim():
+    cs = xbrl_check.amount_claims("2025년 2분기 영업이익 9.2조원, OPM 41.4%를 기록했다.", NAMES)
+    assert [(c.account_id, c.value_text) for c in cs][-1] == ("margin", "41.4%")
+
+
+def test_margin_with_opm_in_parens_is_one_claim():
+    cs = xbrl_check.amount_claims("2025년 2분기 영업이익률(OPM)은 41.4%다.", NAMES)
+    assert [(c.account_id, c.value_text) for c in cs] == [("margin", "41.4%")]
