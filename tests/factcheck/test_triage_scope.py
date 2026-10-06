@@ -354,6 +354,24 @@ def test_not_claim_never_sent_to_jev():
     assert client.calls == [] and got[0].reason == "not_claim:question"
 
 
+def test_list_lead_skipped_in_rule_stage_not_sent_to_jev():
+    # 목록 머리말은 규칙 단계에서 빠진다: JEV 분류 요청에 넣지 않는다(분류 호출 0회 몫)
+    lead = "주요 수치를 정리하면 아래 표와 같다."
+    assert triage.rule_triage(lead, corp_code=SAMSUNG, names=NAMES, as_of=AS_OF) == \
+        triage.Triage(False, "opinion", "not_claim:lead")
+    client = FakeTriageJev()
+    got = asyncio.run(triage.triage_all([lead, "회사는 HBM 사업을 확대하고 있다."], corp_code=SAMSUNG,
+                                        company="삼성전자", names=NAMES, as_of=AS_OF, client=client, enabled=True))
+    assert len(client.calls) == 1
+    state, questions = client.calls[0]
+    assert len(questions) == 1 and "아래 표" not in state
+    assert (got[0].check, got[0].category, got[0].reason) == (False, "opinion", "not_claim:lead")
+    only_lead = FakeTriageJev()
+    asyncio.run(triage.triage_all([lead], corp_code=SAMSUNG, company="삼성전자", names=NAMES, as_of=AS_OF,
+                                  client=only_lead, enabled=True))
+    assert only_lead.calls == []
+
+
 # ---- PR #56 후속(2·3·4번) ----
 
 def test_invalid_half_does_not_crash():

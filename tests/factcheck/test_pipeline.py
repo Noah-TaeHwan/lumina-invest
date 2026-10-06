@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 import pytest
 
-from app.services.factcheck import pipeline
+from app.services.factcheck import pipeline, triage
 from app.services.factcheck.pipeline import FactcheckPipeline, SentenceResult
 
 SAMSUNG = "00126380"
@@ -1140,6 +1140,59 @@ def test_other_company_number_sentence_still_inherits_past_plain_middle():
     rs = _run_names(f"{SK_S} 환율 상승도 이익에 도움이 됐다. {PLAIN}", COMMON_NAMES, SS_FACTS)
     assert (rs[2].status, rs[2].reason) == ("skipped", "other_company_inherited:SK하이닉스")
 
+
+# ---- 근사 표시어 금액은 조기 ⚠️ 하지 않는다(유효숫자 2자리 미만이면 결정적 ✅도 아님) ----
+
+HY_Q1_OP = [_fact(HYNIX, OP, 37_610_000_000_000, "2026Q1", "2026-01-01", "2026-03-31", "r26q1")]
+
+
+def test_approx_amount_not_early_contradicted():
+    store, jev = FakeStore(default=NOISE), FakeJev()
+    r = _check(HYNIX, "SK하이닉스의 2026년 1분기 연결 영업이익은 약 40조원이다.", store, jev, HY_Q1_OP)
+    assert r.status != "contradicted" and r.reason != "xbrl_exact"
+    r = _check(HYNIX, "SK하이닉스의 2026년 1분기 연결 영업이익은 약 50조원이다.", FakeStore(default=NOISE), FakeJev(),
+               HY_Q1_OP)
+    assert (r.status, r.reason) == ("contradicted", "xbrl_mismatch")
+
+
+# ---- 목록 머리말: '정리하면·요약하면·살펴보면 + 다음과/아래와 같다' 꼴은 not_claim:lead ----
+
+@pytest.mark.parametrize("text", [
+    "두 회사의 실적을 요약하면 아래와 같다.",
+    "주요 수치를 정리하면 다음과 같습니다.",
+    "주요 수치를 정리하면 아래 표와 같다.",
+    "실적을 요약하면 다음과 같음.",
+    "두 회사 실적을 살펴보면 아래와 같다(단위: 조원).",
+    "핵심을 요약하면 다음과 같이 정리된다.",
+    "삼성전자와 SK하이닉스의 실적을 살펴보면 다음과 같다:",
+])
+def test_list_lead_sentences_skipped(text):
+    store, jev = FakeStore(default=NOISE), FakeJev()
+    (r,) = collect(make(store, jev), text)
+    assert (r.status, r.category, r.reason) == ("skipped", "opinion", "not_claim:lead"), text
+    assert store.calls == [] and jev.calls == []
+
+
+def test_list_lead_not_sent_to_jev_triage(monkeypatch):
+    # 분류(triage) 판정 모델을 켜도 머리말 문장은 규칙 단계에서 빠져 분류 요청 대상에 없다
+    sent: list[list[str]] = []
+
+    async def spy(client, company, sentences, **kw):
+        sent.append(list(sentences))
+        return [triage.Triage(False, "opinion", "jev:opinion") for _ in sentences]
+
+    monkeypatch.setattr(triage, "jev_triage", spy)
+    store, jev = FakeStore(default=NOISE), FakeJev()
+    lead, other = "주요 수치를 정리하면 아래 표와 같다.", "회사는 HBM 사업을 확대하고 있다."
+    rs = collect(make(store, jev, jev_triage=True), f"{lead}\n{other}")
+    assert sent == [[other]]
+    assert (rs[0].status, rs[0].category, rs[0].reason) == ("skipped", "opinion", "not_claim:lead")
+    assert store.calls == [] and jev.calls == []
+
+
+def test_list_lead_with_number_not_skipped():
+    (r,) = collect(make(FakeStore(default=NOISE), FakeJev()), "2분기 실적을 요약하면 아래와 같다.")
+    assert r.status != "skipped"
 
 
 # ---- 기간 없는 문장의 근거 시점(최근 1년 보고서) ----
