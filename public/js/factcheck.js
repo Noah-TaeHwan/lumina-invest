@@ -49,6 +49,7 @@ const REASONS = {
   triage_error: '분류 실패로 검수',
   forced: '직접 검수 요청',
   restated: '재작성된 비교값과 일치',
+  restated_exists: '원 보고값과 일치(재작성된 비교값이 따로 있음)',
   separate_only: '연결과 다르고 별도 재무제표 값과 일치',
   no_period: 'XBRL에 그 기간 값 없음',
   no_fact: 'XBRL에 그 계정 값 없음',

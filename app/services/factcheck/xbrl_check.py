@@ -51,9 +51,11 @@ _ACCOUNT = re.compile(
     rf"|(?P<margin>{_B}영업\s*이익률)")
 _GROUP_ACCOUNT = {"rev": REVENUE, "op": OPERATING, "own": OWNERS, "net": NET, "ast": ASSETS, "lia": LIABILITIES,
                   "eq": EQUITY, "margin": "margin"}
-_MONEY = re.compile(r"-?\d[\d,]*(?:\.\d+)?(?:\s*(?:조|십억|억|천만|백만|만|천)(?:\s*\d[\d,]*(?:\.\d+)?)?)+\s*원?"
+# 음수 표기: ASCII '-', 수학 빼기 '−'(U+2212), DART 표준 '△'(붙여 쓴 것만)
+_NEG = "-−△"
+_MONEY = re.compile(r"[-−△]?\d[\d,]*(?:\.\d+)?(?:\s*(?:조|십억|억|천만|백만|만|천)(?:\s*\d[\d,]*(?:\.\d+)?)?)+\s*원?"
                     r"|-?\d[\d,]*(?:\.\d+)?\s*원")
-_PERCENT = re.compile(r"[-−]?\d[\d,]*(?:\.\d+)?\s*%(?!p)")
+_PERCENT = re.compile(r"[-−△]?\d[\d,]*(?:\.\d+)?\s*%(?!p)")
 # 절 경계(연결/별도 표시가 미치는 범위를 끊는다): 쉼표·세미콜론·연결 어미
 _CLAUSE_BREAK = re.compile(r"[,;]|지만|는데|으며|이며|며\s|고\s")
 _JOIN = re.compile(r"\s*(?:과|와|및|,|·|그리고)?\s*")  # 계정 묶음의 이음말('매출과 영업이익', '매출, 영업이익')
@@ -102,6 +104,7 @@ class XbrlItem:
     column: str | None = None
     report_type: str | None = None  # 고른 행의 보고서 종류(periodic / preliminary)
     report_nm: str | None = None  # 고른 행의 원 보고서명(가능할 때: '반기보고서 (2025.06)'·'영업(잠정)실적(공정공시)')
+    claim_period: Period | None = None  # 이 금액 주장에 짝지은 문장 속 기간(결정적 ✅의 기간 집합 비교용)
 
 
 @dataclass
@@ -179,9 +182,9 @@ def amount_claims(text: str, names: CompanyIndex | None = None) -> list[AmountCl
             picked = [(m, values[0], None)]
         for g, v, j in picked:
             raw = v.group(0)
-            negative = bool(_LOSS.search(g.group(0))) or raw[0] in "-−" or \
+            negative = bool(_LOSS.search(g.group(0))) or raw[0] in _NEG or \
                 bool(_LOSS.search(text, v.end(), min(end, v.end() + 6))) or bool(_LOSS.search(text, m.end(), v.start()))
-            out.append(AmountClaim(_GROUP_ACCOUNT[g.lastgroup], g.group(0), raw.lstrip("-−"), g.start(), negative,
+            out.append(AmountClaim(_GROUP_ACCOUNT[g.lastgroup], g.group(0), raw.lstrip(_NEG), g.start(), negative,
                                    v.start(), v.end(), j))
     return out
 
@@ -280,11 +283,14 @@ def _compare_account(claim: AmountClaim, facts: Sequence[Mapping], corp_code: st
     rows = candidate_rows(facts, corp_code, account_id, period, fs_div)
     if not rows:
         return None
-    note = "restated" if len({int(r["amount"]) for r in rows}) > 1 else None
+    restated = len({int(r["amount"]) for r in rows}) > 1
     for r in rows:
         if _same_amount(claim, int(r["amount"]), int(r.get("rounding_unit") or 1)):
+            # 어느 값과 맞았는지: 대표 행(원 보고값)이면 'restated_exists', 다른 후보(재작성 비교값)면 'restated'
+            note = None if not restated else "restated_exists" if r is rows[0] else "restated"
             return _item("match", claim, account_id, r, period, fs_div, int(r["amount"]), note=note)
-    return _item("mismatch", claim, account_id, rows[0], period, fs_div, int(rows[0]["amount"]), note=note)
+    return _item("mismatch", claim, account_id, rows[0], period, fs_div, int(rows[0]["amount"]),
+                 note="restated_exists" if restated else None)
 
 
 def _compare_margin(claim: AmountClaim, facts: Sequence[Mapping], corp_code: str, period: Period,
@@ -365,8 +371,10 @@ def check(text: str, facts: Sequence[Mapping], *, corp_code: str, as_of: Period,
                 got = ofs
             else:
                 got = next((g for g in (cfs, ofs) if g and g.status == "mismatch"), None) or cfs or ofs
-        items.append(got or XbrlItem("unknown", c.account_id, DISPLAY[c.account_id], period.label, hint, None,
-                                     c.value_text, note="no_fact", unit="%" if c.account_id == "margin" else "원"))
+        got = got or XbrlItem("unknown", c.account_id, DISPLAY[c.account_id], period.label, hint, None,
+                              c.value_text, note="no_fact", unit="%" if c.account_id == "margin" else "원")
+        got.claim_period = period
+        items.append(got)
     st = [it.status for it in items]
     if "mismatch" in st:
         status = "mismatch"

@@ -36,12 +36,13 @@ import logging
 from collections.abc import AsyncIterator, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import date
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
 from app.services.evidence import judge
 from app.services.evidence.claims import claim_spans
 from app.services.evidence.numbers import number_check
+from app.services.evidence.numbers import parse as numbers_parse
 from app.services.evidence.runner import DEFAULT_POLICY
 from app.services.factcheck import corp_names, scope, triage, xbrl_check
 from app.services.factcheck.scope import CompanyIndex, Period
@@ -72,15 +73,20 @@ def _ambiguous(sc: scope.Scope) -> bool:
     return sc.ambiguous_period or any(m.shifted for m in sc.mentions)
 
 
-def _inherited_period(sentence: str, own: Sequence[Sequence[scope.PeriodMention]], i: int) -> Period | None:
+def _inherited_period(sentence: str, own: Sequence[Sequence[scope.PeriodMention]], i: int,
+                      blocked: Sequence[bool] = ()) -> Period | None:
     """앞 문장 기간 상속: 문장 i에 해석된 기간이 없고 상대 기간 표현('같은 분기' 등)만 있으면, 앞쪽 문장 중 기간이
     해석된 가장 가까운 문장을 본다. 그 문장의 기간이 정확히 하나(당긴 해석 아님)이고 상대 표현의 단위와 맞으면
-    ('같은 분기' ← 분기 단독, '같은 반기' ← 반기, '같은 해' ← 연간, '같은 기간' ← 무엇이든) 그 기간, 아니면 None."""
+    ('같은 분기' ← 분기 단독, '같은 반기' ← 반기, '같은 해' ← 연간, '같은 기간' ← 무엇이든) 그 기간, 아니면 None.
+    blocked[j]가 참인 앞 문장(다른 회사가 주어, force_check의 범위 밖)이 가장 가까우면 이어받지 않는다."""
     if not scope.relative_only(sentence, own[i]):
         return None
-    for prev in reversed(own[:i]):
+    for j in range(i - 1, -1, -1):
+        prev = own[j]
         if not prev:
             continue
+        if j < len(blocked) and blocked[j]:
+            return None
         periods = {m.period for m in prev}
         if len(periods) != 1 or any(m.shifted for m in prev):
             return None
@@ -113,32 +119,92 @@ EXACT_ALLOWED = frozenset({
     "이다", "였다", "이었다", "입니다", "였습니다", "이었습니다", "기록했다", "기록하였다", "기록했습니다", "집계됐다",
     "그리고", "및", "약",
 })
+EXACT_PUNCT = ".,·"  # 낱말 앞뒤에 붙어도 되는 문장부호(이 밖의 글자 — 한자·기호·괄호·−·△ — 가 남으면 JEV 경로)
 _FS_WORD = re.compile(r"연결|별도|개별")
-_WORD = re.compile(r"[가-힣A-Za-z0-9]+")
+_FS_OF = {"연결": "CFS", "별도": "OFS", "개별": "OFS"}
+_PERIOD_IN_ACCOUNT = re.compile(r"반기|분기")  # '반기순이익'·'분기순이익': 계정명 속 기간어
+
+
+def _sig_digits(num) -> int:
+    """주장 숫자의 유효숫자 자릿수(마지막 자리 단위 기준). '4.7조' 2, '4조' 1, '171조 4,995억' 7."""
+    return len(str(int((abs(num.value) / num.step).to_integral_value())))
+
+
+def _strict_same(it: xbrl_check.XbrlItem) -> bool:
+    """결정적 ✅ 관문 안의 엄격한 금액 비교: 주장 숫자의 유효숫자 2자리 이상이고, 공시 값을 주장의 마지막 자리로
+    반올림(버림 아님)했을 때 같다. number_check·_same_amount 자체는 바꾸지 않는다(그러면 ⚠️로 바뀌어 그것도 틀린다)."""
+    nums = numbers_parse(it.claimed)
+    if len(nums) != 1 or it.amount is None:
+        return False
+    w = nums[0]
+    if _sig_digits(w) < 2:
+        return False
+    have = abs(Decimal(str(it.amount)))
+    return (have / w.step).to_integral_value(ROUND_HALF_UP) == abs(w.value) / w.step
 
 
 def amount_only(sentence: str, sc: scope.Scope, xr: xbrl_check.XbrlResult, names: CompanyIndex,
                 corp_code: str) -> bool:
-    """문장이 회사·기간·계정·금액(과 연결/별도 표시)만으로 이루어졌는가. 선택 회사 이름, 기간 표현(상속한 상대 기간
-    포함, 비교 기준 '전년 대비'는 지우지 않는다), 계정 언급·금액 자리, 연결/별도 표시어를 지운 뒤 남은 낱말이 모두
-    EXACT_ALLOWED이면 True. '집계됐다'는 바로 앞이 '로'·'으로'일 때만."""
+    """문장이 회사·기간·계정·금액(과 연결/별도 표시)만으로 이루어졌고, 그 표현이 대조한 XBRL 항목과 정확히 맞는가.
+
+    - 지우는 것: 선택 회사의 이름 자리(뒤 조사는 남긴다), 주장 기간 표현(상속 포함, 비교 기준 '전년 대비'는 지우지
+      않는다), 계정 언급·금액 자리, 연결/별도 표시어. 남은 글자는 공백·EXACT_PUNCT·EXACT_ALLOWED 낱말만이어야 한다
+      (한자·기호·괄호·띄어 쓴 빼기표 등이 하나라도 남으면 False). '집계됐다'는 바로 앞이 '로'·'으로'일 때만.
+    - 기간: 문장 속 주장 기간 집합 == 항목들이 대조한 기간 집합, 월·날짜 표기('6월 말') 없음, 계정명에 기간어
+      ('반기순이익') 없음.
+    - 연결/별도: 문장의 표시어가 가리키는 기준이 하나뿐이고 모든 항목의 fs_div와 같다(표시가 없으면 모두 연결).
+    - 금액: 항목마다 _strict_same(유효숫자 2자리 이상 + 반올림 일치).
+    """
+    items = xr.items
+    if not items or any(it.status != "match" for it in items):
+        return False
+    # 기간 집합
+    claimed = {m.period for m in sc.mentions}
+    if not claimed or claimed != {it.claim_period for it in items}:
+        return False
+    if any("월" in sentence[m.start:m.end] for m in sc.mentions):
+        return False
+    if any(_PERIOD_IN_ACCOUNT.search(sentence[a:b]) for a, b in xr.spans):
+        return False
+    # 연결/별도
+    fs_words = {_FS_OF[m.group(0)] for m in _FS_WORD.finditer(sentence)}
+    want = fs_words or {"CFS"}
+    if len(want) != 1 or any(it.fs_div not in want for it in items):
+        return False
+    # 금액
+    if not all(_strict_same(it) for it in items):
+        return False
+    # 남은 글자
     chars = list(sentence)
 
     def blank(a: int, b: int) -> None:
         chars[a:b] = " " * (b - a)
 
-    for c, _n, a, b in names.mentions(sentence):
-        if c == corp_code:
-            blank(a, b)
+    for c, name, a, b in names.mentions(sentence):
+        if c != corp_code:
+            continue
+        seg = sentence[a:b]
+        k = seg.find(name)
+        if k < 0:
+            return False  # 이름 자리를 정확히 모르면(표기 차이) 보수적으로 JEV 경로
+        blank(a + k, a + k + len(name))
     for m in sc.mentions:
         blank(m.start, m.end)
     for a, b in xr.spans:
         blank(a, b)
     for m in _FS_WORD.finditer(sentence):
         blank(m.start(), m.end())
-    words = _WORD.findall("".join(chars))
-    for j, w in enumerate(words):
-        if w not in EXACT_ALLOWED or (w == "집계됐다" and (j == 0 or words[j - 1] not in ("로", "으로"))):
+    words = "".join(chars).split()
+    cores = []
+    for w in words:
+        core = w.strip(EXACT_PUNCT)
+        if not core:
+            continue
+        if core not in EXACT_ALLOWED:
+            return False
+        cores.append(core)
+    for j, w in enumerate(cores):
+        if w == "집계됐다" and (j == 0 or cores[j - 1] not in ("로", "으로")):
             return False
     return True
 
@@ -390,11 +456,15 @@ class FactcheckPipeline:
                                           user_id=self.user_id)
         todo: list[tuple[int, str, str, str | None, scope.Scope, xbrl_check.XbrlResult, str]] = []
         own = [scope.extract_periods(s, as_of_p) for s in sentences]
+        # 기간을 물려줄 수 없는 문장: 다른 회사가 주어(그 회사의 기간), force_check면 범위 밖 문장도
+        blocked = [scope.other_company(s, corp_code, self.names) is not None or
+                   (force_check and scope.assess(s, corp_code, as_of=as_of_p, names=self.names).category != "checked")
+                   for s in sentences]
         for i, (s, t) in enumerate(zip(sentences, tri, strict=True)):
             if not t.check:
                 yield SentenceResult(i, s, t.category, "skipped", [], None, t.reason)
                 continue
-            inherited = _inherited_period(s, own, i)
+            inherited = _inherited_period(s, own, i, blocked)
             inh = f"period_inherited:{inherited.label}" if inherited else None
             sc = scope.assess(s, corp_code, as_of=as_of_p, names=self.names, inherited=inherited)
             category, note = "checked", inh

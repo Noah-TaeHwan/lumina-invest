@@ -197,9 +197,10 @@ def test_restated_value_any_candidate_matches():
                  rcept_no="r2024", rcept_dt="20250310"),
             _row("ifrs-full_Revenue", 300_900 * 10 ** 9, period="2024", start="2024-01-01", end="2024-12-31",
                  rcept_no="r2025", rcept_dt="20260310", column="frmtrm_amount")]
-    for claim in ("300조원", "300.9조원"):
+    # 원 보고값과 맞으면 'restated_exists'(재작성 값이 따로 있음), 재작성 비교값과 맞으면 'restated'
+    for claim, note in (("300조원", "restated_exists"), ("300.9조원", "restated")):
         r = run(f"2024년 매출은 {claim}이다.", rows)
-        assert (r.status, r.items[0].note) == ("match", "restated"), claim
+        assert (r.status, r.items[0].note) == ("match", note), claim
     r = run("2024년 매출은 250조원이다.", rows)
     assert r.status == "mismatch" and r.items[0].rcept_no == "r2024"  # 당기 칸(thstrm) 값이 대표
 
@@ -292,3 +293,13 @@ def test_preliminary_negative_mwon_loss():
     assert r.status == "match"
     r = xbrl_check.check("2023년 3분기 영업이익은 1.8조원이다.", rows, corp_code=HYNIX, as_of=AS_OF, names=NAMES)
     assert r.status == "mismatch"
+
+
+@pytest.mark.parametrize("text", ["2025년 영업이익은 −43.6조원이다.", "2025년 영업이익은 △43.6조원이다."])
+def test_unicode_minus_is_negative_claim(text, facts):
+    assert run(text, facts).status == "mismatch"   # 실제는 +43.6조
+
+
+def test_items_record_claim_period(facts):
+    r = run("2025년 1분기 및 2분기 매출은 333.6조원이다.", facts)
+    assert all(it.claim_period is not None for it in r.items)
