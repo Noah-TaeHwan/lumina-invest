@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 import pytest
 
-from app.services.factcheck import pipeline
+from app.services.factcheck import pipeline, triage
 from app.services.factcheck.pipeline import FactcheckPipeline, SentenceResult
 
 SAMSUNG = "00126380"
@@ -1166,6 +1166,23 @@ def test_list_lead_sentences_skipped(text):
     store, jev = FakeStore(default=NOISE), FakeJev()
     (r,) = collect(make(store, jev), text)
     assert (r.status, r.category, r.reason) == ("skipped", "opinion", "not_claim:lead"), text
+    assert store.calls == [] and jev.calls == []
+
+
+def test_list_lead_not_sent_to_jev_triage(monkeypatch):
+    # 분류(triage) 판정 모델을 켜도 머리말 문장은 규칙 단계에서 빠져 분류 요청 대상에 없다
+    sent: list[list[str]] = []
+
+    async def spy(client, company, sentences, **kw):
+        sent.append(list(sentences))
+        return [triage.Triage(False, "opinion", "jev:opinion") for _ in sentences]
+
+    monkeypatch.setattr(triage, "jev_triage", spy)
+    store, jev = FakeStore(default=NOISE), FakeJev()
+    lead, other = "주요 수치를 정리하면 아래 표와 같다.", "회사는 HBM 사업을 확대하고 있다."
+    rs = collect(make(store, jev, jev_triage=True), f"{lead}\n{other}")
+    assert sent == [[other]]
+    assert (rs[0].status, rs[0].category, rs[0].reason) == ("skipped", "opinion", "not_claim:lead")
     assert store.calls == [] and jev.calls == []
 
 

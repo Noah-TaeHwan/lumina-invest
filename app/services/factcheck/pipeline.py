@@ -489,9 +489,6 @@ class FactcheckPipeline:
                    (force_check and scope.assess(s, corp_code, as_of=as_of_p, names=self.names).category != "checked")
                    for i, s in enumerate(sentences)]
         for i, (s, t) in enumerate(zip(sentences, tri, strict=True)):
-            if not force_check and scope.is_list_lead(s):  # 목록 머리말(기존 사유 코드 재사용)
-                yield SentenceResult(i, s, "opinion", "skipped", [], None, "not_claim:lead")
-                continue
             if not t.check:
                 yield SentenceResult(i, s, t.category, "skipped", [], None, t.reason)
                 continue

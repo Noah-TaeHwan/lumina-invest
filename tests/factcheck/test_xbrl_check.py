@@ -4,6 +4,8 @@
 """
 from __future__ import annotations
 
+from decimal import Decimal
+
 import pytest
 
 from app.services.factcheck import xbrl_check
@@ -339,3 +341,21 @@ def test_approximate_amount_precision(text, status):
 ])
 def test_approximate_amount_units(text, status):
     assert run(text, SS_OP).status == status
+
+
+@pytest.mark.parametrize("text, amount, status", [
+    # 유효숫자 한 자리라 반올림 단위만으로는 너무 느슨한 경우: 상대오차 10% 상한으로 막는다
+    ("2026년 2분기 영업이익은 약 100조원이다.", 54 * T, "mismatch"),            # 100조 단위로는 1이 같지만 85% 차이
+    ("2026년 2분기 영업이익은 약 10조원이다.", 5_100_000_000_000, "mismatch"),   # 96% 차이
+    ("2026년 2분기 영업이익은 약 2,000억원이다.", 150_000_000_000, "mismatch"),  # 33% 차이
+    ("2026년 2분기 영업이익은 약 50조원이다.", 45 * T, "mismatch"),             # 11% 차이
+    ("2026년 2분기 영업이익은 약 90조원이다.", 89_490_000_000_000, "match"),     # 0.6%
+    ("2026년 2분기 영업이익은 약 40조원이다.", 37_610_000_000_000, "match"),     # 6.4%
+    ("2026년 2분기 영업이익은 약 100조원이다.", 91 * T, "match"),               # 9.9%: 상한 안
+    ("2026년 2분기 영업이익은 약 100조원이다.", 90 * T, "mismatch"),            # 11.1%: 상한 밖(분모는 실제값)
+    ("2026년 2분기 영업이익은 54조원이다.", 54 * T, "match"),                   # 표시어 없음: 그대로
+    ("2026년 2분기 영업이익은 100조원이다.", 54 * T, "mismatch"),
+])
+def test_approximate_amount_relative_cap(text, amount, status):
+    assert xbrl_check.APPROX_REL_TOL == Decimal("0.10")
+    assert run(text, [_row("dart_OperatingIncomeLoss", amount, **SS_Q2)]).status == status

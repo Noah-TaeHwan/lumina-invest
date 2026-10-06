@@ -62,6 +62,7 @@ _JOIN = re.compile(r"\s*(?:과|와|및|,|·|그리고)?\s*")  # 계정 묶음의
 # 근사 표시어: 금액 앞 '약·대략', 금액 뒤 '가량·여·정도·안팎·수준'
 _APPROX_BEFORE = re.compile(r"(?<![가-힣])(?:약|대략)\s*$")
 _APPROX_AFTER = re.compile(r"\s*(?:가량|여(?![가-힣])|정도|안팎|수준)")
+APPROX_REL_TOL = Decimal("0.10")  # 근사 표시 금액은 실제값 대비 이 비율 안이어야 같다고 본다
 _FROM = re.compile(r"\s*에서")  # 'X에서 Y로'의 '에서'
 _EACH = re.compile(r"각각")
 # 계정 바로 앞 토큰으로 허용하는 수식어(회사 전체 값). 그 밖의 명사가 앞에 붙으면 제품·부문 값으로 보고 대조하지 않는다
@@ -250,7 +251,8 @@ def select_fact(facts: Iterable[Mapping], corp_code: str, account_id: str, perio
 
 def _approx_same(value_text: str, amount: int) -> bool:
     """근사 표시어가 붙은 금액의 정밀도를 마지막 0이 아닌 자리로 본다: 정수부가 0으로 끝나고 소수가 없으면
-    '90조' → 10조 단위, '1,200억' → 100억 단위, '1조 2,000억' → 1,000억 단위로 반올림해 맞춘다."""
+    '90조' → 10조 단위, '1,200억' → 100억 단위, '1조 2,000억' → 1,000억 단위로 반올림해 맞춘다.
+    유효숫자가 한 자리면 단위가 너무 커지므로('약 100조' ↔ 54조) 실제값 대비 상대오차 APPROX_REL_TOL 이내도 함께 요구한다."""
     nums = parse(value_text)
     if len(nums) != 1 or nums[0].kind != "abs" or "." in value_text:
         return False
@@ -260,7 +262,9 @@ def _approx_same(value_text: str, amount: int) -> bool:
     if zeros == 0:
         return False
     unit = w.step * (10 ** zeros)
-    return (Decimal(amount) / unit).to_integral_value(ROUND_HALF_UP) == abs(w.value) / unit
+    if (Decimal(amount) / unit).to_integral_value(ROUND_HALF_UP) != abs(w.value) / unit:
+        return False
+    return abs(abs(w.value) - Decimal(amount)) <= APPROX_REL_TOL * Decimal(amount)
 
 
 def _same_amount(claim: AmountClaim, amount: int, rounding_unit: int = 1) -> bool:
