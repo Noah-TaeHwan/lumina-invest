@@ -60,3 +60,7 @@ lab/data/
 
 # e2e 실패 기록(trace·스크린샷·DOM 상태, tests/e2e/evidence_views.py)
 tests/e2e/_artifacts/
+
+# 에이전트 실행 산출물 — 커밋하지 않는다(Paperclip worktree·리뷰 증거, Claude Code 로컬 설정, CMP-1605)
+.paperclip/
+.claude/settings.local.json
