@@ -12,7 +12,7 @@
 
 | 구분 | 내용 |
 |---|---|
-| 출발점 | 강사 교육용 코드 [edumgt/lumina-invest](https://github.com/edumgt/lumina-invest)(FastAPI, 메뉴 50여 개)를 부품 상자로 삼아 개인 저장소에서 조립 |
+| 출발점 | 공개 원본 코드 [edumgt/lumina-invest](https://github.com/edumgt/lumina-invest)(FastAPI, 메뉴 50여 개)를 부품 상자로 삼아 개인 저장소에서 조립 |
 | 핵심 | TypeSafe JEV(선택지 중 하나를 확률과 함께 고르는 판단 모델)를 금융 리서치에 쓸모 있게 붙이는 것 |
 | 목적 | 투자 리서치 직무(애널리스트)와 AI 제품 역량을 함께 보여 주는 포트폴리오 |
 | 현재 단계 | 팩트체커 설계 확정, 1주차 구현 진행 중(아직 동작 확인 전) |

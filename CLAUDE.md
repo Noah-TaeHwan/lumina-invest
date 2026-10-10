@@ -1,11 +1,11 @@
 # lumina-invest 작업 규칙
 
-강사 레포(edumgt/lumina-invest)를 부품 상자로 삼아 조립하는 투자 리서치 포트폴리오다. 핵심은 TypeSafe JEV 활용이다. 이 레포는 public이다.
+원본 저장소(edumgt/lumina-invest)를 부품 상자로 삼아 조립하는 투자 리서치 포트폴리오다. 핵심은 TypeSafe JEV 활용이다. 이 레포는 public이다.
 
 ## Git
 - `main`에 직접 commit·push하지 않는다. `<type>/<short>` 브랜치 → PR로 올린다. force push 금지.
 - 커밋은 Conventional(feat/fix/docs/refactor/chore) + 한국어 본문, PR 본문도 한국어.
-- `.env`·키·토큰을 커밋하지 않는다. `.env.dev`·`.env.prod`는 강사 원본 placeholder이니 건드리지 않는다.
+- `.env`·키·토큰을 커밋하지 않는다. `.env.dev`·`.env.prod`는 원본 placeholder이니 건드리지 않는다.
 
 ## 실험(lab/) 신뢰 장치
 - 사전등록·원장이 이 포트폴리오의 신뢰 장치다. `lab/evidence/prereg*.json`, `lab/evidence/attempts.jsonl`, `lab/evidence/results/`, `docs/lab/*-report.md`는 해시를 맞추거나 결과를 바꾸려고 고치지 않는다.
