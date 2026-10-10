@@ -83,7 +83,7 @@ def test_tune_freeze_check_report(tmp_path, monkeypatch):
     lat = res["generation_latency"]
     assert set(lat) == {"tune", "check"} and lat["check"]["cold_excluded"] == 4 and lat["check"]["n"] == 36
     doc = (tmp_path / "docs/lab/evidence-a2-report.md").read_text()
-    assert "AI 참조 라벨" in doc and "제휴 관계가 아니다" in doc and "정밀도 목표 미확인" in doc
+    assert "AI 참조 라벨" in doc and "외부 문장 판정 모델을 썼다" in doc and "정밀도 목표 미확인" in doc
     events = [json.loads(x) for x in P.attempts.read_text().splitlines()]
     assert [e["event"] for e in events] == ["a2-tune", "freeze-holdout", "a2-report"]
     assert all(e["study"] == "a2" for e in events)

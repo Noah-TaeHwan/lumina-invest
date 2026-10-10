@@ -5,7 +5,7 @@ description: lumina-invest의 lab/jev_gate·lab/evidence 명령줄을 격리된 
 
 # lumina-invest 검증 레시피
 
-## JEV Gate Lab 명령줄 (`lab/jev_gate`)
+## Gate Lab 명령줄 (`lab/jev_gate`)
 
 표면은 `python -m lab.jev_gate`다. 저장소 결과 파일을 건드리지 않게 항상 `--root <임시 디렉터리>`로 격리한다.
 
@@ -82,6 +82,6 @@ env -u TYPESAFE_API_KEY HOME=$(mktemp -d) "${EV[@]}" --study a2 judge --split ch
 
 ## 주의
 
-- `stage0-call`·`stage0-repeat`를 캐시 없이 돌리면 TypeSafe 유료 호출이 나간다(호출당 약 $0.00003).
+- `stage0-call`·`stage0-repeat`를 캐시 없이 돌리면 유료 호출이 나간다.
 - `stage0-report`는 실행할 때마다 `lab/attempts.jsonl`에 한 줄을 추가한다.
 - 저장소 전체 pytest는 macOS uv 환경에서 lightgbm(libomp)이 없어 실패한다 — 앱 이미지 `lumina-portfolio-app`에서 읽기 전용 마운트로 돌린다.

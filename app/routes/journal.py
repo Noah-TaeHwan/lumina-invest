@@ -48,8 +48,8 @@ MEMO_MAX = 2000
 UNIQUE_RUN = "uq_judgment_entries_user_run"
 KST = timezone(timedelta(hours=9))  # 서머타임 없음. tzdata에 기대지 않는다(risk_guard와 같은 방식)
 NOTICE = ("판단 일지는 내가 쓴 기록입니다. 답변과 배지는 AI가 만든 것으로, 배지는 검색된 공시 문단 기준 AI 판정"
-          "(TypeSafe의 JEV 모델)이며 사실 여부를 보증하지 않습니다. 이 서비스는 투자 권유나 수익 예측을 하지 않으며, "
-          "투자 판단과 그 결과는 본인에게 있습니다. 이 프로젝트는 TypeSafe와 제휴 관계가 아닙니다.")  # spec 결정 4-2
+          "(외부 판정 모델)이며 사실 여부를 보증하지 않습니다. 이 서비스는 투자 권유나 수익 예측을 하지 않으며, "
+          "투자 판단과 그 결과는 본인에게 있습니다.")  # spec 결정 4-2
 
 
 def require_enabled() -> None:

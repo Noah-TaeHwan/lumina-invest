@@ -186,7 +186,7 @@ async def s_first(browser, base, ck):
     ck.ok("삼성전자·SK하이닉스" in await page.inner_text("#fc-scope"), "first: 검색 범위 상시 표시")
     ck.ok("주어가 바뀐 문장" in await page.inner_text("#fc-weak"), "first: 알려진 약점 상시 표시")
     privacy = await page.inner_text("#fc-privacy")
-    ck.ok("TypeSafe(외부 API)로 전송" in privacy, "first: 외부 전송 고지")
+    ck.ok("외부 API로 전송" in privacy, "first: 외부 전송 고지")
     ck.ok("로그인 없이 하루 5회까지 쓸 수 있습니다" in privacy and "3회" not in privacy,
           f"first: 익명 횟수 안내는 서버 값(anon_runs) {privacy!r}")
     await submit(page)

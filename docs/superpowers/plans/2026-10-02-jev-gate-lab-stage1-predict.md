@@ -1,10 +1,10 @@
-# JEV Gate Lab — Stage 1 Plan 1 (판정력, H-predict) Implementation Plan
+# Gate Lab — Stage 1 Plan 1 (판정력, H-predict) Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 모든 구간의 5분봉 돌파 후보에 JEV 실패 확률을 받아, 지연 0 가상 거래의 손실 여부를 얼마나 잘 가려내는지(AUC)를 무작위·로지스틱 기준선과 비교하는 리포트를 만든다.
+**Goal:** 모든 구간의 5분봉 돌파 후보에 판정 모델 실패 확률을 받아, 지연 0 가상 거래의 손실 여부를 얼마나 잘 가려내는지(AUC)를 무작위·로지스틱 기준선과 비교하는 리포트를 만든다.
 
-**Architecture:** `lab/jev_gate/`에 후보 표(`candidates.py`)와 판정력 통계(`predict.py`)를 더하고, CLI에 `stage1-call`·`stage1-freeze`·`stage1-report`를 붙인다. JEV 캐시는 Stage 0 v3 호출 기록을 그대로 공유해 같은 입력을 다시 과금하지 않는다. 홀드아웃·공개 이후 구간은 동결 파일(`prereg_holdout.json`)이 사전등록과 일치할 때만 호출한다.
+**Architecture:** `lab/jev_gate/`에 후보 표(`candidates.py`)와 판정력 통계(`predict.py`)를 더하고, CLI에 `stage1-call`·`stage1-freeze`·`stage1-report`를 붙인다. 판정 모델 캐시는 Stage 0 v3 호출 기록을 그대로 공유해 같은 입력을 다시 과금하지 않는다. 홀드아웃·공개 이후 구간은 동결 파일(`prereg_holdout.json`)이 사전등록과 일치할 때만 호출한다.
 
 **Tech Stack:** Python 3.12, pandas 3.0.6, numpy 2.5.3, httpx 0.28.1, scikit-learn 1.9.1(컨테이너와 같은 버전). 새 의존성 없음(`requirements.txt`에 이미 있음).
 
@@ -17,7 +17,7 @@
 - 테스트 명령(저장소 루트): `uv run -q --no-project --python 3.12 --with pandas==3.0.6 --with numpy==2.5.3 --with httpx==0.28.1 --with scikit-learn==1.9.1 --with pytest python -m pytest tests/lab -p no:cacheprovider --basetemp=<workspace>/pytest-tmp`
 - CLI 명령: `uv run -q --no-project --python 3.12 --with pandas==3.0.6 --with numpy==2.5.3 --with httpx==0.28.1 --with scikit-learn==1.9.1 python -m lab.jev_gate <command>`
 - 저장소 전체 테스트는 앱 이미지 `lumina-portfolio-app`에서 읽기 전용 마운트로 돌린다(macOS lightgbm libomp 부재).
-- JEV 모델 `jev-1.13.0`, 예산 하드 상한 $5(Stage 0 v3 호출 포함 누적), 순차 호출, 연속 실패 3회 중단.
+- 판정 모델 `jev-1.13.0`, 예산 하드 상한은 사전등록에 둔다(Stage 0 v3 호출 포함 누적, 금액은 문서에 적지 않는다), 순차 호출, 연속 실패 3회 중단.
 - 홀드아웃·공개 이후 구간 후보는 동결 파일 없이 호출하지 않는다. 홀드아웃은 한 번만 연다.
 - 지연 0 체결가 = 다음 5분봉 시가. 근거: 2026-03-10 하루 5분봉 마감 287개에서 aggTrades의 "마감 이후 첫 체결가"와 다음 1분봉 시가가 100% 일치(중앙값 163ms 뒤). spec 2절 체결 정의와 같은 값이다.
 - 라벨: 같은 코드 청산(손절 2·ATR, 익절 3·ATR, 24봉 시간청산)으로 낸 비용 차감 수익률이 0 미만이면 1(실패). 모든 비교에 같은 라벨을 쓴다.
@@ -29,9 +29,9 @@
 
 1. **청산 체결 봉이 데이터 끝을 넘는 후보** — 마지막 몇 시간의 후보는 라벨을 만들 수 없다. 조용히 0으로 두지 말고 표에서 빼야 한다. → Task 2 `test_candidates_skip_when_exit_fill_missing`
 2. **한 구간 안에서 라벨이 한 종류뿐** — AUC를 정의할 수 없다. 예외로 죽지 말고 `None`으로 보고해야 한다. → Task 3 `test_auc_single_class_is_none`
-3. **JEV 응답 모델이 바뀜** — 별칭이 다른 버전을 가리키면 확률이 섞인다. 실패로 차단하고 캐시하지 않아야 한다. → Task 1 `test_model_mismatch_is_blocked_and_not_cached`
+3. **판정 모델 응답 모델이 바뀜** — 별칭이 다른 버전을 가리키면 확률이 섞인다. 실패로 차단하고 캐시하지 않아야 한다. → Task 1 `test_model_mismatch_is_blocked_and_not_cached`
 4. **동결 후 사전등록이 바뀜** — 동결 파일의 사전등록 해시가 현재와 다르면 홀드아웃 호출을 거부해야 한다. → Task 4 `test_holdout_requires_matching_freeze`
-5. **일부 후보만 JEV 응답을 받은 상태에서 리포트** — 응답 없는 후보는 AUC에서 빠지고 리포트에 비율이 보여야 한다. → Task 5 `test_report_shows_coverage`
+5. **일부 후보만 판정 모델 응답을 받은 상태에서 리포트** — 응답 없는 후보는 AUC에서 빠지고 리포트에 비율이 보여야 한다. → Task 5 `test_report_shows_coverage`
 
 ---
 
@@ -634,7 +634,7 @@ def render_report(s: dict) -> str:
 ### Task 6: 실행 (Stage 0 v3 GO 이후)
 
 - [ ] **Step 1:** Stage 0 v3 판정이 GO이고 PR #6이 병합됐는지 확인. 아니면 멈춘다.
-- [ ] **Step 2:** `stage1-call --period dev`, `stage1-call --period validation` (약 1,620회, 약 $0.055, 순차 약 6분). 연속 실패 시 재실행으로 이어서.
+- [ ] **Step 2:** `stage1-call --period dev`, `stage1-call --period validation` (약 1,620회, 순차 약 6분). 연속 실패 시 재실행으로 이어서.
 - [ ] **Step 3:** `stage1-report`로 개발·검증 구간 판정력 확인(홀드아웃 열기 전 중간 확인). 이 결과를 보고 무엇도 바꾸지 않는다. 바꿔야 하면 사전등록 v5와 시도 원장을 남기고 동결 전에 처리.
 - [ ] **Step 4:** `stage1-freeze` → `lab/jev_gate/prereg_holdout.json` 커밋(홀드아웃 열기 전 기록이 Git에 남아야 한다).
 - [ ] **Step 5:** `stage1-call --period holdout`, `stage1-call --period post_release` (약 610회).

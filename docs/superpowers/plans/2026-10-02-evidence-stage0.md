@@ -2,35 +2,35 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 40개사 DART 사업보고서로 개발 세트(조정·확인)의 질문·답변·주장·AI 참조 라벨을 만들고, JEV 한국어 지지 판정의 Stage 0 관문(코퍼스·라벨 품질·H-ko·질문 묶기·지연/실패·반복 일관성)을 측정해 GO/NO-GO를 낸다.
+**Goal:** 40개사 DART 사업보고서로 개발 세트(조정·확인)의 질문·답변·주장·AI 참조 라벨을 만들고, 판정 모델 한국어 지지 판정의 Stage 0 관문(코퍼스·라벨 품질·H-ko·질문 묶기·지연/실패·반복 일관성)을 측정해 GO/NO-GO를 낸다.
 
 **Architecture:**
 - 제품 코드는 `app/services/evidence/`와 `app/lib/jev.py`에 둔다. 순수 함수 중심이고 네트워크·LLM은 인자로 받는다.
 - 평가 하네스는 `lab/evidence/`에 둔다. 명령줄 `python -m lab.evidence <cmd>`이 단계를 하나씩 실행한다.
 - 실행 위치는 단계마다 다르다.
-  - DART와 JEV 호출은 호스트에서 `uv`로 돈다.
+  - DART와 판정 모델 호출은 호스트에서 `uv`로 돈다.
   - Ollama 임베딩과 생성은 compose 네트워크 안의 일회용 앱 이미지 컨테이너에서 돈다. Ollama 포트가 호스트에 열려 있지 않기 때문이다.
 - 질문 작성, 통제 주장 작성, 라벨링은 AI 서브에이전트(Claude Opus)와 Codex가 파일로 주고받는다.
 
-**Tech Stack:** Python 3.12, httpx 0.28.1, numpy 2.5.3, scikit-learn 1.9.1, scipy 1.18.1, pytest, OpenDART API, TypeSafe JEV `jev-1.13.0`, Ollama `nomic-embed-text`·`llama3.2:1b`
+**Tech Stack:** Python 3.12, httpx 0.28.1, numpy 2.5.3, scikit-learn 1.9.1, scipy 1.18.1, pytest, OpenDART API, 외부 문장 판정 모델 버전 1.13.0, Ollama `nomic-embed-text`·`llama3.2:1b`
 
 **Spec:** `docs/superpowers/specs/2026-10-02-evidence-assistant-design.md`(4판, 커밋 a46903f). 실행자는 spec과 이 계획을 함께 읽는다.
 
 ## Global Constraints
 
-- JEV 모델은 `jev-1.13.0` 고정이다. 응답 모델이 다르면 실패로 본다.
+- 판정 모델은 버전 1.13.0 고정이다. 응답 모델이 다르면 실패로 본다.
 - 판정 단위 k = 8(고정), 시드 20261002, 홀드아웃 상한 20개사, 조정 상한 10개사.
 - 누적 입력 토큰 하드 상한은 20,000,000이다.
 - `lab/jev_gate`를 수정하거나 import하지 않는다.
 - 키 위치:
   - OpenDART 키는 `DART_API_KEY` 또는 `~/.config/opendart/api_key`(0600)다.
-  - JEV 키는 `TYPESAFE_API_KEY` 또는 `~/.config/typesafe/api_key`(0600)다.
+  - 판정 모델 키는 `TYPESAFE_API_KEY` 또는 `~/.config/typesafe/api_key`(0600)다.
   - 키 값을 출력·로그·예외 메시지·Git에 남기지 않는다. lumina `.env*`에 넣지 않는다.
-- Git에 넣지 않는 것: 공시 원문 XML, 문단 본문, JEV 호출 원기록. 모두 `lab/data/`(이미 gitignore)에 둔다.
+- Git에 넣지 않는 것: 공시 원문 XML, 문단 본문, 판정 모델 호출 원기록. 모두 `lab/data/`(이미 gitignore)에 둔다.
 - 커밋하는 것: 원장(접수번호·SHA-256·시각), 문단 ID·해시, 질문, 답변, 주장, 라벨, 집계 결과.
 - 홀드아웃 기업은 Stage 0에서 문단 분해까지만 한다. 질문·검색·생성·주장·라벨·판정 명령은 `--split holdout`을 거부한다.
 - 공개 문서에는 달러 금액·단가를 쓰지 않고 호출 수와 입력 토큰 수만 쓴다.
-- JEV 출력으로 어떤 모델도 학습하지 않는다.
+- 판정 모델 출력으로 어떤 모델도 학습하지 않는다.
 - 모든 모듈·클래스·함수에 한국어 docstring을 단다. 기존 lab 코드처럼 짧게 쓴다.
 - 커밋 메시지는 Conventional + 한국어 본문, 끝에 `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`를 단다. 커밋 전 `bash ~/.agents/hooks/record-ponytail-review.sh`를 실행한다.
 
@@ -39,7 +39,7 @@
 | 순서 | 입력·조건 | 기대 동작 | 고정하는 테스트 |
 |---|---|---|---|
 | 1 | DART 응답이 zip이 아니다(키 오류·한도 초과 시 JSON 본문) | 키가 들어 있지 않은 메시지로 실패한다 | Task 2 `test_download_rejects_non_zip_without_key` |
-| 2 | 1분 안에 JEV 실패 응답이 온다(5xx, 모델 불일치, 확률 누락, 키 불일치) | 재시도 1회 뒤 `ok=False`, 실패를 캐시하지 않는다, 토큰 상한을 지킨다 | Task 1 테스트 묶음 |
+| 2 | 1분 안에 판정 모델 실패 응답이 온다(5xx, 모델 불일치, 확률 누락, 키 불일치) | 재시도 1회 뒤 `ok=False`, 실패를 캐시하지 않는다, 토큰 상한을 지킨다 | Task 1 테스트 묶음 |
 | 3 | 사업보고서 XML에 지정 절 제목 공백이 다르다(`II.사업의 내용`) | 같은 절로 찾는다 | Task 3 `test_sections_tolerates_title_spacing` |
 | 4 | 단위 표가 데이터 표와 분리돼 있다(`(단위 : 억원, %)`) | 다음 표 행에 단위를 붙인다 | Task 3 `test_table_rows_carry_unit_and_header` |
 | 5 | 홀드아웃 기업으로 질문·판정 명령을 실행한다 | 사전등록 동결 전에는 거부한다 | Task 9 `test_holdout_refused_before_freeze` |
@@ -50,14 +50,14 @@
 
 | 파일 | 책임 |
 |---|---|
-| `app/lib/jev.py` | JEV 요청·검증·캐시·토큰 상한·호출 기록 |
+| `app/lib/jev.py` | 판정 모델 요청·검증·캐시·토큰 상한·호출 기록 |
 | `app/services/evidence/__init__.py` | 빈 패키지 |
 | `app/services/evidence/dart.py` | OpenDART 상장사 목록·사업보고서 선택·원문 다운로드 |
 | `app/services/evidence/passages.py` | XML 절 추출, 표 펴기, 600자 문단 묶기 |
 | `app/services/evidence/claims.py` | 문장 분해, 숫자 토큰, 통제 변형 값 검사 |
 | `app/services/evidence/retrieve.py` | 코사인 상위 k, 임베딩 접두어 |
 | `app/services/evidence/generate.py` | 공통 답변 생성 함수 |
-| `app/services/evidence/judge.py` | JEV 판정 요청 구성과 점수 |
+| `app/services/evidence/judge.py` | 판정 모델 판정 요청 구성과 점수 |
 | `lab/evidence/__init__.py` | 패키지 설명 |
 | `lab/evidence/split.py` | 추첨 순서, 후보 조건, 교차 언급 군집, 분할 배정 |
 | `lab/evidence/metrics.py` | AUC, κ, 2단 군집 부트스트랩, Clopper–Pearson 상한 |
@@ -80,7 +80,7 @@ EOF
 chmod +x /tmp/evt.sh
 ```
 
-명령줄(호스트, DART·JEV):
+명령줄(호스트, DART·판정 모델):
 
 ```bash
 cat > /tmp/ev.sh <<'EOF'
@@ -104,7 +104,7 @@ chmod +x /tmp/evd.sh
 
 ---
 
-### Task 1: JEV 클라이언트
+### Task 1: 판정 모델 클라이언트
 
 **Files:**
 - Create: `app/lib/jev.py`
@@ -1091,7 +1091,7 @@ git add app/services/evidence/retrieve.py app/services/evidence/generate.py test
 git commit -m "feat: 코사인 상위 k 검색과 공통 답변 생성 함수"
 ```
 
-### Task 6: JEV 판정기(Stage 0 부분)
+### Task 6: 판정 모델 판정기(Stage 0 부분)
 
 **Files:**
 - Create: `app/services/evidence/judge.py`
@@ -2367,7 +2367,7 @@ git add lab/evidence/__main__.py lab/evidence/prompts/labeler.md tests/evidence/
 git commit -m "feat: AI 참조 라벨 꾸러미(불투명 ID·조정 라운드)와 병합·κ"
 ```
 
-### Task 12: 명령줄 — JEV 판정 실행과 Stage 0 리포트
+### Task 12: 명령줄 — 판정 모델 판정 실행과 Stage 0 리포트
 
 **Files:**
 - Modify: `lab/evidence/__main__.py`
@@ -2739,7 +2739,7 @@ git add lab/evidence/data/labels lab/evidence/data/labels.jsonl lab/evidence/dat
 git commit -m "chore: 개발 세트 AI 참조 라벨(1·2차)과 표본 감사"
 ```
 
-### Task 16: JEV 측정과 Stage 0 판정 (실행)
+### Task 16: 판정 모델 측정과 Stage 0 판정 (실행)
 
 - [ ] **Step 1: 세션 1(조정 세트, 묶음)**
 
@@ -2772,7 +2772,7 @@ Run: `/tmp/ev.sh judge --split check --tag check`, 이어서 `/tmp/ev.sh judge -
 Run: `/tmp/ev.sh stage0-report`
 Expected: `GO` 또는 `NO-GO`. `docs/lab/evidence-stage0-report.md`와 `lab/evidence/results/stage0.json`이 생긴다.
 
-다음 두 grep의 결과가 모두 0이어야 한다. 달러 금액이 없어야 하고, JEV 입력·출력 짝이 커밋 대상에 섞이지 않아야 한다.
+다음 두 grep의 결과가 모두 0이어야 한다. 달러 금액이 없어야 하고, 판정 모델 입력·출력 짝이 커밋 대상에 섞이지 않아야 한다.
 
 ```bash
 grep -c '\$' docs/lab/evidence-stage0-report.md

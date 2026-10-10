@@ -1,10 +1,10 @@
-# JEV Gate Lab — Stage 0 Implementation Plan
+# Gate Lab — Stage 0 Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Binance BTCUSDT 1분봉으로 Donchian 돌파 후보를 만들고, JEV 게이트를 실제로 호출해 Stage 0 통과 기준(지연·실패율·일관성·후보 수·비용)을 판정하는 리포트를 만든다.
+**Goal:** Binance BTCUSDT 1분봉으로 Donchian 돌파 후보를 만들고, 판정 모델 게이트를 실제로 호출해 Stage 0 통과 기준(지연·실패율·일관성·후보 수·비용)을 판정하는 리포트를 만든다.
 
-**Architecture:** `lab/jev_gate/`는 FastAPI 앱과 분리된 독립 패키지다. 데이터 로더 → 익명 특징 → 규칙 → JEV 게이트 → Stage 0 집계 → CLI 순서로 쌓고, 각 모듈은 순수 함수와 작은 클래스 하나로 끝낸다. 외부 호출(Binance, TypeSafe)은 `httpx.Client` 주입으로 테스트에서 MockTransport로 대체한다.
+**Architecture:** `lab/jev_gate/`는 FastAPI 앱과 분리된 독립 패키지다. 데이터 로더 → 익명 특징 → 규칙 → 판정 모델 게이트 → Stage 0 집계 → CLI 순서로 쌓고, 각 모듈은 순수 함수와 작은 클래스 하나로 끝낸다. 외부 호출(Binance, 판정 모델 API)은 `httpx.Client` 주입으로 테스트에서 MockTransport로 대체한다.
 
 **Tech Stack:** Python 3.12, pandas 3.0.6, numpy 2.5.3, httpx 0.28.1, pytest (컨테이너 이미지와 같은 버전). 새 의존성 없음.
 
@@ -17,7 +17,7 @@
 - 테스트 명령(저장소 루트): `uv run --no-project --python 3.12 --with pandas==3.0.6 --with numpy==2.5.3 --with httpx==0.28.1 --with pytest python -m pytest tests/lab -q`
 - CLI 명령(저장소 루트): `uv run --no-project --python 3.12 --with pandas==3.0.6 --with numpy==2.5.3 --with httpx==0.28.1 python -m lab.jev_gate <command>`
 - 새 의존성 추가 금지. `requirements.txt` 변경 없음.
-- JEV 모델 `jev-1.13.0` 고정, 예산 하드 상한 $5, 가격 $0.042 / 입력 100만 토큰.
+- 판정 모델 버전 1.13.0 고정, 예산 하드 상한은 사전등록에 둔다(금액은 문서에 적지 않는다).
 - API 키 값은 출력·로그·캐시·Git에 남기지 않는다.
 - 금지 명칭: "HFT", "초단기", "알파", "수익 보장".
 - 모든 모듈·공개 함수에 한국어 docstring(기존 `app/services/ta_utils.py` 형식).
@@ -28,7 +28,7 @@
 ## Review Focus
 
 1. **일별 파일이 빠진 달** — 월별 파일이 없고 일별 파일도 하루 빠져 있으면 조용히 건너뛰지 말고 오류로 멈춰야 한다. → Task 1 `test_download_month_missing_day_raises`
-2. **거래량 0인 봉** — 나눗셈이 inf를 만들면 JEV 입력이 깨진다. NaN이 되어 후보에서 빠져야 한다. → Task 2 `test_zero_volume_bar_gives_nan_not_inf`
+2. **거래량 0인 봉** — 나눗셈이 inf를 만들면 판정 모델 입력이 깨진다. NaN이 되어 후보에서 빠져야 한다. → Task 2 `test_zero_volume_bar_gives_nan_not_inf`
 3. **세션 도중 중단 후 재실행** — 이미 호출한 입력은 캐시를 써서 다시 과금하지 않고, 누적 비용도 복원돼야 한다. → Task 4 `test_reload_restores_cache_and_spend`, Task 6 `test_session_rerun_uses_cache`
 4. **권한이 열린 API 키 파일** — 0644 키 파일은 읽지 않고 거부해야 한다. → Task 4 `test_load_api_key_rejects_open_permissions`
 5. **세션 간격 위반** — 2시간이 안 돼 다음 세션을 실행하면 거부해야 한다(사전등록 조건). → Task 6 `test_session_gap_is_enforced`
@@ -666,14 +666,14 @@ git commit -m "feat(lab): Donchian 돌파 후보와 코드 청산 규칙" -- lab
 
 ---
 
-### Task 4: JEV 게이트 클라이언트
+### Task 4: 판정 모델 게이트 클라이언트
 
 **Files:**
 - Create: `lab/jev_gate/gate.py`
 - Create: `tests/lab/test_lab_gate.py`
 
 **Interfaces:**
-- Produces: `gate.API_URL`, `gate.MODEL = "jev-1.13.0"`, `gate.PRICE_PER_INPUT_TOKEN = 0.042e-6`, `gate.TIMEOUT_S = 10.0`, `gate.QUESTION_ID = "fail"`, `gate.QUESTION: dict`, `gate.question_hash() -> str`, `gate.cache_key(state: dict) -> str`, `gate.load_api_key() -> str`, `gate.BudgetExceeded`, `gate.GateResult` (dataclass: `key, ok, p_fail, latency_ms, model, input_tokens, status, error, called_at, cached`), `gate.is_blocked(result: GateResult, tau: float) -> bool`, `gate.JevGate(cache_path: Path, budget_usd: float = 5.0, client: httpx.Client | None = None, api_key: str | None = None)` with `.ask(state: dict, use_cache: bool = True, tag: str | None = None) -> GateResult` and `.spent_usd: float`
+- Produces: `gate.API_URL`, `gate.MODEL = "jev-1.13.0"`, `gate.PRICE_PER_INPUT_TOKEN`, `gate.TIMEOUT_S = 10.0`, `gate.QUESTION_ID = "fail"`, `gate.QUESTION: dict`, `gate.question_hash() -> str`, `gate.cache_key(state: dict) -> str`, `gate.load_api_key() -> str`, `gate.BudgetExceeded`, `gate.GateResult` (dataclass: `key, ok, p_fail, latency_ms, model, input_tokens, status, error, called_at, cached`), `gate.is_blocked(result: GateResult, tau: float) -> bool`, `gate.JevGate(cache_path: Path, budget_usd: float = 5.0, client: httpx.Client | None = None, api_key: str | None = None)` with `.ask(state: dict, use_cache: bool = True, tag: str | None = None) -> GateResult` and `.spent_usd: float`
 - 캐시 JSONL 한 줄 = `asdict(GateResult)` + `"state"` + `"tag"`
 
 - [ ] **Step 1: 실패하는 테스트 작성** — `tests/lab/test_lab_gate.py`
@@ -828,7 +828,7 @@ import httpx
 
 API_URL = "https://api.typesafe.ai/v1/systemone"
 MODEL = "jev-1.13.0"
-PRICE_PER_INPUT_TOKEN = 0.042 / 1_000_000
+PRICE_PER_INPUT_TOKEN = 0.0  # 단가는 문서에 적지 않는다(사전등록 값 참조)
 TIMEOUT_S = 10.0
 QUESTION_ID = "fail"
 QUESTION = {
@@ -1681,7 +1681,7 @@ git commit -m "feat(lab): Stage 0 명령줄(규칙·세션 호출·반복·리�
 
 ### Task 7: Stage 0 실행 — 규칙 통계·세션 1·반복 측정
 
-네트워크와 실제 JEV 호출을 쓴다. 예상 비용은 $0.02 미만이다.
+네트워크와 실제 판정 모델 호출을 쓴다. 예상 비용은 사전등록한 예산 안이다.
 
 **Files:**
 - Create(생성물): `lab/results/stage0/{rule_stats.json, sample.json, sessions.json, jev_calls.jsonl, summary.json}`, `docs/lab/stage0-report.md`, `lab/attempts.jsonl`
@@ -1699,7 +1699,7 @@ Expected: 특징 11개 이름만 출력. 가격·시각 필드 없음.
 - [ ] **Step 3: 세션 1 호출**
 
 Run: CLI 명령 `stage0-call --session 1`
-Expected: 100줄 진행 로그, `누적 비용 $0.00…`
+Expected: 100줄 진행 로그, `누적 비용 …`
 
 - [ ] **Step 4: 반복 측정**
 

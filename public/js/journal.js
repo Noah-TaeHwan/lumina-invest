@@ -15,8 +15,8 @@ import {
 // ── 상수·문구 ─────────────────────────────────────────────────────
 // 고정 고지(spec 결정 4-2). app/routes/journal.py NOTICE와 같은 글자다
 export const JOURNAL_NOTICE = "판단 일지는 내가 쓴 기록입니다. 답변과 배지는 AI가 만든 것으로, 배지는 검색된 공시 문단 기준 AI 판정"
-  + "(TypeSafe의 JEV 모델)이며 사실 여부를 보증하지 않습니다. 이 서비스는 투자 권유나 수익 예측을 하지 않으며, "
-  + "투자 판단과 그 결과는 본인에게 있습니다. 이 프로젝트는 TypeSafe와 제휴 관계가 아닙니다.";
+  + "(외부 판정 모델)이며 사실 여부를 보증하지 않습니다. 이 서비스는 투자 권유나 수익 예측을 하지 않으며, "
+  + "투자 판단과 그 결과는 본인에게 있습니다.";
 const DECISIONS = ["consider_buy", "watch", "exclude"];
 const DECISION_LABELS = { consider_buy: "매수 검토", watch: "관망", exclude: "제외" };
 const MEMO_MAX = 2000;
@@ -24,7 +24,7 @@ const PAGE = 50;
 const ACTIVE = new Set(["pending", "running"]);
 const NO_JUDGE = { failed: "실패", limited: "한도 초과로 생략", skipped: "개인정보로 보여 생략" };
 const REPORT_STATES = new Set(["same", "replaced", "company_gone"]);
-const RULE_ROUTES = new Set(["lex_high", "lex_low"]);  // JEV를 부르지 않은 규칙 판정(evidence.js RULE_TOOLTIPS)
+const RULE_ROUTES = new Set(["lex_high", "lex_low"]);  // 외부 모델을 부르지 않은 규칙 판정(evidence.js RULE_TOOLTIPS)
 const FIELD_NAMES = { decision: "내 판단", conviction: "내 확신", memo: "내 메모", relied_claims: "기댄 문장",
                       review_on: "다시 볼 날짜", run_id: "판정 기록" };
 
@@ -93,7 +93,7 @@ export function snapshotHead(snap) {
 }
 
 /** 기록에 남은 배지의 툴팁: 머리에 "당시"를 붙인다(spec 결정 4-1). 규칙 판정 문장은 "당시 규칙 판정"으로 써
- *  뒤의 "규칙 판정(… JEV 호출 없음)"과 출처가 어긋나지 않게 한다. 나머지는 evidence.js badgeTitle 문구 그대로. */
+ *  뒤의 "규칙 판정(… 외부 모델 호출 없음)"과 출처가 어긋나지 않게 한다. 나머지는 evidence.js badgeTitle 문구 그대로. */
 export function pastBadgeTitle(kind, claim, run) {
   const head = RULE_ROUTES.has(claim?.route) ? "당시 규칙 판정" : "당시 AI 판정";
   return `${head} — ${badgeTitle(kind, claim, run)}`;
