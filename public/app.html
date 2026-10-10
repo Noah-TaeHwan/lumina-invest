@@ -133,14 +133,14 @@
             <div id="ev-help" class="ev-help hidden">
               <p>공시 근거 모드는 고른 회사의 2025.12 사업보고서 문단을 검색해 답하고, 답변 문장마다 AI 판정 배지를 붙입니다. 질문마다 공시 문단을 새로 검색합니다(이전 대화 문맥을 쓰지 않습니다).</p>
               <p>✅ 검색된 공시 문단에서 확인됨 · ⚠️ 검색된 공시 문단과 어긋남 · ❔ 검색된 공시 문단에서 확인되지 않음 · ⊘ 판정 불가. 배지는 AI 판정이며 검색된 문단 기준이라 사실 여부를 보증하지 않습니다. 검색이 놓친 근거는 ❔로 보일 수 있습니다.</p>
-              <p>근거 판정을 위해 AI 답변 문장과 공시 문단을 외부 판정 서비스(TypeSafe JEV)로 보냅니다. 질문 원문은 보내지 않습니다. 개인정보를 질문에 넣지 마세요.</p>
-              <p>판정에는 TypeSafe의 JEV 모델을 사용합니다. 이 프로젝트는 TypeSafe와 제휴 관계가 아닙니다.</p>
+              <p>근거 판정을 위해 AI 답변 문장과 공시 문단을 외부 판정 서비스로 보냅니다. 질문 원문은 보내지 않습니다. 개인정보를 질문에 넣지 마세요.</p>
+              <p>판정에는 외부 문장 판정 모델을 사용합니다.</p>
             </div>
           </div>
           <dialog id="ev-notice" class="ev-notice" aria-labelledby="ev-notice-title">
             <h3 id="ev-notice-title">공시 근거 모드 — 외부 전송 안내</h3>
-            <p>근거 판정을 위해 AI 답변 문장과 공시 문단을 외부 판정 서비스(TypeSafe JEV)로 보냅니다. 질문 원문은 보내지 않습니다. 개인정보를 질문에 넣지 마세요.</p>
-            <p class="ev-notice-sub">판정에는 TypeSafe의 JEV 모델을 사용합니다. 이 프로젝트는 TypeSafe와 제휴 관계가 아닙니다.</p>
+            <p>근거 판정을 위해 AI 답변 문장과 공시 문단을 외부 판정 서비스로 보냅니다. 질문 원문은 보내지 않습니다. 개인정보를 질문에 넣지 마세요.</p>
+            <p class="ev-notice-sub">판정에는 외부 문장 판정 모델을 사용합니다.</p>
             <div class="ev-notice-actions">
               <button id="ev-notice-cancel" type="button" class="btn-secondary text-xs">취소</button>
               <button id="ev-notice-ok" type="button" class="btn-primary text-xs">확인하고 켜기</button>
@@ -163,7 +163,7 @@
           <div class="jr-head-title">
             <h2 class="text-lg font-semibold">📓 판단 일지</h2>
             <!-- 고정 고지(spec 결정 4-2). 접지 않는다 -->
-            <p id="jr-view-notice" class="jr-notice">판단 일지는 내가 쓴 기록입니다. 답변과 배지는 AI가 만든 것으로, 배지는 검색된 공시 문단 기준 AI 판정(TypeSafe의 JEV 모델)이며 사실 여부를 보증하지 않습니다. 이 서비스는 투자 권유나 수익 예측을 하지 않으며, 투자 판단과 그 결과는 본인에게 있습니다. 이 프로젝트는 TypeSafe와 제휴 관계가 아닙니다.</p>
+            <p id="jr-view-notice" class="jr-notice">판단 일지는 내가 쓴 기록입니다. 답변과 배지는 AI가 만든 것으로, 배지는 검색된 공시 문단 기준 AI 판정(외부 판정 모델)이며 사실 여부를 보증하지 않습니다. 이 서비스는 투자 권유나 수익 예측을 하지 않으며, 투자 판단과 그 결과는 본인에게 있습니다.</p>
           </div>
           <div class="jr-head-actions">
             <button id="jr-export" type="button" class="btn-secondary text-xs"><i class="fa-solid fa-file-arrow-down"></i> 내보내기(JSON)</button>

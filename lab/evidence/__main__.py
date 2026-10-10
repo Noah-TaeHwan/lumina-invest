@@ -1786,7 +1786,7 @@ def report_md(res: dict) -> str:
     lines = ["# 근거 판정 A-2 평가 리포트(확인 세트 1회 실행)", "",
              "> 이 리포트는 `python -m lab.evidence --study a2 a2-report`가 자동 생성했다. 정답 라벨은 사람이 아니라 "
              "AI(Claude Opus·Codex)가 만든 **AI 참조 라벨**이며, 수치는 그 라벨과의 일치 성능이다. "
-             "판정에는 TypeSafe의 JEV 모델을 썼고, 이 프로젝트는 TypeSafe와 제휴 관계가 아니다.", "",
+             "판정에는 외부 문장 판정 모델을 썼다.", "",
              f"- 사전등록: `lab/evidence/prereg_a2.json`, 동결: `lab/evidence/prereg_a2_check.json`, 원자료: "
              "`lab/evidence/results/a2-check.json`",
              f"- 조정 세트에서 고른 값: τ_s {_num(cfg['tau_s'])}{' (폴백)' if cfg.get('tau_s_fallback') else ''}, "
@@ -1871,7 +1871,7 @@ def a3_report_md(res: dict) -> str:
     lines = ["# 근거 판정 A-3 평가 리포트(주체 확인, 확인 세트 1회 실행)", "",
              "> 이 리포트는 `python -m lab.evidence --study a3 a3-report`가 자동 생성했다. 정답 라벨은 사람이 아니라 "
              "AI(Claude Opus·Codex)가 만든 **AI 참조 라벨**이며, 통제 주장 기대값은 AI 작성자가 만든 변형에서 왔다. "
-             "판정에는 TypeSafe의 JEV 모델을 썼고, 이 프로젝트는 TypeSafe와 제휴 관계가 아니다.", "",
+             "판정에는 외부 문장 판정 모델을 썼다.", "",
              "- 사전등록: `lab/evidence/prereg_a3.json`, 동결: `lab/evidence/prereg_a3_check.json`, 원자료: "
              "`lab/evidence/results/a3-check.json`",
              f"- 비교: 같은 JEV 확률 위에서 a2-v1 대 a3-subject-exp(주체 확인만 다름). 자연 주장 {res['n_natural']}건"
@@ -2397,7 +2397,7 @@ def a4_report_md(res: dict) -> str:
     lines = ["# 근거 판정 A-4 평가 리포트(주체 질문, 확인 세트 1회 실행)", "",
              "> 이 리포트는 `python -m lab.evidence --study a4 a4-report`가 자동 생성했다. 정답 라벨은 사람이 아니라 "
              "AI(Claude Opus·Codex)가 만든 **AI 참조 라벨**이며, 통제 주장 기대값과 교체어 태그는 AI 작성자가 만들었다. "
-             "판정에는 TypeSafe의 JEV 모델을 썼고, 이 프로젝트는 TypeSafe와 제휴 관계가 아니다.", "",
+             "판정에는 외부 문장 판정 모델을 썼다.", "",
              "- 사전등록: `lab/evidence/prereg_a4.json`, 동결: `lab/evidence/prereg_a4_check.json`, 원자료: "
              "`lab/evidence/results/a4-check.json`",
              f"- 비교: 같은 JEV 확률 위에서 a2-v1 대 a4-subject-exp(C, ①c 코드 + ② 주체 질문, 신호 {res['signal']}, "

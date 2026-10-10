@@ -173,12 +173,12 @@ README '한눈에 보기'의 대표 화면(공시 근거 모드 답변, 문장�
 
 | 준비물 | 어디서 읽나(코드 확인) | 쓰는 곳 |
 |---|---|---|
-| TypeSafe JEV API 키 | `TYPESAFE_API_KEY` 환경 변수, 없으면 `~/.config/typesafe/api_key`(권한 0600이 아니면 거부) — [jev.py](app/lib/jev.py) `load_api_key()` | 앱의 답변 문장 판정(배지) |
+| 외부 문장 판정 모델 API 키 | `TYPESAFE_API_KEY` 환경 변수, 없으면 `~/.config/typesafe/api_key`(권한 0600이 아니면 거부) — [jev.py](app/lib/jev.py) `load_api_key()` | 앱의 답변 문장 판정(배지) |
 | OpenDART API 키 | `DART_API_KEY` 환경 변수, 없으면 `~/.config/opendart/api_key`(권한 0600이 아니면 거부) — [dart.py](app/services/evidence/dart.py) `load_dart_key()` | 공시 문단 적재(7-2)만 |
 | Ollama 모델 `llama3.1:8b` | `EVIDENCE_LLM_MODEL`(기본 `llama3.1:8b`, [config.py](app/config.py)) | 근거 모드 답변 생성 |
 | Ollama 모델 `nomic-embed-text` | [store.py](app/services/evidence/store.py) `EMBED_MODEL`(앱의 `EMBED_MODEL` 설정과 별개로 고정) | 문단·질문 임베딩 |
 
-- TypeSafe JEV 키는 TypeSafe에서 직접 발급받는다. 이 프로젝트는 TypeSafe와 제휴 관계가 아니며, 이 문서는 가격·요금을 다루지 않는다. 호출량에 따른 비용은 각자의 TypeSafe 계정 조건을 확인한다.
+- 외부 문장 판정 모델 키는 공급자에서 직접 발급받는다. 이 문서는 가격·요금을 다루지 않는다. 호출량에 따른 비용은 각자의 공급자 계정 조건을 확인한다.
 - 앱 컨테이너는 root로 돌아 `~`가 `/root`다. 오버라이드는 호스트의 키 **파일**을 `/root/.config/typesafe/api_key`에 읽기 전용으로 마운트한다. 키 값이 Compose 설정·이미지·Git에 들어가지 않도록 환경 변수(`TYPESAFE_API_KEY`)로 넘기지 않는다.
 - 두 키 파일은 호스트에서 `chmod 600`으로 만든다. 바인드 마운트는 호스트 권한을 그대로 보이므로 0600이 아니면 컨테이너 안에서도 거부된다.
 - Ollama는 6절의 호스트 Ollama(macOS면 Metal)를 권한다. `llama3.1:8b`는 컨테이너 CPU Ollama에서 매우 느릴 수 있다. 호스트에서 `ollama pull llama3.1:8b`, `ollama pull nomic-embed-text`로 받는다(6절 목록과 같다).
@@ -188,7 +188,7 @@ README '한눈에 보기'의 대표 화면(공시 근거 모드 답변, 문장�
 ### 7-2. 기동
 
 `TYPESAFE_KEY_FILE`은 호스트 키 파일의 절대 경로다. 셸에서 넘기거나, 자신의 `.env.portfolio`에 `TYPESAFE_KEY_FILE=/절대/경로` 한 줄을 더한다(경로만 들어가고 키 값은 들어가지 않는다).
-값이 없으면 `config`·`up`이 `required variable TYPESAFE_KEY_FILE is missing a value: Set TYPESAFE_KEY_FILE to the host path of the TypeSafe JEV key file (mode 0600)`로 멈춘다.
+값이 없으면 `config`·`up`이 `required variable TYPESAFE_KEY_FILE is missing a value`로 시작하는 메시지(뒤에 키 파일 경로를 지정하라는 안내가 붙는다)로 멈춘다.
 경로에 파일이 없으면 `config`는 통과하지만 `up`이 바인드 원본 없음으로 실패한다(`create_host_path: false`, 빈 디렉터리를 대신 만들지 않는다).
 
 ```sh
@@ -204,7 +204,7 @@ app 로그에 `근거 문단 저장소(evidence_passages) 연결 — 컬렉션�
 ### 7-3. 공시 문단 적재
 
 적재 CLI는 [load_passages.py](app/services/evidence/load_passages.py)다. OpenDART에서 회사별 2025.12 사업보고서를 받아 문단으로 나누고, `nomic-embed-text`로 임베딩해 Qdrant `evidence_passages`에 넣는다.
-앱 이미지 안에서 같은 설정(Qdrant·Ollama 주소)으로 돌리고, OpenDART 키 파일만 이 실행에 읽기 전용으로 붙인다. `--no-deps`로 이미 떠 있는 서비스를 그대로 쓴다. JEV 키는 쓰지 않으므로 `compose.features.yml`은 겹치지 않는다.
+앱 이미지 안에서 같은 설정(Qdrant·Ollama 주소)으로 돌리고, OpenDART 키 파일만 이 실행에 읽기 전용으로 붙인다. `--no-deps`로 이미 떠 있는 서비스를 그대로 쓴다. 판정 모델 키는 쓰지 않으므로 `compose.features.yml`은 겹치지 않는다.
 
 ```sh
 # 시드 15개사(삼성전자·SK하이닉스·NAVER 등, app/services/graph_service.py의 _COMPANIES) 전체
@@ -241,10 +241,10 @@ docker compose --env-file .env.portfolio -f compose.portfolio.yml -f compose.hos
 
 ### 7-5. 비용·외부 전송 주의
 
-- 근거 모드 질문 하나마다 TypeSafe JEV를 호출한다. 판정 요청(state)에는 **회사 이름, AI 답변 문장(주장), 검색된 공시 문단**이 들어간다([judge.py](app/services/evidence/judge.py) `build_state`). 질문 원문은 판정 요청에 넣지 않지만, 답변 문장이 질문 내용을 되풀이할 수 있으므로 개인정보를 질문에 넣지 않는다.
+- 근거 모드 질문 하나마다 외부 문장 판정 모델을 호출한다. 판정 요청(state)에는 **회사 이름, AI 답변 문장(주장), 검색된 공시 문단**이 들어간다([judge.py](app/services/evidence/judge.py) `build_state`). 질문 원문은 판정 요청에 넣지 않지만, 답변 문장이 질문 내용을 되풀이할 수 있으므로 개인정보를 질문에 넣지 않는다.
 - 질문과 답변 생성·임베딩은 Ollama(이 구성에선 호스트 로컬)에서 하고, 공시 원문은 OpenDART에서 받는다.
-- 일일 JEV 한도는 사용자별 호출 150회·입력 토큰 75만, 전체 입력 토큰 300만이다(`EVIDENCE_DAILY_*`, KST 자정에 풀림). 한도는 호출량을 제한할 뿐 비용을 보증하지 않는다.
-- 판단 일지의 메모는 JEV·LLM·알림으로 나가지 않고 감사 로그에도 남지 않는다([journal.py](app/routes/journal.py)). 일지는 JEV를 새로 부르지 않고 당시 판정을 보여 준다.
+- 일일 판정 모델 한도는 사용자별 호출 150회·입력 토큰 75만, 전체 입력 토큰 300만이다(`EVIDENCE_DAILY_*`, KST 자정에 풀림). 한도는 호출량을 제한할 뿐 비용을 보증하지 않는다.
+- 판단 일지의 메모는 판정 모델·LLM·알림으로 나가지 않고 감사 로그에도 남지 않는다([journal.py](app/routes/journal.py)). 일지는 판정 모델을 새로 부르지 않고 당시 판정을 보여 준다.
 - 이 기능의 배지는 검색된 문단 기준 AI 판정이며 사실 여부를 보증하지 않는다. 투자 권유가 아니다.
 
-이 절은 AI(Claude Code)가 코드를 읽고 작성했다. 클라우드 세션에서 `docker compose … config`로 세 파일 병합과 `TYPESAFE_KEY_FILE` 누락 시 실패 메시지만 확인했고(더미 `.env.portfolio`·더미 키 파일 사용), 스택 기동·문단 적재·JEV 호출은 하지 않았다. 대표 화면은 별도 로컬 실행에서 위와 같은 구성(세 파일에 해당하는 설정)으로 얻었다.
+이 절은 AI(Claude Code)가 코드를 읽고 작성했다. 클라우드 세션에서 `docker compose … config`로 세 파일 병합과 `TYPESAFE_KEY_FILE` 누락 시 실패 메시지만 확인했고(더미 `.env.portfolio`·더미 키 파일 사용), 스택 기동·문단 적재·판정 모델 호출은 하지 않았다. 대표 화면은 별도 로컬 실행에서 위와 같은 구성(세 파일에 해당하는 설정)으로 얻었다.

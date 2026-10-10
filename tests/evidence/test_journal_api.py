@@ -767,7 +767,7 @@ def test_export_json_with_notice_and_ai_marks(pg, journal, monkeypatch):
     assert r.status_code == 200
     assert r.headers["content-disposition"] == 'attachment; filename="lumina-journal-20261004.json"'
     body = r.json()
-    assert body["notice"] == jr.NOTICE and "투자 권유" in body["notice"] and "제휴 관계가 아닙니다" in body["notice"]
+    assert body["notice"] == jr.NOTICE and "투자 권유" in body["notice"] and "외부 판정 모델" in body["notice"]
     assert body["count"] == 1
     entry = body["entries"][0]
     assert entry["id"] == eid and [u["kind"] for u in entry["updates"]] == ["initial", "revisit"]

@@ -476,12 +476,12 @@ async def s_pure(browser, base, ck: Checks):
     ck.ok("시험 기준" not in res["s_unknown"], f"pure: 목록에 없는 정책은 시험 기준을 붙이지 않는다 {res['s_unknown']}")
     ck.ok(res["rejudge"] == [True, False, False], "pure: 재판정 버튼은 서버 rejudgeable일 때만")
     note = "정밀도 목표를 확인하지 못한 시험 운영"
-    ck.ok(note in res["tip_jev"] and "AI 판정(JEV 모델)" in res["tip_jev"] and "보수적" not in res["tip_jev"],
+    ck.ok(note in res["tip_jev"] and "AI 판정(외부 판정 모델)" in res["tip_jev"] and "보수적" not in res["tip_jev"],
           f"pure: a2-v1 배지 툴팁에 사실대로 쓴 시험 운영 문구 {res['tip_jev']}")
-    ck.ok(note in res["tip_lex"] and "규칙 판정" in res["tip_lex"] and "JEV 모델" not in res["tip_lex"],
-          f"pure: lex_high ✅ 툴팁은 규칙 판정(JEV 모델이라 쓰지 않는다) {res['tip_lex']}")
+    ck.ok(note in res["tip_lex"] and "규칙 판정" in res["tip_lex"] and "외부 판정 모델" not in res["tip_lex"],
+          f"pure: lex_high ✅ 툴팁은 규칙 판정(외부 판정 모델이라 쓰지 않는다) {res['tip_lex']}")
     ck.ok("규칙 판정" in res["tip_low"] and "거의 같은" not in res["tip_low"], f"pure: lex_low 툴팁 {res['tip_low']}")
-    ck.ok(res["tip_proto"].startswith("AI 판정(JEV 모델)"), f"pure: 모르는 경로는 JEV 문구 {res['tip_proto']}")
+    ck.ok(res["tip_proto"].startswith("AI 판정(외부 판정 모델)"), f"pure: 모르는 경로는 AI 판정 문구 {res['tip_proto']}")
     ck.ok(note not in res["tip_prov"] and note not in res["tip_pending"],
           f"pure: 잠정 정책·판정 중 배지에는 덧붙이지 않는다 {res['tip_prov']} / {res['tip_pending']}")
     ck.ok("(시험 기준)" in res["s_prov2"], f"pure: 비주장 규칙 보강 뒤 잠정 정책도 시험 기준 {res['s_prov2']}")
@@ -572,13 +572,13 @@ async def s_notice(browser, base, ck: Checks):
     ctx, page = await open_app(browser, base, fake)
     ck.ok(await page.is_visible("#ev-bar"), "notice: 토글이 보인다")
     help_txt = await page.locator("#ev-help").inner_text()
-    ck.ok("TypeSafe와 제휴 관계가 아닙니다" in help_txt and "질문 원문은 보내지 않습니다" in help_txt,
-          "notice: 도움말에 비제휴·외부 전송 문구(상시)")
+    ck.ok("판정에는 외부 문장 판정 모델을 사용합니다" in help_txt and "질문 원문은 보내지 않습니다" in help_txt,
+          "notice: 도움말에 외부 판정 모델 사용·외부 전송 문구(상시)")
     await page.click("#ev-mode")
     await page.wait_for_timeout(200)
     ck.ok(await page.is_visible("#ev-notice"), "notice: 처음 켜면 고지 대화상자")
     txt = await page.locator("#ev-notice").inner_text()
-    ck.ok("AI 답변 문장과 공시 문단을 외부 판정 서비스(TypeSafe JEV)로 보냅니다" in txt
+    ck.ok("AI 답변 문장과 공시 문단을 외부 판정 서비스로 보냅니다" in txt
           and "개인정보를 질문에 넣지 마세요" in txt, "notice: spec 8절 문구")
     await page.click("#ev-notice-cancel")
     await page.wait_for_timeout(150)
@@ -638,7 +638,7 @@ async def s_done(browser, base, ck: Checks):
     ck.ok(await page.locator(".ev-msg .ev-claim.ev-muted").count() == 1, "done: 비주장은 옅은 글씨·배지 없음")
     ck.ok(await page.locator(".ev-msg .ai-label").inner_text() == "AI 생성 답변", "done: AI 생성 답변 라벨")
     title = await page.locator(".ev-msg .ev-badge").first.get_attribute("title")
-    ck.ok("AI 판정(JEV 모델) · 검색된 공시 문단 기준이며 사실 여부를 보증하지 않습니다" in title and "확신도: 높음" in title,
+    ck.ok("AI 판정(외부 판정 모델) · 검색된 공시 문단 기준이며 사실 여부를 보증하지 않습니다" in title and "확신도: 높음" in title,
           f"done: 배지 툴팁 {title}")
     ck.ok(not re.search(r"0\.\d", title), "done: 확률 숫자를 보이지 않는다")
 
@@ -907,11 +907,11 @@ async def s_policy_v1(browser, base, ck: Checks):
     ck.ok(not await page.locator(".ev-msg .ev-panel").count(), "policy-v1: 재판정하면 펼친 칸을 닫는다")
     ck.ok(await page.locator(".ev-msg").count() == 1, "policy-v1: 같은 말풍선에서 갱신")
     jev_tip = await page.locator(".ev-msg .ev-badge").nth(0).get_attribute("title")
-    ck.ok("AI 판정(JEV 모델)" in jev_tip and "정밀도 목표를 확인하지 못한 시험 운영" in jev_tip and "확신도: 보통" in jev_tip,
-          f"policy-v1: JEV ✅ 툴팁 {jev_tip}")
+    ck.ok("AI 판정(외부 판정 모델)" in jev_tip and "정밀도 목표를 확인하지 못한 시험 운영" in jev_tip and "확신도: 보통" in jev_tip,
+          f"policy-v1: AI 판정 ✅ 툴팁 {jev_tip}")
     lex = page.locator(".ev-msg .ev-badge").nth(1)
     lex_tip = await lex.get_attribute("title")
-    ck.ok(lex_tip.startswith("검색된 공시 문단에서 확인됨") and "규칙 판정" in lex_tip and "JEV 모델" not in lex_tip
+    ck.ok(lex_tip.startswith("검색된 공시 문단에서 확인됨") and "규칙 판정" in lex_tip and "외부 판정 모델" not in lex_tip
           and "확신도" not in lex_tip and "정밀도 목표를 확인하지 못한 시험 운영" in lex_tip,
           f"policy-v1: lex_high ✅ 툴팁(규칙 판정, 확신도 없음) {lex_tip}")
     await lex.click()

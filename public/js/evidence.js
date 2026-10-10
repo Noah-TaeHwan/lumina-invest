@@ -15,11 +15,11 @@ const ACTIVE = new Set(["pending", "running"]);
 const POLL_INTERVAL_MS = 500;
 const DEFAULT_POLL_UNTIL_S = 15;  // 서버가 상한을 주지 않을 때(spec 결정 4-1)
 
-export const BADGE_TOOLTIP = "AI 판정(JEV 모델) · 검색된 공시 문단 기준이며 사실 여부를 보증하지 않습니다";
-// 1차 필터 구간(lex_low·lex_high)은 JEV를 부르지 않은 규칙 판정이라 "JEV 모델"이라고 쓰지 않는다
+export const BADGE_TOOLTIP = "AI 판정(외부 판정 모델) · 검색된 공시 문단 기준이며 사실 여부를 보증하지 않습니다";
+// 1차 필터 구간(lex_low·lex_high)은 외부 모델을 부르지 않은 규칙 판정이라 "외부 판정 모델"이라고 쓰지 않는다
 const RULE_TOOLTIPS = {
-  lex_high: "규칙 판정(문단과 거의 같은 문장, JEV 호출 없음) · 검색된 공시 문단 기준이며 사실 여부를 보증하지 않습니다",
-  lex_low: "규칙 판정(문단과 겹치는 표현이 매우 적음, JEV 호출 없음) · 검색된 공시 문단 기준이며 사실 여부를 보증하지 않습니다",
+  lex_high: "규칙 판정(문단과 거의 같은 문장, 외부 모델 호출 없음) · 검색된 공시 문단 기준이며 사실 여부를 보증하지 않습니다",
+  lex_low: "규칙 판정(문단과 겹치는 표현이 매우 적음, 외부 모델 호출 없음) · 검색된 공시 문단 기준이며 사실 여부를 보증하지 않습니다",
 };
 
 const BADGES = {
@@ -138,7 +138,7 @@ export function showRejudge(run) {
   return run.rejudgeable === true;
 }
 
-/** 배지 툴팁의 판정 방식 문구: 규칙 경로면 규칙 판정, 아니면 AI 판정(JEV 모델). */
+/** 배지 툴팁의 판정 방식 문구: 규칙 경로면 규칙 판정, 아니면 AI 판정(외부 판정 모델). */
 export function judgeTooltip(claim) {
   return Object.hasOwn(RULE_TOOLTIPS, claim?.route ?? "") ? RULE_TOOLTIPS[claim.route] : BADGE_TOOLTIP;
 }

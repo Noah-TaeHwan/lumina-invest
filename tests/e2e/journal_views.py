@@ -29,8 +29,8 @@ KST = datetime.timezone(datetime.timedelta(hours=9))
 
 # spec 결정 4-2 고정 고지(app/routes/journal.py NOTICE와 같은 글자)
 NOTICE = ("판단 일지는 내가 쓴 기록입니다. 답변과 배지는 AI가 만든 것으로, 배지는 검색된 공시 문단 기준 AI 판정"
-          "(TypeSafe의 JEV 모델)이며 사실 여부를 보증하지 않습니다. 이 서비스는 투자 권유나 수익 예측을 하지 않으며, "
-          "투자 판단과 그 결과는 본인에게 있습니다. 이 프로젝트는 TypeSafe와 제휴 관계가 아닙니다.")
+          "(외부 판정 모델)이며 사실 여부를 보증하지 않습니다. 이 서비스는 투자 권유나 수익 예측을 하지 않으며, "
+          "투자 판단과 그 결과는 본인에게 있습니다.")
 Q1 = "HBM 매출 비중과 주요 고객은?"
 Q2 = "SK하이닉스의 2025년 사업부문별 매출 구성과 주요 고객사, 그리고 설비투자 계획은 무엇인가요?"  # 40자 넘음
 CLAIM_KEYS = ("idx", "text", "start", "end", "status", "route", "reason", "source_idx", "number_ok", "confidence")
@@ -377,9 +377,9 @@ async def s_pure(browser, base, ck):
     ck.ok(res["sha"] == ["ok", "unavailable", "unavailable", "unavailable", "unavailable"],
           f"pure: 변화 응답 문단 해시가 스냅샷 같은 위치 문단과 다르면 확인 불가 {res['sha']}")
     t_jev, t_hi, t_lo = res["tips"]
-    ck.ok(t_jev.startswith("당시 AI 판정 — ") and "AI 판정(JEV 모델)" in t_jev and TIP in t_jev,
-          f"pure: JEV 배지 툴팁은 당시 AI 판정 {t_jev}")
-    ck.ok(all(t.startswith("당시 규칙 판정 — ") and "규칙 판정(" in t and "JEV 호출 없음" in t and TIP in t
+    ck.ok(t_jev.startswith("당시 AI 판정 — ") and "AI 판정(외부 판정 모델)" in t_jev and TIP in t_jev,
+          f"pure: AI 판정 배지 툴팁은 당시 AI 판정 {t_jev}")
+    ck.ok(all(t.startswith("당시 규칙 판정 — ") and "규칙 판정(" in t and "외부 모델 호출 없음" in t and TIP in t
               and "AI 판정" not in t for t in (t_hi, t_lo)),
           f"pure: 규칙 판정 배지 툴팁은 출처가 앞뒤로 같다 {t_hi} / {t_lo}")
     ck.ok(res["trunc"] == "가" * 40 + "…", "pure: 질문 앞 40자")
@@ -793,7 +793,7 @@ async def s_detail(browser, base, ck):
     b = [t.strip() for t in await s.locator(".ev-badge").all_inner_texts()]
     ck.ok(b == ["✅", "✅", "⚠️", "❔"], f"detail: 당시 배지 {b}")
     tip = await s.locator(".ev-badge").first.get_attribute("title")
-    ck.ok(tip.startswith("당시 AI 판정") and "AI 판정(JEV 모델) · 검색된 공시 문단 기준이며 사실 여부를 보증하지 않습니다" in tip,
+    ck.ok(tip.startswith("당시 AI 판정") and "AI 판정(외부 판정 모델) · 검색된 공시 문단 기준이며 사실 여부를 보증하지 않습니다" in tip,
           f"detail: 배지 툴팁 머리에 당시 {tip}")
     await s.locator(".ev-badge").nth(1).click()
     pt = await s.locator(".ev-panel").inner_text()

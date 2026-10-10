@@ -1,9 +1,9 @@
 # 근거 판정 A-3 평가 리포트(주체 확인, 확인 세트 1회 실행)
 
-> 이 리포트는 `python -m lab.evidence --study a3 a3-report`가 자동 생성했다. 정답 라벨은 사람이 아니라 AI(Claude Opus·Codex)가 만든 **AI 참조 라벨**이며, 통제 주장 기대값은 AI 작성자가 만든 변형에서 왔다. 판정에는 TypeSafe의 JEV 모델을 썼고, 이 프로젝트는 TypeSafe와 제휴 관계가 아니다.
+> 이 리포트는 `python -m lab.evidence --study a3 a3-report`가 자동 생성했다. 정답 라벨은 사람이 아니라 AI(Claude Opus·Codex)가 만든 **AI 참조 라벨**이며, 통제 주장 기대값은 AI 작성자가 만든 변형에서 왔다. 판정에는 외부 문장 판정 모델을 썼다.
 
 - 사전등록: `lab/evidence/prereg_a3.json`, 동결: `lab/evidence/prereg_a3_check.json`, 원자료: `lab/evidence/results/a3-check.json`
-- 비교: 같은 JEV 확률 위에서 a2-v1 대 a3-subject-exp(주체 확인만 다름). 자연 주장 541건(AI 라벨 지지됨 273건), 통제 주체 교체 165건, JEV 실패 제외 0건
+- 비교: 같은 판정 모델 확률 위에서 a2-v1 대 a3-subject-exp(주체 확인만 다름). 자연 주장 541건(AI 라벨 지지됨 273건), 통제 주체 교체 165건, 판정 모델 실패 제외 0건
 
 ## 관문
 
@@ -15,7 +15,7 @@
 
 ## 권고(사전등록 규칙)
 
-- a2-v1 유지. 후보 추출로는 교체를 막지 못하므로 ②(JEV 주체 질문)를 검토
+- a2-v1 유지. 후보 추출로는 교체를 막지 못하므로 ②(판정 모델 주체 질문)를 검토
 
 ## 보조 결과
 

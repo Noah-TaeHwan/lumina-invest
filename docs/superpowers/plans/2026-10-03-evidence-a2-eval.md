@@ -1,6 +1,6 @@
 # 근거 판정 A-2 평가(P5) 실행 계획
 
-> 작성: AI(Claude Code)가 작성한 계획 초안이다. 결정권자는 노아다. 코드·사전등록·단위 테스트는 클라우드에서 만들었고, 아래 실행 단계는 전부 **로컬**에서 한다(DART·Ollama·JEV·AI 라벨러, `lab/data/`).
+> 작성: AI(Claude Code)가 작성한 계획 초안이다. 결정권자는 노아다. 코드·사전등록·단위 테스트는 클라우드에서 만들었고, 아래 실행 단계는 전부 **로컬**에서 한다(DART·Ollama·판정 모델·AI 라벨러, `lab/data/`).
 
 **Goal:** 새 무작위 40개사와 서비스 생성기(`llama3.1:8b`) 답변으로 ✅ 임계값 τ_s와 1차 필터 구간 θ_low·θ_high를 조정 세트에서 고르고, 확인 세트에서 **한 번** 재서 정책 `a2-v1`을 확정한다. 결과가 부정이어도 리포트를 공개한다.
 
@@ -12,7 +12,7 @@
 | 항목 | A-1 | A-2(`--study a2`) |
 |---|---|---|
 | 커밋 데이터 | `lab/evidence/data/` | `lab/evidence/study_a2/` |
-| 비공개 데이터(gitignore) | `lab/data/evidence/` | `lab/data/evidence_a2/`(문서·문단·벡터·점수·JEV 호출 기록) |
+| 비공개 데이터(gitignore) | `lab/data/evidence/` | `lab/data/evidence_a2/`(문서·문단·벡터·점수·판정 모델 호출 기록) |
 | 분할 | `split.json` | `split_a2.json` |
 | 사전등록 | `prereg.json` | `prereg_a2.json` |
 | 동결 | `prereg_holdout.json` | `prereg_a2_check.json` |
@@ -62,9 +62,9 @@ alias ev2o='OLLAMA_BASE_URL=http://127.0.0.1:11434 /tmp/ev2.sh'
 | 1 | 추첨·분할 | 로컬(OpenDART) | 15~30분 | `split_a2.json`, `study_a2/draw_ledger.jsonl`, `mention_edges.jsonl` |
 | 2 | 조정 세트 데이터: 문단·임베딩·질문·검색·생성·주장·통제 | 로컬(DART 원문·Ollama·Opus) | 약 1~1.5시간(8B 생성 120문항 약 30분) | `study_a2/*` |
 | 3 | 조정 세트 라벨(Opus·Codex 1·2차) | 로컬 | 약 1~1.5시간 | `study_a2/labels*` |
-| 4 | 조정 세트 판정·선택 | 로컬(JEV) | 판정 5~10분, 선택 1분 | `results/a2-tune.json` |
+| 4 | 조정 세트 판정·선택 | 로컬(판정 모델) | 판정 5~10분, 선택 1분 | `results/a2-tune.json` |
 | 5 | 확인 세트 데이터·라벨 → 동결 | 로컬 | 약 2~3시간(8B 생성 120문항 약 30분) | `study_a2/*`, `prereg_a2_check.json` |
-| 6 | 확인 세트 1회 판정·리포트 | 로컬(JEV) | 판정 5~10분, 리포트 2분 | `results/a2-check.json`, `docs/lab/evidence-a2-report.md` |
+| 6 | 확인 세트 1회 판정·리포트 | 로컬(판정 모델) | 판정 5~10분, 리포트 2분 | `results/a2-check.json`, `docs/lab/evidence-a2-report.md` |
 | 7 | 정책 `a2-v1` 반영 | 클라우드 가능(P6) | — | 별도 PR |
 
 8B 생성은 질문 240개(조정 120 + 확인 120) × 10~20초 ≈ **약 1시간**이다. `generate`는 답변 하나마다 파일을 다시 쓰므로 중간에 멈춰도 다시 실행하면 남은 질문만 생성한다(이어서 시작한 첫 답변은 `cold`로 표시된다).
@@ -82,7 +82,7 @@ alias ev2o='OLLAMA_BASE_URL=http://127.0.0.1:11434 /tmp/ev2.sh'
 - 입력: OpenDART 키, A-1 비공개 문단 `lab/data/evidence/passages.jsonl`(A-1 40개사 교차 언급 계산용, 없으면 거부).
 - 동작: `random.Random(20261103)` 순서로 상장사를 보며 A-1 40개사(`a1_company`)·시드 그룹 접두어·금융업·사업보고서 없음·지정 절 3,000자 미만·A-1과 교차 언급 10회 이상(`a1_mention:<A-1 코드>`)을 빼고 40개사를 채운다. 교차 언급 군집 단위로 확인 ≤ 20, 나머지 조정.
 - 예상 출력: `{"tune": 20, "check": 20}` 근처(군집 크기에 따라 확인 15~20). 원장에 `split`(제외 사유별 개수)이 남는다.
-- **중지:** 40개사를 못 채우거나 확인 < 15·조정 = 0이면 거부된다. 규칙을 바꾸려면 원장에 이유를 남기고 사전등록 개정(새 버전) 뒤에 다시 한다. JEV 호출 뒤에는 `split`이 거부된다.
+- **중지:** 40개사를 못 채우거나 확인 < 15·조정 = 0이면 거부된다. 규칙을 바꾸려면 원장에 이유를 남기고 사전등록 개정(새 버전) 뒤에 다시 한다. 판정 모델 호출 뒤에는 `split`이 거부된다.
 
 ```bash
 git add lab/evidence/split_a2.json lab/evidence/study_a2/draw_ledger.jsonl lab/evidence/study_a2/mention_edges.jsonl \
@@ -136,7 +136,7 @@ done
 /tmp/ev2.sh labels-merge --split tune        # 예상: "N labels, kappa r1 x.xxx"
 ```
 
-- 라벨러에게는 주장 출처·변형 유형·JEV 출력·어휘 점수를 보이지 않는다(불투명 ID).
+- 라벨러에게는 주장 출처·변형 유형·판정 모델 출력·어휘 점수를 보이지 않는다(불투명 ID).
 - 비주장 규칙에 걸린 문장도 라벨링한다(규칙 오분류율 보고용).
 - **중지:** 1차 이진 κ < 0.6이면 `a2-tune`이 멈춘다. 라벨 절차를 고치고 원장에 남긴다(확인 세트는 열지 않는다).
 
@@ -165,7 +165,7 @@ git add lab/evidence/results/a2-tune.json lab/evidence/attempts.jsonl
 git commit -m "chore: A-2 조정 세트 τ_s·θ 선택"
 ```
 
-### 5단계: 확인 세트 데이터 → 동결(JEV 호출 전)
+### 5단계: 확인 세트 데이터 → 동결(판정 모델 호출 전)
 
 2·3단계를 `--split check`로 반복한다(`embed`, `question-packets`, 서브에이전트, `questions-merge`, `retrieve`, `generate`, `claims`, `controlled-*`, `label-packets`, `labels-merge`).
 
