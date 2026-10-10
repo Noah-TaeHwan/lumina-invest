@@ -5,6 +5,7 @@
 - 모든 호출을 JSONL에 남긴다(익명 state·결과·태그). 같은 입력은 캐시를 쓰고, 반복 측정은 use_cache=False.
 - 실패(HTTP 오류·타임아웃·스키마 위반)는 차단으로 처리하고 캐시하지 않는다.
 - 누적 입력 토큰 비용이 예산에 닿으면 호출하지 않는다. API 키 값은 어디에도 기록하지 않는다.
+- 입력 토큰 단가는 계약상 비공개라 저장소에 두지 않는다. 환경 변수나 ~/.config/typesafe의 파일에서 읽고, 없으면 호출하지 않는다.
 """
 from __future__ import annotations
 
@@ -21,7 +22,10 @@ import httpx
 
 API_URL = "https://api.typesafe.ai/v1/systemone"
 MODEL = "jev-1.13.0"
-PRICE_PER_INPUT_TOKEN = 0.042 / 1_000_000
+PRICE_ENV = "JEV_PRICE_PER_MILLION_INPUT_TOKENS"
+PRICE_FILE_NAME = ".config/typesafe/price_per_million_input_tokens"
+PRICE_HINT = (f"입력 토큰 단가를 모릅니다(비공개 값). 100만 토큰당 USD를 환경 변수 {PRICE_ENV}나 "
+              f"~/{PRICE_FILE_NAME} 파일에 넣으세요")
 TIMEOUT_S = 10.0
 QUESTION_ID = "fail"
 QUESTION = {
@@ -42,6 +46,10 @@ QUESTION = {
 
 class BudgetExceeded(RuntimeError):
     """누적 JEV 비용이 예산 상한에 닿았다."""
+
+
+class PriceUnknown(RuntimeError):
+    """입력 토큰 단가를 모르면 예산을 지킬 수 없으므로 과금 호출을 하지 않는다."""
 
 
 @dataclass
@@ -83,6 +91,21 @@ def load_api_key() -> str:
     return path.read_text().strip()
 
 
+def load_price_per_input_token() -> float | None:
+    """입력 토큰 하나의 단가(USD). 환경 변수, 없으면 ~/.config/typesafe의 파일(100만 토큰당 USD)에서 읽는다.
+
+    @returns 단가, 둘 다 없으면 None(미확인)
+    """
+    raw = os.environ.get(PRICE_ENV, "").strip()
+    path = Path.home() / PRICE_FILE_NAME
+    if not raw and path.is_file():
+        raw = path.read_text(encoding="utf-8").strip()
+    return float(raw) / 1_000_000 if raw else None
+
+
+PRICE_PER_INPUT_TOKEN = load_price_per_input_token()  # None이면 단가 미확인
+
+
 def is_blocked(result: GateResult, tau: float) -> bool:
     """실패는 차단, 성공은 p_fail ≥ τ이면 차단."""
     return (not result.ok) or result.p_fail >= tau
@@ -106,7 +129,8 @@ class JevGate:
                 rec.pop("state", None)
                 rec.pop("tag", None)
                 r = GateResult(**rec)
-                self.spent_usd += r.input_tokens * PRICE_PER_INPUT_TOKEN
+                if PRICE_PER_INPUT_TOKEN is not None:  # 단가 미확인이면 합산하지 않는다(새 호출은 ask가 막는다)
+                    self.spent_usd += r.input_tokens * PRICE_PER_INPUT_TOKEN
                 if r.ok and r.key not in self._cache:
                     self._cache[r.key] = r
 
@@ -115,6 +139,8 @@ class JevGate:
         key = cache_key(state)
         if use_cache and key in self._cache:
             return replace(self._cache[key], cached=True)
+        if PRICE_PER_INPUT_TOKEN is None:
+            raise PriceUnknown(PRICE_HINT)
         if self.spent_usd >= self.budget_usd:
             raise BudgetExceeded(f"누적 ${self.spent_usd:.6f} ≥ 예산 ${self.budget_usd}")
         result = self._call(key, state)

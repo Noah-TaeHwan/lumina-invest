@@ -107,3 +107,9 @@ def test_render_report_shows_notes():
                "projection": {"calls": 0, "cost_usd": 0.0, "hours_sequential": 0.0}, "complete": False,
                "notes": ["메모 A"]}
     assert "- 메모 A" in stage0.render_report(summary, stage0.evaluate_go(summary, TH), TH)
+
+
+def test_project_full_run_without_a_price_raises(monkeypatch):
+    monkeypatch.setattr(gate, "PRICE_PER_INPUT_TOKEN", None)
+    with pytest.raises(gate.PriceUnknown):
+        stage0.project_full_run(10, 700, 360)

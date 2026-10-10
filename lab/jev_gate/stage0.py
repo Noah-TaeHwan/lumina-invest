@@ -6,7 +6,7 @@ from collections import Counter
 import numpy as np
 import pandas as pd
 
-from lab.jev_gate.gate import PRICE_PER_INPUT_TOKEN
+from lab.jev_gate import gate
 
 
 def _utc_micros(day: str) -> int:
@@ -79,9 +79,11 @@ def repeat_agreement(groups: dict[str, list[float]]) -> dict:
 
 
 def project_full_run(total_candidates: int, mean_input_tokens: float, p50_ms: float) -> dict:
-    """모든 후보를 순차 호출할 때의 비용·시간 추정."""
+    """모든 후보를 순차 호출할 때의 비용·시간 추정. 단가를 모르면(비공개 값) 추정하지 않고 PriceUnknown을 낸다."""
+    if gate.PRICE_PER_INPUT_TOKEN is None:
+        raise gate.PriceUnknown(gate.PRICE_HINT)
     return {"calls": int(total_candidates),
-            "cost_usd": total_candidates * mean_input_tokens * PRICE_PER_INPUT_TOKEN,
+            "cost_usd": total_candidates * mean_input_tokens * gate.PRICE_PER_INPUT_TOKEN,
             "hours_sequential": total_candidates * p50_ms / 3_600_000}
 
 
@@ -120,7 +122,7 @@ def render_report(summary: dict, go: dict[str, bool], th: dict) -> str:
         ("반복 판정 일치율", f"{rep['agreement']:.2%} ({rep['items']}건)", f"≥ {th['repeat_agreement_min']:.0%}",
          go["repeat_agreement"]),
         ("개발 구간 후보 수", f"{summary['dev_candidates']}", f"≥ {th['dev_candidates_min']}", go["dev_candidates"]),
-        ("전체 예상 비용", f"${proj['cost_usd']:.4f}", f"≤ ${th['projected_cost_max_usd']}", go["projected_cost"]),
+        ("전체 예상 비용", "공개하지 않음", "예산 이내", go["projected_cost"]),
     ]
     lines = [
         "# JEV Gate Lab — Stage 0 리포트",
@@ -142,7 +144,7 @@ def render_report(summary: dict, go: dict[str, bool], th: dict) -> str:
         f"- 응답 모델: {', '.join(c['models']) or '없음'}, 호출당 평균 입력 토큰 {c['mean_input_tokens']:.0f}",
         f"- 오류: {c['errors'] or '없음'}",
         f"- 반복 측정 확률 표준편차 평균: {rep['mean_std']:.4f}",
-        f"- 전체 후보 {proj['calls']}건 순차 호출 추정: ${proj['cost_usd']:.4f}, {proj['hours_sequential']:.2f}시간",
+        f"- 전체 후보 {proj['calls']}건 순차 호출 추정: {proj['hours_sequential']:.2f}시간",
         "",
         "## 세션별 지연",
         "",

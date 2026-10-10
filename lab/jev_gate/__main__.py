@@ -66,6 +66,8 @@ def _default_gate(paths: Paths, pre: dict) -> gate.JevGate:
         key = gate.load_api_key()
     except OSError as e:  # 파일 없음·권한 오류
         raise SystemExit(f"TypeSafe API 키를 읽을 수 없습니다: {e}")
+    if gate.PRICE_PER_INPUT_TOKEN is None:  # 단가를 모르면 예산을 못 지키므로 호출 기록이 생기기 전에 멈춘다
+        raise SystemExit(gate.PRICE_HINT)
     return gate.JevGate(paths.calls, budget_usd=pre["jev"]["budget_usd"], api_key=key)
 
 

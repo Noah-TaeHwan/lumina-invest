@@ -39,9 +39,16 @@ def test_prereg_pins_state_inputs():
 
 def test_prereg_pins_cost_operations_and_arms():
     assert PREREG["version"] >= 2
-    assert PREREG["jev"]["price_per_million_input_tokens"] == pytest.approx(gate.PRICE_PER_INPUT_TOKEN * 1e6)
     assert PREREG["stage0"]["max_consecutive_failures"] == cli.MAX_CONSECUTIVE_FAILURES
     assert set(PREREG["arms"]["matching"]) == {"deterministic_filter", "random_block", "logistic"}
+
+
+def test_prereg_price_matches_the_private_price_when_configured():
+    """사전등록에 적힌 단가와 코드가 읽는 단가가 같아야 한다. 단가는 비공개라 설정이 없는 환경에서는 건너뛴다."""
+    price = gate.load_price_per_input_token()  # autouse 대체값이 아니라 실제 설정을 읽는다
+    if price is None:
+        pytest.skip("입력 토큰 단가가 이 환경에 설정되어 있지 않다")
+    assert PREREG["jev"]["price_per_million_input_tokens"] == pytest.approx(price * 1e6)
 
 
 def test_prereg_v3_five_minute_bars_and_separate_results():

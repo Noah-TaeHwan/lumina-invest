@@ -134,3 +134,27 @@ def test_model_mismatch_is_blocked_and_not_cached(tmp_path):
     assert g.spent_usd > 0
     g.ask(STATE)
     assert len(rec.requests) == 2
+
+
+def test_unknown_price_refuses_live_calls_but_serves_cache(tmp_path, monkeypatch):
+    path = tmp_path / "calls.jsonl"
+    _gate(path, Recorder(ok_response)).ask(STATE)
+    monkeypatch.setattr(gate, "PRICE_PER_INPUT_TOKEN", None)
+    rec = Recorder(ok_response)
+    g = _gate(path, rec)
+    assert g.ask(STATE).cached is True and g.spent_usd == 0.0
+    with pytest.raises(gate.PriceUnknown):
+        g.ask({"features": {"ret_1": 0.2}})
+    assert rec.requests == []
+
+
+def test_price_loads_from_env_then_file_and_is_none_without_either(tmp_path, monkeypatch):
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.delenv(gate.PRICE_ENV, raising=False)
+    assert gate.load_price_per_input_token() is None
+    price_file = tmp_path / gate.PRICE_FILE_NAME
+    price_file.parent.mkdir(parents=True)
+    price_file.write_text("2.5\n")
+    assert gate.load_price_per_input_token() == pytest.approx(2.5e-6)
+    monkeypatch.setenv(gate.PRICE_ENV, "4")
+    assert gate.load_price_per_input_token() == pytest.approx(4e-6)
