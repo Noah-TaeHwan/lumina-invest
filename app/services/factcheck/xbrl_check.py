@@ -48,7 +48,7 @@ _ACCOUNT = re.compile(
     rf"|(?P<ast>{_B}(?:자산\s*총계|총\s*자산|자산(?!\s*(?:가치|운용|매각|재평가|유동화|건전성|총계))))"
     rf"|(?P<lia>{_B}(?:부채\s*총계|총\s*부채|부채(?!\s*(?:비율|총계))))"
     rf"|(?P<eq>{_B}(?:자본\s*총계|총\s*자본|자본(?!\s*(?:금|잉여금|변동|조정|적정|비율|총계|시장|지출))))"
-    rf"|(?P<margin>{_B}영업\s*이익률)")
+    rf"|(?P<margin>{_B}영업\s*이익률|(?<![A-Za-z])OPM(?![A-Za-z]))")  # OPM: 영업이익률 영문 약어
 _GROUP_ACCOUNT = {"rev": REVENUE, "op": OPERATING, "own": OWNERS, "net": NET, "ast": ASSETS, "lia": LIABILITIES,
                   "eq": EQUITY, "margin": "margin"}
 # 음수 표기: ASCII '-', 수학 빼기 '−'(U+2212), DART 표준 '△'(붙여 쓴 것만)

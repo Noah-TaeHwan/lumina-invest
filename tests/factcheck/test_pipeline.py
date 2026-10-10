@@ -6,11 +6,11 @@ JEV 시간 초과·실패 → unjudged, 마감 → busy, 결과 순서·점진 �
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import pytest
 
-from app.services.factcheck import pipeline, triage
+from app.services.factcheck import pipeline, scope, triage, xbrl_check
 from app.services.factcheck.pipeline import FactcheckPipeline, SentenceResult
 
 SAMSUNG = "00126380"
@@ -1421,3 +1421,96 @@ def test_header_keeps_company_context_for_body(title, other):
     # 지금 동작 고정: 다른 회사 이름 + 기간 숫자가 있는 제목 줄은 회사 문맥 기준 문장이다
     rs = _run_names(f"{title}\n2025년 2분기 연결 영업이익은 4.7조원이다.", HDR_NAMES, SS_FACTS)
     assert (rs[1].status, rs[1].reason) == ("skipped", f"other_company_inherited:{other}")
+
+
+# ---- 영문 회사명 별칭: 'SK hynix'가 지주사 'SK'로 잡히지 않게(긴 이름 먼저) ----
+
+HY_Q2_25 = [_fact(HYNIX, OP, 9_213_000_000_000, "2025Q2", "2025-04-01", "2025-06-30", "20250814000001"),
+            _fact(HYNIX, REV, 22_232_000_000_000, "2025Q2", "2025-04-01", "2025-06-30", "20250814000001",
+                  nm="매출액")]
+
+
+@pytest.mark.parametrize("name", ["SK Hynix", "SK hynix", "SK HYNIX", "Hynix"])
+def test_english_alias_selected_company_checked(name):
+    r = _check(HYNIX, f"{name}의 2025년 2분기 연결 영업이익은 9.2조원이다.", FakeStore(default=NOISE), FakeJev(),
+               HY_Q2_25)
+    assert r.category == "checked" and r.status != "skipped", (name, r.reason)
+    assert r.xbrl is not None and r.xbrl["amount"] == 9_213_000_000_000
+    assert (r.status, r.reason) == ("supported", "xbrl_exact"), name
+
+
+def test_english_alias_other_company_named_in_korean():
+    rs = _run_text("SK Hynix의 2025년 2분기 영업이익은 9.2조원이다. 2025년 2분기 연결 영업이익은 4.7조원이다.",
+                   FakeStore(default=NOISE), FakeJev(), SS_FACTS)
+    assert (rs[0].status, rs[0].reason) == ("skipped", "other_company:SK하이닉스")
+    assert (rs[1].status, rs[1].reason) == ("skipped", "other_company_inherited:SK하이닉스")
+
+
+@pytest.mark.parametrize("name", ["Samsung Electronics", "Samsung Elec.", "SAMSUNG ELECTRONICS"])
+def test_english_alias_samsung(name):
+    r = _check(SAMSUNG, f"{name}의 2025년 2분기 연결 영업이익은 4.7조원이다.", FakeStore(default=NOISE), FakeJev(),
+               SS_FACTS)
+    assert (r.status, r.reason) == ("supported", "xbrl_exact"), name
+
+
+def test_holding_sk_still_sk():
+    rs = _run_text("SK의 2025년 2분기 영업이익은 9.2조원이다.", FakeStore(default=NOISE), FakeJev(), SS_FACTS)
+    assert (rs[0].status, rs[0].reason) == ("skipped", "other_company:SK")
+
+
+# ---- 'OPM'(영업이익률), 금액 주장 + 대조 못 하는 퍼센트가 섞인 문장 ----
+
+def _hy(text):
+    return _check(HYNIX, text, FakeStore(default=NOISE), FakeJev(), HY_Q2_25)
+
+
+def test_opm_is_margin_and_compared():
+    r = _hy("2025년 2분기 매출액 22.2조원, 영업이익 9.2조원, OPM 41.4%를 기록했다.")  # 9.213/22.232 = 41.44%
+    assert r.status == "supported", r.reason
+
+
+@pytest.mark.parametrize("text", [
+    "2025년 2분기 매출액 22.2조원, 영업이익 9.2조원, OPM 51.4%를 기록했다.",
+    "2025년 2분기 매출액 32.2조원, 영업이익 9.2조원, OPM 41.4%를 기록했다.",
+])
+def test_opm_sentence_wrong_value_contradicted(text):
+    r = _hy(text)
+    assert (r.status, r.reason) == ("contradicted", "xbrl_mismatch"), text
+
+
+def test_amount_with_uncomparable_percent_is_checked_not_exact():
+    r = _hy("2025년 2분기 영업이익은 9.2조원, DRAM 점유율은 36%다.")
+    assert r.status != "skipped" and r.category == "checked", r.reason
+    assert r.reason != "xbrl_exact" and r.status != "supported"
+    assert r.xbrl is not None and r.xbrl["amount"] == 9_213_000_000_000
+
+
+def test_amount_with_uncomparable_percent_wrong_amount_contradicted():
+    r = _hy("2025년 2분기 영업이익은 8.2조원, DRAM 점유율은 36%다.")
+    assert (r.status, r.reason) == ("contradicted", "xbrl_mismatch")
+
+
+def test_percent_only_sentence_still_derived():
+    r = _hy("2025년 2분기 DRAM 점유율은 36%다.")
+    assert (r.status, r.category, r.reason) == ("skipped", "derived", "derived:other")
+
+
+def test_margin_point_change_stays_derived():
+    # %p 변화는 대조 못 하는 퍼센트: 이익률 계정 주장만 있으면 지금처럼 건너뛴다(이익률 값으로 대조하지 않는다)
+    r = _hy("2025년 2분기 영업이익률은 1.2%p 상승했다.")
+    assert (r.status, r.reason) == ("skipped", "derived:other")
+
+
+def test_amount_only_refuses_uncomparable_percent_scope():
+    text = "2025년 2분기 영업이익은 9.2조원이다."
+    as_of = scope.Period.parse("2026H1")
+    idx = scope.CompanyIndex(NAMES)
+    sc = scope.period_scope(text, as_of)
+    xr = xbrl_check.check(text, HY_Q2_25, corp_code=HYNIX, as_of=as_of, names=idx, mentions=sc.mentions)
+    assert pipeline.amount_only(text, sc, xr, idx, HYNIX)
+    assert not pipeline.amount_only(text, replace(sc, derived="other"), xr, idx, HYNIX)
+
+
+def test_margin_with_point_change_compares_margin():
+    r = _hy("2025년 2분기 영업이익률은 51.4%로 1.2%p 상승했다.")  # 실제 41.44%
+    assert (r.status, r.reason) == ("contradicted", "xbrl_mismatch")

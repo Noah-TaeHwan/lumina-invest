@@ -285,6 +285,13 @@ _NGRAM = 3
 # evidence.subject의 일상어 상장사명(전에는 색인에서 아예 뺐다 — 이제 같은 규칙으로 법인 표시·선택 회사면 회사로 본다)
 COMMON_WORD_COMPANY_NAMES = tuple(dict.fromkeys(
     ("도움", "나노", "레이", "대상", "동방", "노을", "레몬", "라임", "기린", "리드") + tuple(COMMON_WORD_NAMES)))
+# 데모 범위 두 회사의 영문 이름 별칭(대소문자 무시, 법인 접미 'Co., Ltd.'는 normalize가 뗀다). 근거: 리드 공개 전 점검에서
+# 'SK hynix'가 두 토큰 중 'SK'(지주사)로 잡혀 선택 회사 문장을 건너뛰었다. 상장사명 사전(corp_names)은 한글 이름뿐이라
+# 색인에만 더하고, 맞으면 한글 사전 이름(화면·사유 표시)을 돌려준다. 긴 이름이 먼저 맞는다(mentions의 n-gram 순서)
+ENGLISH_ALIASES = {
+    "00126380": ("Samsung Electronics", "Samsung Elec."),  # 삼성전자
+    "00164779": ("SK hynix", "Hynix"),  # SK하이닉스
+}
 _MARK_BEFORE = re.compile(r"(?:㈜|\(\s*주\s*\)|주식회사)\s*$")
 _MARK_AFTER = re.compile(r"\s*(?:㈜|\(\s*주\s*\))")
 _MARK_IN = re.compile(r"㈜|\(\s*주\s*\)|주식회사")
@@ -304,6 +311,11 @@ class CompanyIndex:
                 k = normalize(n)
                 if len(k) >= 2 and k not in common:
                     self._idx.setdefault(k, (corp, n))
+        for corp, aliases in ENGLISH_ALIASES.items():
+            if self.names.get(corp):
+                for a in aliases:  # 끝 마침표가 있는 꼴('Samsung Elec.의')과 없는 꼴 둘 다
+                    for k in {normalize(a), normalize(_EDGE.sub("", a))}:
+                        self._idx.setdefault(k, (corp, self.display(corp)))
 
     @classmethod
     def from_entries(cls, entries: Iterable[Mapping]) -> "CompanyIndex":
@@ -419,7 +431,7 @@ def other_company(text: str, corp_code: str, names: Mapping[str, Iterable[str]] 
 # ---- 파생 지표·범위 밖 표현 ----
 
 _PCT = re.compile(r"\d[\d,]*(?:\.\d+)?\s*(?P<u>%p|%포인트|%|퍼센트)")
-_MARGIN = re.compile(r"영업\s*이익률|이익률|마진율")
+_MARGIN = re.compile(r"영업\s*이익률|이익률|마진율|(?<![A-Za-z])OPM(?![A-Za-z])")  # OPM: 영업이익률 영문 약어
 _GROWTH = re.compile(r"YoY|QoQ|전년\s*동기\s*대비|전년\s*대비|전분기\s*대비|전\s*분기\s*대비|전기\s*대비|직전\s*분기\s*대비"
                      r"|증가율|감소율|증감률|증감율|성장률|성장|증가|감소|늘|줄|급증|급감|상승|하락")
 MARKET = re.compile(r"목표\s*주가|목표가|주가|시가\s*총액|시총|PER(?![A-Za-z])|PBR(?![A-Za-z])|EV/EBITDA|투자\s*의견"
@@ -473,23 +485,25 @@ def is_list_lead(text: str) -> bool:
 
 # 제목: 앞부분이 '(회사명) (기간) (리뷰·점검·…)'이고 ':'·'：'·'—'·'–'로 나뉜 문장, 또는 끝 문장부호·서술어미 없는 짧은 제목 줄
 _HEADER_SPLIT = re.compile(r"\s*[:：—–]\s*")
-_HEADER_KIND = re.compile(r"(?:리뷰|점검|분석|프리뷰|코멘트|요약|정리)$")
+_HEADER_KIND = re.compile(r"(?:리뷰|점검|분석|프리뷰|코멘트|요약|정리|(?<![A-Za-z])(?i:review|preview|comment|update))$")
+_STOCK_CODE = re.compile(r"\(\s*\d{6}\s*\)")  # 괄호 안 6자리 종목코드('(373220)'): 금액 숫자가 아니다
 _HEADER_MAX = 40  # 짧은 제목 줄의 최대 글자 수
 # 글 소개: '다음은·아래는 … (메모·초안·정리·답변·요약)(이다·입니다)'
 _INTRO = re.compile(r"^\s*(?:다음은|아래는)\s.*(?:메모|초안|정리|답변|요약)(?:이다|입니다|다)\s*[.!]?\s*$")
 
 
 def _has_amount_digit(text: str, as_of: Period) -> bool:
-    """기간 표현('2026년 2분기')의 숫자를 빼고도 숫자가 남는가(금액·비율 숫자)."""
+    """기간 표현('2026년 2분기')·괄호 안 종목코드('(373220)')의 숫자를 빼고도 숫자가 남는가(금액·비율 숫자)."""
     chars = list(text)
-    for a, b in period_spans(text, as_of):
+    for a, b in period_spans(text, as_of) + [m.span() for m in _STOCK_CODE.finditer(text)]:
         chars[a:b] = " " * (b - a)
     return bool(re.search(r"\d", "".join(chars)))
 
 
 def is_header(text: str, as_of: Period, names: Mapping[str, Iterable[str]] | CompanyIndex,
               corp_code: str | None = None) -> bool:
-    """리포트 제목 줄인가(금액 숫자 없음). ① 앞부분이 기간·회사명을 담고 '리뷰·점검·분석·프리뷰·코멘트·요약·정리'로
+    """리포트 제목 줄인가(금액 숫자 없음). ① 앞부분이 기간·회사명을 담고 '리뷰·점검·분석·프리뷰·코멘트·요약·정리'
+    (영문 Review·Preview·Comment·Update, 대소문자 무시)로
     끝나며 ':'·'：'·'—'·'–'로 나뉜 문장, ② 같은 꼴로 끝나는 짧은 줄(끝 문장부호·서술어미 없음)."""
     if _has_amount_digit(text, as_of):
         return False
