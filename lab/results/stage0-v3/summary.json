@@ -43,7 +43,7 @@
   },
   "projection": {
     "calls": 2234,
-    "cost_usd": 0.07536030390000001,
+    "cost_usd": null,
     "hours_sequential": 0.12912781129068915
   },
   "sessions": [
