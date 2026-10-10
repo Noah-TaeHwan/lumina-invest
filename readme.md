@@ -4,7 +4,7 @@
 
 **현재 단계: 초기 개발 · 로컬 기본 동작 확인 · 판정 모델 실험 완료(가격 판단: 판정력 없음 / 공시 근거 판정: 판정력 확인, 최고 기준선과 실용적 동등 → 채팅 연결(A-2) → 주체 확인 실험(A-3) 관문 미통과 → 판정 모델 주체 질문(A-4) 탐색 진행 기준 미통과) · 판단 일지 로컬 종단 확인**
 
-[edumgt/lumina-invest](https://github.com/edumgt/lumina-invest)의 공개 원본 코드에서 출발했습니다. 원본 기반을 유지하면서 자료 확인, AI의 설명, 사용자의 판단 기록을 연결하는 경험을 개발합니다.
+[원본 저장소](https://github.com/edumgt/lumina-invest)의 공개 코드에서 출발해 확장했습니다. 원본 기반을 유지하면서 자료 확인, AI의 설명, 사용자의 판단 기록을 연결하는 경험을 개발합니다.
 
 ## 한눈에 보기
 
@@ -60,7 +60,7 @@
 | 판정 모델 | 0.513 | 0.5 대비 −0.061 ~ +0.085 |
 | 로지스틱 회귀(같은 특징) | 0.649 | 판정 모델 대비 +0.050 ~ +0.234 |
 
-미리 정한 기준에 따라 **이 과제에서 판정 모델에는 판정력이 없다**고 결론 냈습니다. 같은 특징에 신호는 있었지만(로지스틱 0.649) 판정 모델은 그 신호를 쓰지 못했고, 실제 실패 비율 약 75%에 비해 실패 확률을 0.5 근처로 낮게 답했습니다.
+미리 정한 기준에 따라 **이 실험에서 판정 모델에는 판정력이 없다**고 결론 냈습니다. 같은 특징에 신호는 있었지만(로지스틱 0.649) 판정 모델은 그 신호를 쓰지 못했고, 실제 실패 비율 약 75%에 비해 실패 확률을 0.5 근처로 낮게 답했습니다.
 
 **과정에서 확인한 것**
 
@@ -68,7 +68,7 @@
 - 1분봉 규칙은 익절폭이 왕복 비용(0.22%)보다 작아 5분봉으로 바꿨습니다. 개발 구간만으로 결정했고 이유는 [spec 15절](docs/superpowers/specs/2026-10-01-jev-gate-lab-design.md)에 남겼습니다
 - 돌파 규칙 자체도 이 기간에는 비용 전 우위가 없었습니다([분석](docs/lab/stage1-rule-options.md))
 
-**한계:** 단일 자산·단일 규칙·가격 특징만 다룬 결과입니다. 텍스트(공지·뉴스) 입력이나 다른 과제에서의 판정 모델 성능은 이 실험으로 판단하지 않습니다. 체결은 다음 봉 시가 근사이며 호가·시장 충격은 반영하지 않았습니다. 실거래가 아닙니다.
+**한계:** 단일 자산·단일 규칙·가격 특징만 다룬 결과입니다. 텍스트(공지·뉴스) 입력이나 다른 문제에서의 판정 모델 성능은 이 실험으로 판단하지 않습니다. 체결은 다음 봉 시가 근사이며 호가·시장 충격은 반영하지 않았습니다. 실거래가 아닙니다.
 
 리포트: [판정력](docs/lab/stage1-predict-report.md) · [실현 가능성 Stage 0 v3](docs/lab/stage0-v3-report.md) · [Stage 0 v2(1분봉)](docs/lab/stage0-report.md)
 
@@ -133,10 +133,10 @@ AI 답변의 문장마다 DART 사업보고서 문단이 그 문장을 뒷받침
 
 | 구분 | 범위 | 상태 |
 |---|---|---|
-| 원본 제공 기반 | 인증, 기업 조회, AI 에이전트·RAG 경로, 그래프, 모의투자·퀀트 기능 및 관련 자료 | edumgt의 기존 코드. 전체 기능의 실행 검증은 미수행 |
+| 원본 제공 기반 | 인증, 기업 조회, AI 에이전트·RAG 경로, 그래프, 모의투자·퀀트 기능 및 관련 자료 | 원본 저장소의 기존 코드. 전체 기능의 실행 검증은 미수행 |
 | 개인 작업 — 저장소 | 독립 개인 저장소에서 개발하며 원작 출처와 기존 이력 유지 | 개인 개발 저장소 |
 | 개인 작업 — 실행 환경 | 독립 Compose 환경, 전용 포트·볼륨, 시작 시장 동기화 가드와 최소 검사 | [PR #2로 main 반영](https://github.com/Noah-TaeHwan/lumina-invest/pull/2) |
-| 개인 작업 — 소개 | 제품 중심 README, 원본 교육 자료 보존, 로컬 재현 절차 가이드(새 clone 실행은 미확인) | [PR #2로 main 반영](https://github.com/Noah-TaeHwan/lumina-invest/pull/2), 교차 검수 후 문구 보완 |
+| 개인 작업 — 소개 | 제품 중심 README, 원본 저장소 자료 보존, 로컬 재현 절차 가이드(새 clone 실행은 미확인) | [PR #2로 main 반영](https://github.com/Noah-TaeHwan/lumina-invest/pull/2), 교차 검수 후 문구 보완 |
 | 개인 작업 — 확인 | 회원가입·로그인, 종목 조회·지표 표시, 시드 그래프, 채팅 응답·저장 | 2026-10-01 로컬 확인 |
 | 개인 작업 — Gate Lab | 데이터 로더·익명 특징·돌파 규칙·판정 모델 게이트·사전등록·판정력 통계·CLI와 테스트 | [PR #4](https://github.com/Noah-TaeHwan/lumina-invest/pull/4)·[#5](https://github.com/Noah-TaeHwan/lumina-invest/pull/5)·[#6](https://github.com/Noah-TaeHwan/lumina-invest/pull/6)·[#7](https://github.com/Noah-TaeHwan/lumina-invest/pull/7), 독립 리뷰 반영 |
 | 개인 작업 — 근거 판정 엔진 | DART 수집·문단 분해·숫자 대조·판정 모델 판정기·기준선 4종·군집 분할·AI 참조 라벨·홀드아웃 2단 봉인·CLI와 테스트 | [PR #9](https://github.com/Noah-TaeHwan/lumina-invest/pull/9)·[#10](https://github.com/Noah-TaeHwan/lumina-invest/pull/10)·[#11](https://github.com/Noah-TaeHwan/lumina-invest/pull/11)·[#12](https://github.com/Noah-TaeHwan/lumina-invest/pull/12), 독립 리뷰 반영 |
@@ -243,19 +243,19 @@ macOS에서 채팅이 느리면 [채팅이 느릴 때(macOS)](PORTFOLIO_LOCAL.md
 - [로컬 실행 가이드](PORTFOLIO_LOCAL.md)
 - [Gate Lab 설계](docs/superpowers/specs/2026-10-01-jev-gate-lab-design.md) · [판정력 리포트](docs/lab/stage1-predict-report.md)
 - [근거 판정 엔진 설계](docs/superpowers/specs/2026-10-02-evidence-assistant-design.md) · [Stage 1 리포트](docs/lab/evidence-stage1-report.md)
-- [원본 교육 자료·Mock 화면·개념 설명 보존본](docs/upstream/readme.md)
+- [원본 저장소 자료·Mock 화면·개념 설명 보존본](docs/upstream/readme.md)
 - [AWS 목표 설계](aws.md) · [온프레미스 목표 설계](onprem.md) · [데이터 파이프라인 목표 설계](pipeline.md)
 
-목표 설계와 교육 자료는 원본 프로젝트에서 제공한 문서이며 개인 운영·배포 완료를 증명하지 않습니다.
+목표 설계와 설명 자료는 원본 저장소에서 제공한 문서이며 개인 운영·배포 완료를 증명하지 않습니다.
 
 이 저장소는 공개 API를 사용한 개인 실험입니다. 측정 수치는 이 저장소의 조건에서 얻은 결과입니다.
 기존 904줄 README의 내용은 출처와 기준 commit을 붙여 보존했습니다. 상대 링크·코드 블록 경계·줄 끝 공백 표현을 교정했으며, 의도된 줄바꿈은 유지했습니다.
 
 ## 원작 출처와 이용 조건
 
-- 원본 코드·기초 자료: [edumgt/lumina-invest](https://github.com/edumgt/lumina-invest)
+- 원본 코드·기초 자료: [원본 저장소](https://github.com/edumgt/lumina-invest)
 - 개인 개발 저장소: [Noah-TaeHwan/lumina-invest](https://github.com/Noah-TaeHwan/lumina-invest)
-- 개인 포트폴리오 공개는 강사님의 허용 범위에서 진행합니다.
+- 개인 포트폴리오 공개는 원본 저장소 작성자가 허용한 범위에서 진행합니다.
 - 개인 포트폴리오 공개 허용이 프로젝트 전체의 일반 재배포 라이선스나 MIT 재선언을 뜻하지는 않습니다. 명시적인 프로젝트 라이선스는 확인하지 않았습니다.
 
 이 프로젝트는 학습·정보 제공을 위한 포트폴리오입니다. 투자 자문이나 수익 보장을 제공하지 않습니다.
