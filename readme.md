@@ -2,7 +2,7 @@
 
 기업 지표 조회와 AI 채팅을 출발점으로 발전시키는 **투자 리서치 포트폴리오**입니다.
 
-**현재 단계: 초기 개발 · 로컬 기본 동작 확인 · 판정 모델 실험 완료(가격 판단: 판정력 없음 / 공시 근거 판정: 판정력 확인, 최고 기준선과 실용적 동등 → 채팅 연결(A-2) → 주체 확인 실험(A-3) 관문 미통과 → 판정 모델 주체 질문(A-4) 탐색 진행 기준 미통과) · 판단 일지 로컬 종단 확인**
+**현재 단계: 초기 개발 · 로컬 기본 동작 확인 · 판정 모델 실험 완료(가격 판단: 판별력 없음 / 공시 근거 판정: 판별력 확인, 최고 기준선과 실용적 동등 → 채팅 연결(A-2) → 주체 확인 실험(A-3) 관문 미통과 → 판정 모델 주체 질문(A-4) 탐색 진행 기준 미통과) · 판단 일지 로컬 종단 확인**
 
 [edumgt/lumina-invest](https://github.com/edumgt/lumina-invest)의 공개 원본 코드에서 출발했습니다. 원본 기반을 유지하면서 자료 확인, AI의 설명, 사용자의 판단 기록을 연결하는 경험을 개발합니다.
 
@@ -20,7 +20,7 @@
 | 내 판단 노트 | 판정 한 건에서 판단·확신·메모를 기록하고 당시 근거를 스냅샷으로 보존 | 기능 플래그 `JOURNAL_ENABLED` |
 | 재방문 | 다시 볼 날짜가 된 기록, 그 뒤 공시가 바뀌었는지 비교 | 판단 일지 안 |
 
-**판정 모델로 확인한 것과 안 된 것(사전등록 실험).** 가격 판단(분봉 돌파 실패 예측)에는 판정력이 없었고(홀드아웃 AUC 0.513), 공시 근거 판정에는 판정력이 있어 제품에 넣었습니다(최고 기준선과 실용적 동등). 주어가 바뀐 문장(다른 부문·제품 이름)을 거르는 개선 시도 두 번(A-3·A-4)은 미리 정한 기준을 넘지 못해 기본 정책으로 바꾸지 않았습니다. 정답은 AI 참조 라벨이며 사람 감사는 하지 않았습니다. 판정에는 외부 문장 판정 모델을 썼습니다. 투자 권유가 아닙니다.
+**판정 모델로 확인한 것과 안 된 것(사전등록 실험).** 가격 판단(분봉 돌파 실패 예측)에는 판별력이 없었고(홀드아웃 AUC 0.513), 공시 근거 판정에는 판별력이 있어 제품에 넣었습니다(최고 기준선과 실용적 동등). 주어가 바뀐 문장(다른 부문·제품 이름)을 거르는 개선 시도 두 번(A-3·A-4)은 미리 정한 기준을 넘지 못해 기본 정책으로 바꾸지 않았습니다. 정답은 AI 참조 라벨이며 사람 감사는 하지 않았습니다. 판정에는 외부 문장 판정 모델을 썼습니다. 투자 권유가 아닙니다.
 
 이 절은 AI(Claude Code)가 작성했습니다. 자세한 설계·결과는 아래 각 절과 링크한 리포트에 있습니다.
 
@@ -39,7 +39,7 @@
 
 판단 일지는 판정 모델을 새로 부르지 않고 당시 AI 판정을 그대로 보여 주기만 합니다. 가격·수익률·적중률은 붙이지 않으며 투자 권유가 아닙니다. 원 대화를 지워도 기록은 남고, 메모는 외부 모델·알림·감사 로그로 나가지 않습니다. 로컬 실스택에서 질문 → 기록 → 스레드 삭제 → 기록 재열기 → 내보내기 → 전체 삭제 한 바퀴를 확인했습니다([설계](docs/superpowers/specs/2026-10-04-judgment-journal-c-design.md)). 이 단락은 AI가 작성했습니다.
 
-## Gate Lab — 사전등록 판정력 실험
+## Gate Lab — 사전등록 판별력 실험
 
 외부 문장 판정 모델(버전 1.13.0)을 매매 진입 판단에 붙였을 때 실제로 도움이 되는지 검증한 실험입니다. 앱과 분리된 `lab/jev_gate/` 패키지에 있습니다.
 
@@ -60,7 +60,7 @@
 | 판정 모델 | 0.513 | 0.5 대비 −0.061 ~ +0.085 |
 | 로지스틱 회귀(같은 특징) | 0.649 | 판정 모델 대비 +0.050 ~ +0.234 |
 
-미리 정한 기준에 따라 **이 과제에서 판정 모델에는 판정력이 없다**고 결론 냈습니다. 같은 특징에 신호는 있었지만(로지스틱 0.649) 판정 모델은 그 신호를 쓰지 못했고, 실제 실패 비율 약 75%에 비해 실패 확률을 0.5 근처로 낮게 답했습니다.
+미리 정한 기준에 따라 **이 과제에서 판정 모델에는 판별력이 없다**고 결론 냈습니다. 같은 특징에 신호는 있었지만(로지스틱 0.649) 판정 모델은 그 신호를 쓰지 못했고, 실제 실패 비율 약 75%에 비해 실패 확률을 0.5 근처로 낮게 답했습니다.
 
 **과정에서 확인한 것**
 
@@ -70,7 +70,7 @@
 
 **한계:** 단일 자산·단일 규칙·가격 특징만 다룬 결과입니다. 텍스트(공지·뉴스) 입력이나 다른 과제에서의 판정 모델 성능은 이 실험으로 판단하지 않습니다. 체결은 다음 봉 시가 근사이며 호가·시장 충격은 반영하지 않았습니다. 실거래가 아닙니다.
 
-리포트: [판정력](docs/lab/stage1-predict-report.md) · [실현 가능성 Stage 0 v3](docs/lab/stage0-v3-report.md) · [Stage 0 v2(1분봉)](docs/lab/stage0-report.md)
+리포트: [판별력](docs/lab/stage1-predict-report.md) · [실현 가능성 Stage 0 v3](docs/lab/stage0-v3-report.md) · [Stage 0 v2(1분봉)](docs/lab/stage0-report.md)
 
 ## 근거 판정 엔진 — AI 답변 문장마다 공시 근거 확인
 
@@ -138,7 +138,7 @@ AI 답변의 문장마다 DART 사업보고서 문단이 그 문장을 뒷받침
 | 개인 작업 — 실행 환경 | 독립 Compose 환경, 전용 포트·볼륨, 시작 시장 동기화 가드와 최소 검사 | [PR #2로 main 반영](https://github.com/Noah-TaeHwan/lumina-invest/pull/2) |
 | 개인 작업 — 소개 | 제품 중심 README, 원본 교육 자료 보존, 로컬 재현 절차 가이드(새 clone 실행은 미확인) | [PR #2로 main 반영](https://github.com/Noah-TaeHwan/lumina-invest/pull/2), 교차 검수 후 문구 보완 |
 | 개인 작업 — 확인 | 회원가입·로그인, 종목 조회·지표 표시, 시드 그래프, 채팅 응답·저장 | 2026-10-01 로컬 확인 |
-| 개인 작업 — Gate Lab | 데이터 로더·익명 특징·돌파 규칙·판정 모델 게이트·사전등록·판정력 통계·CLI와 테스트 | [PR #4](https://github.com/Noah-TaeHwan/lumina-invest/pull/4)·[#5](https://github.com/Noah-TaeHwan/lumina-invest/pull/5)·[#6](https://github.com/Noah-TaeHwan/lumina-invest/pull/6)·[#7](https://github.com/Noah-TaeHwan/lumina-invest/pull/7), 독립 리뷰 반영 |
+| 개인 작업 — Gate Lab | 데이터 로더·익명 특징·돌파 규칙·판정 모델 게이트·사전등록·판별력 통계·CLI와 테스트 | [PR #4](https://github.com/Noah-TaeHwan/lumina-invest/pull/4)·[#5](https://github.com/Noah-TaeHwan/lumina-invest/pull/5)·[#6](https://github.com/Noah-TaeHwan/lumina-invest/pull/6)·[#7](https://github.com/Noah-TaeHwan/lumina-invest/pull/7), 독립 리뷰 반영 |
 | 개인 작업 — 근거 판정 엔진 | DART 수집·문단 분해·숫자 대조·판정 모델 판정기·기준선 4종·군집 분할·AI 참조 라벨·홀드아웃 2단 봉인·CLI와 테스트 | [PR #9](https://github.com/Noah-TaeHwan/lumina-invest/pull/9)·[#10](https://github.com/Noah-TaeHwan/lumina-invest/pull/10)·[#11](https://github.com/Noah-TaeHwan/lumina-invest/pull/11)·[#12](https://github.com/Noah-TaeHwan/lumina-invest/pull/12), 독립 리뷰 반영 |
 | 개인 작업 — 공시 근거 모드(A-2) | 채팅 답변 문장마다 ✅·⚠️·❔ 배지와 근거 문단, 판정 저장·재판정, 사전등록 평가(정책 a2-v1) | [PR #17](https://github.com/Noah-TaeHwan/lumina-invest/pull/17)·[#18](https://github.com/Noah-TaeHwan/lumina-invest/pull/18)·[#19](https://github.com/Noah-TaeHwan/lumina-invest/pull/19)·[#20](https://github.com/Noah-TaeHwan/lumina-invest/pull/20)·[#22](https://github.com/Noah-TaeHwan/lumina-invest/pull/22)·[#23](https://github.com/Noah-TaeHwan/lumina-invest/pull/23)·[#24](https://github.com/Noah-TaeHwan/lumina-invest/pull/24), 독립 리뷰 반영 |
 | 개인 작업 — 판단 일지(C) | 판정 한 건에서 판단 기록·스냅샷 보존·다시 볼 날짜·공시 변화 비교·내보내기 | [PR #29](https://github.com/Noah-TaeHwan/lumina-invest/pull/29)·[#30](https://github.com/Noah-TaeHwan/lumina-invest/pull/30)·[#31](https://github.com/Noah-TaeHwan/lumina-invest/pull/31)·[#33](https://github.com/Noah-TaeHwan/lumina-invest/pull/33), 로컬 실스택 종단 확인 |
@@ -241,7 +241,7 @@ macOS에서 채팅이 느리면 [채팅이 느릴 때(macOS)](PORTFOLIO_LOCAL.md
 
 - [프로젝트 개요 — 기획·동작 원리·구조·현재 상태 한 장 정리](docs/project-overview.md)
 - [로컬 실행 가이드](PORTFOLIO_LOCAL.md)
-- [Gate Lab 설계](docs/superpowers/specs/2026-10-01-jev-gate-lab-design.md) · [판정력 리포트](docs/lab/stage1-predict-report.md)
+- [Gate Lab 설계](docs/superpowers/specs/2026-10-01-jev-gate-lab-design.md) · [판별력 리포트](docs/lab/stage1-predict-report.md)
 - [근거 판정 엔진 설계](docs/superpowers/specs/2026-10-02-evidence-assistant-design.md) · [Stage 1 리포트](docs/lab/evidence-stage1-report.md)
 - [원본 교육 자료·Mock 화면·개념 설명 보존본](docs/upstream/readme.md)
 - [AWS 목표 설계](aws.md) · [온프레미스 목표 설계](onprem.md) · [데이터 파이프라인 목표 설계](pipeline.md)
